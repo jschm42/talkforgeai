@@ -11,11 +11,11 @@
 </template>
 
 <script>
-import HistoryToolbar from './HistoryToolbar.vue';
+import Toolbar from './Toolbar.vue';
 
 export default {
   name: 'History',
-    components: {HistoryToolbar},
+    components: {Toolbar},
 };
 </script>
 

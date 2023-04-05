@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import History from './History.vue';
+import History from './history/History.vue';
 import Chat from './chat/Chat.vue';
 
 export default {
