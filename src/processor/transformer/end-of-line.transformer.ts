@@ -7,9 +7,8 @@ class EndOfLineTransformer extends MessageTransformer {
   process() {
     return (content: string) => new Promise((resolve, reject) => {
       this.sendProgress('Processing end of line...');
-      resolve(content.replaceAll('\n\n', '<p />').replaceAll('\n', '<br />'));
+      resolve(content.replace(/\n\n/g, '<p />').replace(/\n/g, '<br />'));
     });
-    //return content.replaceAll('\n\n', '<p />').replaceAll('\n', '<br />');
   }
 
 }
