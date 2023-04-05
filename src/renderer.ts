@@ -29,7 +29,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import 'highlight.js/styles/github.css';
 import './index.css';
-import App from './app/App.vue';
+import App from './component/App.vue';
 import {createApp} from 'vue';
 import '@fortawesome/fontawesome-free/js/brands.js';
 import '@fortawesome/fontawesome-free/js/solid.js';
@@ -37,10 +37,4 @@ import '@fortawesome/fontawesome-free/js/fontawesome.js';
 
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
-createApp({
-  data: function() {
-    return {
-        message: 'Hello Vue 3 + TypeScript + Vite!'
-    }
-  }
-}).mount('#app');
+createApp(App).mount('#app');
