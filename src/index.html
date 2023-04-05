@@ -2,14 +2,105 @@
 <html>
 <head>
     <meta charset="UTF-8"/>
-    <title>Hello World!</title>
-
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
 </head>
 <body>
-<h1>💖 Hello World!</h1>
-<p>Welcome to your Electron application.</p>
 
-<div id="app"></div>
+<div id="app" class="container-flex full-height">
+    <div class="row g-1 full-height">
+        <!-- History Column -->
+        <div class="col-3">
+            <div class="p-3 full-height vertical-scrollbar shadow">
+
+                <div aria-label="Toolbar with button groups" class="my-3 btn-toolbar" role="toolbar">
+                    <div aria-label="First group" class="btn-group me-2" role="group">
+                        <button class="btn btn-primary" type="button">1</button>
+                        <button class="btn btn-primary" type="button">4</button>
+                    </div>
+                    <div aria-label="Second group" class="btn-group me-2" role="group">
+                        <button class="btn btn-secondary" type="button">5</button>
+                        <button class="btn btn-secondary" type="button">7</button>
+                    </div>
+                    <div aria-label="Third group" class="btn-group" role="group">
+                        <button class="btn btn-info" type="button">8</button>
+                    </div>
+                </div>
+
+                <div class="list-group list-group-flush border-bottom" id="history-container">
+
+                </div>
+
+            </div>
+        </div>
+        <!-- End History Column -->
+
+        <!-- Chat Column -->
+        <div class="col-9 gx-3 full-height">
+            <div class="d-flex flex-column full-height">
+
+                <div class="p-2 m-1" id="header-container">
+
+                </div>
+
+                <!-- Response Section -->
+                <div class="flex-fill vertical-scrollbar no-horizontal-scrollbar" id="response-container">
+
+                </div>
+                <!-- End Response Section -->
+
+                <!-- Input Section -->
+                <div class="p-2 m-1 rounded shadow input-container">
+                    <!-- Tabs -->
+                    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+
+                        <li class="nav-item" role="presentation">
+                            <button aria-controls="pills-message" aria-selected="true" class="nav-link active"
+                                    data-bs-target="#pills-message"
+                                    data-bs-toggle="pill" id="pills-message-tab" role="tab" type="button">ChatMessage
+                            </button>
+                        </li>
+
+                        <li class="nav-item" role="presentation">
+                            <button aria-controls="pills-system" aria-selected="true" class="nav-link"
+                                    data-bs-target="#pills-system"
+                                    data-bs-toggle="pill" id="pills-system-tab" role="tab" type="button">System
+                            </button>
+                        </li>
+
+                        <li class="nav-item" role="presentation">
+                            <button aria-controls="pills-parameters" aria-selected="false" class="nav-link"
+                                    data-bs-target="#pills-parameters"
+                                    data-bs-toggle="pill" id="pills-parameters-tab" role="tab" type="button">Parameters
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="pills-tabContent">
+                        <div aria-labelledby="pills-message-tab" class="tab-pane fade show active" id="pills-message"
+                             role="tabpanel" tabindex="0">
+                            <div class="input-group">
+                                <div class="input-group-text" id="new-session-button"><i class="bi bi-x-circle"
+                                                                                         style="font-size: 2em"></i></div>
+                                <textarea class="form-control shadow" id="input_area" placeholder="Enter text..." rows="5"></textarea>
+                                <div class="input-group-text" id="submit-button"><i class="bi bi-send-check-fill"
+                                                                                    style="font-size: 2em"></i></div>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="pills-system-tab" class="tab-pane fade" id="pills-system" role="tabpanel"
+                             tabindex="0">System Content
+                        </div>
+                        <div aria-labelledby="pills-parameters-tab" class="tab-pane fade" id="pills-parameters" role="tabpanel"
+                             tabindex="0">
+                            Parameters Content
+                        </div>
+                    </div>
+                    <!-- Ende Tabs -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 
 </body>
 </html>
