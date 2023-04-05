@@ -13,8 +13,7 @@
   },
   "keywords": [],
   "author": {
-    "name": "Jean Schmitz",
-    "email": "jean@schmitzonline.name"
+    "name": "Jean Schmitz"
   },
   "license": "MIT",
   "devDependencies": {
