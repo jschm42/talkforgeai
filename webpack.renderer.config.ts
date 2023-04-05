@@ -9,11 +9,6 @@ rules.push({
 });
 
 rules.push({
-  test: /\.js$/,
-  loader: 'babel-loader',
-});
-
-rules.push({
   test: /\.css$/,
   use: [
     'vue-style-loader',

@@ -25,8 +25,11 @@
  *  });
  * ```
  */
-
-import App from './App.vue';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min';
+import 'highlight.js/styles/github.css';
+import './index.css';
+import App from './app/App.vue';
 import {createApp} from 'vue';
 
 createApp(App).mount('#app');

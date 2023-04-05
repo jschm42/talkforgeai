@@ -10,13 +10,7 @@ export default {
 </script>
 
 <style>
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
-    margin: auto;
-    max-width: 38rem;
-    padding: 2rem;
-}
+
 </style>
 
 <template>
