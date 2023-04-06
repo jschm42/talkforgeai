@@ -3,6 +3,7 @@ import {CHAT_DATA_DIRECTORY} from '../path-constants';
 import OpenAiService from './openai.service';
 import UserMessageProcessor from '../processor/user-message-processor';
 import AssistantMessageProcessor from '../processor/asssistant-message-processor';
+import IdentityUtil from '../util/identity-util';
 import os from 'os';
 import path from 'path';
 import fs from 'fs';

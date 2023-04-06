@@ -27,14 +27,15 @@
  */
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
-import 'highlight.js/styles/github.css';
-import './index.css';
-import App from './component/App.vue';
-import {createApp} from 'vue';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 import '@fortawesome/fontawesome-free/js/brands.js';
 import '@fortawesome/fontawesome-free/js/solid.js';
 import '@fortawesome/fontawesome-free/js/fontawesome.js';
 
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import 'highlight.js/styles/github.css';
+
+import App from './component/App.vue';
+import {createApp} from 'vue';
 
 createApp(App).mount('#app');

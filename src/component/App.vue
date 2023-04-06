@@ -26,5 +26,40 @@ export default {
 </script>
 
 <style scoped>
+pre {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 0.25rem;
+  padding: 1rem;
+}
+
+.code-word {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 0.25rem;
+  /*font-family: "Source Code Pro", monospace;*/
+  font-family: 'Courier New', monospace
+}
+
+body, html {
+  overflow: hidden;
+  height: 100vh;
+}
+
+.full-height {
+  height: 100vh;
+}
+
+.vertical-scrollbar {
+  overflow-y: auto;
+}
+
+.no-horizontal-scrollbar {
+  overflow-x: hidden;
+}
+
+.input-container {
+  height: 230px;
+}
 
 </style>

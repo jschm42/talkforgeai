@@ -1,16 +1,16 @@
 <template>
     <div class="p-3 full-height vertical-scrollbar shadow">
 
-        <HistoryToolbar></HistoryToolbar>
+        <Toolbar></Toolbar>
 
         <div class="list-group list-group-flush border-bottom">
 
-            <div v-for="(line, index) in index" :key="index">
-                <a id='{{line.sessionId}}' class="list-group-item list-group-item-action py-3 lh-sm {{line.active}}">
+            <div v-for="entry in store.entries" :key="entry.sessionId">
+                <a id='{{entry.sessionId}}' class="list-group-item list-group-item-action py-3 lh-sm {{entry.active}}">
                     <div class="d-flex w-100 align-items-center justify-content-between">
-                        <strong class="mb-1 text-truncate" title="{{line.title}}">{{ line.title }}</strong>
+                        <strong class="mb-1 text-truncate" title="{{entry.title}}">{{ entry.title }}</strong>
                     </div>
-                    <div class="col-10 mb-1 small">{{ line.timestamp }}</div>
+<!--                    <div class="col-10 mb-1 small">{{ entry.timestamp }}</div>-->
                 </a>
             </div>
 
@@ -21,17 +21,18 @@
 
 <script>
 import Toolbar from './Toolbar.vue';
+import indexStore from '../../store/index.store';
 
 export default {
   name: 'History',
   components: {Toolbar},
   data() {
     return {
-      index: [],
+      store: indexStore
     };
   },
   mounted() {
-    this.index = window.electronAPI.loadIndex();
+   this.store.loadIndex();
   },
 };
 </script>

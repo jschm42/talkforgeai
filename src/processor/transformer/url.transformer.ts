@@ -1,10 +1,10 @@
 import https from 'https';
 import http from 'http';
 import MessageTransformer from './transformer';
-
-const {convert} = require('html-to-text');
+const convert = require('html-to-text');
 
 const UrlRegEx = /\[\[link\s(https?:\/\/[^\s\]]+)\]\]/g;
+
 
 class UrlTransformer extends MessageTransformer {
 

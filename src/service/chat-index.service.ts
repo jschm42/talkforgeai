@@ -10,6 +10,7 @@ class IndexEntry {
   title: string;
   description: string;
   timestamp: Date;
+  selected: boolean;
 
   constructor(
       sessionId: string, title: string, description: string, timestamp: Date) {
@@ -17,24 +18,19 @@ class IndexEntry {
     this.description = description;
     this.timestamp = timestamp;
     this.sessionId = sessionId;
+    this.selected = false;
   }
 }
 
 class ChatIndexService {
-
-  #index: Array<IndexEntry> = [];
-
-  get index() {
-    return this.#index;
-  }
 
   /**
    * Fins the index entry by the session id
    * @param sessionId
    * @returns {IndexEntry}
    */
-  findBySessionId(sessionId: string) {
-    return this.#index.find(entry => entry.sessionId === sessionId);
+  findBySessionId(indexEntries:Array<IndexEntry>,  sessionId: string) {
+    return indexEntries.find(entry => entry.sessionId === sessionId);
   }
 
   /**
@@ -42,8 +38,8 @@ class ChatIndexService {
    * @param sessionId
    * @returns {boolean}
    */
-  existsSessionId(sessionId: string) {
-    return this.findBySessionId(sessionId) !== undefined;
+  existsSessionId(indexEntries:Array<IndexEntry>, sessionId: string) {
+    return this.findBySessionId(indexEntries, sessionId) !== undefined;
   }
 
   /**
@@ -61,10 +57,10 @@ class ChatIndexService {
         parsed.forEach((entry: IndexEntry) => {
           entry.timestamp = new Date(entry.timestamp);
         });
-        this.#index = parsed;
+        return parsed;
       } else {
         console.log('ChatIndex file doesn\'t exist', filePath);
-        this.#index = [];
+        return [];
       }
     } catch (err) {
       throw new Error('Error reading index file: ' + err);
@@ -72,18 +68,18 @@ class ChatIndexService {
 
   }
 
-  insert(sessionId: string, title: string): IndexEntry {
+  insert(indexEntries: Array<IndexEntry>, sessionId: string, title: string): IndexEntry {
     const indexEntry = new IndexEntry(
         sessionId,
         title,
         '<empty>',
         new Date(),
     );
-    this.#index.unshift(indexEntry);
+    indexEntries.unshift(indexEntry);
     return indexEntry;
   }
 
-  write() {
+  write(indexEntries: Array<IndexEntry>) {
     //console.log('Writing index file', this.#index);
 
     // Read the index file
@@ -93,7 +89,7 @@ class ChatIndexService {
     fs.mkdirSync(subDirectoryPath, {recursive: true});
 
     try {
-      fs.writeFileSync(filePath, JSON.stringify(this.#index));
+      fs.writeFileSync(filePath, JSON.stringify(indexEntries));
       console.log('File has been written');
     } catch (error) {
       console.error(error);
