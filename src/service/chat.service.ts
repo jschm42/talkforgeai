@@ -7,7 +7,6 @@ import IdentityUtil from '../util/identity-util';
 import os from 'os';
 import path from 'path';
 import fs from 'fs';
-import {ipcMain} from 'electron';
 
 const DEFAULT_SYSTEM = 'Add a tag [[lang iso-code]] to the start of every message. ' +
   'Create an image prompt in English for DALL-E to generate an image whenever instructed to output an image, ' +
@@ -79,7 +78,7 @@ class ChatService {
   }
 
   sendProgress(progress: string) {
-    ipcMain.emit('update-progress', progress);
+    //ipcMain.emit('update-progress', progress);
   }
 
   setPersona(persona: Persona) {
@@ -100,6 +99,24 @@ class ChatService {
         new ChatMessage(Role.SYSTEM, system));
     }
 
+  }
+
+  submit(prompt: string, pastMessages: Array<ChatMessage>) {
+    const promptMessage = new ChatMessage(Role.USER, prompt);
+
+    this.sendProgress('Processing prompt...');
+    return this.#userMessageProcessor.process(promptMessage).then((processedPromptMessage: ChatMessage) => {
+      return {promptMessage, processedPromptMessage};
+      //this.#addMessage(promptMessage);
+      //this.#addProcessedMessage(processedPromptMessage);
+    }).then(() => {
+      return this.createRequestPromise(pastMessages);
+    }).then((message: ChatMessage) => {
+      return this.createPostProcessPromise(message);
+    }).then((processedMessage: ChatMessage) => {
+      this.#writeToFile();
+      return processedMessage;
+    });
   }
 
   chatRequest(prompt: string) {

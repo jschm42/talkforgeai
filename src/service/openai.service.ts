@@ -9,7 +9,7 @@ const mockOpenAIUrl = mockServerUrl + '/v1/completions';
 const mockOpenAIChatUrl = mockServerUrl + '/v1/chat/completions';
 const mockOpenAIImageUrl = mockServerUrl + '/v1/images/generations';
 
-const testMode = true;
+const testMode = false;
 
 enum OpenAiModel {
   chatGpt35Turbo = 'gpt-3.5-turbo',
@@ -26,7 +26,7 @@ class OpenAiService {
 
   chatCompletion(messages: Array<ChatMessage>) {
     return this.callOpenAiChatApi(testMode ? mockOpenAIChatUrl : openAIChatUrl,
-        messages);
+      messages);
   }
 
   textCompletion(prompt: string) {
@@ -35,7 +35,7 @@ class OpenAiService {
 
   imageGeneration(prompt: string) {
     return this.callOpenAiImageApi(
-        testMode ? mockOpenAIImageUrl : openAIImageUrl, prompt);
+      testMode ? mockOpenAIImageUrl : openAIImageUrl, prompt);
   }
 
   async callOpenAiChatApi(url: string, messages: Array<ChatMessage>) {

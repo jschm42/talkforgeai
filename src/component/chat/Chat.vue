@@ -1,7 +1,7 @@
 <template>
-    <div class="flex-fill vertical-scrollbar no-horizontal-scrollbar" id="response-container">
+  <div class="flex-fill vertical-scrollbar no-horizontal-scrollbar">
 
-    </div>
+  </div>
   <!-- Input Section -->
 
   <ChatControl></ChatControl>
@@ -14,6 +14,7 @@ import ChatControl from './ChatControl.vue';
 export default {
   name: 'Chat',
   components: {ChatControl},
+  
 };
 </script>
 

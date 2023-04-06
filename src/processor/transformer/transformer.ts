@@ -1,5 +1,3 @@
-import {ipcMain} from 'electron';
-
 class MessageTransformer {
 
   /**
@@ -12,7 +10,7 @@ class MessageTransformer {
   }
 
   sendProgress(progress: string) {
-    ipcMain.emit('update-progress', progress);
+    //ipcMain.emit('update-progress', progress);
   }
 
 }

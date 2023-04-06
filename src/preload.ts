@@ -1,34 +1,40 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
-import {contextBridge} from 'electron';
+import {contextBridge, ipcMain, ipcRenderer} from 'electron';
 import ChatIndexService, {IndexEntry} from './service/chat-index.service';
-import ChatService from './service/chat.service';
 
 const chatIndexService = new ChatIndexService();
-const chatService = new ChatService();
 
 declare global {
   interface Window {
-    chatIndexApi?: any;
-    chatApi?: any;
+    chatIndexApi?: any,
+    electronAPI?: any
   }
 }
 
+contextBridge.exposeInMainWorld('electronAPI', {
+  sendToMainProcess: (channel: string, data: any) => {
+    ipcRenderer.send(channel, data);
+  },
+
+  listenToMainProcess: (channel: string, callback: any) => {
+    ipcRenderer.on(channel, (event, data) => {
+      callback(data);
+    });
+  },
+});
+
 contextBridge.exposeInMainWorld('chatIndexApi', {
+  sendMessage(chanel: string, message: any) {
+    ipcMain.emit(chanel, message);
+  },
+
   load: () => {
     return chatIndexService.read();
   },
   save: (indexEntries: Array<IndexEntry>) => {
     chatIndexService.write(indexEntries);
-  }
-});
-
-contextBridge.exposeInMainWorld('chatApi', {
-  load: (sessionId: string) => {
-    return chatService.readFromFile(sessionId);
   },
 });
-
-
 
