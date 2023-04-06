@@ -1,4 +1,5 @@
 import MessageProcessor from './message-processor';
+import UrlTransformer from './transformer/url.transformer';
 
 class UserMessageProcessor extends MessageProcessor {
   constructor() {
@@ -6,3 +7,5 @@ class UserMessageProcessor extends MessageProcessor {
     this.addProcessor(new UrlTransformer());
   }
 }
+
+export default UserMessageProcessor;

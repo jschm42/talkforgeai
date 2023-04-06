@@ -1,15 +1,17 @@
 import {DEFAULT_PERSONA, Persona} from './persona.service';
-import * as os from 'os';
-import * as path from 'path';
 import {CHAT_DATA_DIRECTORY} from '../path-constants';
-import * as fs from 'fs';
 import OpenAiService from './openai.service';
-import ipcMain = Electron.ipcMain;
+import UserMessageProcessor from '../processor/user-message-processor';
+import AssistantMessageProcessor from '../processor/asssistant-message-processor';
+import os from 'os';
+import path from 'path';
+import fs from 'fs';
+import {ipcMain} from 'electron';
 
 const DEFAULT_SYSTEM = 'Add a tag [[lang iso-code]] to the start of every message. ' +
-    'Create an image prompt in English for DALL-E to generate an image whenever instructed to output an image, ' +
-    'taking into account the content of the user prompts for subject matter, specific details, and style. ' +
-    'Place the prompt between the following tags: <image-prompt></image-prompt>.';
+  'Create an image prompt in English for DALL-E to generate an image whenever instructed to output an image, ' +
+  'taking into account the content of the user prompts for subject matter, specific details, and style. ' +
+  'Place the prompt between the following tags: <image-prompt></image-prompt>.';
 
 enum Role {
   USER = 'user',
@@ -23,10 +25,6 @@ class ChatMessage {
 
   content: string;
 
-  /**
-   * @param {Role} role
-   * @param {string} content
-   */
   constructor(role: Role, content: string) {
     this.role = role;
     this.content = content;
@@ -35,10 +33,10 @@ class ChatMessage {
 
 class ChatService {
 
-  #sessionId: string;
+  #sessionId: string = null;
   #messages: Array<ChatMessage> = [];
   #processedMessages: Array<ChatMessage> = [];
-  #persona: Persona;
+  #persona: Persona = null;
   #openAiService;
   #userMessageProcessor;
   #assistantMessageProcessor;
@@ -90,7 +88,7 @@ class ChatService {
     const system = DEFAULT_SYSTEM + ' ' + persona.system;
 
     const index = this.#messages.findIndex(
-        message => message.role === Role.SYSTEM);
+      message => message.role === Role.SYSTEM);
 
     if (index > -1) {
       this.#messages[index] = new ChatMessage(Role.SYSTEM, system);
@@ -98,7 +96,7 @@ class ChatService {
     } else {
       this.#messages.splice(0, 0, new ChatMessage(Role.SYSTEM, system));
       this.#processedMessages.splice(0, 0,
-          new ChatMessage(Role.SYSTEM, system));
+        new ChatMessage(Role.SYSTEM, system));
     }
 
   }
@@ -109,20 +107,20 @@ class ChatService {
 
     this.sendProgress('Processing prompt...');
     return this.#userMessageProcessor.process(promptMessage).
-        then((processedPromptMessage: ChatMessage) => {
-          this.#addMessage(promptMessage);
-          this.#addProcessedMessage(processedPromptMessage);
-        }).
-        then(() => {
-          return this.createRequestPromise(this.getRequestMessages());
-        }).
-        then((message: ChatMessage) => {
-          return this.createPostProcessPromise(message);
-        }).
-        then((processedMessage: ChatMessage) => {
-          this.#writeToFile();
-          return processedMessage;
-        });
+      then((processedPromptMessage: ChatMessage) => {
+        this.#addMessage(promptMessage);
+        this.#addProcessedMessage(processedPromptMessage);
+      }).
+      then(() => {
+        return this.createRequestPromise(this.getRequestMessages());
+      }).
+      then((message: ChatMessage) => {
+        return this.createPostProcessPromise(message);
+      }).
+      then((processedMessage: ChatMessage) => {
+        this.#writeToFile();
+        return processedMessage;
+      });
   }
 
   getRequestMessages(): Array<ChatMessage> {
@@ -152,25 +150,25 @@ class ChatService {
   createRequestPromise(messageRequest: Array<ChatMessage>) {
     this.sendProgress('Processing request...');
     return this.#openAiService.chatCompletion(messageRequest).
-        then((response: any) => {
-          console.log('Response: ', response);
+      then((response: any) => {
+        console.log('Response: ', response);
 
-          const chatMessage = new ChatMessage(Role.ASSISTANT, response.content);
-          this.#addMessage(chatMessage);
+        const chatMessage = new ChatMessage(Role.ASSISTANT, response.content);
+        this.#addMessage(chatMessage);
 
-          return chatMessage;
-        });
+        return chatMessage;
+      });
   }
 
   createPostProcessPromise(message: ChatMessage) {
     console.log('Post-Processing response...');
     this.sendProgress('Post-Processing response...');
     return this.#assistantMessageProcessor.process(message).
-        then((processedMessage: ChatMessage) => {
-          this.#addProcessedMessage(processedMessage);
+      then((processedMessage: ChatMessage) => {
+        this.#addProcessedMessage(processedMessage);
 
-          return processedMessage;
-        });
+        return processedMessage;
+      });
   }
 
   clearMessages() {
@@ -184,7 +182,7 @@ class ChatService {
     const fileName = `chat-${sessionId}.json`;
     const homeDirectory = os.homedir();
     const subDirectoryPath = path.join(homeDirectory, CHAT_DATA_DIRECTORY,
-        sessionId);
+      sessionId);
     const filePath = path.join(subDirectoryPath, fileName);
 
     console.log('Reading file ' + filePath, sessionId);
@@ -223,7 +221,7 @@ class ChatService {
 
     // Set the subdirectory name and create the directory if it does not exist
     const subDirectoryPath = path.join(homeDirectory, CHAT_DATA_DIRECTORY,
-        this.#sessionId);
+      this.#sessionId);
 
     fs.mkdirSync(subDirectoryPath, {recursive: true});
 
