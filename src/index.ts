@@ -89,13 +89,17 @@ app.whenReady().then(() => {
   chat.setPersona(personaService.getDefaultPersona());
 
   mainWindow.webContents.on('dom-ready', () => {
-    index.read();
     //mainService.addAllHistory(index.index);
     //mainService.addConfigurationPanel(personaService.persona);
   });
 
   ipcMain.on('set-system', (event, name) => {
     chat.setPersona(personaService.getPersonaByName(name));
+  });
+
+  ipcMain.on('load-index', (event) => {
+    const loadedIndex = index.read();
+    mainWindow.webContents.send('index-load-reply', loadedIndex);
   });
 
   ipcMain.on('submit-prompt', (event, prompt) => {

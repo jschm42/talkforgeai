@@ -1,7 +1,7 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
-import {contextBridge, ipcMain, ipcRenderer} from 'electron';
+import {contextBridge, ipcRenderer} from 'electron';
 import ChatIndexService, {IndexEntry} from './service/chat-index.service';
 import {ChatMessage} from './service/chat.service';
 
@@ -9,35 +9,34 @@ const chatIndexService = new ChatIndexService();
 
 declare global {
   interface Window {
-    chatIndexApi?: any,
+    chatIndexAPI?: unknown,
     chatAPI?: unknown
   }
 }
-
-type ChatMessageCallback = (t: ChatMessage) => void;
 
 contextBridge.exposeInMainWorld('chatAPI', {
   submitPrompt: (data: ChatMessage) => {
     ipcRenderer.send('submit-prompt', data);
   },
 
-  listenToPromptReply: (callback: ChatMessageCallback) => {
+  listenToPromptReply: (callback: (t: ChatMessage) => void) => {
     ipcRenderer.on('submit-prompt-reply', (event, data) => {
       callback(data);
     });
   },
 });
 
-contextBridge.exposeInMainWorld('chatIndexApi', {
-  sendMessage(chanel: string, message: any) {
-    ipcMain.emit(chanel, message);
-  },
-
+contextBridge.exposeInMainWorld('chatIndexAPI', {
   load: () => {
-    return chatIndexService.read();
+    ipcRenderer.send('load-index');
   },
   save: (indexEntries: Array<IndexEntry>) => {
-    chatIndexService.write(indexEntries);
+    ipcRenderer.send('save-index', indexEntries);
+  },
+  listenToLoadReply: (callback: (t: Array<IndexEntry>) => void) => {
+    ipcRenderer.on('index-load-reply', (event, data) => {
+      callback(data);
+    });
   },
 });
 

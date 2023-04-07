@@ -4,18 +4,22 @@ import {IndexEntry} from '../service/chat-index.service';
 
 const indexStore = reactive({
   entries: [] as Array<IndexEntry>,
-  loadIndex(){
-    this.entries = window.chatIndexApi.load();
-    console.log("Index loaded", this.entries);
+  load() {
+    window.chatIndexAPI.listenToLoadReply((entries: Array<IndexEntry>) => {
+      this.entries = [...entries];
+      console.log('Index loaded', this.entries);
+    });
+
+    window.chatIndexAPI.load();
   },
-  saveIndex(){
-    window.chatIndexApi.save(this.entries);
-    console.log("Index saved", this.entries);
+  save() {
+    window.chatIndexAPI.save(this.entries);
+    console.log('Index saved', this.entries);
   },
-  addEntry(entry: IndexEntry){
+  add(entry: IndexEntry) {
     this.entries.push(entry);
-    this.saveIndex();
-  }
+    this.save();
+  },
 });
 
 export default indexStore;
