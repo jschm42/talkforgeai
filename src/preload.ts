@@ -3,23 +3,26 @@
 
 import {contextBridge, ipcMain, ipcRenderer} from 'electron';
 import ChatIndexService, {IndexEntry} from './service/chat-index.service';
+import {ChatMessage} from './service/chat.service';
 
 const chatIndexService = new ChatIndexService();
 
 declare global {
   interface Window {
     chatIndexApi?: any,
-    electronAPI?: any
+    chatAPI?: unknown
   }
 }
 
-contextBridge.exposeInMainWorld('electronAPI', {
-  sendToMainProcess: (channel: string, data: any) => {
-    ipcRenderer.send(channel, data);
+type ChatMessageCallback = (t: ChatMessage) => void;
+
+contextBridge.exposeInMainWorld('chatAPI', {
+  submitPrompt: (data: ChatMessage) => {
+    ipcRenderer.send('submit-prompt', data);
   },
 
-  listenToMainProcess: (channel: string, callback: any) => {
-    ipcRenderer.on(channel, (event, data) => {
+  listenToPromptReply: (callback: ChatMessageCallback) => {
+    ipcRenderer.on('submit-prompt-reply', (event, data) => {
       callback(data);
     });
   },
