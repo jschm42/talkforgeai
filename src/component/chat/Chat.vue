@@ -1,8 +1,7 @@
 <template>
   <div class="flex-fill vertical-scrollbar no-horizontal-scrollbar">
 
-    <div v-for="message in store.processedMessages">
-      {{ message.content }}
+    <div v-for="message in store.processedMessages" v-html="message.content">
     </div>
 
   </div>
