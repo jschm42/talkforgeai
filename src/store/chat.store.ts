@@ -12,10 +12,11 @@ const chatStore = reactive({
     console.log('submit', prompt);
 
     // @ts-ignore
-    window.chatAPI.listenToPromptReply(({originalResponseMessage, processedResponseMessage}) => {
-      this.messages.push(originalResponseMessage);
-      this.processedMessages.push(processedResponseMessage);
-      console.log('Reply received', originalResponseMessage, processedResponseMessage);
+    window.chatAPI.listenToPromptReply(({userMessage, originalAssistantMessage, processedAssistantMessage}) => {
+      this.processedMessages.push(userMessage);
+      this.messages.push(originalAssistantMessage);
+      this.processedMessages.push(processedAssistantMessage);
+      console.log('Reply received', originalAssistantMessage, processedAssistantMessage);
     });
 
     const previousMessages = [];

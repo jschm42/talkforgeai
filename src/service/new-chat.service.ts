@@ -21,32 +21,30 @@ class NewChatService {
     return this.#userMessageProcessor.process(new ChatMessage(Role.USER, prompt));
   }
 
-  submit(promptMessage: ChatMessage, pastMessages: Array<ChatMessage>) {
+  submit(userMessage: ChatMessage, pastMessages: Array<ChatMessage>) {
+    return this.createRequestPromise(userMessage, pastMessages).then((responseMessage: ChatMessage) => {
+      return this.createPostProcessPromise(responseMessage);
+    }).then(({originalAssistantMessage, processedAssistantMessage}) => {
+      //this.#writeToFile();
+      return {userMessage, originalAssistantMessage, processedAssistantMessage};
+    });
+  }
+
+  createRequestPromise(promptMessage: ChatMessage, pastMessages: Array<ChatMessage>) {
     const requestMessages = [...pastMessages, promptMessage];
 
-    return this.createRequestPromise(requestMessages).then((responseMessage: ChatMessage) => {
-      return this.createPostProcessPromise(responseMessage);
-    }).then((processed) => {
-      //this.#writeToFile();
-      return processed;
-    });
-  }
-
-  createRequestPromise(messageRequest: Array<ChatMessage>) {
     console.log('Requesting response...');
-    return this.#openAiService.chatCompletion(messageRequest).then((response: any) => {
+    return this.#openAiService.chatCompletion(requestMessages).then((response: any) => {
       console.log('Response: ', response);
-
-      const chatMessage = new ChatMessage(Role.ASSISTANT, response.content);
-      return chatMessage;
+      return new ChatMessage(Role.ASSISTANT, response.content);
     });
   }
 
-  createPostProcessPromise(originalResponseMessage: ChatMessage) {
+  createPostProcessPromise(originalAssistantMessage: ChatMessage) {
     console.log('Post-Processing response...');
-    return this.#assistantMessageProcessor.process(originalResponseMessage).
-      then((processedResponseMessage: ChatMessage) => {
-        return {originalResponseMessage, processedResponseMessage};
+    return this.#assistantMessageProcessor.process(originalAssistantMessage).
+      then((processedAssistantMessage: ChatMessage) => {
+        return {originalAssistantMessage, processedAssistantMessage};
       });
   }
 
