@@ -105,10 +105,10 @@ app.whenReady().then(() => {
     mainWindow.webContents.send('index-load-reply', loadedIndex);
   });
 
-  ipcMain.on('submit-prompt', (event, prompt: string) => {
-    newChat.preProcess(prompt).then((preProcessedUserMessage: ChatMessage) => {
-
-      return newChat.submit(preProcessedUserMessage, []);
+  ipcMain.on('submit-prompt', (event, request) => {
+    newChat.preProcess(request.prompt).then((preProcessedUserMessage: ChatMessage) => {
+      console.log('Pre-processed', preProcessedUserMessage);
+      return newChat.submit(preProcessedUserMessage, request.previousMessages);
     }).then((processed: unknown) => {
       console.log('Processed', processed);
       mainWindow.webContents.send('submit-prompt-reply', processed);

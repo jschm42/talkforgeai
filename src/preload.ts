@@ -13,15 +13,16 @@ declare global {
 }
 
 contextBridge.exposeInMainWorld('chatAPI', {
-  submitPrompt: (prompt: string) => {
-    ipcRenderer.send('submit-prompt', prompt);
+  submitPrompt: (prompt: string, previousMessages: Array<ChatMessage>) => {
+    ipcRenderer.send('submit-prompt', {prompt, previousMessages});
   },
 
   listenToPromptReply: (callback: (t: ChatMessage) => void) => {
-    ipcRenderer.on('submit-prompt-reply', (event, data) => {
+    ipcRenderer.once('submit-prompt-reply', (event, data) => {
       callback(data);
     });
   },
+
 });
 
 contextBridge.exposeInMainWorld('chatIndexAPI', {
@@ -32,7 +33,7 @@ contextBridge.exposeInMainWorld('chatIndexAPI', {
     ipcRenderer.send('save-index', indexEntries);
   },
   listenToLoadReply: (callback: (t: Array<IndexEntry>) => void) => {
-    ipcRenderer.on('index-load-reply', (event, data) => {
+    ipcRenderer.once('index-load-reply', (event, data) => {
       callback(data);
     });
   },

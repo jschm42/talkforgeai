@@ -22,10 +22,10 @@ class NewChatService {
   }
 
   submit(promptMessage: ChatMessage, pastMessages: Array<ChatMessage>) {
-    const requestMessages = pastMessages.concat(promptMessage);
+    const requestMessages = [...pastMessages, promptMessage];
 
-    return this.createRequestPromise(requestMessages).then((message: ChatMessage) => {
-      return this.createPostProcessPromise(message);
+    return this.createRequestPromise(requestMessages).then((responseMessage: ChatMessage) => {
+      return this.createPostProcessPromise(responseMessage);
     }).then((processed) => {
       //this.#writeToFile();
       return processed;
@@ -42,11 +42,11 @@ class NewChatService {
     });
   }
 
-  createPostProcessPromise(originalMessage: ChatMessage) {
+  createPostProcessPromise(originalResponseMessage: ChatMessage) {
     console.log('Post-Processing response...');
-    return this.#assistantMessageProcessor.process(originalMessage).
-      then((processedMessage: ChatMessage) => {
-        return {originalMessage, processedMessage};
+    return this.#assistantMessageProcessor.process(originalResponseMessage).
+      then((processedResponseMessage: ChatMessage) => {
+        return {originalResponseMessage, processedResponseMessage};
       });
   }
 
