@@ -1,6 +1,5 @@
 import {reactive} from 'vue';
-import {IndexEntry} from '../service/chat-index.service';
-//import {IndexEntry} from '../service/chat-index.service';
+import IndexEntry from '../service/to/index-entry';
 
 const indexStore = reactive({
   entries: [] as Array<IndexEntry>,

@@ -2,45 +2,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import {CHAT_DATA_DIRECTORY} from '../path-constants';
+import IndexEntry from './to/index-entry';
 
 const CHAT_INDEX_FILE = 'chat-index.json';
 
-class IndexEntry {
-  sessionId: string;
-  title: string;
-  description: string;
-  timestamp: Date;
-  selected: boolean;
-
-  constructor(
-      sessionId: string, title: string, description: string, timestamp: Date) {
-    this.title = title;
-    this.description = description;
-    this.timestamp = timestamp;
-    this.sessionId = sessionId;
-    this.selected = false;
-  }
-}
-
 class ChatIndexService {
-
-  /**
-   * Fins the index entry by the session id
-   * @param sessionId
-   * @returns {IndexEntry}
-   */
-  findBySessionId(indexEntries:Array<IndexEntry>,  sessionId: string) {
-    return indexEntries.find(entry => entry.sessionId === sessionId);
-  }
-
-  /**
-   * Returns true, if the index contains an entry with the given session id
-   * @param sessionId
-   * @returns {boolean}
-   */
-  existsSessionId(indexEntries:Array<IndexEntry>, sessionId: string) {
-    return this.findBySessionId(indexEntries, sessionId) !== undefined;
-  }
 
   /**
    * Reads the whole index file
@@ -70,10 +36,10 @@ class ChatIndexService {
 
   insert(indexEntries: Array<IndexEntry>, sessionId: string, title: string): IndexEntry {
     const indexEntry = new IndexEntry(
-        sessionId,
-        title,
-        '<empty>',
-        new Date(),
+      sessionId,
+      title,
+      '<empty>',
+      new Date(),
     );
     indexEntries.unshift(indexEntry);
     return indexEntry;

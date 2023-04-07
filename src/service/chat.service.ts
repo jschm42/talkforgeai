@@ -7,29 +7,13 @@ import IdentityUtil from '../util/identity-util';
 import os from 'os';
 import path from 'path';
 import fs from 'fs';
+import ChatMessage from './to/chat-message';
+import Role from './to/role';
 
 const DEFAULT_SYSTEM = 'Add a tag [[lang iso-code]] to the start of every message. ' +
   'Create an image prompt in English for DALL-E to generate an image whenever instructed to output an image, ' +
   'taking into account the content of the user prompts for subject matter, specific details, and style. ' +
   'Place the prompt between the following tags: <image-prompt></image-prompt>.';
-
-enum Role {
-  USER = 'user',
-  SYSTEM = 'system',
-  ASSISTANT = 'assistant'
-}
-
-class ChatMessage {
-
-  role: Role;
-
-  content: string;
-
-  constructor(role: Role, content: string) {
-    this.role = role;
-    this.content = content;
-  }
-}
 
 class ChatService {
 
@@ -255,4 +239,3 @@ class ChatService {
 }
 
 export default ChatService;
-export {ChatMessage, Role};

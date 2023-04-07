@@ -2,10 +2,8 @@
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 import {contextBridge, ipcRenderer} from 'electron';
-import ChatIndexService, {IndexEntry} from './service/chat-index.service';
-import {ChatMessage} from './service/chat.service';
-
-const chatIndexService = new ChatIndexService();
+import ChatMessage from './service/to/chat-message';
+import IndexEntry from './service/to/index-entry';
 
 declare global {
   interface Window {
@@ -15,8 +13,8 @@ declare global {
 }
 
 contextBridge.exposeInMainWorld('chatAPI', {
-  submitPrompt: (data: ChatMessage) => {
-    ipcRenderer.send('submit-prompt', data);
+  submitPrompt: (prompt: string) => {
+    ipcRenderer.send('submit-prompt', prompt);
   },
 
   listenToPromptReply: (callback: (t: ChatMessage) => void) => {

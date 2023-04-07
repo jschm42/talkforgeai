@@ -13,27 +13,23 @@
 
 <script>
 
+import chatStore from '../../store/chat.store';
+
 export default {
   name: 'Input',
   data() {
     return {
       prompt: '',
+      store: chatStore,
     };
   },
   methods: {
     submit() {
-      window.chatAPI.submitPrompt(this.prompt);
-    },
-
-    setupResponseListener() {
-      window.chatAPI.listenToPromptReply((processedMessage) => {
-        // Handle the response from the main process, e.g., update the component's data
-        console.log('Received processed Message', processedMessage);
-      });
+      this.store.submit(this.prompt);
     },
   },
   mounted() {
-    this.setupResponseListener();
+    
   },
 };
 </script>

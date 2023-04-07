@@ -1,5 +1,5 @@
 import MessageTransformer from './transformer/transformer';
-import {ChatMessage} from '../service/chat.service';
+import ChatMessage from '../service/to/chat-message';
 
 class MessageProcessor {
 
@@ -19,13 +19,13 @@ class MessageProcessor {
    */
   async process(message: ChatMessage) {
     const functions = this.transformers.map(
-        (transformer) => transformer.process());
+      (transformer) => transformer.process());
 
     // Chain the promises using reduce()
     const processedContent = await functions.reduce(
-        (previousPromise, currentAsyncFunction) =>
-            previousPromise.then((result: any) => currentAsyncFunction(result)),
-        Promise.resolve(message.content),
+      (previousPromise, currentAsyncFunction) =>
+        previousPromise.then((result: any) => currentAsyncFunction(result)),
+      Promise.resolve(message.content),
     );
 
     return new ChatMessage(message.role, processedContent);
