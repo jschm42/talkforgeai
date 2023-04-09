@@ -1,7 +1,7 @@
 <template>
   <div class="flex-fill vertical-scrollbar no-horizontal-scrollbar">
 
-    <div v-for="message in store.processedMessages" v-html="message.content">
+    <div v-for="message in chatState.processedMessages" v-html="message.content">
     </div>
 
   </div>
@@ -13,17 +13,19 @@
 
 <script>
 import ChatControl from './ChatControl.vue';
-import chatStore from '../../store/chat.store';
+import Store from '../../store/store';
 
 export default {
   name: 'Chat',
   data() {
     return {
-      store: chatStore,
+      chatState: Store.state.chat,
     };
   },
   components: {ChatControl},
-
+  changed() {
+    console.log('Chat-Component changed');
+  },
 };
 </script>
 

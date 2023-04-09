@@ -5,7 +5,7 @@
 
     <div class="list-group list-group-flush border-bottom">
 
-      <div v-for="entry in store.entries" :key="entry.sessionId">
+      <div v-for="entry in indexState.entries" :key="entry.sessionId">
         <a id='{{entry.sessionId}}' class="list-group-item list-group-item-action py-3 lh-sm {{entry.active}}">
           <div class="d-flex w-100 align-items-center justify-content-between">
             <strong class="mb-1 text-truncate" title="{{entry.title}}">{{ entry.title }}</strong>
@@ -21,23 +21,26 @@
 
 <script>
 import Toolbar from './Toolbar.vue';
-import indexStore from '../../store/index.store';
+import Store from '../../store/store';
 
 export default {
   name: 'History',
   components: {Toolbar},
   data() {
     return {
-      store: indexStore,
+      indexState: Store.state.index,
     };
   },
   methods: {
     load() {
-      this.store.load();
+      Store.mutations.index.load();
     },
   },
   mounted() {
-    this.load();
+    Store.mutations.index.load();
+  },
+  changed() {
+    console.log('History-Component changed');
   },
 };
 </script>
