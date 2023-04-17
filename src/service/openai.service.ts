@@ -1,4 +1,4 @@
-import {ChatMessage} from './chat.service';
+import ChatMessage from './to/chat-message';
 
 const openAIUrl = 'https://api.openai.com/v1/completions';
 const openAIChatUrl = 'https://api.openai.com/v1/chat/completions';

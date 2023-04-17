@@ -1,6 +1,6 @@
 import {reactive, readonly} from 'vue';
 import ChatMessage from '../service/to/chat-message';
-import Persona from '../service/to/persona';
+import {PERSONA} from '../service/to/persona';
 import IndexEntry from '../service/to/index-entry';
 import Role from '../service/to/role';
 
@@ -10,11 +10,11 @@ const state = reactive(
       sessionId: '' as string,
       messages: [] as Array<ChatMessage>,
       processedMessages: [] as Array<ChatMessage>,
-      persona: Persona,
     },
     index: {
       entries: [] as Array<IndexEntry>,
     },
+    persona: PERSONA,
   },
 );
 
@@ -69,7 +69,16 @@ const mutations = {
       this.save();
     },
   },
-
+  persona: {
+    change(personaName: String) {
+      const persona = PERSONA.find(p => p.name === personaName);
+      if (persona) {
+        // @ts-ignore
+        window.chatAPI.setPersona(persona.name);
+        console.log('Persona changed', persona);
+      }
+    },
+  },
 };
 
 export default {

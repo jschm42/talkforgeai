@@ -1,8 +1,8 @@
 <template>
+  <ChatHeader></ChatHeader>
   <div class="flex-fill vertical-scrollbar no-horizontal-scrollbar">
 
-    <div v-for="message in chatState.processedMessages" v-html="message.content">
-    </div>
+    <ChatMessage v-for="message in chatState.processedMessages" :message="message"></ChatMessage>
 
   </div>
   <!-- Input Section -->
@@ -14,6 +14,8 @@
 <script>
 import ChatControl from './ChatControl.vue';
 import Store from '../../store/store';
+import ChatMessage from './ChatMessage.vue';
+import ChatHeader from './ChatHeader.vue';
 
 export default {
   name: 'Chat',
@@ -22,7 +24,7 @@ export default {
       chatState: Store.state.chat,
     };
   },
-  components: {ChatControl},
+  components: {ChatHeader, ChatControl, ChatMessage},
   changed() {
     console.log('Chat-Component changed');
   },

@@ -96,7 +96,7 @@ app.whenReady().then(() => {
     //mainService.addConfigurationPanel(personaService.persona);
   });
 
-  ipcMain.on('set-system', (event, name) => {
+  ipcMain.on('set-persona', (event, name) => {
     chat.setPersona(personaService.getPersonaByName(name));
   });
 
