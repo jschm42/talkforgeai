@@ -9,7 +9,10 @@ const mockOpenAIUrl = mockServerUrl + '/v1/completions';
 const mockOpenAIChatUrl = mockServerUrl + '/v1/chat/completions';
 const mockOpenAIImageUrl = mockServerUrl + '/v1/images/generations';
 
-const testMode = false;
+const chatApiResponseId = process.env.POSTMAN_CHAT_API_RESPONSE_ID;
+const imageApiResponseId = process.env.POSTMAN_IMAGE_API_RESPONSE_ID;
+
+const testMode = true;
 
 enum OpenAiModel {
   chatGpt35Turbo = 'gpt-3.5-turbo',
@@ -96,7 +99,7 @@ class OpenAiService {
   }
 
   async #fetchChatApi(url: string, requestOptions: any) {
-    requestOptions.headers['x-mock-response-id'] = process.env.POSTMAN_CHAT_API_RESPONSE_ID;
+    requestOptions.headers['x-mock-response-id'] = chatApiResponseId;
 
     console.log('Fetch Chat API', url, requestOptions);
 
@@ -110,7 +113,7 @@ class OpenAiService {
   }
 
   async #fetchImageApi(url: string, requestOptions: any) {
-    requestOptions.headers['x-mock-response-id'] = process.env.POSTMAN_IMAGE_API_RESPONSE_ID;
+    requestOptions.headers['x-mock-response-id'] = imageApiResponseId;
 
     console.log('Fetch Image API', url, requestOptions);
 
