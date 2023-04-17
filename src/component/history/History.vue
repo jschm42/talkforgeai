@@ -19,25 +19,31 @@
   </div>
 </template>
 
-<script>
+
+<script lang="ts">
 import Toolbar from './Toolbar.vue';
-import Store from '../../store/store';
+import {useChatStore} from '../../store/piniaStore';
 
 export default {
   name: 'History',
   components: {Toolbar},
+  setup() {
+    const store = useChatStore(); // Call useMyStore() inside the setup function
+
+    return {store};
+  },
   data() {
     return {
-      indexState: Store.state.index,
+      indexState: this.store.index,
     };
   },
   methods: {
     load() {
-      Store.mutations.index.load();
+      this.store.loadIndex();
     },
   },
   mounted() {
-    Store.mutations.index.load();
+    this.store.loadIndex();
   },
   changed() {
     console.log('History-Component changed');

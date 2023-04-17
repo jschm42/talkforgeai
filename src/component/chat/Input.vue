@@ -11,21 +11,27 @@
   </div>
 </template>
 
-<script>
 
-import Store from '../../store/store';
+<script lang="ts">
+
+import {useChatStore} from '../../store/piniaStore';
 
 export default {
   name: 'Input',
+  setup() {
+    const store = useChatStore(); // Call useMyStore() inside the setup function
+
+    return {store};
+  },
   data() {
     return {
       prompt: '',
-      chatState: Store.state.chat,
+      chatState: this.store.chat,
     };
   },
   methods: {
     submit() {
-      Store.mutations.chat.submit(this.prompt);
+      this.store.submitPrompt(this.prompt);
     },
   },
   mounted() {

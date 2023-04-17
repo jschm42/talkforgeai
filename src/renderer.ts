@@ -34,8 +34,11 @@ import '@fortawesome/fontawesome-free/js/solid.js';
 import '@fortawesome/fontawesome-free/js/fontawesome.js';
 
 import 'highlight.js/styles/github.css';
-
-import App from './component/App.vue';
 import {createApp} from 'vue';
+import App from './component/App.vue';
+import {useStore} from './store';
 
-createApp(App).mount('#app');
+const app = createApp(App);
+
+app.use(useStore);
+app.mount('#app');

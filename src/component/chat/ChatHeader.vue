@@ -11,15 +11,21 @@
 
 </template>
 
-<script>
-import Store from '../../store/store';
+<script lang="ts">
+
+import {useChatStore} from '../../store/piniaStore';
 
 export default {
   name: 'ChatHeader',
+  setup() {
+    const store = useChatStore(); // Call useMyStore() inside the setup function
+
+    return {store};
+  },
   data() {
     return {
-      selectedPersonaName: Store.state.chat.personaName,
-      persona: Store.state.persona,
+      selectedPersonaName: this.store.personaName,
+      persona: this.store.persona,
       selectedIndex: -1,
     };
   },
@@ -28,7 +34,7 @@ export default {
       this.selectedIndex = $event.target.selectedIndex;
       console.log('EVENT', this.selectedIndex);
       if (this.selectedIndex > -1) {
-        Store.mutations.persona.change(Store.state.persona[this.selectedIndex].name);
+        this.store.changePersona(this.store.chat.persona[this.selectedIndex].name);
       }
     },
   },

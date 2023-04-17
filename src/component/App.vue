@@ -15,7 +15,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import History from './history/History.vue';
 import Chat from './chat/Chat.vue';
 
