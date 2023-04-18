@@ -1,9 +1,11 @@
 import ChatMessage from './to/chat-message';
 
+const openAIApiKey = process.env.OPENAI_API_KEY;
 const openAIUrl = 'https://api.openai.com/v1/completions';
 const openAIChatUrl = 'https://api.openai.com/v1/chat/completions';
 const openAIImageUrl = 'https://api.openai.com/v1/images/generations';
 
+const postmanApiKey = process.env.POSTMAN_API_KEY;
 const mockServerUrl = process.env.POSTMAN_MOCK_SERVER_URL;
 const mockOpenAIUrl = mockServerUrl + '/v1/completions';
 const mockOpenAIChatUrl = mockServerUrl + '/v1/chat/completions';
@@ -131,8 +133,8 @@ class OpenAiService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.POSTMAN_API_KEY,
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'x-api-key': postmanApiKey,
+        'Authorization': `Bearer ${openAIApiKey}`,
       },
       body: JSON.stringify(requestBody),
     };

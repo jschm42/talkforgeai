@@ -43,7 +43,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import Parameters from './Parameters.vue';
 import System from './System.vue';
 import Input from './Input.vue';

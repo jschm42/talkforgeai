@@ -11,11 +11,11 @@
 
 </template>
 
-<script lang="ts">
+<script>
 import ChatControl from './ChatControl.vue';
 import ChatMessage from './ChatMessage.vue';
 import ChatHeader from './ChatHeader.vue';
-import {useChatStore} from '../../store/piniaStore';
+import {useChatStore} from '../../store/chat-store';
 
 export default {
   name: 'Chat',

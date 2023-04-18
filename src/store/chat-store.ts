@@ -1,7 +1,7 @@
 import {defineStore} from 'pinia';
 import ChatMessage from '../service/to/chat-message';
 import IndexEntry from '../service/to/index-entry';
-import {PERSONA} from '../service/to/persona';
+import {DEFAULT_PERSONA, PERSONA} from '../service/to/persona';
 import Role from '../service/to/role';
 
 export const useChatStore = defineStore('chat', {
@@ -11,7 +11,9 @@ export const useChatStore = defineStore('chat', {
         sessionId: '' as string,
         messages: [] as Array<ChatMessage>,
         processedMessages: [] as Array<ChatMessage>,
-        personaName: '' as string,
+        personaName: DEFAULT_PERSONA.name,
+        system: DEFAULT_PERSONA.system,
+        configHeaderEnabled: true,
       },
       index: {
         entries: [] as Array<IndexEntry>,
@@ -20,6 +22,10 @@ export const useChatStore = defineStore('chat', {
     };
   },
   actions: {
+    disableConfigHeader() {
+      console.log('disableConfigHeader');
+      this.chat.configHeaderEnabled = false;
+    },
     loadIndex() {
       // @ts-ignore
       window.chatIndexAPI.listenToLoadReply((entries: Array<IndexEntry>) => {
@@ -51,6 +57,8 @@ export const useChatStore = defineStore('chat', {
       });
 
       const previousMessages = [];
+      previousMessages.push(new ChatMessage(Role.SYSTEM, this.chat.system));
+
       for (let i = 0; i < this.chat.messages.length; i++) {
         if (this.chat.messages[i].role === Role.USER) {
           previousMessages.push(Object.assign({}, this.chat.processedMessages[i]));
@@ -67,8 +75,8 @@ export const useChatStore = defineStore('chat', {
     changePersona(personaName: string) {
       const persona = PERSONA.find(p => p.name === personaName);
       if (persona) {
-        // @ts-ignore
-        window.chatAPI.setPersona(persona.name);
+        this.chat.personaName = personaName;
+        this.chat.system = persona.system;
         console.log('Persona changed', persona);
       }
     },

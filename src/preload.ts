@@ -23,10 +23,6 @@ contextBridge.exposeInMainWorld('chatAPI', {
     });
   },
 
-  setPersona: (personaName: string) => {
-    ipcRenderer.send('set-persona', personaName);
-  },
-
 });
 
 contextBridge.exposeInMainWorld('chatIndexAPI', {

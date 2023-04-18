@@ -12,9 +12,9 @@
 </template>
 
 
-<script lang="ts">
+<script>
 
-import {useChatStore} from '../../store/piniaStore';
+import {useChatStore} from '../../store/chat-store';
 
 export default {
   name: 'Input',
@@ -31,14 +31,15 @@ export default {
   },
   methods: {
     submit() {
+      this.store.disableConfigHeader();
       this.store.submitPrompt(this.prompt);
     },
   },
   mounted() {
 
   },
-  changed() {
-    console.log('Input-Component changed');
+  changed($event) {
+    console.log('Input-Component changed', $event);
   },
 };
 </script>

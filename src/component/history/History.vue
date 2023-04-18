@@ -20,9 +20,9 @@
 </template>
 
 
-<script lang="ts">
+<script>
 import Toolbar from './Toolbar.vue';
-import {useChatStore} from '../../store/piniaStore';
+import {useChatStore} from '../../store/chat-store';
 
 export default {
   name: 'History',

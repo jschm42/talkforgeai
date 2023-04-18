@@ -97,10 +97,6 @@ app.whenReady().then(() => {
     //mainService.addConfigurationPanel(personaService.persona);
   });
 
-  ipcMain.on('set-persona', (event, name) => {
-    chat.setPersona(personaService.getPersonaByName(name));
-  });
-
   ipcMain.on('load-index', (event) => {
     const loadedIndex = index.read();
     mainWindow.webContents.send('index-load-reply', loadedIndex);
