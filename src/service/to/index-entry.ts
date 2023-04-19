@@ -1,18 +1,18 @@
-class IndexEntry {
-  sessionId: string;
-  title: string;
-  description: string;
-  timestamp: Date;
-  selected: boolean;
+import StringUtil from '../../util/string-util';
 
-  constructor(
-    sessionId: string, title: string, description: string, timestamp: Date) {
-    this.title = title;
+class IndexEntry {
+  readonly sessionId: string;
+  readonly title: string;
+  readonly description: string;
+  readonly timestamp: Date;
+
+  constructor(sessionId: string, title: string, description: string, timestamp: Date) {
+    this.title = StringUtil.truncateString(title, 50);
     this.description = description;
     this.timestamp = timestamp;
     this.sessionId = sessionId;
-    this.selected = false;
   }
+
 }
 
 export default IndexEntry;

@@ -1,13 +1,13 @@
 <template>
   <ChatHeader></ChatHeader>
-  <div class="flex-fill vertical-scrollbar no-horizontal-scrollbar">
+  <div ref="entries" class="flex-fill vertical-scrollbar no-horizontal-scrollbar">
 
     <ChatMessage v-for="message in chatState.processedMessages" :message="message"></ChatMessage>
 
   </div>
   <!-- Input Section -->
 
-  <ChatControl></ChatControl>
+  <ChatControl @submit-result-received="submitResultReceived"></ChatControl>
 
 </template>
 
@@ -30,8 +30,15 @@ export default {
     };
   },
   components: {ChatHeader, ChatControl, ChatMessage},
-  changed() {
-    console.log('Chat-Component changed');
+  methods: {
+    submitResultReceived() {
+      console.log('Submit Result Received');
+      // Scroll to bottom
+      this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
+    },
+  },
+  updated() {
+    console.log('Chat-Component updated');
   },
 };
 </script>

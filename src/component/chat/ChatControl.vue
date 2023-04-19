@@ -27,7 +27,7 @@
     <div id="pills-tabContent" class="tab-content">
       <div id="pills-message" aria-labelledby="pills-message-tab" class="tab-pane fade show active"
            role="tabpanel" tabindex="0">
-        <Input></Input>
+        <Input @submit-result-received="submitResultReceived"></Input>
       </div>
 
       <div id="pills-system" aria-labelledby="pills-system-tab" class="tab-pane fade" role="tabpanel"
@@ -51,6 +51,11 @@ import Input from './Input.vue';
 export default {
   name: 'ChatControl',
   components: {Input, Parameters, System},
+  methods: {
+    submitResultReceived() {
+      this.$emit('submitResultReceived');
+    },
+  },
 };
 </script>
 

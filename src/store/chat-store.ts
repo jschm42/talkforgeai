@@ -21,7 +21,10 @@ export const useChatStore = defineStore('chat', {
   },
   actions: {
     newSession() {
-      this.session = new ChatSession();
+      this.$patch({
+        session: new ChatSession(),
+        chat: {configHeaderEnabled: true},
+      });
     },
     disableConfigHeader() {
       console.log('disableConfigHeader');
@@ -34,9 +37,11 @@ export const useChatStore = defineStore('chat', {
       this.index.entries = entries;
     },
     saveIndex() {
+      const indexRaw = toRaw(this.index.entries);
+
       // @ts-ignore
-      window.chatIndexAPI.save(this.entries);
-      console.log('Index saved', this.index.entries);
+      window.chatIndexAPI.save(indexRaw);
+      console.log('Index saved', indexRaw);
     },
     addIndexEntry(entry: IndexEntry) {
       this.index.entries.push(entry);
@@ -68,13 +73,17 @@ export const useChatStore = defineStore('chat', {
       const result = await window.chatAPI.submitPrompt(prompt, previousMessages);
       console.log('Submit Result', result);
 
+      const isFirstSubmit = this.session.processedMessages.length == 0;
+      if (isFirstSubmit) {
+        this.addIndexEntry(new IndexEntry(this.session.sessionId, prompt, 'Description', new Date()));
+      }
+
       this.session.processedMessages.push(result.userMessage);
       this.session.messages.push(result.originalAssistantMessage);
       this.session.processedMessages.push(result.processedAssistantMessage);
 
       // @ts-ignore
       window.chatAPI.writeChatSession(toRaw(this.session));
-
     },
     changePersona(personaName: string) {
       const persona = PERSONA.find(p => p.name === personaName);

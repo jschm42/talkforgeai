@@ -3,7 +3,9 @@
     <div id="new-session-button" class="input-group-text">
       <i class="bi bi-x-circle" role="button" style="font-size: 2em" @click="clearChat"></i>
     </div>
-    <textarea v-model="prompt" class="form-control shadow" placeholder="Enter text..." rows="5"
+    <textarea ref="promptInputArea" v-model="prompt" :disabled="isInputLocked" class="form-control shadow"
+              placeholder="Enter text..."
+              rows="5"
               @keyup.enter.exact="submit"></textarea>
     <div id="submit-button" class="input-group-text">
       <i class="bi bi-send-check-fill" role="button" style="font-size: 2em" @click="submit"></i>
@@ -26,13 +28,26 @@ export default {
   data() {
     return {
       prompt: '',
+      isInputLocked: false,
       chatState: this.store.chat,
     };
   },
   methods: {
     async submit() {
       this.store.disableConfigHeader();
-      return this.store.submitPrompt(this.prompt);
+      this.isInputLocked = true;
+      const result = await this.store.submitPrompt(this.prompt);
+
+      this.$emit('submitResultReceived');
+      this.prompt = '';
+      this.isInputLocked = false;
+      await this.$nextTick(() => {
+        this.$refs.promptInputArea.focus();
+      });
+      return result;
+    },
+    clearChat() {
+      this.store.newSession();
     },
   },
   mounted() {
