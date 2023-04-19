@@ -9,7 +9,7 @@ import {CHAT_DATA_DIRECTORY} from '../path-constants';
 import fs from 'fs';
 import ChatSession from './to/chat-session';
 
-class NewChatService {
+class ChatService {
 
   #openAiService;
   #userMessageProcessor;
@@ -100,4 +100,4 @@ class NewChatService {
 
 }
 
-export default NewChatService;
+export default ChatService;

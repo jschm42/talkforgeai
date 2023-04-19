@@ -25,7 +25,7 @@ export default {
   },
   data() {
     return {
-      selectedPersonaName: this.store.chat.personaName,
+      selectedPersonaName: this.store.session.personaName,
       persona: this.store.persona,
       selectedIndex: -1,
     };

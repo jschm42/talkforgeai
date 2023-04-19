@@ -26,7 +26,7 @@ export default {
   },
   data() {
     return {
-      chatState: this.store.chat,
+      chatState: this.store.session,
     };
   },
   components: {ChatHeader, ChatControl, ChatMessage},

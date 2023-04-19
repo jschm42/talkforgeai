@@ -5,7 +5,7 @@
 
     <div class="list-group list-group-flush border-bottom">
 
-      <div v-for="entry in indexState.entries" :key="entry.sessionId">
+      <div v-for="entry in allIndexEntries" :key="entry.sessionId">
         <a id='{{entry.sessionId}}' class="list-group-item list-group-item-action py-3 lh-sm {{entry.active}}"
            @click="entrySelected(entry.sessionId)">
           <div class="d-flex w-100 align-items-center justify-content-between">
@@ -37,6 +37,11 @@ export default {
     return {
       indexState: this.store.index,
     };
+  },
+  computed: {
+    allIndexEntries() {
+      return this.store.index.entries;
+    },
   },
   methods: {
     load() {
