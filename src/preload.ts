@@ -4,6 +4,9 @@
 import {contextBridge, ipcRenderer} from 'electron';
 import ChatMessage from './service/to/chat-message';
 import IndexEntry from './service/to/index-entry';
+import ChatSession from './service/to/chat-session';
+
+import NewChatService from './service/new-chat.service';
 
 declare global {
   interface Window {
@@ -13,14 +16,21 @@ declare global {
 }
 
 contextBridge.exposeInMainWorld('chatAPI', {
-  submitPrompt: (prompt: string, previousMessages: Array<ChatMessage>) => {
-    ipcRenderer.send('submit-prompt', {prompt, previousMessages});
-  },
+  submitPrompt: async (prompt: string, previousMessages: Array<ChatMessage>) => {
+    const newChatService = new NewChatService();
 
-  listenToPromptReply: (callback: (t: ChatMessage) => void) => {
-    ipcRenderer.once('submit-prompt-reply', (event, data) => {
-      callback(data);
-    });
+    const preProcessedUserMessage = await newChatService.preProcess(prompt);
+    console.log('Pre-processed', preProcessedUserMessage);
+
+    return newChatService.submit(preProcessedUserMessage, previousMessages);
+  },
+  loadChatSession: (chatSessionId: string) => {
+    ipcRenderer.send('load-chat-session', chatSessionId);
+  },
+  writeChatSession: (chatSession: ChatSession) => {
+    //ipcRenderer.send('write-chat-session', chatSession);
+    const newChatService = new NewChatService();
+    newChatService.writeToFile(chatSession);
   },
 
 });

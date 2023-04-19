@@ -3,6 +3,8 @@ import ChatMessage from '../service/to/chat-message';
 import IndexEntry from '../service/to/index-entry';
 import {DEFAULT_PERSONA, PERSONA} from '../service/to/persona';
 import Role from '../service/to/role';
+import ChatSession from '../service/to/chat-session';
+import {toRaw} from 'vue';
 
 export const useChatStore = defineStore('chat', {
   state: () => {
@@ -45,16 +47,37 @@ export const useChatStore = defineStore('chat', {
       this.index.entries.push(entry);
       this.saveIndex();
     },
-    submitPrompt(prompt: string) {
+    loadChatSession(sessionId: string) {
+      // @ts-ignore
+      window.chatIndexAPI.listenToLoadChatSessionReply((chatSession: ChatSession) => {
+        this.chat.sessionId = chatSession.sessionId;
+        this.chat.messages = chatSession.messages;
+        this.chat.processedMessages = chatSession.processedMessages;
+      });
+
+      // @ts-ignore
+      window.chatAPI.loadChatSession(sessionId);
+    },
+    async submitPrompt(prompt: string) {
       console.log('submit', prompt);
 
+      /*
       // @ts-ignore
       window.chatAPI.listenToPromptReply(({userMessage, originalAssistantMessage, processedAssistantMessage}) => {
         this.chat.processedMessages.push(userMessage);
         this.chat.messages.push(originalAssistantMessage);
         this.chat.processedMessages.push(processedAssistantMessage);
         console.log('Reply received', originalAssistantMessage, processedAssistantMessage);
+
+        const chatSession = new ChatSession();
+        chatSession.sessionId = this.chat.sessionId;
+        chatSession.processedMessages = this.chat.processedMessages;
+        chatSession.messages = this.chat.messages;
+        // @ts-ignore
+        window.chatAPI.writeChatSession(chatSession);
       });
+
+       */
 
       const previousMessages = [];
       previousMessages.push(new ChatMessage(Role.SYSTEM, this.chat.system));
@@ -70,7 +93,34 @@ export const useChatStore = defineStore('chat', {
       this.chat.messages.push(new ChatMessage(Role.USER, prompt));
 
       // @ts-ignore
-      window.chatAPI.submitPrompt(prompt, previousMessages);
+      const result = await window.chatAPI.submitPrompt(prompt, previousMessages);
+      console.log('Submit Result', result);
+
+      this.chat.processedMessages.push(result.userMessage);
+      this.chat.messages.push(result.originalAssistantMessage);
+      this.chat.processedMessages.push(result.processedAssistantMessage);
+
+      const chatSession = new ChatSession();
+      chatSession.sessionId = toRaw(this.chat.sessionId);
+      chatSession.messages = toRaw(this.chat.messages);
+      chatSession.processedMessages = toRaw(this.chat.processedMessages);
+      // @ts-ignore
+      window.chatAPI.writeChatSession(chatSession);
+
+      /*
+      window.chatAPI.submitPrompt(prompt, previousMessages).then(result => {
+
+
+        this.chat.processedMessages.push(result.userMessage);
+        this.chat.messages.push(result.originalAssistantMessage);
+        this.chat.processedMessages.push(result.processedAssistantMessage);
+        console.log('Reply received', result);
+      }).catch((error: any) => {
+        console.log('ERROR', error);
+      });
+
+       */
+
     },
     changePersona(personaName: string) {
       const persona = PERSONA.find(p => p.name === personaName);

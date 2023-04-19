@@ -6,7 +6,8 @@
     <div class="list-group list-group-flush border-bottom">
 
       <div v-for="entry in indexState.entries" :key="entry.sessionId">
-        <a id='{{entry.sessionId}}' class="list-group-item list-group-item-action py-3 lh-sm {{entry.active}}">
+        <a id='{{entry.sessionId}}' class="list-group-item list-group-item-action py-3 lh-sm {{entry.active}}"
+           @click="entrySelected(entry.sessionId)">
           <div class="d-flex w-100 align-items-center justify-content-between">
             <strong class="mb-1 text-truncate" title="{{entry.title}}">{{ entry.title }}</strong>
           </div>
@@ -40,6 +41,12 @@ export default {
   methods: {
     load() {
       this.store.loadIndex();
+    },
+    entrySelected(sessionId) {
+      console.log('Index selected', sessionId);
+      if (this.selectedIndex > -1) {
+        this.store.loadChatSession(sessionId);
+      }
     },
   },
   mounted() {

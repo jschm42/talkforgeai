@@ -30,9 +30,9 @@ export default {
     };
   },
   methods: {
-    submit() {
+    async submit() {
       this.store.disableConfigHeader();
-      this.store.submitPrompt(this.prompt);
+      return this.store.submitPrompt(this.prompt);
     },
   },
   mounted() {
