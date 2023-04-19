@@ -29,12 +29,9 @@ contextBridge.exposeInMainWorld('chatAPI', {
     return newChatService.submit(preProcessedUserMessage, previousMessages);
   },
   loadChatSession: (chatSessionId: string) => {
-    //ipcRenderer.send('load-chat-session', chatSessionId);
     return chatService.readFromFile(chatSessionId);
   },
   writeChatSession: (chatSession: ChatSession) => {
-    //ipcRenderer.send('write-chat-session', chatSession);
-
     chatService.writeToFile(chatSession);
   },
 
@@ -42,11 +39,9 @@ contextBridge.exposeInMainWorld('chatAPI', {
 
 contextBridge.exposeInMainWorld('chatIndexAPI', {
   load: () => {
-    //ipcRenderer.send('load-index');
     return indexService.read();
   },
   save: (indexEntries: Array<IndexEntry>) => {
-    //ipcRenderer.send('save-index', indexEntries);
     indexService.write(indexEntries);
   },
 });

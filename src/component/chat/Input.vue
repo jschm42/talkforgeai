@@ -4,7 +4,7 @@
       <i class="bi bi-x-circle" role="button" style="font-size: 2em" @click="clearChat"></i>
     </div>
     <textarea ref="promptInputArea" v-model="prompt" :disabled="isInputLocked" class="form-control shadow"
-              placeholder="Enter text..."
+              placeholder="Enter prompt..."
               rows="5"
               @keyup.enter.exact="submit"></textarea>
     <div id="submit-button" class="input-group-text">
@@ -52,9 +52,6 @@ export default {
   },
   mounted() {
 
-  },
-  changed($event) {
-    console.log('Input-Component changed', $event);
   },
 };
 </script>

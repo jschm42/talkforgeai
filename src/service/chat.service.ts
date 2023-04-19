@@ -62,15 +62,7 @@ class ChatService {
     const filePath = path.join(subDirectoryPath, fileName);
 
     console.log('Reading file ' + filePath, sessionId);
-    const chatData = JSON.parse(fs.readFileSync(filePath, {encoding: 'utf-8'}));
-
-    const chatSession = new ChatSession();
-
-    chatSession.sessionId = chatData.sessionId;
-    chatSession.messages = chatData.messages;
-    chatSession.processedMessages = chatData.processedMessages;
-
-    return chatSession;
+    return JSON.parse(fs.readFileSync(filePath, {encoding: 'utf-8'}));
   }
 
   writeToFile(chatSession: ChatSession) {

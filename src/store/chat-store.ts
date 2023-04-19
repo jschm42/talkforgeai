@@ -51,7 +51,11 @@ export const useChatStore = defineStore('chat', {
       // @ts-ignore
       const chatSession = window.chatAPI.loadChatSession(sessionId);
       console.log('Loaded chat session', chatSession);
-      this.session = chatSession;
+
+      this.$patch({
+        session: chatSession,
+        chat: {configHeaderEnabled: false},
+      });
     },
     async submitPrompt(prompt: string) {
       console.log('submit', prompt);

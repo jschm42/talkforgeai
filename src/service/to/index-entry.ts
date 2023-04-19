@@ -2,9 +2,9 @@ import StringUtil from '../../util/string-util';
 
 class IndexEntry {
   readonly sessionId: string;
-  readonly title: string;
-  readonly description: string;
-  readonly timestamp: Date;
+  title: string;
+  description: string;
+  timestamp: Date;
 
   constructor(sessionId: string, title: string, description: string, timestamp: Date) {
     this.title = StringUtil.truncateString(title, 50);

@@ -25,7 +25,6 @@ export default {
   },
   data() {
     return {
-      selectedPersonaName: this.store.session.personaName,
       persona: this.store.persona,
       selectedIndex: -1,
     };
@@ -34,6 +33,9 @@ export default {
 
   },
   computed: {
+    selectedPersonaName() {
+      return this.store.session.personaName;
+    },
     isDisabled() {
       return !this.store.chat.configHeaderEnabled;
     },
