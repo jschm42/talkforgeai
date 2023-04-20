@@ -1,16 +1,21 @@
 <template>
-  <div :class="messageClass" class="card p-1 m-2 shadow">
+  <div :class="messageClass" class="card m-1 p-1 shadow">
     <div class="row">
       <div class="col-md-1">
-        <i :class="avatarImageClass" class="bi icon"></i>
+        <i :class="avatarImageClass" class="bi role-icon"></i>
       </div>
-      <div class="col-md-11">
+      <div class="col-md-10">
         <div class="card-body">
           <div class="card-text" v-html="message.content"></div>
         </div>
       </div>
+      <div class="col-md-1 text-end">
+        <i class="bi bi-play-circle-fill message-icon" role="button" @click="playAudio"></i>
+      </div>
     </div>
+
   </div>
+
 </template>
 
 <script>
@@ -44,6 +49,11 @@ export default {
       };
     },
   },
+  methods: {
+    async playAudio() {
+      return window.chatAPI.textToSpeech(this.message.content);
+    },
+  },
 };
 </script>
 
@@ -56,7 +66,12 @@ export default {
 
 }
 
-.icon {
+.role-icon {
   font-size: 2em;
 }
+
+.message-icon {
+  font-size: 1.5em;
+}
+
 </style>

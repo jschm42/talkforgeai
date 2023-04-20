@@ -64,7 +64,7 @@ app.whenReady().then(() => {
       responseHeaders: {
         ...details.responseHeaders,
         'Content-Security-Policy': [
-          'default-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://*.mock.pstmn.io https://api.openai.com data: blob: file:',
+          'default-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://*.mock.pstmn.io https://api.openai.com https://api.elevenlabs.io data: blob: file:',
         ],
       },
     });

@@ -8,9 +8,11 @@ import ChatSession from './service/to/chat-session';
 
 import ChatService from './service/chat.service';
 import ChatIndexService from './service/chat-index.service';
+import ElevenlabsService, {VOICES} from './service/elevenlabs.service';
 
 const indexService = new ChatIndexService();
 const chatService = new ChatService();
+const elevenlabsService = new ElevenlabsService();
 
 declare global {
   interface Window {
@@ -34,7 +36,14 @@ contextBridge.exposeInMainWorld('chatAPI', {
   writeChatSession: (chatSession: ChatSession) => {
     chatService.writeToFile(chatSession);
   },
+  textToSpeech: async (text: string) => {
+    console.log('Text to speech', text);
+    const audioBlob = await elevenlabsService.speachStream(text, VOICES.Elli);
 
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+    return audio.play();
+  },
 });
 
 contextBridge.exposeInMainWorld('chatIndexAPI', {
