@@ -38,11 +38,7 @@ contextBridge.exposeInMainWorld('chatAPI', {
   },
   textToSpeech: async (text: string) => {
     console.log('Text to speech', text);
-    const audioBlob = await elevenlabsService.speachStream(text, VOICES.Elli);
-
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = new Audio(audioUrl);
-    return audio.play();
+    return await elevenlabsService.speachStream(text, VOICES.Elli);
   },
 });
 
