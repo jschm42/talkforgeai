@@ -29,9 +29,8 @@ enum OpenAiModel {
  */
 class OpenAiService {
 
-  chatCompletion(messages: Array<ChatMessage>) {
-    return this.callOpenAiChatApi(testMode ? mockOpenAIChatUrl : openAIChatUrl,
-      messages);
+  async chatCompletion(messages: Array<ChatMessage>, stream = false) {
+    return this.callOpenAiChatApi(testMode ? mockOpenAIChatUrl : openAIChatUrl, messages, stream);
   }
 
   textCompletion(prompt: string) {
@@ -43,7 +42,7 @@ class OpenAiService {
       testMode ? mockOpenAIImageUrl : openAIImageUrl, prompt);
   }
 
-  async callOpenAiChatApi(url: string, messages: Array<ChatMessage>) {
+  async callOpenAiChatApi(url: string, messages: Array<ChatMessage>, stream = false) {
     console.log('callOpenAiChatApi', url, messages);
     const requestBody = {
       model: OpenAiModel.chatGpt35Turbo,
@@ -53,11 +52,17 @@ class OpenAiService {
       'top_p': 1.0,
       'frequency_penalty': 0.0,
       'presence_penalty': 0.0,
+      stream,
     };
 
     const requestOptions = this.#createRequestOptions(requestBody);
     //console.log('Send request to OpenAI', requestOptions);
-    return await this.#fetchChatApi(url, requestOptions);
+
+    if (stream) {
+      return this.#fetchApiStream(url, requestOptions);
+    } else {
+      return this.#fetchChatApi(url, requestOptions);
+    }
   }
 
   async callOpenAiApi(url: string, prompt: string) {
@@ -112,6 +117,14 @@ class OpenAiService {
     } else {
       throw new Error('HTTP error, status = ' + response.status);
     }
+  }
+
+  async #fetchApiStream(url: string, requestOptions: any) {
+    requestOptions.headers['x-mock-response-id'] = chatApiResponseId;
+
+    console.log('Fetch Chat API Stream', url, requestOptions);
+
+    return fetch(url, requestOptions);
   }
 
   async #fetchImageApi(url: string, requestOptions: any) {

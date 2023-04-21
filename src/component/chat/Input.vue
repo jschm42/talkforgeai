@@ -2,6 +2,7 @@
   <div class="input-group">
     <div id="new-session-button" class="input-group-text">
       <i class="bi bi-x-circle" role="button" style="font-size: 2em" @click="clearChat"></i>
+      <i class="bi bi-6-square" role="button" style="font-size: 2em" @click="testStream"></i>
     </div>
     <textarea ref="promptInputArea" v-model="prompt" :disabled="isInputLocked" class="form-control shadow"
               placeholder="Enter prompt..."
@@ -48,6 +49,9 @@ export default {
     },
     clearChat() {
       this.store.newSession();
+    },
+    async testStream() {
+      return window.chatAPI.submitStreamTest();
     },
   },
   mounted() {

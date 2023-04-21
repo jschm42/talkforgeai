@@ -9,6 +9,9 @@ import ChatSession from './service/to/chat-session';
 import ChatService from './service/chat.service';
 import ChatIndexService from './service/chat-index.service';
 import ElevenlabsService, {VOICES} from './service/elevenlabs.service';
+import OpenAiService from './service/openai.service';
+import Role from './service/to/role';
+import * as util from 'util';
 
 const indexService = new ChatIndexService();
 const chatService = new ChatService();
@@ -30,6 +33,38 @@ contextBridge.exposeInMainWorld('chatAPI', {
 
     return newChatService.submit(preProcessedUserMessage, previousMessages);
   },
+  submitStreamTest: async () => {
+    const openAiService = new OpenAiService();
+
+    const delayTime = 10; // milliseconds
+    const maxResponseLength = 200;
+    const sleep = util.promisify(setTimeout);
+
+    const startTime = Date.now();
+
+    const messages = [
+      new ChatMessage(Role.USER, 'Tell a funny joke.'),
+    ];
+
+    console.log('Requesting stream...');
+    const response = await openAiService.chatCompletion(messages, true);
+
+    const reader = response.body.getReader();
+
+    reader.read().then(function processText({done, value}) {
+      const str = new TextDecoder().decode(value);
+      console.log('VALUE', str);
+
+      if (done) {
+        console.log('Stream complete');
+        return;
+      }
+
+      return reader.read().then(processText);
+    });
+
+  },
+
   loadChatSession: (chatSessionId: string) => {
     return chatService.readFromFile(chatSessionId);
   },
