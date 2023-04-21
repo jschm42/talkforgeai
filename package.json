@@ -49,6 +49,8 @@
     "electron-squirrel-startup": "^1.0.0",
     "highlight.js": "^11.7.0",
     "html-to-text": "^9.0.5",
+    "openai": "^3.2.1",
+    "openai-ext": "^1.2.6",
     "pinia": "^2.0.34",
     "vue": "^3.2.47"
   }
