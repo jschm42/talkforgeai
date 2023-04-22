@@ -37,7 +37,7 @@ export default {
     async submit() {
       this.store.disableConfigHeader();
       this.isInputLocked = true;
-      const result = await this.store.submitPrompt(this.prompt);
+      const result = await this.store.submitStreamPrompt(this.prompt);
 
       this.$emit('submitResultReceived');
       this.prompt = '';

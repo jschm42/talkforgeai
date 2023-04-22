@@ -51,6 +51,7 @@ contextBridge.exposeInMainWorld('chatAPI', {
 
     const reader = response.body.getReader();
 
+    // @ts-ignore
     reader.read().then(function processText({done, value}) {
       const str = new TextDecoder().decode(value);
       console.log('VALUE', str);

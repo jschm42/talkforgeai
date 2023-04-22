@@ -34,6 +34,15 @@ class ChatService {
     });
   }
 
+  async submitStream(prompt: string, pastMessages: Array<ChatMessage>) {
+    const preProcessedUserMessage = await this.preProcess(prompt);
+    console.log('Pre-processed', preProcessedUserMessage);
+    const requestMessages = [...pastMessages, preProcessedUserMessage];
+    
+    console.log('Requesting response...');
+    return this.#openAiService.chatCompletion(requestMessages, true);
+  }
+
   createRequestPromise(promptMessage: ChatMessage, pastMessages: Array<ChatMessage>) {
     const requestMessages = [...pastMessages, promptMessage];
 
@@ -46,10 +55,9 @@ class ChatService {
 
   createPostProcessPromise(originalAssistantMessage: ChatMessage) {
     console.log('Post-Processing response...');
-    return this.#assistantMessageProcessor.process(originalAssistantMessage).
-      then((processedAssistantMessage: ChatMessage) => {
-        return {originalAssistantMessage, processedAssistantMessage};
-      });
+    return this.#assistantMessageProcessor.process(originalAssistantMessage).then((processedAssistantMessage: ChatMessage) => {
+      return {originalAssistantMessage, processedAssistantMessage};
+    });
   }
 
   readFromFile(sessionId: string): ChatSession {

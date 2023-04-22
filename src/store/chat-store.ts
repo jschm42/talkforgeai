@@ -5,6 +5,7 @@ import {PERSONA} from '../service/to/persona';
 import Role from '../service/to/role';
 import ChatSession from '../service/to/chat-session';
 import {toRaw} from 'vue';
+import OpenAiRenderer from "../service/openai.renderer";
 
 export const useChatStore = defineStore('chat', {
   state: () => {
@@ -57,7 +58,13 @@ export const useChatStore = defineStore('chat', {
         chat: {configHeaderEnabled: false},
       });
     },
-    async submitPrompt(prompt: string) {
+    addToLastMessage(content: string) {
+      const lastMessage = this.session.processedMessages[this.session.processedMessages.length - 1];
+      lastMessage.content += content;
+    },
+    async submitStreamPrompt(prompt: string) {
+      const openAiSerice = new OpenAiRenderer();
+
       console.log('submit', prompt);
 
       const previousMessages = [];
@@ -71,23 +78,69 @@ export const useChatStore = defineStore('chat', {
         }
       }
 
-      this.session.messages.push(new ChatMessage(Role.USER, prompt));
+      const userMessage = new ChatMessage(Role.USER, prompt);
+      this.session.messages.push(userMessage);
+
+      const submitMessages = [...previousMessages, userMessage];
+      console.log("Submitt messages", submitMessages);
 
       // @ts-ignore
-      const result = await window.chatAPI.submitPrompt(prompt, previousMessages);
-      console.log('Submit Result', result);
+      const response = await openAiSerice.chatCompletion(submitMessages, true);
+      const reader = response.body.getReader();
 
-      const isFirstSubmit = this.session.processedMessages.length == 0;
-      if (isFirstSubmit) {
-        this.addIndexEntry(new IndexEntry(this.session.sessionId, prompt, 'Description', new Date()));
+      const processedMessage = new ChatMessage(Role.ASSISTANT, '');
+      this.session.processedMessages.push(processedMessage);
+
+      // @ts-ignore
+      let done = false;
+      while (!done) {
+        const row = await reader.read();
+
+        const regex = /"delta":\s*{"(role|content)":"([^"]+)"/;
+
+        const str = new TextDecoder().decode(row.value);
+
+        const parsed = str.split("\n\n")
+          .filter(e => e.length > 0)
+          .map(e => regex.exec(e))
+          .map(p => {
+            if (p === null) return {}
+            return {
+              type: p[1], value: p[2]
+            }
+          });
+
+        parsed.filter(e => e.type === 'content')
+          .forEach(p => {
+            console.log("Adding content", p.value);
+
+
+            if (p.value) {
+              p.value = p.value.replace('\\n\\n', '<p/>');
+              this.addToLastMessage(p.value);
+            }
+          })
+
+        console.log("Decoded Text", parsed);
+
+        done = row.done;
       }
+      console.log('Stream complete');
 
-      this.session.processedMessages.push(result.userMessage);
-      this.session.messages.push(result.originalAssistantMessage);
-      this.session.processedMessages.push(result.processedAssistantMessage);
 
-      // @ts-ignore
-      window.chatAPI.writeChatSession(toRaw(this.session));
+      /*
+            const isFirstSubmit = this.session.processedMessages.length == 0;
+            if (isFirstSubmit) {
+              this.addIndexEntry(new IndexEntry(this.session.sessionId, prompt, 'Description', new Date()));
+            }
+
+            this.session.processedMessages.push(result.userMessage);
+            this.session.messages.push(result.originalAssistantMessage);
+            this.session.processedMessages.push(result.processedAssistantMessage);
+
+            // @ts-ignore
+            window.chatAPI.writeChatSession(toRaw(this.session));
+            */
     },
     changePersona(personaName: string) {
       const persona = PERSONA.find(p => p.name === personaName);
