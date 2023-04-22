@@ -5,7 +5,8 @@ import {PERSONA} from '../service/to/persona';
 import Role from '../service/to/role';
 import ChatSession from '../service/to/chat-session';
 import {toRaw} from 'vue';
-import OpenAiRenderer from "../service/openai.renderer";
+import OpenAiRenderer from "../renderer/openai.renderer";
+import ChatRenderer from "../renderer/chat.renderer";
 
 export const useChatStore = defineStore('chat', {
   state: () => {
@@ -64,25 +65,14 @@ export const useChatStore = defineStore('chat', {
     },
     async submitStreamPrompt(prompt: string) {
       const openAiSerice = new OpenAiRenderer();
+      const chatRenderer = new ChatRenderer();
 
-      console.log('submit', prompt);
-
-      const previousMessages = [];
-      previousMessages.push(new ChatMessage(Role.SYSTEM, this.session.system));
-
-      for (let i = 0; i < this.session.messages.length; i++) {
-        if (this.session.messages[i].role === Role.USER) {
-          previousMessages.push(Object.assign({}, this.session.processedMessages[i]));
-        } else {
-          previousMessages.push(Object.assign({}, this.session.messages[i]));
-        }
-      }
+      const previousMessages = chatRenderer.getPreviousMessages(this.session.system, this.session.messages, this.session.processedMessages);
 
       const userMessage = new ChatMessage(Role.USER, prompt);
       this.session.messages.push(userMessage);
 
       const submitMessages = [...previousMessages, userMessage];
-      console.log("Submitt messages", submitMessages);
 
       // @ts-ignore
       const response = await openAiSerice.chatCompletion(submitMessages, true);
@@ -95,52 +85,48 @@ export const useChatStore = defineStore('chat', {
       let done = false;
       while (!done) {
         const row = await reader.read();
-
-        const regex = /"delta":\s*{"(role|content)":"([^"]+)"/;
-
         const str = new TextDecoder().decode(row.value);
+        const parsed = chatRenderer.parseStreamResponse(str);
 
-        const parsed = str.split("\n\n")
-          .filter(e => e.length > 0)
-          .map(e => regex.exec(e))
-          .map(p => {
-            if (p === null) return {}
-            return {
-              type: p[1], value: p[2]
+
+        const contentArray = parsed
+          .filter(e => e.type === 'content')
+          .map(e => e.value);
+
+        let command = '';
+        let commandMode = false;
+
+        for (let value of contentArray) {
+          console.log("COMMAND MODE", commandMode);
+          if (value) {
+
+            if (commandMode && value === '``') {
+              console.log("TURN COMMAND MODE OFF");
+              commandMode = false;
+              console.log("COMMAND FOUND: ", command);
+            } else if (!commandMode && value === '``') {
+              console.log("TURN COMMAND MODE ON");
+              commandMode = true;
+              command = '';
             }
-          });
 
-        parsed.filter(e => e.type === 'content')
-          .forEach(p => {
-            console.log("Adding content", p.value);
+            if (commandMode) {
+              command += value;
+              console.log("CUR COMMAND VALUE", command);
+            } else {
+              value = value.replace('\\n\\n', '<p/>');
 
-
-            if (p.value) {
-              p.value = p.value.replace('\\n\\n', '<p/>');
-              this.addToLastMessage(p.value);
+              console.log("CUR VALUE", value);
+              this.addToLastMessage(value);
             }
-          })
 
-        console.log("Decoded Text", parsed);
+          }
+        }
 
         done = row.done;
       }
       console.log('Stream complete');
 
-
-      /*
-            const isFirstSubmit = this.session.processedMessages.length == 0;
-            if (isFirstSubmit) {
-              this.addIndexEntry(new IndexEntry(this.session.sessionId, prompt, 'Description', new Date()));
-            }
-
-            this.session.processedMessages.push(result.userMessage);
-            this.session.messages.push(result.originalAssistantMessage);
-            this.session.processedMessages.push(result.processedAssistantMessage);
-
-            // @ts-ignore
-            window.chatAPI.writeChatSession(toRaw(this.session));
-            */
     },
     changePersona(personaName: string) {
       const persona = PERSONA.find(p => p.name === personaName);
