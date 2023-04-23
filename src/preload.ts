@@ -6,18 +6,20 @@ import ChatMessage from './service/to/chat-message';
 import IndexEntry from './service/to/index-entry';
 import ChatSession from './service/to/chat-session';
 
+import AsssistantMessageProcessor from './processor/asssistant-message-processor';
 import ChatService from './service/chat.service';
 import ChatIndexService from './service/chat-index.service';
 import ElevenlabsService, {VOICES} from './service/elevenlabs.service';
 import OpenAiService from './service/openai.service';
 import Role from './service/to/role';
 import * as util from 'util';
-import ConfigService from "./service/config.service";
+import ConfigService from './service/config.service';
 
 const indexService = new ChatIndexService();
 const chatService = new ChatService();
 const elevenlabsService = new ElevenlabsService();
 const configService = new ConfigService();
+const assistantMessageProcessor = new AsssistantMessageProcessor();
 
 declare global {
   interface Window {
@@ -28,6 +30,9 @@ declare global {
 }
 
 contextBridge.exposeInMainWorld('chatAPI', {
+  process: async (message: ChatMessage) => {
+    return assistantMessageProcessor.process(message);
+  },
   submitPrompt: async (prompt: string, previousMessages: Array<ChatMessage>) => {
     const newChatService = new ChatService();
 

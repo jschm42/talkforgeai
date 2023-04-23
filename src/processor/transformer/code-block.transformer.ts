@@ -4,13 +4,13 @@ import hljs from 'highlight.js';
 class CodeBlockTransformer extends MessageTransformer {
   process() {
     return (content: string) => new Promise((resolve, reject) => {
-
-      this.sendProgress('Processing code blocks...');
-
-      const regex = /```([a-z]*)\n([\s\S]*?)```/gm;
+      const regex = /```([a-z]*)\\n([\s\S]*?)```/gm;
       let m;
 
+      console.log('CODE BLOCK', content);
+
       while ((m = regex.exec(content)) !== null) {
+        console.log('M ', m);
 
         //let highlighted = rainbow.colorSync(m[2], m[1]);
         let highlightedValue;

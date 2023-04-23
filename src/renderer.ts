@@ -37,6 +37,9 @@ import 'highlight.js/styles/github.css';
 import {createApp} from 'vue';
 import App from './component/App.vue';
 import {useStore} from './store';
+import hljs from 'highlight.js/lib/core';
+
+hljs.highlightAll();
 
 const app = createApp(App);
 

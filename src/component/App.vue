@@ -18,6 +18,9 @@
 <script>
 import History from './history/History.vue';
 import Chat from './chat/Chat.vue';
+import hljs from 'highlight.js';
+
+hljs.highlightAll();
 
 export default {
   name: 'App',

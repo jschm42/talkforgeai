@@ -1,14 +1,14 @@
-import ChatMessage from "../service/to/chat-message";
-import Role from "../service/to/role";
-import OpenAiRenderer from "./openai.renderer";
-import ChatSession from "../service/to/chat-session";
+import ChatMessage from '../service/to/chat-message';
+import Role from '../service/to/role';
+import OpenAiRenderer from './openai.renderer';
+import ChatSession from '../service/to/chat-session';
+import {toRaw} from 'vue';
 
 const regex = /"delta":\s*{"(role|content)":"([^"]+)"/;
 
 class ChatRenderer {
   async submit(prompt: string, session: ChatSession) {
     // @ts-ignore
-    const config = window.configAPI.getConfig();
     const openAiSerice = new OpenAiRenderer();
     const chatRenderer = new ChatRenderer();
 
@@ -26,11 +26,17 @@ class ChatRenderer {
 
     const processedMessage = new ChatMessage(Role.ASSISTANT, '');
     session.processedMessages.push(processedMessage);
+    const message = new ChatMessage(Role.ASSISTANT, '');
+    session.messages.push(message);
 
     // @ts-ignore
     let done = false;
     let command = '';
     let commandMode = false;
+    let wordMode = false;
+    let word = '';
+
+    let messageContent = '';
 
     while (!done) {
       const row = await reader.read();
@@ -43,27 +49,42 @@ class ChatRenderer {
         console.log('COMMAND MODE', commandMode);
         if (value) {
 
+          /*
+          console.log('CUR VALUE', value);
           if (value === '``') {
             if (commandMode) {
               console.log('TURN COMMAND MODE OFF');
               commandMode = false;
+              command = command.replace('`', '');
               console.log('COMMAND FOUND: ', command);
+              value = '</pre>';
             } else {
               console.log('TURN COMMAND MODE ON');
               commandMode = true;
               command = '';
+              value = '<pre>';
+            }
+          } else if (value.endsWith('`')) {
+            if (wordMode) {
+              console.log('TURN WORD MODE OFF');
+              wordMode = false;
+              word = word.replace('`', '');
+              console.log('WORD FOUND: ', command);
+              value = value.substring(0, value.length - 1) + '</span>';
+            } else {
+              console.log('TURN WORD MODE ON');
+              wordMode = true;
+              word = '';
+              value = '<span class="code-word">';
             }
           }
 
-          if (commandMode) {
-            command += value;
-            console.log('CUR COMMAND VALUE', command);
-          } else {
-            value = value.replace('\\n\\n', '<p/>');
+           */
 
-            console.log('CUR VALUE', value);
-            this.addToLastMessage(value, session);
-          }
+          //value = value.replace('\\n\\n', '<p/>');
+
+          messageContent += value;
+          this.addToLastMessage(value, session);
 
         }
       }
@@ -71,11 +92,36 @@ class ChatRenderer {
       done = row.done;
     }
     console.log('Stream complete');
+
+    session.messages.push(new ChatMessage(Role.ASSISTANT, messageContent));
+
+    // @ts-ignore
+    const transformed = await window.chatAPI.process(processedMessage);
+    this.updateLastProcessedMessage(transformed.content, session);
+  }
+
+  getLastMessage(session: ChatSession) {
+    return toRaw(session.messages[session.messages.length - 1]);
   }
 
   addToLastMessage(content: string, session: ChatSession) {
-    const lastMessage = session.processedMessages[session.processedMessages.length - 1];
+    const lastProcessedMessage = session.processedMessages[session.processedMessages.length - 1];
+    lastProcessedMessage.content += content;
+
+    const lastMessage = session.messages[session.messages.length - 1];
     lastMessage.content += content;
+  }
+
+  updateLastProcessedMessage(content: string, session: ChatSession) {
+    const lastMessage = session.processedMessages[session.processedMessages.length - 1];
+    lastMessage.content = content;
+  }
+
+  getLastMessageChars(value: string, charCount: number) {
+    if (value && value.length >= charCount) {
+      return value.substring(value.length - charCount);
+    }
+
   }
 
   getPreviousMessages(system: string, messages: Array<ChatMessage>, processedMessages: Array<ChatMessage>) {
@@ -93,15 +139,12 @@ class ChatRenderer {
   }
 
   parseStreamResponse(str: string) {
-    return str.split("\n\n")
-      .filter(e => e.length > 0)
-      .map(e => regex.exec(e))
-      .map(p => {
-        if (p === null) return {}
-        return {
-          type: p[1], value: p[2]
-        }
-      });
+    return str.split('\n\n').filter(e => e.length > 0).map(e => regex.exec(e)).map(p => {
+      if (p === null) return {};
+      return {
+        type: p[1], value: p[2],
+      };
+    });
   }
 }
 
