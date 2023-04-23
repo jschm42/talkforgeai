@@ -120,7 +120,7 @@ class OpenAiRenderer {
       headers: {
         'Content-Type': 'application/json',
         //'x-api-key': postmanApiKey,
-        'Authorization': `Bearer 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`,
+        'Authorization': `Bearer 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`,
       },
       body: JSON.stringify(requestBody),
     };

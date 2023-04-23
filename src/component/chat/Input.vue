@@ -51,7 +51,7 @@ export default {
       this.store.newSession();
     },
     async testStream() {
-      return window.chatAPI.submitStreamTest();
+      return this.store.submitStreamPrompt('Explain how to sort an array in java.');
     },
   },
   mounted() {

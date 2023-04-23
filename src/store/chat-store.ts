@@ -5,8 +5,8 @@ import {PERSONA} from '../service/to/persona';
 import Role from '../service/to/role';
 import ChatSession from '../service/to/chat-session';
 import {toRaw} from 'vue';
-import OpenAiRenderer from "../renderer/openai.renderer";
-import ChatRenderer from "../renderer/chat.renderer";
+import OpenAiRenderer from '../renderer/openai.renderer';
+import ChatRenderer from '../renderer/chat.renderer';
 
 export const useChatStore = defineStore('chat', {
   state: () => {
@@ -67,7 +67,8 @@ export const useChatStore = defineStore('chat', {
       const openAiSerice = new OpenAiRenderer();
       const chatRenderer = new ChatRenderer();
 
-      const previousMessages = chatRenderer.getPreviousMessages(this.session.system, this.session.messages, this.session.processedMessages);
+      const previousMessages = chatRenderer.getPreviousMessages(this.session.system, this.session.messages,
+        this.session.processedMessages);
 
       const userMessage = new ChatMessage(Role.USER, prompt);
       this.session.messages.push(userMessage);
@@ -83,40 +84,39 @@ export const useChatStore = defineStore('chat', {
 
       // @ts-ignore
       let done = false;
+      let command = '';
+      let commandMode = false;
+
       while (!done) {
         const row = await reader.read();
         const str = new TextDecoder().decode(row.value);
         const parsed = chatRenderer.parseStreamResponse(str);
 
-
-        const contentArray = parsed
-          .filter(e => e.type === 'content')
-          .map(e => e.value);
-
-        let command = '';
-        let commandMode = false;
+        const contentArray = parsed.filter(e => e.type === 'content').map(e => e.value);
 
         for (let value of contentArray) {
-          console.log("COMMAND MODE", commandMode);
+          console.log('COMMAND MODE', commandMode);
           if (value) {
 
-            if (commandMode && value === '``') {
-              console.log("TURN COMMAND MODE OFF");
-              commandMode = false;
-              console.log("COMMAND FOUND: ", command);
-            } else if (!commandMode && value === '``') {
-              console.log("TURN COMMAND MODE ON");
-              commandMode = true;
-              command = '';
+            if (value === '``') {
+              if (commandMode) {
+                console.log('TURN COMMAND MODE OFF');
+                commandMode = false;
+                console.log('COMMAND FOUND: ', command);
+              } else {
+                console.log('TURN COMMAND MODE ON');
+                commandMode = true;
+                command = '';
+              }
             }
 
             if (commandMode) {
               command += value;
-              console.log("CUR COMMAND VALUE", command);
+              console.log('CUR COMMAND VALUE', command);
             } else {
               value = value.replace('\\n\\n', '<p/>');
 
-              console.log("CUR VALUE", value);
+              console.log('CUR VALUE', value);
               this.addToLastMessage(value);
             }
 
