@@ -12,15 +12,18 @@ import ElevenlabsService, {VOICES} from './service/elevenlabs.service';
 import OpenAiService from './service/openai.service';
 import Role from './service/to/role';
 import * as util from 'util';
+import ConfigService from "./service/config.service";
 
 const indexService = new ChatIndexService();
 const chatService = new ChatService();
 const elevenlabsService = new ElevenlabsService();
+const configService = new ConfigService();
 
 declare global {
   interface Window {
     chatIndexAPI?: unknown,
-    chatAPI?: unknown
+    chatAPI?: unknown,
+    configAPI?: unknown
   }
 }
 
@@ -87,3 +90,8 @@ contextBridge.exposeInMainWorld('chatIndexAPI', {
   },
 });
 
+contextBridge.exposeInMainWorld('configAPI', {
+  getConfig: () => {
+    return configService.getConfig();
+  },
+});

@@ -1,12 +1,11 @@
 import {defineStore} from 'pinia';
-import ChatMessage from '../service/to/chat-message';
 import IndexEntry from '../service/to/index-entry';
 import {PERSONA} from '../service/to/persona';
-import Role from '../service/to/role';
 import ChatSession from '../service/to/chat-session';
 import {toRaw} from 'vue';
-import OpenAiRenderer from '../renderer/openai.renderer';
-import ChatRenderer from '../renderer/chat.renderer';
+import ChatRenderer from "../renderer/chat.renderer";
+
+const chatRenderer = new ChatRenderer();
 
 export const useChatStore = defineStore('chat', {
   state: () => {
@@ -59,74 +58,9 @@ export const useChatStore = defineStore('chat', {
         chat: {configHeaderEnabled: false},
       });
     },
-    addToLastMessage(content: string) {
-      const lastMessage = this.session.processedMessages[this.session.processedMessages.length - 1];
-      lastMessage.content += content;
-    },
+
     async submitStreamPrompt(prompt: string) {
-      const openAiSerice = new OpenAiRenderer();
-      const chatRenderer = new ChatRenderer();
-
-      const previousMessages = chatRenderer.getPreviousMessages(this.session.system, this.session.messages,
-        this.session.processedMessages);
-
-      const userMessage = new ChatMessage(Role.USER, prompt);
-      this.session.messages.push(userMessage);
-
-      const submitMessages = [...previousMessages, userMessage];
-
-      // @ts-ignore
-      const response = await openAiSerice.chatCompletion(submitMessages, true);
-      const reader = response.body.getReader();
-
-      const processedMessage = new ChatMessage(Role.ASSISTANT, '');
-      this.session.processedMessages.push(processedMessage);
-
-      // @ts-ignore
-      let done = false;
-      let command = '';
-      let commandMode = false;
-
-      while (!done) {
-        const row = await reader.read();
-        const str = new TextDecoder().decode(row.value);
-        const parsed = chatRenderer.parseStreamResponse(str);
-
-        const contentArray = parsed.filter(e => e.type === 'content').map(e => e.value);
-
-        for (let value of contentArray) {
-          console.log('COMMAND MODE', commandMode);
-          if (value) {
-
-            if (value === '``') {
-              if (commandMode) {
-                console.log('TURN COMMAND MODE OFF');
-                commandMode = false;
-                console.log('COMMAND FOUND: ', command);
-              } else {
-                console.log('TURN COMMAND MODE ON');
-                commandMode = true;
-                command = '';
-              }
-            }
-
-            if (commandMode) {
-              command += value;
-              console.log('CUR COMMAND VALUE', command);
-            } else {
-              value = value.replace('\\n\\n', '<p/>');
-
-              console.log('CUR VALUE', value);
-              this.addToLastMessage(value);
-            }
-
-          }
-        }
-
-        done = row.done;
-      }
-      console.log('Stream complete');
-
+      return await chatRenderer.submit(prompt, this.session);
     },
     changePersona(personaName: string) {
       const persona = PERSONA.find(p => p.name === personaName);

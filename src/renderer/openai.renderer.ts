@@ -1,8 +1,13 @@
 import ChatMessage from '../service/to/chat-message';
+import {Config} from "../service/config.service";
+
 
 const openAIUrl = 'https://api.openai.com/v1/completions';
 const openAIChatUrl = 'https://api.openai.com/v1/chat/completions';
 const openAIImageUrl = 'https://api.openai.com/v1/images/generations';
+const mockOpenAIUrl = '/v1/completions';
+const mockOpenAIChatUrl = '/v1/chat/completions';
+const mockOpenAIImageUrl = '/v1/images/generations';
 
 enum OpenAiModel {
   chatGpt35Turbo = 'gpt-3.5-turbo',
@@ -16,9 +21,16 @@ enum OpenAiModel {
  * @class OpenAiService
  */
 class OpenAiRenderer {
+  config: Config;
+
+  constructor() {
+    // @ts-ignore
+    this.config = window.configAPI.getConfig();
+  }
 
   async chatCompletion(messages: Array<ChatMessage>, stream = false) {
-    return this.callOpenAiChatApi(openAIChatUrl, messages, stream);
+    const url = this.config.openai.testMode ? this.config.openai.mockServerUrl + mockOpenAIChatUrl : openAIChatUrl;
+    return this.callOpenAiChatApi(url, messages, stream);
   }
 
   async callOpenAiChatApi(url: string, messages: Array<ChatMessage>, stream = false) {
@@ -119,8 +131,9 @@ class OpenAiRenderer {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        //'x-api-key': postmanApiKey,
-        'Authorization': `Bearer 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`,
+        'x-api-key': this.config.openai.postmanApiKey,
+        'x-mock-response-id': this.config.openai.chatApiResponseId,
+        'Authorization': `Bearer ${this.config.openai.openAIApiKey}`,
       },
       body: JSON.stringify(requestBody),
     };
