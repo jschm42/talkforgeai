@@ -18,6 +18,7 @@ class ChatRenderer {
 
     const userMessage = new ChatMessage(Role.USER, prompt);
     session.messages.push(userMessage);
+    session.processedMessages.push(userMessage);
 
     const submitMessages = [...previousMessages, userMessage];
 
@@ -39,6 +40,16 @@ class ChatRenderer {
 
     let messageContent = '';
 
+    let regExCommandStart = /```[a-z]*\\n$/;
+
+    /**
+     * Variants:
+     * ```java\n - Start of code block with language type
+     * ```\n - Start of code block without language type
+     *
+     * ```\n\n - End of code block with language type
+     */
+
     while (!done) {
       const row = await reader.read();
       const str = new TextDecoder().decode(row.value);
@@ -55,19 +66,15 @@ class ChatRenderer {
 
           if (commandMode) {
             command += value;
-            this.appendOrReplaceTagInMessage(value, command, '<pre>', '</pre>',
-              session);
-            /*
+            this.appendOrReplaceTagInMessage(value, command, '<pre>', '</pre>', session);
           } else if (wordMode) {
             word += value;
-            this.appendOrReplaceTagInMessage(value, word, `<span class='code-word'>`, '</span>', session);
-
-             */
+            this.appendOrReplaceTagInMessage(value, word, `<code>`, '</code>', session);
           } else {
             this.addToLastMessage(value, session);
           }
 
-          if (value === '``') {
+          if (messageContent.match(regExCommandStart)) {
             if (commandMode) {
               console.log('TURN COMMAND MODE OFF');
               commandMode = false;
@@ -78,6 +85,7 @@ class ChatRenderer {
               commandMode = true;
               command = '';
             }
+            /*
           } else if (value.endsWith('`')) {
             if (wordMode) {
               console.log('TURN WORD MODE OFF');
@@ -87,6 +95,8 @@ class ChatRenderer {
               console.log('TURN WORD MODE ON');
               wordMode = true;
             }
+
+             */
           }
 
         }
@@ -109,8 +119,9 @@ class ChatRenderer {
   }
 
   addToLastMessage(content: string, session: ChatSession) {
-    content = content.replace('\\n\\n', '<p/>').replace('\\n', '<br />').replace(/`/g, '');
-
+    content = content.replace(/\\n\\n/g, '\n\n');
+    content = content.replace(/\\n/g, '\n');
+    content = content.replace(/\\/g, '\"');
     const lastProcessedMessage = session.processedMessages[session.processedMessages.length - 1];
     lastProcessedMessage.content += content;
 
@@ -133,12 +144,16 @@ class ChatRenderer {
   }
 
   appendOrReplaceTagInMessage(value: string, buffer: string, startTag: string, endTag: string, session: ChatSession) {
-    buffer = buffer.replace(/\\n\\n/g, '\n\n').replace(/\\n/g, '\n').replace(/`/g, '');
+    buffer = buffer.replace(/\\n\\n/g, '\n\n');
+    buffer = buffer.replace(/\\n/g, '\n');
+    buffer = buffer.replace(/`/g, '');
+    buffer = buffer.replace(/\\/g, '\"');
 
     const lastProcessedMessage = session.processedMessages[session.processedMessages.length - 1];
 
     if (lastProcessedMessage.content.endsWith(endTag)) {
       // Find the <pre> tag and extract its contents
+      //console.log('LAST PROCESSED MSG', lastProcessedMessage.content);
       const preTagStart = lastProcessedMessage.content.lastIndexOf(startTag);
       const preTagEnd = lastProcessedMessage.content.lastIndexOf(endTag);
       //const preTagContent = lastProcessedMessage.content.slice(preTagStart + 5, preTagEnd);
@@ -146,12 +161,12 @@ class ChatRenderer {
       // Append the new text to the <pre> contents
       //let newPreTagContent = preTagContent + value;
 
-      console.log('BUFFER', buffer);
+      //console.log('BUFFER', buffer);
       const processed = hljs.highlightAuto(buffer).value;
-      console.log('PROCESSED', processed);
+      //console.log('PROCESSED', processed);
 
       // Replace the old <pre> contents with the new one
-      lastProcessedMessage.content = lastProcessedMessage.content.slice(0, preTagStart + 5) + processed +
+      lastProcessedMessage.content = lastProcessedMessage.content.slice(0, preTagStart + startTag.length) + processed +
         lastProcessedMessage.content.slice(preTagEnd);
 
     } else {
