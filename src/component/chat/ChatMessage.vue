@@ -127,13 +127,6 @@ export default {
   font-size: 1.0em;
 }
 
-pre {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 0.25rem;
-  padding: 1rem;
-}
-
 .code-word {
   background-color: #f8f9fa;
   border: 1px solid #e9ecef;

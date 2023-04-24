@@ -3,6 +3,7 @@ import Role from '../service/to/role';
 import OpenAiRenderer from './openai.renderer';
 import ChatSession from '../service/to/chat-session';
 import {toRaw} from 'vue';
+import hljs from 'highlight.js';
 
 const regex = /"delta":\s*{"(role|content)":"([^"]+)"/;
 
@@ -48,56 +49,59 @@ class ChatRenderer {
       for (let value of contentArray) {
         console.log('COMMAND MODE', commandMode);
         if (value) {
+          messageContent += value;
 
-          /*
           console.log('CUR VALUE', value);
+
+          if (commandMode) {
+            command += value;
+            this.appendOrReplaceTagInMessage(value, command, '<pre>', '</pre>',
+              session);
+            /*
+          } else if (wordMode) {
+            word += value;
+            this.appendOrReplaceTagInMessage(value, word, `<span class='code-word'>`, '</span>', session);
+
+             */
+          } else {
+            this.addToLastMessage(value, session);
+          }
+
           if (value === '``') {
             if (commandMode) {
               console.log('TURN COMMAND MODE OFF');
               commandMode = false;
-              command = command.replace('`', '');
-              console.log('COMMAND FOUND: ', command);
-              value = '</pre>';
+              //command = command.replace('`', '');
+              //console.log('COMMAND FOUND: ', command);
             } else {
               console.log('TURN COMMAND MODE ON');
               commandMode = true;
               command = '';
-              value = '<pre>';
             }
           } else if (value.endsWith('`')) {
             if (wordMode) {
               console.log('TURN WORD MODE OFF');
               wordMode = false;
-              word = word.replace('`', '');
-              console.log('WORD FOUND: ', command);
-              value = value.substring(0, value.length - 1) + '</span>';
+              word = '';
             } else {
               console.log('TURN WORD MODE ON');
               wordMode = true;
-              word = '';
-              value = '<span class="code-word">';
             }
           }
-
-           */
-
-          //value = value.replace('\\n\\n', '<p/>');
-
-          messageContent += value;
-          this.addToLastMessage(value, session);
 
         }
       }
 
       done = row.done;
+
     }
     console.log('Stream complete');
 
     session.messages.push(new ChatMessage(Role.ASSISTANT, messageContent));
 
     // @ts-ignore
-    const transformed = await window.chatAPI.process(processedMessage);
-    this.updateLastProcessedMessage(transformed.content, session);
+    //const transformed = await window.chatAPI.process(processedMessage);
+    //this.updateLastProcessedMessage(transformed.content, session);
   }
 
   getLastMessage(session: ChatSession) {
@@ -105,11 +109,55 @@ class ChatRenderer {
   }
 
   addToLastMessage(content: string, session: ChatSession) {
+    content = content.replace('\\n\\n', '<p/>').replace('\\n', '<br />').replace(/`/g, '');
+
     const lastProcessedMessage = session.processedMessages[session.processedMessages.length - 1];
     lastProcessedMessage.content += content;
 
     const lastMessage = session.messages[session.messages.length - 1];
     lastMessage.content += content;
+  }
+
+  highlightLastTagInMessage(startTag: string, endTag: string, session: ChatSession) {
+    const lastProcessedMessage = session.processedMessages[session.processedMessages.length - 1];
+    // Find the <pre> tag and extract its contents
+    const preTagStart = lastProcessedMessage.content.lastIndexOf(startTag);
+    const preTagEnd = lastProcessedMessage.content.lastIndexOf(endTag);
+    const preTagContent = lastProcessedMessage.content.slice(preTagStart + 5, preTagEnd);
+
+    // Append the new text to the <pre> contents
+    const newPreTagContent = hljs.highlightAuto(preTagContent).value;
+    // Replace the old <pre> contents with the new one
+    lastProcessedMessage.content = lastProcessedMessage.content.slice(0, preTagStart + 5) + newPreTagContent +
+      lastProcessedMessage.content.slice(preTagEnd);
+  }
+
+  appendOrReplaceTagInMessage(value: string, buffer: string, startTag: string, endTag: string, session: ChatSession) {
+    buffer = buffer.replace(/\\n\\n/g, '\n\n').replace(/\\n/g, '\n').replace(/`/g, '');
+
+    const lastProcessedMessage = session.processedMessages[session.processedMessages.length - 1];
+
+    if (lastProcessedMessage.content.endsWith(endTag)) {
+      // Find the <pre> tag and extract its contents
+      const preTagStart = lastProcessedMessage.content.lastIndexOf(startTag);
+      const preTagEnd = lastProcessedMessage.content.lastIndexOf(endTag);
+      //const preTagContent = lastProcessedMessage.content.slice(preTagStart + 5, preTagEnd);
+
+      // Append the new text to the <pre> contents
+      //let newPreTagContent = preTagContent + value;
+
+      console.log('BUFFER', buffer);
+      const processed = hljs.highlightAuto(buffer).value;
+      console.log('PROCESSED', processed);
+
+      // Replace the old <pre> contents with the new one
+      lastProcessedMessage.content = lastProcessedMessage.content.slice(0, preTagStart + 5) + processed +
+        lastProcessedMessage.content.slice(preTagEnd);
+
+    } else {
+      const processed = hljs.highlightAuto(buffer).value;
+      lastProcessedMessage.content += `${startTag}${processed}${endTag}`;
+    }
   }
 
   updateLastProcessedMessage(content: string, session: ChatSession) {
