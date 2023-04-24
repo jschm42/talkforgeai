@@ -41,6 +41,7 @@ class ChatRenderer {
     let messageContent = '';
 
     let regExCommandStart = /```[a-z]*\\n$/;
+    let regExCommandEnd = /```\\n\\n$/;
 
     /**
      * Variants:
@@ -75,29 +76,33 @@ class ChatRenderer {
           }
 
           if (messageContent.match(regExCommandStart)) {
-            if (commandMode) {
-              console.log('TURN COMMAND MODE OFF');
-              commandMode = false;
-              //command = command.replace('`', '');
-              //console.log('COMMAND FOUND: ', command);
-            } else {
-              console.log('TURN COMMAND MODE ON');
-              commandMode = true;
-              command = '';
-            }
-            /*
-          } else if (value.endsWith('`')) {
-            if (wordMode) {
-              console.log('TURN WORD MODE OFF');
-              wordMode = false;
-              word = '';
-            } else {
-              console.log('TURN WORD MODE ON');
-              wordMode = true;
-            }
-
-             */
+            console.log('TURN COMMAND MODE ON');
+            commandMode = true;
+            command = '';
+          } else if (messageContent.match(regExCommandEnd)) {
+            console.log('TURN COMMAND MODE OFF');
+            commandMode = false;
+          } else if (messageContent.endsWith(' `')) {
+            console.log('TURN WORD MODE ON');
+            wordMode = true;
+          } else if (wordMode && messageContent.endsWith('`')) {
+            console.log('TURN WORD MODE OFF');
+            wordMode = false;
+            word = '';
           }
+
+          /*
+        } else if (value.endsWith('`')) {
+          if (wordMode) {
+            console.log('TURN WORD MODE OFF');
+            wordMode = false;
+            word = '';
+          } else {
+            console.log('TURN WORD MODE ON');
+            wordMode = true;
+          }
+
+           */
 
         }
       }
@@ -122,6 +127,7 @@ class ChatRenderer {
     content = content.replace(/\\n\\n/g, '\n\n');
     content = content.replace(/\\n/g, '\n');
     content = content.replace(/\\/g, '\"');
+    content = content.replace(/`/g, '');
     const lastProcessedMessage = session.processedMessages[session.processedMessages.length - 1];
     lastProcessedMessage.content += content;
 
