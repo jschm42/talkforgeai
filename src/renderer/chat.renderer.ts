@@ -51,9 +51,12 @@ class ChatRenderer {
      * ```\n\n - End of code block with language type
      */
 
+    const decoder = new TextDecoder();
+
     while (!done) {
       const row = await reader.read();
-      const str = new TextDecoder().decode(row.value);
+      const str = decoder.decode(row.value, {stream: true});
+      console.log('PARSED', str);
       const parsed = this.parseStreamResponse(str);
 
       const contentArray = parsed.filter(e => e.type === 'content').map(e => e.value);
@@ -208,6 +211,8 @@ class ChatRenderer {
   }
 
   parseStreamResponse(str: string) {
+    // FIXME Wird nicht korrekt geparsed. Siehe Screenshot in OneNote!!!
+    
     return str.split('\n\n').filter(e => e.length > 0).map(e => regex.exec(e)).map(p => {
       if (p === null) return {};
       return {
