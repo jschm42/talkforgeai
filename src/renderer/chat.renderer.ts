@@ -59,7 +59,6 @@ class ChatRenderer {
       const contentArray = parsed.filter(e => e.type === 'content').map(e => e.value);
 
       for (let value of contentArray) {
-        console.log('COMMAND MODE', commandMode);
         if (value) {
           messageContent += value;
 
@@ -153,6 +152,7 @@ class ChatRenderer {
     buffer = buffer.replace(/\\n\\n/g, '\n\n');
     buffer = buffer.replace(/\\n/g, '\n');
     buffer = buffer.replace(/`/g, '');
+    buffer = buffer.replace(/\\t/g, '\t');
     buffer = buffer.replace(/\\/g, '\"');
 
     const lastProcessedMessage = session.processedMessages[session.processedMessages.length - 1];
