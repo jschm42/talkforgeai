@@ -3,10 +3,10 @@ import IndexEntry from '../service/to/index-entry';
 import {PERSONA} from '../service/to/persona';
 import ChatSession from '../service/to/chat-session';
 import {toRaw} from 'vue';
-import ChatRenderer from '../renderer/chat.renderer';
+import ChatRendererOptimized from '../renderer/char.renderer.optimized';
 
 //const chatRenderer = new ChatRenderer();
-const chatRenderer = new ChatRenderer();
+const chatRenderer = new ChatRendererOptimized();
 
 export const useChatStore = defineStore('chat', {
   state: () => {

@@ -6,7 +6,7 @@ import hljs from 'highlight.js';
 
 const regex = /"delta":\s*{"(role|content)":"([^"]+)"/;
 
-const regExOptimized = /{"(content|role)":(.*?)}/;
+const regExOptimized = /{"(content|role)":(.*?)},/;
 
 class ChatRendererOptimized {
   openAiService = new OpenAiRenderer();
@@ -37,14 +37,16 @@ class ChatRendererOptimized {
     while (!done) {
       const row = await reader.read();
       const str = decoder.decode(row.value, {stream: true});
-      console.log('PARSED', str);
       const parsed = this.parseStreamResponse(str);
-      const contentArray = parsed.filter(e => e.type === 'content').map(e => e.value);
+      const contentArray = parsed.filter((e: any) => e.type === 'content').map(e => e.value);
 
       for (let value of contentArray) {
+        console.log('VALUE', value);
         if (value) {
           messageContent += value;
+
           this.handleMessageContent(value, messageContent, session);
+
         }
       }
 
@@ -74,20 +76,33 @@ class ChatRendererOptimized {
       regExEnd: /`$/,
     };
 
-    if (messageContent.match(commandConfig.regExStart)) {
-      this.toggleMode(commandConfig, true, session);
-    } else if (messageContent.match(commandConfig.regExEnd)) {
-      this.toggleMode(commandConfig, false, session);
-    } else if (messageContent.match(wordConfig.regExStart)) {
-      this.toggleMode(wordConfig, true, session);
-    } else if (messageContent.match(wordConfig.regExEnd)) {
-      this.toggleMode(wordConfig, false, session);
+    if (this.commandMode) {
+      this.commandBuffer += value;
+      // @ts-ignore
+      this.appendOrReplaceTagInMessage(this.commandBuffer, commandConfig.startTag, commandConfig.endTag, session);
+    } else if (this.wordMode) {
+      this.wordBuffer += value;
+      this.appendOrReplaceTagInMessage(this.wordBuffer, wordConfig.startTag, wordConfig.endTag, session);
     } else {
       this.addToLastMessage(value, session);
+    }
+
+    if (messageContent.match(commandConfig.regExStart)) {
+      this.commandMode = true;
+      this.commandBuffer = '';
+    } else if (messageContent.match(commandConfig.regExEnd)) {
+      this.commandMode = false;
+    } else if (messageContent.match(wordConfig.regExStart)) {
+      this.wordMode = true;
+      this.wordBuffer = '';
+    } else if (messageContent.match(wordConfig.regExEnd)) {
+      this.wordMode = false;
     }
   }
 
   toggleMode(config: any, isOn: boolean, session: ChatSession) {
+    console.log('TOGGLE MODE', config.mode, isOn, config.buffer);
+
     const {mode, buffer, startTag, endTag} = config;
 
     // @ts-ignore
@@ -127,7 +142,7 @@ class ChatRendererOptimized {
   }
 
   addToLastMessage(content: string, session: ChatSession) {
-    content = content.replace(/\n\n/g, '\n\n').replace(/\n/g, '\n').replace(/\\/g, '"').replace(/`/g, '');
+    content = content.replace(/\\n\\n/g, '\n\n').replace(/\\n/g, '\n').replace(/`/g, '');
 
     const lastProcessedMessage = session.processedMessages.slice(-1)[0];
     const lastMessage = session.messages.slice(-1)[0];
@@ -138,10 +153,10 @@ class ChatRendererOptimized {
 
   appendOrReplaceTagInMessage(buffer: string, startTag: string, endTag: string, session: ChatSession) {
     buffer = buffer.replace(/\n\n/g, '\n\n').
-      replace(/\n/g, '\n').
+      replace(/\\n/g, '\n').
       replace(/`/g, '').
-      replace(/\t/g, '\t').
-      replace(/\\/g, '"');
+      replace(/\\t/g, '\t');
+    //replace(/\\/g, '"');
 
     const lastProcessedMessage = session.processedMessages.slice(-1)[0];
 
@@ -167,11 +182,15 @@ class ChatRendererOptimized {
       if (p === null) return {};
 
       // Fix for \\"
-      p[2] = p[2].replace(/\\"/, '"');
+      //p[2] = p[2].replace(/\\"/, '"');
 
-      return {
-        type: this.removeFirstAndLastQuotes(p[1]), value: this.removeFirstAndLastQuotes(p[2]),
-      };
+      //console.log('RAW', p);
+
+      const result = {type: this.removeFirstAndLastQuotes(p[1]), value: this.removeFirstAndLastQuotes(p[2])};
+
+      console.log('PARSED', result.value);
+
+      return result;
     });
   }
 
