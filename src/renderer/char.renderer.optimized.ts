@@ -26,8 +26,7 @@ class ChatRendererOptimized {
     const response = await this.openAiService.chatCompletion(submitMessages, true);
     const reader = response.body.getReader();
 
-    const processedMessage = this.addMessageToSession('', Role.ASSISTANT, session, true);
-    // const message = this.addMessageToSession('', Role.ASSISTANT, session);
+    this.addMessageToSession('', Role.ASSISTANT, session, true);
 
     await this.processReader(reader, session);
 
@@ -138,6 +137,7 @@ class ChatRendererOptimized {
   }
 
   addMessageToSession(content: string, role: Role, session: ChatSession, isProcessed = false) {
+    console.log("ADD MSG TO SESSION", content, role, isProcessed);
     const message = new ChatMessage(role, content);
     if (isProcessed) {
       session.processedMessages.push(message);
@@ -154,7 +154,6 @@ class ChatRendererOptimized {
     const lastMessage = session.messages.slice(-1)[0];
 
     lastProcessedMessage.content += content;
-    lastMessage.content += content;
   }
 
   appendOrReplaceTagInMessage(buffer: string, startTag: string, endTag: string, session: ChatSession) {
@@ -187,11 +186,11 @@ class ChatRendererOptimized {
       // Fix for \\"
       p[2] = p[2].replace(/\\"/, '"');
 
-      console.log('RAW', p);
+      //console.log('RAW', p);
 
       const result = {type: this.removeFirstAndLastQuotes(p[1]), value: this.removeFirstAndLastQuotes(p[2])};
 
-      console.log('PARSED', result.value);
+      //console.log('PARSED', result.value);
 
       return result;
     });
