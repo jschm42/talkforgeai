@@ -61,6 +61,8 @@ export const useChatStore = defineStore('chat', {
     },
 
     async submitStreamPrompt(prompt: string) {
+      this.addIndexEntry(new IndexEntry(this.session.sessionId, prompt, "Description", new Date()));
+      this.saveIndex();
       return await chatRenderer.submit(prompt, this.session);
     },
     changePersona(personaName: string) {

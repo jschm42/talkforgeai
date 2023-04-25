@@ -17,6 +17,7 @@ const chatService = new ChatService();
 const elevenlabsService = new ElevenlabsService();
 const configService = new ConfigService();
 const assistantMessageProcessor = new AsssistantMessageProcessor();
+const userMessageProcessor = new AsssistantMessageProcessor();
 
 declare global {
   interface Window {
@@ -27,8 +28,11 @@ declare global {
 }
 
 contextBridge.exposeInMainWorld('chatAPI', {
-  process: async (message: ChatMessage) => {
+  processAssistantMessage: async (message: ChatMessage) => {
     return assistantMessageProcessor.process(message);
+  },
+  processUserMessage: async (message: ChatMessage) => {
+    return userMessageProcessor.process(message);
   },
   loadChatSession: (chatSessionId: string) => {
     return chatService.readFromFile(chatSessionId);

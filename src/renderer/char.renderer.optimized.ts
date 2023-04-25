@@ -18,15 +18,19 @@ class ChatRendererOptimized {
 
   async submit(prompt: string, session: ChatSession) {
     const previousMessages = this.getPreviousMessages(session);
-    const userMessage = this.addMessageToSession(prompt, Role.USER, session);
-    this.addMessageToSession(prompt, Role.USER, session, true);
+
+    const userMessage = new ChatMessage(Role.USER, prompt);
+    session.messages.push(userMessage);
+    // @ts-ignore
+    const processedUserMessage = await window.chatAPI.processUserMessage(userMessage);
+    session.processedMessages.push(processedUserMessage);
 
     const submitMessages = [...previousMessages, userMessage];
 
     const response = await this.openAiService.chatCompletion(submitMessages, true);
     const reader = response.body.getReader();
 
-    this.addMessageToSession('', Role.ASSISTANT, session, true);
+    session.processedMessages.push(new ChatMessage(Role.ASSISTANT, ''));
 
     await this.processReader(reader, session);
 
@@ -134,17 +138,6 @@ class ChatRendererOptimized {
       }
     });
     return previousMessages;
-  }
-
-  addMessageToSession(content: string, role: Role, session: ChatSession, isProcessed = false) {
-    console.log("ADD MSG TO SESSION", content, role, isProcessed);
-    const message = new ChatMessage(role, content);
-    if (isProcessed) {
-      session.processedMessages.push(message);
-    } else {
-      session.messages.push(message);
-    }
-    return message;
   }
 
   addToLastMessage(content: string, session: ChatSession) {
