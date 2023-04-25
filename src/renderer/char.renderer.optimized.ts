@@ -185,9 +185,9 @@ class ChatRendererOptimized {
       if (p === null) return {};
 
       // Fix for \\"
-      //p[2] = p[2].replace(/\\"/, '"');
+      p[2] = p[2].replace(/\\"/, '"');
 
-      //console.log('RAW', p);
+      console.log('RAW', p);
 
       const result = {type: this.removeFirstAndLastQuotes(p[1]), value: this.removeFirstAndLastQuotes(p[2])};
 
@@ -198,8 +198,11 @@ class ChatRendererOptimized {
   }
 
   removeFirstAndLastQuotes(str: string): string {
-    if (str.length >= 2 && str.startsWith('"') && str.endsWith('"')) {
-      return str.slice(1, -1);
+    if (str.startsWith('"')) {
+      str = str.slice(1);
+    }
+    if (str.endsWith('"')) {
+      str = str.slice(0, -1);
     }
     return str;
   }
