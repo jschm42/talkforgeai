@@ -3,6 +3,7 @@ import Role from '../service/to/role';
 import OpenAiRenderer from './openai.renderer';
 import ChatSession from '../service/to/chat-session';
 import hljs from 'highlight.js';
+import {toRaw} from 'vue';
 
 const regex = /"delta":\s*{"(role|content)":"([^"]+)"/;
 
@@ -18,15 +19,20 @@ class ChatRendererOptimized {
   async submit(prompt: string, session: ChatSession) {
     const previousMessages = this.getPreviousMessages(session);
     const userMessage = this.addMessageToSession(prompt, Role.USER, session);
+    this.addMessageToSession(prompt, Role.USER, session, true);
+
     const submitMessages = [...previousMessages, userMessage];
 
     const response = await this.openAiService.chatCompletion(submitMessages, true);
     const reader = response.body.getReader();
 
     const processedMessage = this.addMessageToSession('', Role.ASSISTANT, session, true);
-    const message = this.addMessageToSession('', Role.ASSISTANT, session);
+    // const message = this.addMessageToSession('', Role.ASSISTANT, session);
 
     await this.processReader(reader, session);
+
+    // @ts-ignore
+    window.chatAPI.writeChatSession(toRaw(session));
   }
 
   processReader = async (reader: any, session: ChatSession) => {
@@ -40,7 +46,7 @@ class ChatRendererOptimized {
       const parsed = this.parseStreamResponse(str);
       const contentArray = parsed.filter((e: any) => e.type === 'content').map((e: any) => e.value);
 
-      for (let value of contentArray) {
+      for (const value of contentArray) {
         console.log('VALUE', value);
         if (value) {
           messageContent += value;
@@ -152,10 +158,7 @@ class ChatRendererOptimized {
   }
 
   appendOrReplaceTagInMessage(buffer: string, startTag: string, endTag: string, session: ChatSession) {
-    buffer = buffer.replace(/\n\n/g, '\n\n').
-      replace(/\\n/g, '\n').
-      replace(/`/g, '').
-      replace(/\\t/g, '\t');
+    buffer = buffer.replace(/\n\n/g, '\n\n').replace(/\\n/g, '\n').replace(/`/g, '').replace(/\\t/g, '\t');
     //replace(/\\/g, '"');
 
     const lastProcessedMessage = session.processedMessages.slice(-1)[0];
