@@ -6,6 +6,7 @@ import {toRaw} from 'vue';
 import hljs from 'highlight.js';
 
 const regex = /"delta":\s*{"(role|content)":"([^"]+)"/;
+const regExOptimized = /{"(content|role)":(.*?)},/;
 
 class ChatRenderer {
   async submit(prompt: string, session: ChatSession) {
@@ -56,7 +57,7 @@ class ChatRenderer {
     while (!done) {
       const row = await reader.read();
       const str = decoder.decode(row.value, {stream: true});
-      console.log('PARSED', str);
+      //console.log('PARSED', str);
       const parsed = this.parseStreamResponse(str);
 
       const contentArray = parsed.filter(e => e.type === 'content').map(e => e.value);
@@ -93,19 +94,6 @@ class ChatRenderer {
             word = '';
           }
 
-          /*
-        } else if (value.endsWith('`')) {
-          if (wordMode) {
-            console.log('TURN WORD MODE OFF');
-            wordMode = false;
-            word = '';
-          } else {
-            console.log('TURN WORD MODE ON');
-            wordMode = true;
-          }
-
-           */
-
         }
       }
 
@@ -116,9 +104,6 @@ class ChatRenderer {
 
     session.messages.push(new ChatMessage(Role.ASSISTANT, messageContent));
 
-    // @ts-ignore
-    //const transformed = await window.chatAPI.process(processedMessage);
-    //this.updateLastProcessedMessage(transformed.content, session);
   }
 
   getLastMessage(session: ChatSession) {
@@ -212,13 +197,25 @@ class ChatRenderer {
 
   parseStreamResponse(str: string) {
     // FIXME Wird nicht korrekt geparsed. Siehe Screenshot in OneNote!!!
-    
-    return str.split('\n\n').filter(e => e.length > 0).map(e => regex.exec(e)).map(p => {
+
+    return str.split('\n\n').filter(e => e.length > 0).map(e => regExOptimized.exec(e)).map(p => {
       if (p === null) return {};
-      return {
-        type: p[1], value: p[2],
-      };
+
+      p[2] = p[2].replace(/\\"/, '"');
+
+      const result = {type: this.removeFirstAndLastQuotes(p[1]), value: this.removeFirstAndLastQuotes(p[2])};
+
+      console.log('RESULT', p, result);
+
+      return result;
     });
+  }
+
+  removeFirstAndLastQuotes(str: string): string {
+    if (str.length >= 2 && str.startsWith('"') && str.endsWith('"')) {
+      return str.slice(1, -1);
+    }
+    return str;
   }
 }
 
