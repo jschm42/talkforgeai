@@ -38,7 +38,7 @@ class ChatRendererOptimized {
       const row = await reader.read();
       const str = decoder.decode(row.value, {stream: true});
       const parsed = this.parseStreamResponse(str);
-      const contentArray = parsed.filter((e: any) => e.type === 'content').map(e => e.value);
+      const contentArray = parsed.filter((e: any) => e.type === 'content').map((e: any) => e.value);
 
       for (let value of contentArray) {
         console.log('VALUE', value);
