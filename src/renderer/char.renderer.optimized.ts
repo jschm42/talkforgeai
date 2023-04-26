@@ -17,6 +17,7 @@ class ChatRendererOptimized {
   wordBuffer = '';
 
   async submit(prompt: string, session: ChatSession) {
+
     const previousMessages = this.getPreviousMessages(session);
 
     const userMessage = new ChatMessage(Role.USER, prompt);
@@ -25,7 +26,7 @@ class ChatRendererOptimized {
     const processedUserMessage = await window.chatAPI.processUserMessage(userMessage);
     session.processedMessages.push(processedUserMessage);
 
-    const submitMessages = [...previousMessages, userMessage];
+    const submitMessages = [...session.systemMessages, ...previousMessages, userMessage];
 
     const response = await this.openAiService.chatCompletion(submitMessages, true);
     const reader = response.body.getReader();
@@ -129,7 +130,7 @@ class ChatRendererOptimized {
   }
 
   getPreviousMessages(session: ChatSession) {
-    const previousMessages = [new ChatMessage(Role.SYSTEM, session.system)];
+    const previousMessages = [new ChatMessage(Role.SYSTEM, session.persona.system)];
     session.messages.forEach((message, i) => {
       if (message.role === Role.USER) {
         previousMessages.push(Object.assign({}, session.processedMessages[i]));

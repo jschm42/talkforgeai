@@ -4,7 +4,7 @@
             aria-label="Default select example"
             class="form-select"
             @change="changePersona">
-      <option v-for="(person, index) in persona" :key="index" :value="person.name">{{ person.name }} -
+      <option v-for="(person, index) in personaList" :key="index" :value="person.name">{{ person.name }} -
         {{ person.description }}
       </option>
     </select>
@@ -25,19 +25,18 @@ export default {
   },
   data() {
     return {
-      persona: this.store.persona,
+      selectedPersonaName: this.store.session.persona.name,
       selectedIndex: -1,
     };
   },
   mounted() {
-
   },
   computed: {
-    selectedPersonaName() {
-      return this.store.session.personaName;
-    },
     isDisabled() {
       return !this.store.chat.configHeaderEnabled;
+    },
+    personaList() {
+      return this.store.getPersonas();
     },
   },
   methods: {
@@ -45,7 +44,7 @@ export default {
       this.selectedIndex = $event.target.selectedIndex;
       console.log('EVENT', this.selectedIndex);
       if (this.selectedIndex > -1) {
-        this.store.changePersona(this.store.persona[this.selectedIndex].name);
+        this.store.changePersona(this.selectedPersonaName);
       }
     },
   },

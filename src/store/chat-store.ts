@@ -1,9 +1,9 @@
 import {defineStore} from 'pinia';
 import IndexEntry from '../service/to/index-entry';
-import {PERSONA} from '../service/to/persona';
 import ChatSession from '../service/to/chat-session';
 import {toRaw} from 'vue';
 import ChatRendererOptimized from '../renderer/char.renderer.optimized';
+import {DEFAULT_PERSONA} from '../service/to/persona';
 
 //const chatRenderer = new ChatRenderer();
 const chatRenderer = new ChatRendererOptimized();
@@ -18,7 +18,6 @@ export const useChatStore = defineStore('chat', {
       index: {
         entries: [] as Array<IndexEntry>,
       },
-      persona: PERSONA,
     };
   },
   actions: {
@@ -46,7 +45,8 @@ export const useChatStore = defineStore('chat', {
       console.log('Index saved', indexRaw);
     },
     addIndexEntry(entry: IndexEntry) {
-      this.index.entries.push(entry);
+      // Insert entry at the start of the index
+      this.index.entries.unshift(entry);
       this.saveIndex();
     },
     loadChatSession(sessionId: string) {
@@ -59,19 +59,28 @@ export const useChatStore = defineStore('chat', {
         chat: {configHeaderEnabled: false},
       });
     },
-
     async submitStreamPrompt(prompt: string) {
-      this.addIndexEntry(new IndexEntry(this.session.sessionId, prompt, "Description", new Date()));
-      this.saveIndex();
       return await chatRenderer.submit(prompt, this.session);
     },
+    setDefaultPersona() {
+      this.changePersona(DEFAULT_PERSONA.name);
+    },
     changePersona(personaName: string) {
-      const persona = PERSONA.find(p => p.name === personaName);
+
+      console.log('Changing persona to', personaName);
+      // @ts-ignore
+      const persona = window.personaAPI.getPersona(personaName);
       if (persona) {
-        this.session.personaName = personaName;
-        this.session.system = persona.system;
+        this.session.persona = persona;
         console.log('Persona changed', persona);
+
+        // @ts-ignore
+        this.session.systemMessages = window.personaAPI.getSystemMessagesForPersona(persona);
       }
+    },
+    getPersonas() {
+      // @ts-ignore
+      return window.personaAPI.getPersonas();
     },
   },
 

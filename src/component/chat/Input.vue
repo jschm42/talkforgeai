@@ -18,6 +18,7 @@
 <script>
 
 import {useChatStore} from '../../store/chat-store';
+import IndexEntry from '../../service/to/index-entry';
 
 export default {
   name: 'Input',
@@ -37,6 +38,11 @@ export default {
     async submit() {
       this.store.disableConfigHeader();
       this.isInputLocked = true;
+
+      const indexEntry = new IndexEntry(this.store.session.sessionId, this.prompt, 'Description', new Date());
+      this.store.addIndexEntry(indexEntry);
+      this.store.saveIndex();
+
       const result = await this.store.submitStreamPrompt(this.prompt);
 
       this.$emit('submitResultReceived');

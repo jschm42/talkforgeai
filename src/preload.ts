@@ -11,11 +11,14 @@ import ChatService from './service/chat.service';
 import ChatIndexService from './service/chat-index.service';
 import ElevenlabsService, {VOICES} from './service/elevenlabs.service';
 import ConfigService from './service/config.service';
+import PersonaService from './service/persona.service';
+import Persona from './service/to/persona';
 
 const indexService = new ChatIndexService();
 const chatService = new ChatService();
 const elevenlabsService = new ElevenlabsService();
 const configService = new ConfigService();
+const personaService = new PersonaService();
 const assistantMessageProcessor = new AsssistantMessageProcessor();
 const userMessageProcessor = new AsssistantMessageProcessor();
 
@@ -23,7 +26,8 @@ declare global {
   interface Window {
     chatIndexAPI?: unknown,
     chatAPI?: unknown,
-    configAPI?: unknown
+    configAPI?: unknown,
+    personaAPI?: unknown
   }
 }
 
@@ -59,4 +63,17 @@ contextBridge.exposeInMainWorld('configAPI', {
   getConfig: () => {
     return configService.getConfig();
   },
+});
+
+contextBridge.exposeInMainWorld('personaAPI', {
+  getPersona: (name: string) => {
+    return personaService.getPersonaByName(name);
+  },
+  getSystemMessagesForPersona: (persona: Persona) => {
+    return personaService.getSystemMessagesForPersona(persona);
+  },
+  getPersonas: () => {
+    return personaService.getPersonas();
+  },
+
 });

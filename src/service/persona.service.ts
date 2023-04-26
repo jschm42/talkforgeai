@@ -2,7 +2,9 @@ import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
 import {USER_DATA_DIRECTORY} from '../path-constants';
-import {PERSONA} from './to/persona';
+import Persona, {IMAGE_GENERATION_SYSTEM, PERSONA} from './to/persona';
+import ChatMessage from './to/chat-message';
+import Role from './to/role';
 
 class PersonaService {
 
@@ -22,6 +24,33 @@ class PersonaService {
       return PERSONA;
     }
 
+  }
+
+  /**
+   * Get persona by name
+   * @param name Persona name
+   * @return Persona
+   */
+  getPersonaByName(name: string): Persona | undefined {
+    return PERSONA.find(p => p.name === name);
+  }
+
+  getSystemMessagesForPersona(persona: Persona): Array<ChatMessage> {
+    const systemMessages: Array<ChatMessage> = [];
+
+    if (persona.withImagePromptSystem) {
+      //systemMessages.push(new ChatMessage(Role.SYSTEM, IMAGE_GENERATION_SYSTEM));
+    }
+
+    //systemMessages.push(new ChatMessage(Role.SYSTEM, persona.system));
+
+    systemMessages.push(new ChatMessage(Role.SYSTEM, IMAGE_GENERATION_SYSTEM));
+
+    return systemMessages;
+  }
+
+  getPersonas() {
+    return PERSONA;
   }
 }
 
