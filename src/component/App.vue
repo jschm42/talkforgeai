@@ -61,4 +61,15 @@ body, html {
   overflow-x: hidden;
 }
 
+
+image-prompt {
+  display: none;
+}
+
+image-prompt::before {
+  display: block;
+  content: "IMAGE: "
+}
+
+
 </style>

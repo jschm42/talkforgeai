@@ -35,7 +35,7 @@ class ChatRendererOptimized {
 
     await this.processReader(reader, session);
 
-    await this.postProcessLastMessage(session);
+    //await this.postProcessLastMessage(session);
 
     // @ts-ignore
     window.chatAPI.writeChatSession(toRaw(session));
