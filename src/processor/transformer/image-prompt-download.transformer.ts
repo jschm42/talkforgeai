@@ -6,6 +6,7 @@ import https from 'https';
 import MessageTransformer from './transformer';
 import OpenAiService from '../../service/openai.service';
 import {CHAT_DATA_DIRECTORY} from '../../path-constants';
+import IdentityUtil from '../../util/identity-util';
 
 const UrlRegEx = /<image-prompt>[\\n]?([\s\S]*?)[\\n]?<\/image-prompt>/gm;
 
@@ -32,16 +33,16 @@ class ImagePromptDownloadTransformer extends MessageTransformer {
       this.sendProgress('Processing images...');
 
       Promise.all(matchAll.map(
-          match => this.fetchAndDownloadImage(match[0], match[1]))).
-          then((result) => {
-            result.forEach(({fullTag, localFilePath}) => {
-              content = content.replace(fullTag,
-                  `<img src="${localFilePath}">`);
-            });
-
-            console.log('Resolved content', content);
-            resolve(content);
+        match => this.fetchAndDownloadImage(match[0], match[1]))).
+        then((result) => {
+          result.forEach(({fullTag, localFilePath}) => {
+            content = content.replace(fullTag,
+              `<img src="${localFilePath}">`);
           });
+
+          console.log('Resolved content', content);
+          resolve(content);
+        });
     });
   }
 
@@ -70,7 +71,7 @@ class ImagePromptDownloadTransformer extends MessageTransformer {
       const urlObj = url.parse(imageUrl);
       const fileName = IdentityUtil.generateUUID() + '.png';
       const subDirectoryPath = path.join(homeDirectory, CHAT_DATA_DIRECTORY,
-          'images');
+        'images');
       const localFilePath = path.join(subDirectoryPath, fileName);
 
       fs.mkdirSync(subDirectoryPath, {recursive: true});

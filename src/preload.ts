@@ -10,70 +10,35 @@ import AsssistantMessageProcessor from './processor/asssistant-message-processor
 import ChatService from './service/chat.service';
 import ChatIndexService from './service/chat-index.service';
 import ElevenlabsService, {VOICES} from './service/elevenlabs.service';
-import OpenAiService from './service/openai.service';
-import Role from './service/to/role';
-import * as util from 'util';
 import ConfigService from './service/config.service';
+import PersonaService from './service/persona.service';
+import Persona from './service/to/persona';
 
 const indexService = new ChatIndexService();
 const chatService = new ChatService();
 const elevenlabsService = new ElevenlabsService();
 const configService = new ConfigService();
+const personaService = new PersonaService();
 const assistantMessageProcessor = new AsssistantMessageProcessor();
+const userMessageProcessor = new AsssistantMessageProcessor();
 
 declare global {
   interface Window {
     chatIndexAPI?: unknown,
     chatAPI?: unknown,
-    configAPI?: unknown
+    configAPI?: unknown,
+    personaAPI?: unknown,
+    transformerAPI?: unknown
   }
 }
 
 contextBridge.exposeInMainWorld('chatAPI', {
-  process: async (message: ChatMessage) => {
+  processAssistantMessage: async (message: ChatMessage) => {
     return assistantMessageProcessor.process(message);
   },
-  submitPrompt: async (prompt: string, previousMessages: Array<ChatMessage>) => {
-    const newChatService = new ChatService();
-
-    const preProcessedUserMessage = await newChatService.preProcess(prompt);
-    console.log('Pre-processed', preProcessedUserMessage);
-
-    return newChatService.submit(preProcessedUserMessage, previousMessages);
+  processUserMessage: async (message: ChatMessage) => {
+    return userMessageProcessor.process(message);
   },
-  submitStreamTest: async () => {
-    const openAiService = new OpenAiService();
-
-    const delayTime = 10; // milliseconds
-    const maxResponseLength = 200;
-    const sleep = util.promisify(setTimeout);
-
-    const startTime = Date.now();
-
-    const messages = [
-      new ChatMessage(Role.USER, 'Tell a funny joke.'),
-    ];
-
-    console.log('Requesting stream...');
-    const response = await openAiService.chatCompletion(messages, true);
-
-    const reader = response.body.getReader();
-
-    // @ts-ignore
-    reader.read().then(function processText({done, value}) {
-      const str = new TextDecoder().decode(value);
-      console.log('VALUE', str);
-
-      if (done) {
-        console.log('Stream complete');
-        return;
-      }
-
-      return reader.read().then(processText);
-    });
-
-  },
-
   loadChatSession: (chatSessionId: string) => {
     return chatService.readFromFile(chatSessionId);
   },
@@ -98,5 +63,24 @@ contextBridge.exposeInMainWorld('chatIndexAPI', {
 contextBridge.exposeInMainWorld('configAPI', {
   getConfig: () => {
     return configService.getConfig();
+  },
+});
+
+contextBridge.exposeInMainWorld('personaAPI', {
+  getPersona: (name: string) => {
+    return personaService.getPersonaByName(name);
+  },
+  getSystemMessagesForPersona: (persona: Persona) => {
+    return personaService.getSystemMessagesForPersona(persona);
+  },
+  getPersonas: () => {
+    return personaService.getPersonas();
+  },
+
+});
+
+contextBridge.exposeInMainWorld('transformerAPI', {
+  processAssistantMessage: async (message: ChatMessage) => {
+    return await assistantMessageProcessor.process(message);
   },
 });
