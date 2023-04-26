@@ -27,7 +27,8 @@ declare global {
     chatIndexAPI?: unknown,
     chatAPI?: unknown,
     configAPI?: unknown,
-    personaAPI?: unknown
+    personaAPI?: unknown,
+    transformerAPI?: unknown
   }
 }
 
@@ -76,4 +77,10 @@ contextBridge.exposeInMainWorld('personaAPI', {
     return personaService.getPersonas();
   },
 
+});
+
+contextBridge.exposeInMainWorld('transformerAPI', {
+  processAssistantMessage: async (message: ChatMessage) => {
+    return await assistantMessageProcessor.process(message);
+  },
 });

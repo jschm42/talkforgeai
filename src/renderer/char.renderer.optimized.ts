@@ -35,6 +35,8 @@ class ChatRendererOptimized {
 
     await this.processReader(reader, session);
 
+    await this.postProcessLastMessage(session);
+
     // @ts-ignore
     window.chatAPI.writeChatSession(toRaw(session));
   }
@@ -51,12 +53,10 @@ class ChatRendererOptimized {
       const contentArray = parsed.filter((e: any) => e.type === 'content').map((e: any) => e.value);
 
       for (const value of contentArray) {
-        console.log('VALUE', value);
+        //console.log('VALUE', value);
         if (value) {
           messageContent += value;
-
           this.handleMessageContent(value, messageContent, session);
-
         }
       }
 
@@ -66,6 +66,15 @@ class ChatRendererOptimized {
     console.log('Stream complete');
     session.messages.push(new ChatMessage(Role.ASSISTANT, messageContent));
   };
+
+  async postProcessLastMessage(session: ChatSession) {
+    const lastProcessedMessage = session.processedMessages.slice(-1)[0];
+
+    // @ts-ignore
+    const processedMessage = await window.transformerAPI.processAssistantMessage(toRaw(lastProcessedMessage));
+
+    lastProcessedMessage.content = processedMessage.content;
+  }
 
   handleMessageContent(value: string, messageContent: string, session: ChatSession) {
     const commandConfig = {
