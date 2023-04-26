@@ -62,13 +62,34 @@ body, html {
 }
 
 
-image-prompt {
-  display: none;
+.prompt {
+  background-color: red;
+  width: 100px;
+  height: 10px;
+
 }
 
+
 image-prompt::before {
+  content: "Image Prompt";
+  position: absolute;
+  font-size: 14px;
+  font-weight: bold;
+  color: red;
+  left: 5px;
+}
+
+image-prompt {
+  background-color: beige;
+  border-color: black;
+  width: 110px;
+  height: 23px;
+  overflow: hidden;
+  color: beige;
   display: block;
-  content: "IMAGE: "
+  position: relative;
+  border-radius: 5px;
+  box-shadow: black;
 }
 
 
