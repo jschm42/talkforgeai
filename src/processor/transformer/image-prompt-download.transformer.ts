@@ -37,7 +37,7 @@ class ImagePromptDownloadTransformer extends MessageTransformer {
         then((result) => {
           result.forEach(({fullTag, localFilePath}) => {
             content = content.replace(fullTag,
-              `<img src="${localFilePath}">`);
+              `<img src="file://${localFilePath}">`);
           });
 
           console.log('Resolved content', content);

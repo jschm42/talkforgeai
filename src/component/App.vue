@@ -63,12 +63,38 @@ body, html {
 
 
 image-prompt {
-  display: none;
+  display: block;
+  width: 110px;
+  height: 23px;
+  background-color: #ddd;
+  border: 2px solid #aaa;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  color: #ddd;
+  box-shadow: 5px 3px 3px #aaa;
 }
 
 image-prompt::before {
-  display: block;
-  content: "IMAGE: "
+  content: "X";
+  /* --bs-spinner-width: 2rem; */
+  /* --bs-spinner-height: 2rem; */
+  /* --bs-spinner-vertical-align: -0.125em; */
+  --bs-spinner-animation-speed: 0.75s;
+  --bs-spinner-animation-name: spinner-grow;
+  display: inline-block;
+  /* width: var(--bs-spinner-width); */
+  /* height: var(--bs-spinner-height); */
+  vertical-align: var(--bs-spinner-vertical-align);
+  border-radius: 50%;
+  animation: var(--bs-spinner-animation-speed) linear infinite var(--bs-spinner-animation-name);
+  position: relative;
+  top: -3px;
+  left: 5px;
+  /* transform: translate(-50%, -50%); */
+  font-size: 14px;
+  font-weight: bold;
+  color: black;
 }
 
 

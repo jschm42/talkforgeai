@@ -15,9 +15,10 @@ class ChatRendererOptimized {
   wordMode = false;
   commandBuffer = '';
   wordBuffer = '';
+  imageMode = false;
+  imageBuffer = '';
 
   async submit(prompt: string, session: ChatSession) {
-
     const previousMessages = this.getPreviousMessages(session);
 
     const userMessage = new ChatMessage(Role.USER, prompt);
@@ -117,25 +118,7 @@ class ChatRendererOptimized {
     } else if (messageContent.match(wordConfig.regExEnd)) {
       this.wordMode = false;
     }
-  }
 
-  toggleMode(config: any, isOn: boolean, session: ChatSession) {
-    console.log('TOGGLE MODE', config.mode, isOn, config.buffer);
-
-    const {mode, buffer, startTag, endTag} = config;
-
-    // @ts-ignore
-    this[mode] = isOn;
-
-    if (isOn) {
-      // @ts-ignore
-      this[buffer] = '';
-    } else {
-      // @ts-ignore
-      this.appendOrReplaceTagInMessage(this[buffer], startTag, endTag, session);
-      // @ts-ignore
-      this[buffer] = '';
-    }
   }
 
   getPreviousMessages(session: ChatSession) {

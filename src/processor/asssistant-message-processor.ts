@@ -1,5 +1,5 @@
 import MessageProcessor from './message-processor';
-import ImagePromptTransformer from './transformer/image-prompt.transformer';
+import ImagePromptDownloadTransformer from './transformer/image-prompt-download.transformer';
 
 /**
  * @extends MessageProcessor
@@ -10,7 +10,7 @@ class AssistantMessageProcessor extends MessageProcessor {
     //this.addProcessor(new CodeBlockTransformer());
     //this.addProcessor(new CodeWordTransformer());
     //this.addProcessor(new EndOfLineTransformer());
-    this.addProcessor(new ImagePromptTransformer());
+    this.addProcessor(new ImagePromptDownloadTransformer());
   }
 }
 

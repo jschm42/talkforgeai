@@ -3,6 +3,7 @@
     <div class="row">
       <div class="col-md-1">
         <i :class="avatarImageClass" class="bi role-icon"></i>
+        <span class="spinner-grow" role="status"></span>
       </div>
       <div class="col-md-10">
         <div class="card-body">
