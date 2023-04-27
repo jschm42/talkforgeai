@@ -37,9 +37,26 @@ import 'highlight.js/styles/github.css';
 import {createApp} from 'vue';
 import App from './component/App.vue';
 import {useStore} from './store';
-import hljs from 'highlight.js/lib/core';
 
-hljs.highlightAll();
+class MyCustomElement extends HTMLElement {
+
+  constructor() {
+    super();
+
+    this.title = this.innerHTML;
+    // Your initialization code here
+
+    this.innerHTML = `Image Prompt`;
+
+    // Add a CSS class to the custom element
+    this.classList.add('image-prompt-element');
+
+  }
+
+  // Define your custom element's behavior here
+}
+
+customElements.define('image-prompt', MyCustomElement);
 
 const app = createApp(App);
 

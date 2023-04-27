@@ -61,7 +61,7 @@ body, html {
   overflow-x: hidden;
 }
 
-
+/*
 image-prompt {
   display: block;
   width: 110px;
@@ -77,24 +77,26 @@ image-prompt {
 
 image-prompt::before {
   content: "X";
-  /* --bs-spinner-width: 2rem; */
-  /* --bs-spinner-height: 2rem; */
-  /* --bs-spinner-vertical-align: -0.125em; */
   --bs-spinner-animation-speed: 0.75s;
   --bs-spinner-animation-name: spinner-grow;
   display: inline-block;
-  /* width: var(--bs-spinner-width); */
-  /* height: var(--bs-spinner-height); */
   vertical-align: var(--bs-spinner-vertical-align);
   border-radius: 50%;
   animation: var(--bs-spinner-animation-speed) linear infinite var(--bs-spinner-animation-name);
   position: relative;
   top: -3px;
   left: 5px;
-  /* transform: translate(-50%, -50%); */
   font-size: 14px;
   font-weight: bold;
   color: black;
+}
+
+ */
+
+.image-prompt-element {
+  background-color: red;
+  min-width: 100px;
+  min-height: 20px;
 }
 
 
