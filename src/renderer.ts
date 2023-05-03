@@ -56,7 +56,7 @@ class MyCustomElement extends HTMLElement {
   // Define your custom element's behavior here
 }
 
-//customElements.define('image-prompt', MyCustomElement);
+customElements.define('image-prompt', MyCustomElement);
 
 const app = createApp(App);
 

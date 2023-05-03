@@ -94,9 +94,13 @@ image-prompt::before {
  */
 
 .image-prompt-element {
-  background-color: red;
+  background-color: bisque;
+  border-color: black;
+  border-radius: 3px;
+  box-shadow: 4px 4px 2px 1px rgba(50, 50, 50, .2);
   min-width: 100px;
   min-height: 20px;
+  padding: 3px;
 }
 
 
