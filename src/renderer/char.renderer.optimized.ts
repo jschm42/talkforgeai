@@ -81,8 +81,8 @@ class ChatRendererOptimized {
     const commandConfig = {
       mode: 'commandMode',
       buffer: 'commandBuffer',
-      startTag: '<pre>',
-      endTag: '</pre>',
+      startTag: '<div class="code-block card shadow p-2 my-3"><div class="card-body"><pre>',
+      endTag: '</pre></div></div>',
       regExStart: /```[a-z]*\\n$/,
       regExEnd: /```\\n\\n$/,
     };

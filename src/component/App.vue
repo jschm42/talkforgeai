@@ -103,5 +103,4 @@ image-prompt::before {
   padding: 3px;
 }
 
-
 </style>
