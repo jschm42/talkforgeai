@@ -7,8 +7,19 @@ import MessageTransformer from './transformer';
 import OpenAiService from '../../service/openai.service';
 import {CHAT_DATA_DIRECTORY} from '../../path-constants';
 import IdentityUtil from '../../util/identity-util';
+import Mustache from 'mustache';
 
 const UrlRegEx = /<image-prompt>[\\n]?([\s\S]*?)[\\n]?<\/image-prompt>/gm;
+
+const imageTemplate = `
+<div class="card shadow">
+  <div class="card-body">
+    <!--<h5 class="card-title">Card title</h5>-->
+    <!--<h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>-->
+    <img src='{{localFilePath}}' title='{{prompt}}'>
+  </div>
+</div>
+`;
 
 /**
  * Does not work, because local file path is not accessible from the browser
@@ -26,19 +37,16 @@ class ImagePromptDownloadTransformer extends MessageTransformer {
 
   process() {
     return (content: string) => new Promise((resolve, reject) => {
-
-      console.log('Incoming content for image processing ', content);
-
       let matchAll = [...content.matchAll(UrlRegEx)];
 
-      this.sendProgress('Processing images...');
+      console.log('Processing images...', matchAll);
 
       Promise.all(matchAll.map(
         match => this.fetchAndDownloadImage(match[0], match[1]))).
         then((result) => {
-          result.forEach(({fullTag, localFilePath}) => {
-            content = content.replace(fullTag,
-              `<img src="file://${localFilePath}">`);
+          result.forEach(({fullTag, localFilePath, prompt}) => {
+            const parsedTemplate = Mustache.render(imageTemplate, {localFilePath, prompt});
+            content = content.replace(fullTag, parsedTemplate);
           });
 
           console.log('Resolved content', content);
@@ -62,7 +70,7 @@ class ImagePromptDownloadTransformer extends MessageTransformer {
     const localFilePath = await this.downloadImage(resultImageUrl);
     console.log('Local file path', localFilePath);
 
-    return {fullTag, localFilePath};
+    return {fullTag, localFilePath, prompt};
   }
 
   async downloadImage(imageUrl: string) {
