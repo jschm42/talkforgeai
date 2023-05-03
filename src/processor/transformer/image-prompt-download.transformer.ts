@@ -27,9 +27,10 @@ class ImagePromptDownloadTransformer extends MessageTransformer {
   process() {
     return (content: string) => new Promise((resolve, reject) => {
 
+      console.log('Incoming content for image processing ', content);
+
       let matchAll = [...content.matchAll(UrlRegEx)];
 
-      console.log('Processing images...', matchAll);
       this.sendProgress('Processing images...');
 
       Promise.all(matchAll.map(

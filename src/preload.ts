@@ -7,6 +7,7 @@ import IndexEntry from './service/to/index-entry';
 import ChatSession from './service/to/chat-session';
 
 import AsssistantMessageProcessor from './processor/asssistant-message-processor';
+import ImagePromptDownloadTransformer from './processor/transformer/image-prompt-download.transformer';
 import ChatService from './service/chat.service';
 import ChatIndexService from './service/chat-index.service';
 import ElevenlabsService, {VOICES} from './service/elevenlabs.service';
@@ -21,6 +22,7 @@ const configService = new ConfigService();
 const personaService = new PersonaService();
 const assistantMessageProcessor = new AsssistantMessageProcessor();
 const userMessageProcessor = new AsssistantMessageProcessor();
+const imagePromptDownloadTransformer = new ImagePromptDownloadTransformer();
 
 declare global {
   interface Window {
@@ -82,5 +84,9 @@ contextBridge.exposeInMainWorld('personaAPI', {
 contextBridge.exposeInMainWorld('transformerAPI', {
   processAssistantMessage: async (message: ChatMessage) => {
     return await assistantMessageProcessor.process(message);
+  },
+  transformImage: async (content: string) => {
+    const fn = imagePromptDownloadTransformer.process();
+    return await fn(content);
   },
 });

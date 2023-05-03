@@ -57,7 +57,7 @@ class ChatRendererOptimized {
         //console.log('VALUE', value);
         if (value) {
           messageContent += value;
-          this.handleMessageContent(value, messageContent, session);
+          await this.handleMessageContent(value, messageContent, session);
         }
       }
 
@@ -77,7 +77,7 @@ class ChatRendererOptimized {
     lastProcessedMessage.content = processedMessage.content;
   }
 
-  handleMessageContent(value: string, messageContent: string, session: ChatSession) {
+  async handleMessageContent(value: string, messageContent: string, session: ChatSession) {
     const commandConfig = {
       mode: 'commandMode',
       buffer: 'commandBuffer',
@@ -118,7 +118,6 @@ class ChatRendererOptimized {
     } else if (messageContent.match(wordConfig.regExEnd)) {
       this.wordMode = false;
     }
-
   }
 
   getPreviousMessages(session: ChatSession) {
@@ -140,6 +139,29 @@ class ChatRendererOptimized {
     const lastMessage = session.messages.slice(-1)[0];
 
     lastProcessedMessage.content += content;
+  }
+
+  async handleImagePrompt(buffer: string, session: ChatSession) {
+    const lastProcessedMessage = session.processedMessages.slice(-1)[0];
+
+    const startTag = '<image-prompt>';
+    const endTag = '</image-prompt>';
+
+    const preTagStart = lastProcessedMessage.content.lastIndexOf(startTag);
+    const preTagEnd = lastProcessedMessage.content.lastIndexOf(endTag);
+
+    // @ts-ignore
+    const processed = await window.transformerAPI.transformImage(buffer);
+
+    console.log('LAST PROC MESSAGE', lastProcessedMessage.content);
+    //lastProcessedMessage.content = lastProcessedMessage.content.slice(0, preTagStart + startTag.length) + processed +
+    // lastProcessedMessage.content.slice(preTagEnd);
+
+    lastProcessedMessage.content = lastProcessedMessage.content.slice(0, preTagStart) + processed +
+      lastProcessedMessage.content.slice(preTagEnd);
+
+    console.log('LAST PROC MESSAGE (AFTER)', lastProcessedMessage.content);
+
   }
 
   appendOrReplaceTagInMessage(buffer: string, startTag: string, endTag: string, session: ChatSession) {
