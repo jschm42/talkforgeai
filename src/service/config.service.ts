@@ -4,7 +4,7 @@ class OpenAIConfig {
   imageApiResponseId = process.env.POSTMAN_IMAGE_API_RESPONSE_ID;
   postmanApiKey = process.env.POSTMAN_API_KEY;
   mockServerUrl = process.env.POSTMAN_MOCK_SERVER_URL;
-  testMode = false;
+  testMode = true;
 }
 
 class Config {

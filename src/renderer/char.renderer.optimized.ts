@@ -220,11 +220,12 @@ class ChatRendererOptimized {
       //buffer = buffer.replace(/`/g, '')
       buffer = buffer.replace(/\\t/g, '\t');
 
-      let options = {language: 'auto'};
+      let processed = '';
       if (hljsLanguage && hljsLanguage.name) {
-        options.language = hljsLanguage.name;
+        processed = hljs.highlight(buffer, {language: hljsLanguage.name}).value;
+      } else {
+        processed = hljs.highlightAuto(buffer).value;
       }
-      const processed = hljs.highlight(buffer, options).value;
 
       if (lastProcessedMessage.content.endsWith(endTag)) {
         const preTagStart = lastProcessedMessage.content.lastIndexOf(this.processedStartTag);
