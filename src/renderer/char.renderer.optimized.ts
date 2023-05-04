@@ -6,8 +6,8 @@ import hljs from 'highlight.js';
 import {toRaw} from 'vue';
 import Mustache from 'mustache';
 
-const regExOptimized = /{"(content|role)":(.*?)},/;
-
+const streamRegex = /{"(content|role)":(.*?)},/;
+const codeTagRegex = /`(.*)`/;
 const newlineRegex = /\\n/g;
 const tabRegex = /\\t/g;
 
@@ -35,8 +35,6 @@ class ChatRendererOptimized {
   wordMode = false;
   commandBuffer = '';
   wordBuffer = '';
-  imageMode = false;
-  imageBuffer = '';
   xBuffer = '';
   processedStartTag = '';
 
@@ -138,12 +136,18 @@ class ChatRendererOptimized {
   }
 
   addToLastMessage(content: string, session: ChatSession) {
-    content = content.replace(/\\n\\n/g, '\n\n').replace(/\\n/g, '\n').replace(/`/g, '');
+    content = content.replace(newlineRegex, '\n');
 
     const lastProcessedMessage = session.processedMessages.slice(-1)[0];
-    const lastMessage = session.messages.slice(-1)[0];
-
     lastProcessedMessage.content += content;
+
+    const lastContent = lastProcessedMessage.content;
+    const matched = lastContent.match(codeTagRegex);
+    if (matched) {
+      const highlighted = hljs.highlightAuto(matched[1]).value;
+      lastProcessedMessage.content = lastContent.replace(matched[0], `<code>${highlighted}</code>`);
+    }
+
   }
 
   async handleImagePrompt(buffer: string, session: ChatSession) {
@@ -206,7 +210,7 @@ class ChatRendererOptimized {
 
   parseStreamResponse(str: string) {
     // FIXME Does not parse the content corretly, if a " is inside
-    return str.split('\n\n').filter(e => e.length > 0).map(e => regExOptimized.exec(e)).map(p => {
+    return str.split('\n\n').filter(e => e.length > 0).map(e => streamRegex.exec(e)).map(p => {
       if (p === null) return {};
 
       // Fix for \\"
