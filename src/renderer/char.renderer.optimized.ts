@@ -197,13 +197,12 @@ class ChatRendererOptimized {
   appendOrReplaceTagInMessage(buffer: string, startTag: string, endTag: string, session: ChatSession) {
     //buffer = buffer.replace(/\\n\\n/g, '\n\n').replace(/\\n/g, '\n').replace(/`/g, '').replace(/\\t/g, '\t');
     //replace(/\\/g, '"');
-    buffer = buffer.replace(/`/g, '');
     console.log('BUFFER', buffer);
     const indexEndLangToken = buffer.indexOf('\\n');
 
     if (indexEndLangToken > -1) {
 
-      const lang = buffer.substring(0, indexEndLangToken);
+      const lang = buffer.substring(0, indexEndLangToken).replace(/`/g, '');
       buffer = buffer.substring(indexEndLangToken + 2);
 
       const hljsLanguage = hljs.getLanguage(lang);
@@ -215,9 +214,7 @@ class ChatRendererOptimized {
 
       const lastProcessedMessage = session.processedMessages.slice(-1)[0];
 
-      //buffer = buffer.replace(/\\n\\n/g, '\n\n');
       buffer = buffer.replace(/\\n/g, '\n');
-      //buffer = buffer.replace(/`/g, '')
       buffer = buffer.replace(/\\t/g, '\t');
 
       let processed = '';
