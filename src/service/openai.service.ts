@@ -14,7 +14,7 @@ const mockOpenAIImageUrl = mockServerUrl + '/v1/images/generations';
 const chatApiResponseId = process.env.POSTMAN_CHAT_API_RESPONSE_ID;
 const imageApiResponseId = process.env.POSTMAN_IMAGE_API_RESPONSE_ID;
 
-const testMode = false;
+const testMode = true;
 
 enum OpenAiModel {
   chatGpt35Turbo = 'gpt-3.5-turbo',

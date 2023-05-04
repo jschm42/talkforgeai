@@ -4,10 +4,29 @@ import OpenAiRenderer from './openai.renderer';
 import ChatSession from '../service/to/chat-session';
 import hljs from 'highlight.js';
 import {toRaw} from 'vue';
+import Mustache from 'mustache';
 
 const regex = /"delta":\s*{"(role|content)":"([^"]+)"/;
 
 const regExOptimized = /{"(content|role)":(.*?)},/;
+
+const commandConfig = {
+  mode: 'commandMode',
+  buffer: 'commandBuffer',
+  startTag: '<div class="code-block card shadow p-2 my-3"><div class="card-body"><h5 class="card-title">{{lang}}</h5><pre>',
+  endTag: '</pre></div></div>',
+  regExStart: /```[a-z]*\\n$/,
+  regExEnd: /```\\n\\n$/,
+};
+
+const wordConfig = {
+  mode: 'wordMode',
+  buffer: 'wordBuffer',
+  startTag: '<code>',
+  endTag: '</code>',
+  regExStart: / `$/,
+  regExEnd: /`$/,
+};
 
 class ChatRendererOptimized {
   openAiService = new OpenAiRenderer();
@@ -17,6 +36,8 @@ class ChatRendererOptimized {
   wordBuffer = '';
   imageMode = false;
   imageBuffer = '';
+  xBuffer = '';
+  processedStartTag = '';
 
   async submit(prompt: string, session: ChatSession) {
     const previousMessages = this.getPreviousMessages(session);
@@ -78,24 +99,31 @@ class ChatRendererOptimized {
   }
 
   async handleMessageContent(value: string, messageContent: string, session: ChatSession) {
-    const commandConfig = {
-      mode: 'commandMode',
-      buffer: 'commandBuffer',
-      startTag: '<div class="code-block card shadow p-2 my-3"><div class="card-body"><pre>',
-      endTag: '</pre></div></div>',
-      regExStart: /```[a-z]*\\n$/,
-      regExEnd: /```\\n\\n$/,
-    };
 
-    const wordConfig = {
-      mode: 'wordMode',
-      buffer: 'wordBuffer',
-      startTag: '<code>',
-      endTag: '</code>',
-      regExStart: / `$/,
-      regExEnd: /`$/,
-    };
+    this.xBuffer += value;
+    //console.log('VALUE', value);
 
+    if (!this.commandMode && this.xBuffer.lastIndexOf('```') > -1) {
+      console.log('Command Mode ON');
+      this.commandMode = true;
+      this.commandBuffer = '';
+      this.xBuffer = '';
+    } else if (this.commandMode && this.xBuffer.lastIndexOf('```') > -1) {
+      console.log('Command Mode OFF', this.xBuffer);
+      this.commandMode = false;
+      this.xBuffer = '';
+      this.processedStartTag = '';
+    }
+
+    if (this.commandMode) {
+      this.commandBuffer += value;
+      //console.log('APPEND OR REPLACE', this.commandBuffer);
+      this.appendOrReplaceTagInMessage(this.commandBuffer, commandConfig.startTag, commandConfig.endTag, session);
+    } else {
+      this.addToLastMessage(value, session);
+    }
+
+    /*
     if (this.commandMode) {
       this.commandBuffer += value;
       // @ts-ignore
@@ -118,6 +146,8 @@ class ChatRendererOptimized {
     } else if (messageContent.match(wordConfig.regExEnd)) {
       this.wordMode = false;
     }
+
+     */
   }
 
   getPreviousMessages(session: ChatSession) {
@@ -165,24 +195,52 @@ class ChatRendererOptimized {
   }
 
   appendOrReplaceTagInMessage(buffer: string, startTag: string, endTag: string, session: ChatSession) {
-    buffer = buffer.replace(/\n\n/g, '\n\n').replace(/\\n/g, '\n').replace(/`/g, '').replace(/\\t/g, '\t');
+    //buffer = buffer.replace(/\\n\\n/g, '\n\n').replace(/\\n/g, '\n').replace(/`/g, '').replace(/\\t/g, '\t');
     //replace(/\\/g, '"');
+    buffer = buffer.replace(/`/g, '');
+    console.log('BUFFER', buffer);
+    const indexEndLangToken = buffer.indexOf('\\n');
 
-    const lastProcessedMessage = session.processedMessages.slice(-1)[0];
+    if (indexEndLangToken > -1) {
 
-    if (lastProcessedMessage.content.endsWith(endTag)) {
-      const preTagStart = lastProcessedMessage.content.lastIndexOf(startTag);
-      const preTagEnd = lastProcessedMessage.content.lastIndexOf(endTag);
+      const lang = buffer.substring(0, indexEndLangToken);
+      buffer = buffer.substring(indexEndLangToken + 2);
 
-      const processed = hljs.highlightAuto(buffer).value;
+      const hljsLanguage = hljs.getLanguage(lang);
+      console.log('DETECTED LANG', hljsLanguage);
 
-      lastProcessedMessage.content = lastProcessedMessage.content.slice(0, preTagStart + startTag.length) + processed +
-        lastProcessedMessage.content.slice(preTagEnd);
+      if (this.processedStartTag.length == 0) {
+        this.processedStartTag = Mustache.render(startTag, {lang: hljsLanguage ? hljsLanguage.name : 'Code'});
+      }
 
-    } else {
-      const processed = hljs.highlightAuto(buffer).value;
-      lastProcessedMessage.content += `${startTag}${processed}${endTag}`;
+      const lastProcessedMessage = session.processedMessages.slice(-1)[0];
+
+      //buffer = buffer.replace(/\\n\\n/g, '\n\n');
+      buffer = buffer.replace(/\\n/g, '\n');
+      //buffer = buffer.replace(/`/g, '')
+      buffer = buffer.replace(/\\t/g, '\t');
+
+      let options = {language: 'auto'};
+      if (hljsLanguage && hljsLanguage.name) {
+        options.language = hljsLanguage.name;
+      }
+      const processed = hljs.highlight(buffer, options).value;
+
+      if (lastProcessedMessage.content.endsWith(endTag)) {
+        const preTagStart = lastProcessedMessage.content.lastIndexOf(this.processedStartTag);
+        const preTagEnd = lastProcessedMessage.content.lastIndexOf(endTag);
+
+        lastProcessedMessage.content = lastProcessedMessage.content.slice(0,
+            preTagStart + this.processedStartTag.length) + processed +
+          lastProcessedMessage.content.slice(preTagEnd);
+
+      } else {
+        lastProcessedMessage.content += `${this.processedStartTag}${processed}${endTag}`;
+      }
+
     }
+
+    //console.log('LANG INDEX', langIndex, lang, buffer);
 
   }
 
