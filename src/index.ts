@@ -72,7 +72,7 @@ app.whenReady().then(() => {
 
   const ret = globalShortcut.register('CommandOrControl+Shift+I', () => {
     console.log('DevTools toggled');
-    //mainWindow.webContents.toggleDevTools();
+    mainWindow.webContents.toggleDevTools();
   });
 
   if (!ret) {

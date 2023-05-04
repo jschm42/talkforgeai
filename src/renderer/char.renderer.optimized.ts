@@ -120,6 +120,7 @@ class ChatRendererOptimized {
       this.appendOrReplaceTagInMessage(this.commandBuffer, commandConfig.startTag, commandConfig.endTag, session);
     } else {
       this.addToLastMessage(value, session);
+      this.postProcessCode(session);
     }
   }
 
@@ -140,6 +141,10 @@ class ChatRendererOptimized {
 
     const lastProcessedMessage = session.processedMessages.slice(-1)[0];
     lastProcessedMessage.content += content;
+  }
+
+  postProcessCode(session: ChatSession): void {
+    const lastProcessedMessage = session.processedMessages.slice(-1)[0];
 
     const lastContent = lastProcessedMessage.content;
     const matched = lastContent.match(codeTagRegex);
@@ -147,7 +152,6 @@ class ChatRendererOptimized {
       const highlighted = hljs.highlightAuto(matched[1]).value;
       lastProcessedMessage.content = lastContent.replace(matched[0], `<code>${highlighted}</code>`);
     }
-
   }
 
   async handleImagePrompt(buffer: string, session: ChatSession) {
