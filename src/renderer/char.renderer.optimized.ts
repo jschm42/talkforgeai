@@ -6,9 +6,10 @@ import hljs from 'highlight.js';
 import {toRaw} from 'vue';
 import Mustache from 'mustache';
 
-const regex = /"delta":\s*{"(role|content)":"([^"]+)"/;
-
 const regExOptimized = /{"(content|role)":(.*?)},/;
+
+const newlineRegex = /\\n/g;
+const tabRegex = /\\t/g;
 
 const commandConfig = {
   mode: 'commandMode',
@@ -122,32 +123,6 @@ class ChatRendererOptimized {
     } else {
       this.addToLastMessage(value, session);
     }
-
-    /*
-    if (this.commandMode) {
-      this.commandBuffer += value;
-      // @ts-ignore
-      this.appendOrReplaceTagInMessage(this.commandBuffer, commandConfig.startTag, commandConfig.endTag, session);
-    } else if (this.wordMode) {
-      this.wordBuffer += value;
-      this.appendOrReplaceTagInMessage(this.wordBuffer, wordConfig.startTag, wordConfig.endTag, session);
-    } else {
-      this.addToLastMessage(value, session);
-    }
-
-    if (messageContent.match(commandConfig.regExStart)) {
-      this.commandMode = true;
-      this.commandBuffer = '';
-    } else if (messageContent.match(commandConfig.regExEnd)) {
-      this.commandMode = false;
-    } else if (messageContent.match(wordConfig.regExStart)) {
-      this.wordMode = true;
-      this.wordBuffer = '';
-    } else if (messageContent.match(wordConfig.regExEnd)) {
-      this.wordMode = false;
-    }
-
-     */
   }
 
   getPreviousMessages(session: ChatSession) {
@@ -194,51 +169,38 @@ class ChatRendererOptimized {
 
   }
 
-  appendOrReplaceTagInMessage(buffer: string, startTag: string, endTag: string, session: ChatSession) {
-    //buffer = buffer.replace(/\\n\\n/g, '\n\n').replace(/\\n/g, '\n').replace(/`/g, '').replace(/\\t/g, '\t');
-    //replace(/\\/g, '"');
-    console.log('BUFFER', buffer);
+  appendOrReplaceTagInMessage(buffer: string, startTag: string, endTag: string, session: ChatSession): void {
+    buffer = buffer.replace(/``$/, '');
     const indexEndLangToken = buffer.indexOf('\\n');
 
     if (indexEndLangToken > -1) {
-
-      const lang = buffer.substring(0, indexEndLangToken).replace(/`/g, '');
-      buffer = buffer.substring(indexEndLangToken + 2);
+      const lang = buffer.slice(0, indexEndLangToken).replace(/`/g, '');
+      buffer = buffer.slice(indexEndLangToken + 2);
 
       const hljsLanguage = hljs.getLanguage(lang);
-      console.log('DETECTED LANG', hljsLanguage);
 
-      if (this.processedStartTag.length == 0) {
-        this.processedStartTag = Mustache.render(startTag, {lang: hljsLanguage ? hljsLanguage.name : 'Code'});
+      if (this.processedStartTag.length === 0) {
+        this.processedStartTag = Mustache.render(startTag, {lang: hljsLanguage?.name || 'Code'});
       }
 
       const lastProcessedMessage = session.processedMessages.slice(-1)[0];
 
-      buffer = buffer.replace(/\\n/g, '\n');
-      buffer = buffer.replace(/\\t/g, '\t');
+      buffer = buffer.replace(newlineRegex, '\n').replace(tabRegex, '\t');
 
-      let processed = '';
-      if (hljsLanguage && hljsLanguage.name) {
-        processed = hljs.highlight(buffer, {language: hljsLanguage.name}).value;
-      } else {
-        processed = hljs.highlightAuto(buffer).value;
-      }
+      const processed = hljsLanguage?.name
+        ? hljs.highlight(buffer, {language: hljsLanguage.name}).value
+        : hljs.highlightAuto(buffer).value;
 
       if (lastProcessedMessage.content.endsWith(endTag)) {
         const preTagStart = lastProcessedMessage.content.lastIndexOf(this.processedStartTag);
         const preTagEnd = lastProcessedMessage.content.lastIndexOf(endTag);
 
         lastProcessedMessage.content = lastProcessedMessage.content.slice(0,
-            preTagStart + this.processedStartTag.length) + processed +
-          lastProcessedMessage.content.slice(preTagEnd);
-
+          preTagStart + this.processedStartTag.length) + processed + lastProcessedMessage.content.slice(preTagEnd);
       } else {
         lastProcessedMessage.content += `${this.processedStartTag}${processed}${endTag}`;
       }
-
     }
-
-    //console.log('LANG INDEX', langIndex, lang, buffer);
 
   }
 
