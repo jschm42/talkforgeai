@@ -30,7 +30,8 @@ export default {
 
 <style>
 pre {
-  background-color: #f8f9fa;
+  background-color: #303030;
+  color: white;
   border: 1px solid #e9ecef;
   border-radius: 0.25rem;
   padding: 1rem;

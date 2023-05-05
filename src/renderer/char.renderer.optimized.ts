@@ -6,36 +6,28 @@ import hljs from 'highlight.js';
 import {toRaw} from 'vue';
 import Mustache from 'mustache';
 
-const streamRegex = /{"(content|role)":(.*?)},/;
-const codeTagRegex = /`(.*)`/;
-const newlineRegex = /\\n/g;
-const tabRegex = /\\t/g;
+const STREAM_REGEX = /{"(content|role)":(.*?)},/;
+const CODETAG_REGEX = /`(.*)`/;
+const NEWLINE_REGEX = /\\n/g;
+const TAB_REGEX = /\\t/g;
+const BACKTICK_REGEX = /`/g;
+const DOUBLEBACKTICK_EL_REGEX = /``$/;
+const QUOTE_REGEX = /\\"/;
 
-const commandConfig = {
-  mode: 'commandMode',
-  buffer: 'commandBuffer',
-  startTag: '<div class="code-block card shadow p-2 my-3"><div class="card-body"><h5 class="card-title">{{lang}}</h5><pre>',
-  endTag: '</pre></div></div>',
-  regExStart: /```[a-z]*\\n$/,
-  regExEnd: /```\\n\\n$/,
-};
+const CODEBLOCK_START_TPL = `<div class="code-block card shadow p-2 my-3"><div class="card-body"><h5 class="card-title">{{lang}}</h5><pre>`;
+const CODEBLOCK_END_TPL = `</pre></div></div>`;
 
-const wordConfig = {
-  mode: 'wordMode',
-  buffer: 'wordBuffer',
-  startTag: '<code>',
-  endTag: '</code>',
-  regExStart: / `$/,
-  regExEnd: /`$/,
-};
+const TRIPLE_BACKTICK = '```';
+const NEW_LINE = '\\n';
 
 class ChatRendererOptimized {
   openAiService = new OpenAiRenderer();
-  commandMode = false;
-  wordMode = false;
-  commandBuffer = '';
-  wordBuffer = '';
-  xBuffer = '';
+  codeBlockMode = false;
+  codeBlockBuffer = '';
+  htmlBlockMode = false;
+  htmlBlockBuffer = '';
+
+  sectionBuffer = '';
   processedStartTag = '';
 
   async submit(prompt: string, session: ChatSession) {
@@ -74,7 +66,6 @@ class ChatRendererOptimized {
       const contentArray = parsed.filter((e: any) => e.type === 'content').map((e: any) => e.value);
 
       for (const value of contentArray) {
-        //console.log('VALUE', value);
         if (value) {
           messageContent += value;
           await this.handleMessageContent(value, messageContent, session);
@@ -98,26 +89,40 @@ class ChatRendererOptimized {
   }
 
   async handleMessageContent(value: string, messageContent: string, session: ChatSession) {
+    this.sectionBuffer += value;
+    console.log('VALUE', value);
+    //console.log('SEC BUF', this.sectionBuffer);
 
-    this.xBuffer += value;
-    //console.log('VALUE', value);
-
-    if (!this.commandMode && this.xBuffer.lastIndexOf('```') > -1) {
-      console.log('Command Mode ON');
-      this.commandMode = true;
-      this.commandBuffer = '';
-      this.xBuffer = '';
-    } else if (this.commandMode && this.xBuffer.lastIndexOf('```') > -1) {
-      console.log('Command Mode OFF', this.xBuffer);
-      this.commandMode = false;
-      this.xBuffer = '';
+    if (!this.codeBlockMode && this.sectionBuffer.lastIndexOf(TRIPLE_BACKTICK) > -1) {
+      this.codeBlockMode = true;
+      this.codeBlockBuffer = '';
+      this.sectionBuffer = '';
+    } else if (this.codeBlockMode && this.sectionBuffer.lastIndexOf(TRIPLE_BACKTICK) > -1) {
+      console.log('HTML-MODE OFF');
+      this.codeBlockMode = false;
+      this.sectionBuffer = '';
       this.processedStartTag = '';
+      value = '';
+    } else if (!this.htmlBlockMode && this.sectionBuffer.lastIndexOf('<!') > -1) {
+      console.log('HTML-MODE ON');
+      this.htmlBlockMode = true;
+      this.htmlBlockBuffer = '';
+      this.sectionBuffer = '';
+    } else if (this.htmlBlockMode && this.sectionBuffer.lastIndexOf('</html>') > -1) {
+      console.log('HTML-MODE OFF');
+      this.htmlBlockMode = false;
+      this.sectionBuffer = '';
+      this.htmlBlockBuffer += value;
+      this.processHtmlBlock(this.htmlBlockBuffer, '<pre>', '</pre>', session);
+      value = '';
     }
 
-    if (this.commandMode) {
-      this.commandBuffer += value;
-      //console.log('APPEND OR REPLACE', this.commandBuffer);
-      this.appendOrReplaceTagInMessage(this.commandBuffer, commandConfig.startTag, commandConfig.endTag, session);
+    if (this.codeBlockMode) {
+      this.codeBlockBuffer += value;
+      this.processCodeBlock(this.codeBlockBuffer, CODEBLOCK_START_TPL, CODEBLOCK_END_TPL, session);
+    } else if (this.htmlBlockMode) {
+      this.htmlBlockBuffer += value;
+      this.processHtmlBlock(this.htmlBlockBuffer, '<pre>', '</pre>', session);
     } else {
       this.addToLastMessage(value, session);
       this.postProcessCode(session);
@@ -137,7 +142,7 @@ class ChatRendererOptimized {
   }
 
   addToLastMessage(content: string, session: ChatSession) {
-    content = content.replace(newlineRegex, '\n');
+    content = content.replace(NEWLINE_REGEX, '\n');
 
     const lastProcessedMessage = session.processedMessages.slice(-1)[0];
     lastProcessedMessage.content += content;
@@ -147,45 +152,47 @@ class ChatRendererOptimized {
     const lastProcessedMessage = session.processedMessages.slice(-1)[0];
 
     const lastContent = lastProcessedMessage.content;
-    const matched = lastContent.match(codeTagRegex);
+    const matched = lastContent.match(CODETAG_REGEX);
     if (matched) {
       const highlighted = hljs.highlightAuto(matched[1]).value;
       lastProcessedMessage.content = lastContent.replace(matched[0], `<code>${highlighted}</code>`);
     }
   }
 
-  async handleImagePrompt(buffer: string, session: ChatSession) {
+  processHtmlBlock(buffer: string, startTag: string, endTag: string, session: ChatSession): void {
+    console.log('BUFFER', buffer);
+
     const lastProcessedMessage = session.processedMessages.slice(-1)[0];
 
-    const startTag = '<image-prompt>';
-    const endTag = '</image-prompt>';
+    buffer = buffer.replace(NEWLINE_REGEX, '\n').replace(TAB_REGEX, '\t');
 
-    const preTagStart = lastProcessedMessage.content.lastIndexOf(startTag);
-    const preTagEnd = lastProcessedMessage.content.lastIndexOf(endTag);
+    const processed = hljs.highlight(buffer, {language: 'html'}).value;
 
-    // @ts-ignore
-    const processed = await window.transformerAPI.transformImage(buffer);
+    if (lastProcessedMessage.content.endsWith(endTag)) {
+      const preTagStart = lastProcessedMessage.content.lastIndexOf(startTag);
+      const preTagEnd = lastProcessedMessage.content.lastIndexOf(endTag);
 
-    console.log('LAST PROC MESSAGE', lastProcessedMessage.content);
-    //lastProcessedMessage.content = lastProcessedMessage.content.slice(0, preTagStart + startTag.length) + processed +
-    // lastProcessedMessage.content.slice(preTagEnd);
-
-    lastProcessedMessage.content = lastProcessedMessage.content.slice(0, preTagStart) + processed +
-      lastProcessedMessage.content.slice(preTagEnd);
-
-    console.log('LAST PROC MESSAGE (AFTER)', lastProcessedMessage.content);
+      lastProcessedMessage.content = lastProcessedMessage.content.slice(0,
+        preTagStart + startTag.length) + processed + lastProcessedMessage.content.slice(preTagEnd);
+    } else {
+      lastProcessedMessage.content += `${startTag}${processed}${endTag}`;
+    }
 
   }
 
-  appendOrReplaceTagInMessage(buffer: string, startTag: string, endTag: string, session: ChatSession): void {
-    buffer = buffer.replace(/``$/, '');
-    const indexEndLangToken = buffer.indexOf('\\n');
+  processCodeBlock(buffer: string, startTag: string, endTag: string, session: ChatSession): void {
+    buffer = buffer.replace(DOUBLEBACKTICK_EL_REGEX, '');
+    const indexEndLangToken = buffer.indexOf(NEW_LINE);
+
+    console.log('BUFFER', buffer);
 
     if (indexEndLangToken > -1) {
-      const lang = buffer.slice(0, indexEndLangToken).replace(/`/g, '');
+      const lang = buffer.slice(0, indexEndLangToken).replace(BACKTICK_REGEX, '');
+      console.log('LANG', lang);
       buffer = buffer.slice(indexEndLangToken + 2);
 
       const hljsLanguage = hljs.getLanguage(lang);
+      console.log('HLJS', hljsLanguage);
 
       if (this.processedStartTag.length === 0) {
         this.processedStartTag = Mustache.render(startTag, {lang: hljsLanguage?.name || 'Code'});
@@ -193,11 +200,14 @@ class ChatRendererOptimized {
 
       const lastProcessedMessage = session.processedMessages.slice(-1)[0];
 
-      buffer = buffer.replace(newlineRegex, '\n').replace(tabRegex, '\t');
+      buffer = buffer.replace(NEWLINE_REGEX, '\n').replace(TAB_REGEX, '\t');
 
-      const processed = hljsLanguage?.name
-        ? hljs.highlight(buffer, {language: hljsLanguage.name}).value
-        : hljs.highlightAuto(buffer).value;
+      let processed;
+      if (hljsLanguage && hljsLanguage.name) {
+        processed = hljs.highlight(buffer, {language: lang}).value;
+      } else {
+        processed = hljs.highlightAuto(buffer).value;
+      }
 
       if (lastProcessedMessage.content.endsWith(endTag)) {
         const preTagStart = lastProcessedMessage.content.lastIndexOf(this.processedStartTag);
@@ -214,19 +224,13 @@ class ChatRendererOptimized {
 
   parseStreamResponse(str: string) {
     // FIXME Does not parse the content corretly, if a " is inside
-    return str.split('\n\n').filter(e => e.length > 0).map(e => streamRegex.exec(e)).map(p => {
+    return str.split('\n\n').filter(e => e.length > 0).map(e => STREAM_REGEX.exec(e)).map(p => {
       if (p === null) return {};
 
       // Fix for \\"
-      p[2] = p[2].replace(/\\"/, '"');
+      p[2] = p[2].replace(QUOTE_REGEX, '"');
 
-      //console.log('RAW', p);
-
-      const result = {type: this.removeFirstAndLastQuotes(p[1]), value: this.removeFirstAndLastQuotes(p[2])};
-
-      //console.log('PARSED', result.value);
-
-      return result;
+      return {type: this.removeFirstAndLastQuotes(p[1]), value: this.removeFirstAndLastQuotes(p[2])};
     });
   }
 

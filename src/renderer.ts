@@ -33,7 +33,8 @@ import '@fortawesome/fontawesome-free/js/brands.js';
 import '@fortawesome/fontawesome-free/js/solid.js';
 import '@fortawesome/fontawesome-free/js/fontawesome.js';
 
-import 'highlight.js/styles/github.css';
+import 'highlight.js/styles/atom-one-dark.css';
+//import 'highlight.js/styles/github-dark.css';
 import {createApp} from 'vue';
 import App from './component/App.vue';
 import {useStore} from './store';
