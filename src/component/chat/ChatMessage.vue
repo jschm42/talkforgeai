@@ -2,8 +2,9 @@
   <div :class="messageClass" class="card m-1 p-1 shadow">
     <div class="row">
       <div class="col-md-1">
-        <img v-if="isAssistant" :src="personaImage" class="persona-icon">
-        <i v-else :class="avatarImageClass" class="bi role-icon"></i>-->
+        <i v-if="isUser" class="fa-1 bi bi-person"></i>
+        <img v-else-if="isShowPersonaIcon" :src="personaImage" alt="Assistant" class="persona-icon">
+        <i v-else class="fa-1 bi bi-robot"></i>
       </div>
       <div class="col-md-10">
         <div class="card-body">
@@ -71,6 +72,17 @@ export default {
         'bg-info': this.message.role === Role.USER,
       };
     },
+    isShowPersonaIcon() {
+      return this.isAssistant && !!this.store.session.persona.personaImage;
+    },
+    isShowRobotIcon() {
+      return this.isAssistant &&
+        (this.store.session.persona.personaImage === undefined || this.store.session.persona.personaImage === null);
+    },
+    isShowUserIcon() {
+      return this.isUser;
+    },
+
     isAssistant() {
       return this.message.role === Role.ASSISTANT;
     },
