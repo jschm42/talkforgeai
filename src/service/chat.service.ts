@@ -1,63 +1,24 @@
-import OpenAiService from './openai.service';
+import OpenaiImageService from './openai-image.service';
 import UserMessageProcessor from '../processor/user-message-processor';
 import AssistantMessageProcessor from '../processor/asssistant-message-processor';
-import ChatMessage from './to/chat-message';
-import Role from './to/role';
 import os from 'os';
 import path from 'path';
 import {CHAT_DATA_DIRECTORY} from '../path-constants';
 import fs from 'fs';
 import ChatSession from './to/chat-session';
+import ConfigService from '../service/config.service';
 
 class ChatService {
-
   #openAiService;
   #userMessageProcessor;
   #assistantMessageProcessor;
 
   constructor() {
-    this.#openAiService = new OpenAiService();
+    const config = new ConfigService();
+    this.#openAiService = new OpenaiImageService(config.getConfig());
     this.#userMessageProcessor = new UserMessageProcessor();
     this.#assistantMessageProcessor = new AssistantMessageProcessor();
 
-  }
-
-  preProcess(prompt: string): Promise<ChatMessage> {
-    return this.#userMessageProcessor.process(new ChatMessage(Role.USER, prompt));
-  }
-
-  submit(userMessage: ChatMessage, pastMessages: Array<ChatMessage>) {
-    return this.createRequestPromise(userMessage, pastMessages).then((responseMessage: ChatMessage) => {
-      return this.createPostProcessPromise(responseMessage);
-    }).then(({originalAssistantMessage, processedAssistantMessage}) => {
-      return {userMessage, originalAssistantMessage, processedAssistantMessage};
-    });
-  }
-
-  async submitStream(prompt: string, pastMessages: Array<ChatMessage>) {
-    const preProcessedUserMessage = await this.preProcess(prompt);
-    console.log('Pre-processed', preProcessedUserMessage);
-    const requestMessages = [...pastMessages, preProcessedUserMessage];
-    
-    console.log('Requesting response...');
-    return this.#openAiService.chatCompletion(requestMessages, true);
-  }
-
-  createRequestPromise(promptMessage: ChatMessage, pastMessages: Array<ChatMessage>) {
-    const requestMessages = [...pastMessages, promptMessage];
-
-    console.log('Requesting response...');
-    return this.#openAiService.chatCompletion(requestMessages).then((response: any) => {
-      console.log('Response: ', response);
-      return new ChatMessage(Role.ASSISTANT, response.content);
-    });
-  }
-
-  createPostProcessPromise(originalAssistantMessage: ChatMessage) {
-    console.log('Post-Processing response...');
-    return this.#assistantMessageProcessor.process(originalAssistantMessage).then((processedAssistantMessage: ChatMessage) => {
-      return {originalAssistantMessage, processedAssistantMessage};
-    });
   }
 
   readFromFile(sessionId: string): ChatSession {

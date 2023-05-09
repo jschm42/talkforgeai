@@ -4,10 +4,11 @@ import path from 'path';
 import fs from 'fs';
 import https from 'https';
 import MessageTransformer from './transformer';
-import OpenAiService from '../../service/openai.service';
 import {CHAT_DATA_DIRECTORY} from '../../path-constants';
 import IdentityUtil from '../../util/identity-util';
 import Mustache from 'mustache';
+import OpenaiImageService from '../../service/openai-image.service';
+import ConfigService from '../../service/config.service';
 
 const UrlRegEx = /<image-prompt>[\\n]?([\s\S]*?)[\\n]?<\/image-prompt>/gm;
 
@@ -26,18 +27,19 @@ const imageTemplate = `
  */
 class ImagePromptDownloadTransformer extends MessageTransformer {
   /**
-   * @type {OpenAiService}
+   * @type {OpenaiImageService}
    */
   #service;
 
   constructor() {
     super();
-    this.#service = new OpenAiService();
+    const config = new ConfigService();
+    this.#service = new OpenaiImageService(config.getConfig());
   }
 
   process() {
     return (content: string) => new Promise((resolve, reject) => {
-      let matchAll = [...content.matchAll(UrlRegEx)];
+      const matchAll = [...content.matchAll(UrlRegEx)];
 
       console.log('Processing images...', matchAll);
 
@@ -64,7 +66,6 @@ class ImagePromptDownloadTransformer extends MessageTransformer {
   }
 
   async fetchAndDownloadImage(fullTag: string, prompt: string) {
-    this.sendProgress('Processing image prompt: ' + prompt);
     const resultImageUrl = await this.#service.imageGeneration(prompt);
     console.log('Image result URL', resultImageUrl);
     const localFilePath = await this.downloadImage(resultImageUrl);
@@ -83,24 +84,28 @@ class ImagePromptDownloadTransformer extends MessageTransformer {
         'images');
       const localFilePath = path.join(subDirectoryPath, fileName);
 
-      fs.mkdirSync(subDirectoryPath, {recursive: true});
+      try {
+        fs.mkdirSync(subDirectoryPath, {recursive: true});
 
-      //const localFilePath = path.join(__dirname, 'images', fileName);
-      console.log('Writing image to ' + localFilePath);
-      const fileStream = fs.createWriteStream(localFilePath);
+        //const localFilePath = path.join(__dirname, 'images', fileName);
+        console.log('Writing image to ' + localFilePath);
+        const fileStream = fs.createWriteStream(localFilePath);
 
-      https.get(urlObj, (response) => {
-        response.pipe(fileStream);
-        fileStream.on('finish', () => {
-          fileStream.close();
-          resolve(localFilePath);
-        });
-        fileStream.on('error', (err) => {
+        https.get(urlObj, (response) => {
+          response.pipe(fileStream);
+          fileStream.on('finish', () => {
+            fileStream.close();
+            resolve(localFilePath);
+          });
+          fileStream.on('error', (err) => {
+            fs.unlink(localFilePath, () => reject(err));
+          });
+        }).on('error', (err) => {
           fs.unlink(localFilePath, () => reject(err));
         });
-      }).on('error', (err) => {
-        fs.unlink(localFilePath, () => reject(err));
-      });
+      } catch (error) {
+        console.error('Error while downloading image ', localFilePath);
+      }
     });
   }
 }

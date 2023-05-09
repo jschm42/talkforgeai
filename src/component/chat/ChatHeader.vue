@@ -28,7 +28,8 @@
           href="#"
           @click.prevent="onPersonaSelected(persona)"
         >
-          <img :alt="persona.name" :src="imageUrl(persona.personaImage)"/>
+          <img v-if="persona.personaImage" :alt="persona.name" :src="imageUrl(persona.personaImage)"/>
+          <i v-else class="fs-1 bi bi-robot robot-icon"></i>
           {{ persona.name }} - {{ persona.description }}
         </a>
       </div>
@@ -89,5 +90,7 @@ export default {
 </script>
 
 <style scoped>
-
+.robot-icon {
+  margin-right: 8px;
+}
 </style>

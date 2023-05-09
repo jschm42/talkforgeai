@@ -1,17 +1,19 @@
-import OpenAiService from '../../service/openai.service';
+import OpenaiImageService from '../../service/openai-image.service';
 import MessageTransformer from './transformer';
+import ConfigService from '../../service/config.service';
 
 const UrlRegEx = /<image-prompt>[\\n]?([\s\S]*?)[\\n]?<\/image-prompt>/gm;
 
 class ImagePromptTransformer extends MessageTransformer {
   /**
-   * @type {OpenAiService}
+   * @type {OpenaiImageService}
    */
   #service;
 
   constructor() {
     super();
-    this.#service = new OpenAiService();
+    const config = new ConfigService();
+    this.#service = new OpenaiImageService(config.getConfig());
   }
 
   process() {
@@ -24,14 +26,14 @@ class ImagePromptTransformer extends MessageTransformer {
       console.log('Image matches', matchAll);
 
       Promise.all(matchAll.map(match => this.fetchImage(match[0], match[1]))).
-          then((result) => {
-            result.forEach(({fullTag, resultImageUrl}) => {
-              content = content.replace(fullTag,
-                  `<img src="${resultImageUrl}">`);
-            });
-
-            resolve(content);
+        then((result) => {
+          result.forEach(({fullTag, resultImageUrl}) => {
+            content = content.replace(fullTag,
+              `<img src="${resultImageUrl}">`);
           });
+
+          resolve(content);
+        });
     });
   }
 

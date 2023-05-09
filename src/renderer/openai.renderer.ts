@@ -1,13 +1,5 @@
 import ChatMessage from '../service/to/chat-message';
-import {Config} from "../service/config.service";
-
-
-const openAIUrl = 'https://api.openai.com/v1/completions';
-const openAIChatUrl = 'https://api.openai.com/v1/chat/completions';
-const openAIImageUrl = 'https://api.openai.com/v1/images/generations';
-const mockOpenAIUrl = '/v1/completions';
-const mockOpenAIChatUrl = '/v1/chat/completions';
-const mockOpenAIImageUrl = '/v1/images/generations';
+import {Config} from '../service/config.service';
 
 enum OpenAiModel {
   chatGpt35Turbo = 'gpt-3.5-turbo',
@@ -29,8 +21,17 @@ class OpenAiRenderer {
   }
 
   async chatCompletion(messages: Array<ChatMessage>, stream = false) {
-    const url = this.config.openai.testMode ? this.config.openai.mockServerUrl + mockOpenAIChatUrl : openAIChatUrl;
+    const url = this.config.openai.testMode ?
+      this.config.openai.mockServerUrl + this.config.openai.mockOpenAIChatUrl :
+      this.config.openai.openAIChatUrl;
     return this.callOpenAiChatApi(url, messages, stream);
+  }
+
+  async imageGeneration(prompt: string) {
+    const url = this.config.openai.testMode ?
+      this.config.openai.mockServerUrl + this.config.openai.mockOpenAIImageUrl :
+      this.config.openai.openAIImageUrl;
+    return this.callOpenAiImageApi(url, prompt);
   }
 
   async callOpenAiChatApi(url: string, messages: Array<ChatMessage>, stream = false) {

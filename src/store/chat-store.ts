@@ -3,7 +3,9 @@ import IndexEntry from '../service/to/index-entry';
 import ChatSession from '../service/to/chat-session';
 import {toRaw} from 'vue';
 import ChatRendererOptimized from '../renderer/char.renderer.optimized';
-import Persona, {DEFAULT_PERSONA} from '../service/to/persona';
+import Persona, {DEFAULT_PERSONA, IMAGE_GENERATION_SYSTEM} from '../service/to/persona';
+import Role from '../service/to/role';
+import ChatMessage from '../service/to/chat-message';
 
 //const chatRenderer = new ChatRenderer();
 const chatRenderer = new ChatRendererOptimized();
@@ -83,6 +85,12 @@ export const useChatStore = defineStore('chat', {
       console.log('FOUND', foundPersona);
       if (foundPersona) {
         this.session.persona = foundPersona;
+
+        if (this.session.persona.withImagePromptSystem) {
+          this.session.systemMessages.push(new ChatMessage(Role.SYSTEM, IMAGE_GENERATION_SYSTEM));
+        }
+
+        this.session.systemMessages.push(new ChatMessage(Role.SYSTEM, foundPersona.system));
         console.log('Persona changed', foundPersona);
 
         // @ts-ignore
