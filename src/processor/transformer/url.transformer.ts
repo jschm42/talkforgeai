@@ -1,10 +1,10 @@
 import https from 'https';
 import http from 'http';
 import MessageTransformer from './transformer';
+
 const convert = require('html-to-text');
 
 const UrlRegEx = /\[\[link\s(https?:\/\/[^\s\]]+)\]\]/g;
-
 
 class UrlTransformer extends MessageTransformer {
 
@@ -31,7 +31,7 @@ class UrlTransformer extends MessageTransformer {
       Promise.all(fetchPromises).then((result) => {
         console.log('UrlTransformer.afterFetch', result);
 
-        result.forEach(({tag, url, data}) => {
+        result.forEach((entry: any) => {
 
           const options = {
             limits: {
@@ -43,10 +43,10 @@ class UrlTransformer extends MessageTransformer {
             ],
           };
 
-          let textContent = convert(data, options);
+          let textContent = convert(entry.data, options);
           textContent = textContent.replaceAll('\n\n', '\n').replaceAll('* \n', '');
 
-          content = content.replace(tag, '>>>' + textContent + '<<<');
+          content = content.replace(entry.tag, '>>>' + textContent + '<<<');
         });
 
         resolve(content);
