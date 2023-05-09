@@ -1,13 +1,38 @@
 <template>
   <div id="prompt-configuration-panel" class="p-2">
-    <select id="prompt-configuration-select" v-model="selectedPersonaName" :disabled="isDisabled"
-            aria-label="Default select example"
-            class="form-select"
-            @change="changePersona">
-      <option v-for="(person, index) in personaList" :key="index" :value="person.name">{{ person.name }} -
-        {{ person.description }}
-      </option>
-    </select>
+    <div class="dropdown">
+      <button
+        id="dropdownMenuButton"
+        :disabled="isDisabled"
+        aria-expanded="false"
+        aria-haspopup="true"
+        class="btn btn-secondary dropdown-toggle"
+        data-bs-toggle="dropdown"
+        type="button"
+      >
+        <div v-if="selectedPersona">
+          <img
+            :alt="selectedPersona.name"
+            :src="imageUrl(selectedPersona.personaImage)"
+            class="button-image mx-3"
+          />
+          <span>{{ selectedPersona.name }} - {{ selectedPersona.description }}</span>
+        </div>
+        <span v-else>Choose a persona</span>
+      </button>
+      <div aria-labelledby="dropdownMenuButton" class="dropdown-menu">
+        <a
+          v-for="(persona, index) in personaList"
+          :key="index"
+          class="dropdown-item"
+          href="#"
+          @click.prevent="onPersonaSelected(persona)"
+        >
+          <img :alt="persona.name" :src="imageUrl(persona.personaImage)"/>
+          {{ persona.name }} - {{ persona.description }}
+        </a>
+      </div>
+    </div>
   </div>
 
 </template>
@@ -15,9 +40,11 @@
 <script>
 
 import {useChatStore} from '../../store/chat-store';
+import ImageSelect from '../common/ImageSelect.vue';
 
 export default {
   name: 'ChatHeader',
+  components: {ImageSelect},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
 
@@ -25,27 +52,34 @@ export default {
   },
   data() {
     return {
-      selectedPersonaName: this.store.session.persona.name,
-      selectedIndex: -1,
+      selectedPersona: null,
     };
   },
   mounted() {
+    this.readPersonaList();
   },
   computed: {
     isDisabled() {
       return !this.store.chat.configHeaderEnabled;
     },
     personaList() {
-      return this.store.getPersonas();
+      return this.store.persona;
     },
+
   },
   methods: {
-    changePersona($event) {
-      this.selectedIndex = $event.target.selectedIndex;
-      console.log('EVENT', this.selectedIndex);
-      if (this.selectedIndex > -1) {
-        this.store.changePersona(this.selectedPersonaName);
-      }
+    onPersonaSelected(persona) {
+      console.log('ON PERSONA SELECT', persona);
+      this.store.changePersona(persona.name);
+      this.selectedPersona = persona;
+    },
+    readPersonaList() {
+      this.store.readPersonas().then(() => {
+        console.log('Personas read done.');
+      });
+    },
+    imageUrl(personaImage) {
+      return 'file://C:\\users\\jschmitz\\.aitool\\persona\\' + personaImage;
     },
   },
   updated($event) {

@@ -50,6 +50,7 @@ class ChatRendererOptimized {
 
     await this.postProcessLastMessage(session);
 
+    console.log('WRITING CHAT SESSION', toRaw(session));
     // @ts-ignore
     window.chatAPI.writeChatSession(toRaw(session));
   }

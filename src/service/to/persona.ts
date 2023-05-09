@@ -20,6 +20,8 @@ class Persona {
   withImagePromptSystem: boolean = false;
   system: string;
 
+  personaImage: string;
+
   chatGPTProperties: ChatGPTProperties = new ChatGPTProperties();
 
   constructor(name: string, description: string, system: string, withImagePromptSystem: boolean = false) {
@@ -27,6 +29,7 @@ class Persona {
     this.description = description;
     this.system = system;
     this.withImagePromptSystem = withImagePromptSystem;
+    this.personaImage = '';
   }
 }
 
@@ -49,6 +52,7 @@ const DEFAULT_PERSONA = new Persona(
 
 const PERSONA = [
   DEFAULT_PERSONA,
+  /*
   new Persona(
     'Chat Bot',
     'The friendly chat bot that will answer your questions.',
@@ -80,6 +84,8 @@ const PERSONA = [
     'Stephen is an astrophysicist with a deep understanding of the cosmos.',
     'Stay in the role of Stephen, the astrophysicist. Stephen is an astrophysicist with a deep understanding of the cosmos and always wants to explore the mysteries of the universe.',
   ),
+
+   */
 ];
 
 export default Persona;

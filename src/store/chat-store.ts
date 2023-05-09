@@ -3,7 +3,7 @@ import IndexEntry from '../service/to/index-entry';
 import ChatSession from '../service/to/chat-session';
 import {toRaw} from 'vue';
 import ChatRendererOptimized from '../renderer/char.renderer.optimized';
-import {DEFAULT_PERSONA} from '../service/to/persona';
+import Persona, {DEFAULT_PERSONA} from '../service/to/persona';
 
 //const chatRenderer = new ChatRenderer();
 const chatRenderer = new ChatRendererOptimized();
@@ -15,6 +15,7 @@ export const useChatStore = defineStore('chat', {
       chat: {
         configHeaderEnabled: true,
       },
+      persona: [] as Array<Persona>,
       index: {
         entries: [] as Array<IndexEntry>,
       },
@@ -69,18 +70,30 @@ export const useChatStore = defineStore('chat', {
 
       console.log('Changing persona to', personaName);
       // @ts-ignore
-      const persona = window.personaAPI.getPersona(personaName);
-      if (persona) {
-        this.session.persona = persona;
-        console.log('Persona changed', persona);
+      //const persona = window.personaAPI.getPersona(personaName);
+      //const persona = <Persona>this.persona.filter(p => p.name === personaName);
+      let foundPersona;
+      for (const per of this.persona) {
+        if (per.name === personaName) {
+          foundPersona = per;
+          break;
+        }
+      }
+
+      console.log('FOUND', foundPersona);
+      if (foundPersona) {
+        this.session.persona = foundPersona;
+        console.log('Persona changed', foundPersona);
 
         // @ts-ignore
-        this.session.systemMessages = window.personaAPI.getSystemMessagesForPersona(persona);
+        //this.session.systemMessages = window.personaAPI.getSystemMessagesForPersona(persona);
+      } else {
+        console.error('Persona ' + personaName + ' not found.');
       }
     },
-    getPersonas() {
+    async readPersonas() {
       // @ts-ignore
-      return window.personaAPI.getPersonas();
+      this.persona = await window.personaAPI.readPersonas();
     },
   },
 

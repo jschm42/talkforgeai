@@ -13,7 +13,7 @@ export const plugins = [
   new VueLoaderPlugin(),
   new CopyPlugin({
     patterns: [
-      {from: 'persona', to: '../persona'},
+      {from: 'resources/persona', to: '../persona'},
     ],
   }),
 ];

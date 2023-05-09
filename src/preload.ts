@@ -75,8 +75,8 @@ contextBridge.exposeInMainWorld('personaAPI', {
   getSystemMessagesForPersona: (persona: Persona) => {
     return personaService.getSystemMessagesForPersona(persona);
   },
-  getPersonas: () => {
-    return personaService.getPersonas();
+  readPersonas: async () => {
+    return await personaService.readPersonas();
   },
 
 });
