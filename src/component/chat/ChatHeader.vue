@@ -11,11 +11,12 @@
         type="button"
       >
         <div v-if="selectedPersona">
-          <img
-            :alt="selectedPersona.name"
-            :src="imageUrl(selectedPersona.personaImage)"
-            class="button-image mx-3"
+          <img v-if="isShowPersonaImage(selectedPersona)"
+               :alt="selectedPersona.name"
+               :src="imageUrl(selectedPersona.personaImage)"
+               class="button-image mx-3"
           />
+          <i v-else class="fs-2 bi bi-robot robot-icon"></i>
           <span>{{ selectedPersona.name }} - {{ selectedPersona.description }}</span>
         </div>
         <span v-else>Choose a persona</span>
@@ -28,8 +29,8 @@
           href="#"
           @click.prevent="onPersonaSelected(persona)"
         >
-          <img v-if="persona.personaImage" :alt="persona.name" :src="imageUrl(persona.personaImage)"/>
-          <i v-else class="fs-1 bi bi-robot robot-icon"></i>
+          <img v-if="isShowPersonaImage(persona)" :alt="persona.name" :src="imageUrl(persona.personaImage)"/>
+          <i v-else class="fs-2 bi bi-robot robot-icon"></i>
           {{ persona.name }} - {{ persona.description }}
         </a>
       </div>
@@ -69,6 +70,9 @@ export default {
 
   },
   methods: {
+    isShowPersonaImage(persona) {
+      return !!persona.personaImage;
+    },
     onPersonaSelected(persona) {
       console.log('ON PERSONA SELECT', persona);
       this.store.changePersona(persona.name);
