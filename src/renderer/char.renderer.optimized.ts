@@ -91,7 +91,7 @@ class ChatRendererOptimized {
 
   async handleMessageContent(value: string, messageContent: string, session: ChatSession) {
     this.sectionBuffer += value;
-    console.log('VALUE', value);
+    //console.log('VALUE', value);
     //console.log('SEC BUF', this.sectionBuffer);
 
     if (!this.codeBlockMode && this.sectionBuffer.lastIndexOf(TRIPLE_BACKTICK) > -1) {
@@ -185,15 +185,15 @@ class ChatRendererOptimized {
     buffer = buffer.replace(DOUBLEBACKTICK_EL_REGEX, '');
     const indexEndLangToken = buffer.indexOf(NEW_LINE);
 
-    console.log('BUFFER', buffer);
+    //console.log('BUFFER', buffer);
 
     if (indexEndLangToken > -1) {
       const lang = buffer.slice(0, indexEndLangToken).replace(BACKTICK_REGEX, '');
-      console.log('LANG', lang);
+      //console.log('LANG', lang);
       buffer = buffer.slice(indexEndLangToken + 2);
 
       const hljsLanguage = hljs.getLanguage(lang);
-      console.log('HLJS', hljsLanguage);
+      //console.log('HLJS', hljsLanguage);
 
       if (this.processedStartTag.length === 0) {
         this.processedStartTag = Mustache.render(startTag, {lang: hljsLanguage?.name || 'Code'});

@@ -14,6 +14,9 @@ import ElevenlabsService, {VOICES} from './service/elevenlabs.service';
 import ConfigService from './service/config.service';
 import PersonaService from './service/persona.service';
 import Persona from './service/to/persona';
+import os from 'os';
+import path from 'path';
+import {PERSONA_DIRECTORY} from './path-constants';
 
 const indexService = new ChatIndexService();
 const chatService = new ChatService();
@@ -65,6 +68,9 @@ contextBridge.exposeInMainWorld('chatIndexAPI', {
 contextBridge.exposeInMainWorld('configAPI', {
   getConfig: () => {
     return configService.getConfig();
+  },
+  getPersonaImagePath: (imagePath: string) => {
+    return path.join(os.homedir(), PERSONA_DIRECTORY, imagePath);
   },
 });
 

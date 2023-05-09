@@ -2,7 +2,8 @@
   <div :class="messageClass" class="card m-1 p-1 shadow">
     <div class="row">
       <div class="col-md-1">
-        <i :class="avatarImageClass" class="bi role-icon"></i>
+        <img v-if="isAssistant" :src="personaImage" class="persona-icon">
+        <i v-else :class="avatarImageClass" class="bi role-icon"></i>-->
       </div>
       <div class="col-md-10">
         <div class="card-body">
@@ -34,6 +35,7 @@
 <script>
 
 import Role from '../../service/to/role';
+import {useChatStore} from '../../store/chat-store';
 
 const AudioState = {
   Loading: 'loading',
@@ -44,6 +46,11 @@ const AudioState = {
 
 export default {
   name: 'ChatMessage',
+  setup() {
+    const store = useChatStore(); // Call useMyStore() inside the setup function
+
+    return {store};
+  },
   data() {
     return {
       audioState: AudioState.Stopped,
@@ -56,6 +63,9 @@ export default {
     },
   },
   computed: {
+    personaImage() {
+      return window.configAPI.getPersonaImagePath(this.store.session.persona.personaImage);
+    },
     messageClass() {
       return {
         'bg-info': this.message.role === Role.USER,
@@ -117,6 +127,11 @@ export default {
 
 .role-icon {
   font-size: 2em;
+}
+
+.persona-icon {
+  width: 64px;
+  height: 64px;
 }
 
 .message-icon {

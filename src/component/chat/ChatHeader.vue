@@ -79,7 +79,7 @@ export default {
       });
     },
     imageUrl(personaImage) {
-      return 'file://C:\\users\\jschmitz\\.aitool\\persona\\' + personaImage;
+      return window.configAPI.getPersonaImagePath(personaImage);
     },
   },
   updated($event) {
