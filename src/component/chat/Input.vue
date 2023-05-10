@@ -17,7 +17,7 @@
 
 <script>
 
-import {useChatStore} from '../../store/chat-store';
+import {useChatStore} from '@/store/chat-store';
 import IndexEntry from '../../service/to/index-entry';
 
 export default {

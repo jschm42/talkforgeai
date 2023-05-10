@@ -25,6 +25,11 @@ export const useChatStore = defineStore('chat', {
       },
     };
   },
+  getters: {
+    autoSpeak(): boolean {
+      return this.chat.autoSpeak;
+    },
+  },
   actions: {
     newSession() {
       /*
@@ -116,6 +121,9 @@ export const useChatStore = defineStore('chat', {
     },
     getElevenLabsProperties(): ElevenLabsProperties {
       return this.session.persona.elevenLabsProperties;
+    },
+    toggleAutoSpeak() {
+      this.chat.autoSpeak = !this.chat.autoSpeak;
     },
   },
 

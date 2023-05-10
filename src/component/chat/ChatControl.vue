@@ -28,7 +28,7 @@
       <div id="pills-message" aria-labelledby="pills-message-tab" class="tab-pane fade show active"
            role="tabpanel" tabindex="0">
         <div class="form-check">
-          <input id="flexCheckDefault" v-model="autoSpeak" class="form-check-input" type="checkbox" value="">
+          <input id="flexCheckDefault" class="form-check-input" type="checkbox" @change="toggleAutoSpeak">
           <label class="form-check-label" for="flexCheckDefault">
             Auto speak
           </label>
@@ -59,18 +59,18 @@ export default {
   name: 'ChatControl',
   components: {Input, Parameters, System},
   data() {
-    return {
-      autoSpeak: this.store.chat.autoSpeak,
-    };
+    return {};
   },
   methods: {
+    toggleAutoSpeak() {
+      this.store.toggleAutoSpeak();
+    },
     submitResultReceived() {
       this.$emit('submitResultReceived');
     },
   },
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
-
     return {store};
   },
 };

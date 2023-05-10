@@ -15,19 +15,20 @@
 import ChatControl from './ChatControl.vue';
 import ChatMessage from './ChatMessage.vue';
 import ChatHeader from './ChatHeader.vue';
-import {useChatStore} from '../../store/chat-store';
+import {useChatStore} from '@/store/chat-store';
 
 export default {
   name: 'Chat',
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
 
-    return {store};
+    return {
+      chatState: store.session,
+      store,
+    };
   },
   data() {
-    return {
-      chatState: this.store.session,
-    };
+    return {};
   },
   components: {ChatHeader, ChatControl, ChatMessage},
   methods: {
@@ -36,7 +37,7 @@ export default {
       // Scroll to bottom
       this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
 
-      if (this.store.chat.autoSpeak) {
+      if (this.store.autoSpeak) {
         console.log('Auto speaking last Chat-Message.');
         const lastChatMessage = this.$refs.chatMessageRef.slice(-1)[0];
         lastChatMessage.playAudio();
