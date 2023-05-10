@@ -54,7 +54,7 @@ export default {
   },
   data() {
     return {
-      selectedPersona: null,
+      //selectedPersona: null,
     };
   },
   mounted() {
@@ -67,7 +67,9 @@ export default {
     personaList() {
       return this.store.persona;
     },
-
+    selectedPersona() {
+      return this.store.session.persona;
+    },
   },
   methods: {
     isShowPersonaImage(persona) {

@@ -6,6 +6,7 @@ import ChatRendererOptimized from '../renderer/char.renderer.optimized';
 import Persona, {DEFAULT_PERSONA, IMAGE_GENERATION_SYSTEM} from '../service/to/persona';
 import Role from '../service/to/role';
 import ChatMessage from '../service/to/chat-message';
+import IdentityUtil from '@/util/identity-util';
 
 //const chatRenderer = new ChatRenderer();
 const chatRenderer = new ChatRendererOptimized();
@@ -25,10 +26,19 @@ export const useChatStore = defineStore('chat', {
   },
   actions: {
     newSession() {
+      /*
       this.$patch({
         session: new ChatSession(),
         chat: {configHeaderEnabled: true},
       });
+
+       */
+      this.session.sessionId = IdentityUtil.generateUUID();
+      this.session.messages = [];
+      this.session.processedMessages = [];
+      this.session.systemMessages = [];
+      this.session.persona = DEFAULT_PERSONA;
+      this.chat.configHeaderEnabled = true;
     },
     disableConfigHeader() {
       console.log('disableConfigHeader');
