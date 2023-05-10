@@ -17,6 +17,7 @@ export const useChatStore = defineStore('chat', {
       session: new ChatSession(),
       chat: {
         configHeaderEnabled: true,
+        autoSpeak: false,
       },
       persona: [] as Array<Persona>,
       index: {

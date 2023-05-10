@@ -27,6 +27,12 @@
     <div id="pills-tabContent" class="tab-content">
       <div id="pills-message" aria-labelledby="pills-message-tab" class="tab-pane fade show active"
            role="tabpanel" tabindex="0">
+        <div class="form-check">
+          <input id="flexCheckDefault" v-model="autoSpeak" class="form-check-input" type="checkbox" value="">
+          <label class="form-check-label" for="flexCheckDefault">
+            Auto speak
+          </label>
+        </div>
         <Input @submit-result-received="submitResultReceived"></Input>
       </div>
 
@@ -47,14 +53,25 @@
 import Parameters from './Parameters.vue';
 import System from './System.vue';
 import Input from './Input.vue';
+import {useChatStore} from '@/store/chat-store';
 
 export default {
   name: 'ChatControl',
   components: {Input, Parameters, System},
+  data() {
+    return {
+      autoSpeak: this.store.chat.autoSpeak,
+    };
+  },
   methods: {
     submitResultReceived() {
       this.$emit('submitResultReceived');
     },
+  },
+  setup() {
+    const store = useChatStore(); // Call useMyStore() inside the setup function
+
+    return {store};
   },
 };
 </script>

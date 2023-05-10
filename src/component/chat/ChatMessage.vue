@@ -50,7 +50,6 @@ export default {
   name: 'ChatMessage',
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
-
     return {store};
   },
   data() {

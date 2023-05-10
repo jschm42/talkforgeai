@@ -2,7 +2,7 @@
   <ChatHeader></ChatHeader>
   <div ref="entries" class="flex-fill vertical-scrollbar no-horizontal-scrollbar">
 
-    <ChatMessage v-for="message in chatState.processedMessages" :message="message"></ChatMessage>
+    <ChatMessage v-for="message in chatState.processedMessages" ref="chatMessageRef" :message="message"></ChatMessage>
 
   </div>
   <!-- Input Section -->
@@ -35,6 +35,12 @@ export default {
       console.log('Submit Result Received');
       // Scroll to bottom
       this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
+
+      if (this.store.chat.autoSpeak) {
+        console.log('Auto speaking last Chat-Message.');
+        const lastChatMessage = this.$refs.chatMessageRef.slice(-1)[0];
+        lastChatMessage.playAudio();
+      }
     },
   },
   updated() {
