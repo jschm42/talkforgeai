@@ -7,7 +7,8 @@ class ChatGPTProperties {
 }
 
 class ElevenLabsProperties {
-  voiceId: string = '';
+  voiceId: string = '21m00Tcm4TlvDq8ikWAM'; // Rachel
+  modelId: string = 'eleven_multilingual_v1';
 }
 
 class Persona {
@@ -95,4 +96,4 @@ const PERSONA = [
 ];
 
 export default Persona;
-export {DEFAULT_PERSONA, PERSONA, IMAGE_GENERATION_SYSTEM};
+export {DEFAULT_PERSONA, PERSONA, IMAGE_GENERATION_SYSTEM, ElevenLabsProperties};

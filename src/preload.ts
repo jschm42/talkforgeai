@@ -10,10 +10,10 @@ import AsssistantMessageProcessor from './processor/asssistant-message-processor
 import ImagePromptDownloadTransformer from './processor/transformer/image-prompt-download.transformer';
 import ChatService from './service/chat.service';
 import ChatIndexService from './service/chat-index.service';
-import ElevenlabsService, {VOICES} from './service/elevenlabs.service';
+import ElevenlabsService from './service/elevenlabs.service';
 import ConfigService from './service/config.service';
 import PersonaService from './service/persona.service';
-import Persona from './service/to/persona';
+import Persona, {ElevenLabsProperties} from './service/to/persona';
 import os from 'os';
 import path from 'path';
 import {PERSONA_DIRECTORY} from './path-constants';
@@ -50,12 +50,15 @@ contextBridge.exposeInMainWorld('chatAPI', {
   writeChatSession: (chatSession: ChatSession) => {
     chatService.writeToFile(chatSession);
   },
-  textToSpeech: async (text: string, voiceId: string = '') => {
+  textToSpeech: async (text: string, properties: ElevenLabsProperties) => {
     console.log('Text to speech', text);
-    if (voiceId === '') {
-      voiceId = VOICES.Elli;
+
+    let submitProperties = new ElevenLabsProperties();
+
+    if (properties) {
+      submitProperties = properties;
     }
-    return await elevenlabsService.speachStream(text, voiceId);
+    return await elevenlabsService.speachStream(text, submitProperties);
   },
 });
 

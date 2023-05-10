@@ -1,3 +1,5 @@
+import {ElevenLabsProperties} from '@/service/to/persona';
+
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io';
 const VOICES = {
@@ -15,16 +17,17 @@ const VOICES = {
 
 class ElevenlabsService {
 
-  async speachStream(text: string, voiceId: string) {
+  async speachStream(text: string, properties: ElevenLabsProperties) {
     const body = {
       text,
+      'model_id': properties.modelId,
       'voice_settings': {
         'stability': 0,
         'similarity_boost': 0,
       },
     };
 
-    const url = `${ELEVENLABS_API_URL}/v1/text-to-speech/${voiceId}/stream`;
+    const url = `${ELEVENLABS_API_URL}/v1/text-to-speech/${properties.voiceId}/stream`;
     console.log('Elevenlabs URL', url);
 
     const response = await fetch(

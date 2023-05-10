@@ -12,6 +12,7 @@
     "topP": 1
   },
   "elevenLabsProperties": {
-    "voiceId": "21m00Tcm4TlvDq8ikWAM"
+    "voiceId": "21m00Tcm4TlvDq8ikWAM",
+    "modelId": "eleven_multilingual_v1"
   }
 }

@@ -3,7 +3,7 @@ import IndexEntry from '../service/to/index-entry';
 import ChatSession from '../service/to/chat-session';
 import {toRaw} from 'vue';
 import ChatRendererOptimized from '../renderer/char.renderer.optimized';
-import Persona, {DEFAULT_PERSONA, IMAGE_GENERATION_SYSTEM} from '../service/to/persona';
+import Persona, {DEFAULT_PERSONA, ElevenLabsProperties, IMAGE_GENERATION_SYSTEM} from '../service/to/persona';
 import Role from '../service/to/role';
 import ChatMessage from '../service/to/chat-message';
 import IdentityUtil from '@/util/identity-util';
@@ -113,8 +113,8 @@ export const useChatStore = defineStore('chat', {
       // @ts-ignore
       this.persona = await window.personaAPI.readPersonas();
     },
-    getVoiceId(): string {
-      return this.session.persona.elevenLabsProperties.voiceId;
+    getElevenLabsProperties(): ElevenLabsProperties {
+      return this.session.persona.elevenLabsProperties;
     },
   },
 

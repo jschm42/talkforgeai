@@ -37,6 +37,7 @@
 
 import Role from '../../service/to/role';
 import {useChatStore} from '../../store/chat-store';
+import {toRaw} from 'vue';
 
 const AudioState = {
   Loading: 'loading',
@@ -109,7 +110,8 @@ export default {
       console.log('Playing audio');
       this.audioState = AudioState.Loading;
       try {
-        const audioBlob = await window.chatAPI.textToSpeech(this.message.content, this.store.getVoiceId());
+        const properties = toRaw(this.store.getElevenLabsProperties());
+        const audioBlob = await window.chatAPI.textToSpeech(this.message.content, properties);
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.addEventListener('ended', () => {
