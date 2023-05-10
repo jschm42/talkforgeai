@@ -50,9 +50,12 @@ contextBridge.exposeInMainWorld('chatAPI', {
   writeChatSession: (chatSession: ChatSession) => {
     chatService.writeToFile(chatSession);
   },
-  textToSpeech: async (text: string) => {
+  textToSpeech: async (text: string, voiceId: string = '') => {
     console.log('Text to speech', text);
-    return await elevenlabsService.speachStream(text, VOICES.Elli);
+    if (voiceId === '') {
+      voiceId = VOICES.Elli;
+    }
+    return await elevenlabsService.speachStream(text, voiceId);
   },
 });
 

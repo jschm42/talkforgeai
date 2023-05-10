@@ -113,6 +113,9 @@ export const useChatStore = defineStore('chat', {
       // @ts-ignore
       this.persona = await window.personaAPI.readPersonas();
     },
+    getVoiceId(): string {
+      return this.session.persona.elevenLabsProperties.voiceId;
+    },
   },
 
 });

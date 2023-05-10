@@ -10,5 +10,8 @@
     "frequencyPenalty": 0.0,
     "presencePenalty": 0.0,
     "topP": 1
+  },
+  "elevenLabsProperties": {
+    "voiceId": "21m00Tcm4TlvDq8ikWAM"
   }
 }

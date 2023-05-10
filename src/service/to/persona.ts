@@ -6,6 +6,10 @@ class ChatGPTProperties {
   topP: number = 1;
 }
 
+class ElevenLabsProperties {
+  voiceId: string = '';
+}
+
 class Persona {
   /**
    * Name of the profile
@@ -23,6 +27,8 @@ class Persona {
   personaImage: string;
 
   chatGPTProperties: ChatGPTProperties = new ChatGPTProperties();
+
+  elevenLabsProperties: ElevenLabsProperties = new ElevenLabsProperties();
 
   constructor(name: string, description: string, system: string, withImagePromptSystem: boolean = false) {
     this.name = name;

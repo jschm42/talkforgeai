@@ -109,7 +109,7 @@ export default {
       console.log('Playing audio');
       this.audioState = AudioState.Loading;
       try {
-        const audioBlob = await window.chatAPI.textToSpeech(this.message.content);
+        const audioBlob = await window.chatAPI.textToSpeech(this.message.content, this.store.getVoiceId());
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.addEventListener('ended', () => {
