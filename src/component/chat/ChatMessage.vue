@@ -2,9 +2,9 @@
   <div :class="messageClass" class="card m-1 p-1 shadow">
     <div class="row">
       <div class="col-md-1">
-        <i v-if="isUser" class="fa-1 bi bi-person"></i>
+        <i v-if="isUser" class="fs-1 bi bi-person"></i>
         <img v-else-if="isShowPersonaIcon" :src="personaImage" alt="Assistant" class="persona-icon">
-        <i v-else class="fa-1 bi bi-robot"></i>
+        <i v-else class="fs-1 bi bi-robot"></i>
       </div>
       <div class="col-md-10">
         <div class="card-body">
