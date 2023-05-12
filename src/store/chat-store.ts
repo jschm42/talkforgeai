@@ -29,6 +29,9 @@ export const useChatStore = defineStore('chat', {
     autoSpeak(): boolean {
       return this.chat.autoSpeak;
     },
+    isEmptySession(): boolean {
+      return this.session.messages.length == 0;
+    },
   },
   actions: {
     newSession() {
@@ -71,7 +74,7 @@ export const useChatStore = defineStore('chat', {
     loadChatSession(sessionId: string) {
       // @ts-ignore
       const chatSession = window.chatAPI.loadChatSession(sessionId);
-      console.log('Loaded chat session', chatSession);
+      console.log('Loaded chat session with ID: ' + sessionId, chatSession);
 
       this.$patch({
         session: chatSession,

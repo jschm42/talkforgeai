@@ -8,9 +8,9 @@
       <div v-for="entry in allIndexEntries" :key="entry.sessionId">
         <a id='{{entry.sessionId}}' :class="getEntryClass(entry.sessionId)"
            class="list-group-item list-group-item-action py-3 lh-sm {{entry.active}}"
-           @click="entrySelected(entry.sessionId)">
+           @click="onEntrySelected(entry.sessionId)">
           <div class="d-flex w-100 align-items-center justify-content-between">
-            <strong class="mb-1 text-truncate" title="{{entry.title}}">{{ entry.title }}</strong>
+            <strong :title="entry.sessionId" class="mb-1 text-truncate">{{ entry.title }}</strong>
           </div>
           <!--                    <div class="col-10 mb-1 small">{{ entry.timestamp }}</div>-->
         </a>
@@ -24,7 +24,7 @@
 
 <script>
 import Toolbar from './Toolbar.vue';
-import {useChatStore} from '../../store/chat-store';
+import {useChatStore} from '@/store/chat-store';
 
 export default {
   name: 'History',
@@ -45,16 +45,10 @@ export default {
     allIndexEntries() {
       return this.store.index.entries;
     },
-    indexClass() {
-      return {
-        'bg-info': sessionId !== this.selectedIndexId,
-        'bg-primary': sessionId === this.selectedIndexId,
-      };
-    },
   },
   methods: {
     getEntryClass(sessionId) {
-      if (sessionId === this.selectedIndexId) {
+      if (sessionId === this.store.session.sessionId) {
         return 'bg-primary';
       }
       return '';
@@ -62,7 +56,7 @@ export default {
     load() {
       this.store.loadIndex();
     },
-    entrySelected(sessionId) {
+    onEntrySelected(sessionId) {
       console.log('Index selected', sessionId);
       this.selectedIndexId = sessionId;
       this.store.loadChatSession(sessionId);

@@ -39,9 +39,11 @@ export default {
       this.store.disableConfigHeader();
       this.isInputLocked = true;
 
-      const indexEntry = new IndexEntry(this.store.session.sessionId, this.prompt, 'Description', new Date());
-      this.store.addIndexEntry(indexEntry);
-      this.store.saveIndex();
+      if (this.store.isEmptySession) {
+        const indexEntry = new IndexEntry(this.store.session.sessionId, this.prompt, 'Description', new Date());
+        this.store.addIndexEntry(indexEntry);
+        this.store.saveIndex();
+      }
 
       const result = await this.store.submitStreamPrompt(this.prompt);
 
