@@ -81,9 +81,6 @@ export const useChatStore = defineStore('chat', {
     async submitStreamPrompt(prompt: string) {
       return await chatRenderer.submit(prompt, this.session);
     },
-    setDefaultPersona() {
-      this.changePersona(DEFAULT_PERSONA.name);
-    },
     changePersona(personaName: string) {
 
       console.log('Changing persona to', personaName);

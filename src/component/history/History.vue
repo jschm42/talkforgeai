@@ -1,7 +1,7 @@
 <template>
   <div class="p-3 full-height vertical-scrollbar shadow">
 
-    <Toolbar></Toolbar>
+    <!--<Toolbar></Toolbar>-->
 
     <div class="list-group list-group-flush border-bottom">
 

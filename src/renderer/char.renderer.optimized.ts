@@ -131,7 +131,7 @@ class ChatRendererOptimized {
   }
 
   getPreviousMessages(session: ChatSession) {
-    const previousMessages = [new ChatMessage(Role.SYSTEM, session.persona.system)];
+    const previousMessages: Array<ChatMessage> = [];
     session.messages.forEach((message, i) => {
       if (message.role === Role.USER) {
         previousMessages.push(Object.assign({}, session.processedMessages[i]));

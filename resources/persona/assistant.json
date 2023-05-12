@@ -1,9 +1,9 @@
 {
-  "name": "Chat Bot",
-  "description": "The friendly chat bot that will answer your questions.",
+  "name": "Assistant",
+  "description": "The friendly assistant that will answer your questions.",
   "system": "Add a smiley to the end of every paragraph, covering the current mood.",
   "withImagePromptSystem": true,
-  "personaImage": "chat-bot.png",
+  "personaImage": "assistant.png",
   "chatGPTProperties": {
     "temperature": 0.7,
     "maxTokens": 2048,
