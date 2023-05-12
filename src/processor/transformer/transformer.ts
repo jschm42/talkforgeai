@@ -9,10 +9,6 @@ class MessageTransformer {
     throw new Error('Not implemented');
   }
 
-  sendProgress(progress: string) {
-    //ipcMain.emit('update-progress', progress);
-  }
-
 }
 
 export default MessageTransformer;

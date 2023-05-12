@@ -9,6 +9,7 @@ import IdentityUtil from '../../util/identity-util';
 import Mustache from 'mustache';
 import OpenaiImageService from '../../service/openai-image.service';
 import ConfigService from '../../service/config.service';
+import ChatSession from '@/service/to/chat-session';
 
 const UrlRegEx = /<image-prompt>[\\n]?([\s\S]*?)[\\n]?<\/image-prompt>/gm;
 
@@ -38,13 +39,13 @@ class ImagePromptDownloadTransformer extends MessageTransformer {
   }
 
   process() {
-    return (content: string) => new Promise((resolve, reject) => {
+    return (content: string, session: ChatSession) => new Promise((resolve, reject) => {
       const matchAll = [...content.matchAll(UrlRegEx)];
 
-      console.log('Processing images...', matchAll);
+      console.log('Processing images...', session.sessionId, matchAll);
 
       Promise.all(matchAll.map(
-        match => this.fetchAndDownloadImage(match[0], match[1]))).
+        match => this.fetchAndDownloadImage(match[0], match[1], session.sessionId))).
         then((result) => {
           result.forEach(({fullTag, localFilePath, prompt}) => {
             const parsedTemplate = Mustache.render(imageTemplate, {localFilePath, prompt});
@@ -58,30 +59,28 @@ class ImagePromptDownloadTransformer extends MessageTransformer {
   }
 
   fetchImage(fullTag: string, prompt: string) {
-    this.sendProgress('Processing image prompt: ' + prompt);
     return this.#service.imageGeneration(prompt).then((resultImageUrl) => {
       console.log('Image result URL', resultImageUrl);
       return {fullTag, resultImageUrl};
     });
   }
 
-  async fetchAndDownloadImage(fullTag: string, prompt: string) {
+  async fetchAndDownloadImage(fullTag: string, prompt: string, sessionId: string) {
     const resultImageUrl = await this.#service.imageGeneration(prompt);
     console.log('Image result URL', resultImageUrl);
-    const localFilePath = await this.downloadImage(resultImageUrl);
+    const localFilePath = await this.downloadImage(resultImageUrl, sessionId);
     console.log('Local file path', localFilePath);
 
     return {fullTag, localFilePath, prompt};
   }
 
-  async downloadImage(imageUrl: string) {
+  async downloadImage(imageUrl: string, sessionId: string) {
     return new Promise((resolve, reject) => {
       const homeDirectory = os.homedir();
 
       const urlObj = url.parse(imageUrl);
       const fileName = IdentityUtil.generateUUID() + '.png';
-      const subDirectoryPath = path.join(homeDirectory, CHAT_DATA_DIRECTORY,
-        'images');
+      const subDirectoryPath = path.join(homeDirectory, CHAT_DATA_DIRECTORY, sessionId);
       const localFilePath = path.join(subDirectoryPath, fileName);
 
       try {

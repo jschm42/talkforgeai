@@ -38,11 +38,11 @@ declare global {
 }
 
 contextBridge.exposeInMainWorld('chatAPI', {
-  processAssistantMessage: async (message: ChatMessage) => {
-    return assistantMessageProcessor.process(message);
+  processAssistantMessage: async (message: ChatMessage, session: ChatSession) => {
+    return assistantMessageProcessor.process(message, session);
   },
-  processUserMessage: async (message: ChatMessage) => {
-    return userMessageProcessor.process(message);
+  processUserMessage: async (message: ChatMessage, session: ChatSession) => {
+    return userMessageProcessor.process(message, session);
   },
   loadChatSession: (chatSessionId: string) => {
     return chatService.readFromFile(chatSessionId);
@@ -94,11 +94,11 @@ contextBridge.exposeInMainWorld('personaAPI', {
 });
 
 contextBridge.exposeInMainWorld('transformerAPI', {
-  processAssistantMessage: async (message: ChatMessage) => {
-    return await assistantMessageProcessor.process(message);
+  processAssistantMessage: async (message: ChatMessage, session: ChatSession) => {
+    return await assistantMessageProcessor.process(message, session);
   },
-  transformImage: async (content: string) => {
+  transformImage: async (content: string, session: ChatSession) => {
     const fn = imagePromptDownloadTransformer.process();
-    return await fn(content);
+    return await fn(content, session);
   },
 });

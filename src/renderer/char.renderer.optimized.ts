@@ -36,7 +36,7 @@ class ChatRendererOptimized {
     const userMessage = new ChatMessage(Role.USER, prompt);
     session.messages.push(userMessage);
     // @ts-ignore
-    const processedUserMessage = await window.chatAPI.processUserMessage(userMessage);
+    const processedUserMessage = await window.chatAPI.processUserMessage(toRaw(userMessage), toRaw(session));
     session.processedMessages.push(processedUserMessage);
 
     const submitMessages = [...session.systemMessages, ...previousMessages, userMessage];
@@ -48,6 +48,7 @@ class ChatRendererOptimized {
 
     await this.processReader(reader, session);
 
+    console.log('Postprocessing.....');
     await this.postProcessLastMessage(session);
 
     console.log('WRITING CHAT SESSION', toRaw(session));
@@ -84,7 +85,8 @@ class ChatRendererOptimized {
     const lastProcessedMessage = session.processedMessages.slice(-1)[0];
 
     // @ts-ignore
-    const processedMessage = await window.transformerAPI.processAssistantMessage(toRaw(lastProcessedMessage));
+    const processedMessage = await window.transformerAPI.processAssistantMessage(toRaw(lastProcessedMessage),
+      toRaw(session));
 
     lastProcessedMessage.content = processedMessage.content;
   }

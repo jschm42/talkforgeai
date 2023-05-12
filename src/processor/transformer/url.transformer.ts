@@ -11,8 +11,6 @@ class UrlTransformer extends MessageTransformer {
   process() {
     return (content: string) => new Promise((resolve, reject) => {
 
-      this.sendProgress('Processing urls...');
-
       console.log('UrlTransformer.process', content);
 
       let matchAll = [...content.matchAll(UrlRegEx)];
