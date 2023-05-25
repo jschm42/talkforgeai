@@ -2,6 +2,7 @@ package com.talkforgeai.talkforgeaiserver.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkforgeai.talkforgeaiserver.properties.OpenAIProperties;
+import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.service.OpenAiService;
@@ -23,16 +24,14 @@ public class OpenAIChatService {
         this.openAIProperties = openAIProperties;
     }
 
-    public ChatGptResponse submit(List<ChatMessage> messages) {
-        OpenAiService service = new OpenAiService("your_token");
+    public List<ChatCompletionChoice> submit(List<ChatMessage> messages) {
+        OpenAiService service = new OpenAiService(openAIProperties.apiKey());
         ChatCompletionRequest completionRequest = ChatCompletionRequest.builder()
             .messages(messages)
             .model("gpt-3.5-turbo")
             .build();
 
-        service.createChatCompletion(completionRequest).getChoices().forEach(System.out::println);
-
-        return null;
+        return service.createChatCompletion(completionRequest).getChoices();
     }
 
 }

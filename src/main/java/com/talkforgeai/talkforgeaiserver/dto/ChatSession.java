@@ -1,5 +1,7 @@
 package com.talkforgeai.talkforgeaiserver.dto;
 
+import com.theokanning.openai.completion.chat.ChatMessage;
+
 import java.util.ArrayList;
 import java.util.List;
 
