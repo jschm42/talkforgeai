@@ -3,6 +3,7 @@ package com.talkforgeai.talkforgeaiserver.domain;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
@@ -23,7 +24,8 @@ public class ChatMessageEntity {
     String content;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue
+    @UuidGenerator
     private UUID id;
 
     @ManyToOne

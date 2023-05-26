@@ -1,4 +1,4 @@
-package com.talkforgeai.talkforgeaiserver.service.dto;
+package com.talkforgeai.talkforgeaiserver.dto;
 
 public record ChatCompletionRequest(
     String prompt) {

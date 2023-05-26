@@ -2,6 +2,7 @@ package com.talkforgeai.talkforgeaiserver.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
@@ -9,7 +10,8 @@ import java.util.UUID;
 @Table(name = "PERSONA")
 public class PersonaEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue
+    @UuidGenerator
     private UUID id;
 
     @NotNull

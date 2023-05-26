@@ -3,11 +3,12 @@ package com.talkforgeai.talkforgeaiserver.service;
 import com.talkforgeai.talkforgeaiserver.domain.ChatMessageType;
 import com.talkforgeai.talkforgeaiserver.domain.ChatSessionEntity;
 import com.talkforgeai.talkforgeaiserver.domain.PersonaEntity;
+import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionRequest;
+import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionResponse;
+import com.talkforgeai.talkforgeaiserver.dto.NewChatSessionRequest;
+import com.talkforgeai.talkforgeaiserver.dto.SessionResponse;
 import com.talkforgeai.talkforgeaiserver.exception.PersonaException;
 import com.talkforgeai.talkforgeaiserver.exception.SessionException;
-import com.talkforgeai.talkforgeaiserver.service.dto.ChatCompletionRequest;
-import com.talkforgeai.talkforgeaiserver.service.dto.ChatCompletionResponse;
-import com.talkforgeai.talkforgeaiserver.service.dto.NewChatSessionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
@@ -94,6 +95,14 @@ public class ChatService {
         return previousMessages;
     }
 
+
+    public List<SessionResponse> getSessions() {
+        List<ChatSessionEntity> allSessions = sessionService.getAllSessions();
+        return allSessions.stream()
+            .map(this::mapSessionEntity)
+            .toList();
+    }
+
     private ChatCompletionResponse createResponse(ChatMessage newUserMessage, ChatMessage processedNewUserMessage, List<ChatMessage> responseMessages, List<ChatMessage> processedMessagesToSave, ChatSessionEntity updatedSession) {
         List<ChatMessage> unprocessedMessagesForResponse = new ArrayList<>();
         unprocessedMessagesForResponse.add(newUserMessage);
@@ -112,6 +121,14 @@ public class ChatService {
         messages.addAll(previousMessages);
         messages.add(newMessage);
         return messages;
+    }
+
+    private SessionResponse mapSessionEntity(ChatSessionEntity session) {
+        return new SessionResponse(
+            session.getId(),
+            "",
+            ""
+        );
     }
 
 }

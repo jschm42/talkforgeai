@@ -40,6 +40,8 @@ public class SessionService {
 
     public ChatSessionEntity createChatSession(PersonaEntity persona, List<ChatMessage> messages, List<ChatMessage> processedMessages) {
         ChatSessionEntity session = new ChatSessionEntity();
+        session.setName("<empty>");
+        session.setDescription("<empty>");
         session.setPersona(persona);
 
         return saveChatSession(messages, processedMessages, session);
@@ -54,4 +56,7 @@ public class SessionService {
         return repository.save(session);
     }
 
+    public List<ChatSessionEntity> getAllSessions() {
+        return repository.findAll();
+    }
 }
