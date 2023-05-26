@@ -1,6 +1,7 @@
 package com.talkforgeai.talkforgeaiserver.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
@@ -11,12 +12,15 @@ public class PersonaEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @NotNull
     @Column(unique = true, length = 32)
     private String name;
 
+    @NotNull
     @Column(length = 256)
     private String description;
 
+    @NotNull
     @Lob
     @Column(columnDefinition = "CLOB")
     private String system;

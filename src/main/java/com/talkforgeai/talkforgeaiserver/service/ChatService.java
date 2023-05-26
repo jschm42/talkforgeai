@@ -4,17 +4,18 @@ import com.talkforgeai.talkforgeaiserver.domain.ChatMessageType;
 import com.talkforgeai.talkforgeaiserver.domain.ChatSessionEntity;
 import com.talkforgeai.talkforgeaiserver.domain.PersonaEntity;
 import com.talkforgeai.talkforgeaiserver.exception.PersonaException;
+import com.talkforgeai.talkforgeaiserver.exception.SessionException;
 import com.talkforgeai.talkforgeaiserver.service.dto.ChatCompletionRequest;
 import com.talkforgeai.talkforgeaiserver.service.dto.ChatCompletionResponse;
+import com.talkforgeai.talkforgeaiserver.service.dto.NewChatSessionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ChatService {
@@ -36,18 +37,22 @@ public class ChatService {
         this.messageService = messageService;
     }
 
-    public ChatCompletionResponse submit(ChatCompletionRequest request) {
-        List<ChatMessage> previousMessages = new ArrayList<>();
-        Optional<ChatSessionEntity> session = sessionService.getSession(request.sessionId());
+    public UUID create(NewChatSessionRequest request) {
+        PersonaEntity persona = personaService.getPersonaByName(request.personaName())
+            .orElseThrow(() -> new PersonaException("Persona not found: " + request.personaName()));
 
-        PersonaEntity persona;
-        if (session.isPresent()) {
-            previousMessages = getPreviousMessages(session);
-            persona = session.get().getPersona();
-        } else {
-            persona = personaService.getPersonaByName(request.personaName())
-                .orElseThrow(() -> new PersonaException("Persona not found: " + request.personaName()));
-        }
+        ChatSessionEntity session
+            = sessionService.createChatSession(persona, new ArrayList<>(), new ArrayList<>());
+
+        return session.getId();
+    }
+
+    public ChatCompletionResponse submit(UUID sessionId, ChatCompletionRequest request) {
+        ChatSessionEntity session = sessionService.getSession(sessionId)
+            .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
+
+        PersonaEntity persona = session.getPersona();
+        List<ChatMessage> previousMessages = getPreviousMessages(session);
 
         ChatMessage newUserMessage = new ChatMessage(ChatMessageRole.USER.value(), request.prompt());
         // TODO Postprocessing of new user message
@@ -73,20 +78,16 @@ public class ChatService {
         processedMessagesToSave.add(processedNewUserMessage);
         processedMessagesToSave.addAll(processedResponseMessages);
 
-        ChatSessionEntity updatedSession;
-        if (session.isPresent()) {
-            updatedSession = sessionService.updateChatSession(request.sessionId(), messagesToSave, processedMessagesToSave);
-        } else {
-            updatedSession = sessionService.createChatSession(persona, messagesToSave, processedMessagesToSave);
-        }
+        ChatSessionEntity updatedSession
+            = sessionService.updateChatSession(sessionId, messagesToSave, processedMessagesToSave);
 
-        return createResponse(newUserMessage, processedNewUserMessage, responseMessages, processedMessagesToSave, updatedSession);
+        return createResponse(newUserMessage, processedNewUserMessage, responseMessages,
+            processedMessagesToSave, updatedSession);
     }
 
-    @NotNull
-    private List<ChatMessage> getPreviousMessages(Optional<ChatSessionEntity> session) {
+    private List<ChatMessage> getPreviousMessages(ChatSessionEntity session) {
         List<ChatMessage> previousMessages;
-        previousMessages = session.get().getChatMessages().stream()
+        previousMessages = session.getChatMessages().stream()
             .filter(m -> m.getType() == ChatMessageType.UNPROCESSED)
             .map(messageService::mapToDto)
             .toList();

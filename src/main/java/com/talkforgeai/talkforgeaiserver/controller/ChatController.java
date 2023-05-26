@@ -3,13 +3,13 @@ package com.talkforgeai.talkforgeaiserver.controller;
 import com.talkforgeai.talkforgeaiserver.service.ChatService;
 import com.talkforgeai.talkforgeaiserver.service.dto.ChatCompletionRequest;
 import com.talkforgeai.talkforgeaiserver.service.dto.ChatCompletionResponse;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.talkforgeai.talkforgeaiserver.service.dto.NewChatSessionRequest;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/chat")
 public class ChatController {
     private final ChatService chatService;
 
@@ -17,9 +17,15 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-    @PostMapping("/chat")
-    public ChatCompletionResponse submit(@RequestBody ChatCompletionRequest request) {
-        return chatService.submit(request);
+    @PostMapping("/session/{sessionId}")
+    public ChatCompletionResponse submit(@PathVariable("sessionId") UUID sessionId,
+                                         @RequestBody ChatCompletionRequest request) {
+        return chatService.submit(sessionId, request);
+    }
+
+    @PostMapping("/create")
+    UUID createNewChatSession(@RequestBody NewChatSessionRequest request) {
+        return chatService.create(request);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.talkforgeai.talkforgeaiserver.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +14,11 @@ public class ChatSessionEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @NotNull
     @OneToMany(mappedBy = "chatSession", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<ChatMessageEntity> chatMessages = new ArrayList<>();
 
+    @NotNull
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "persona_id", referencedColumnName = "id")
     private PersonaEntity persona;

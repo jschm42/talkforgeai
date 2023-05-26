@@ -4,6 +4,7 @@ import com.talkforgeai.talkforgeaiserver.domain.ChatMessageEntity;
 import com.talkforgeai.talkforgeaiserver.domain.ChatMessageType;
 import com.talkforgeai.talkforgeaiserver.domain.ChatSessionEntity;
 import com.talkforgeai.talkforgeaiserver.domain.PersonaEntity;
+import com.talkforgeai.talkforgeaiserver.exception.SessionException;
 import com.talkforgeai.talkforgeaiserver.repository.ChatSessionRepository;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import org.springframework.stereotype.Service;
@@ -22,16 +23,17 @@ public class SessionService {
         this.messageService = messageService;
     }
 
-    public Optional<ChatSessionEntity> getSession(String sessionId) {
-        if (sessionId == null || sessionId.isEmpty() || sessionId.isBlank()) {
+    public Optional<ChatSessionEntity> getSession(UUID sessionId) {
+        if (sessionId == null) {
             return Optional.empty();
         }
 
-        return this.repository.findById(UUID.fromString(sessionId));
+        return this.repository.findById(sessionId);
     }
 
-    public ChatSessionEntity updateChatSession(String sessionId, List<ChatMessage> messages, List<ChatMessage> processedMessages) {
-        ChatSessionEntity session = repository.getReferenceById(UUID.fromString(sessionId));
+    public ChatSessionEntity updateChatSession(UUID sessionId, List<ChatMessage> messages, List<ChatMessage> processedMessages) {
+        ChatSessionEntity session = repository.findById(sessionId)
+            .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
 
         return saveChatSession(messages, processedMessages, session);
     }

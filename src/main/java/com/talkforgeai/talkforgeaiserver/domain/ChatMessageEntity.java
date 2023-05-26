@@ -2,18 +2,22 @@ package com.talkforgeai.talkforgeaiserver.domain;
 
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
 @Entity
 @Table(name = "CHAT_MESSAGE")
 public class ChatMessageEntity {
+    @NotNull
     @Enumerated(EnumType.STRING)
     ChatMessageType type;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     ChatMessageRole role;
 
+    @NotNull
     @Lob
     @Column(columnDefinition = "CLOB")
     String content;
