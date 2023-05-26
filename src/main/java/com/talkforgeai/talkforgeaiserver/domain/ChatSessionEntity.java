@@ -19,7 +19,7 @@ public class ChatSessionEntity {
 
     @Size(max = 32)
     @NotNull
-    private String name;
+    private String title;
 
     @Size(max = 256)
     @NotNull
@@ -58,12 +58,12 @@ public class ChatSessionEntity {
         this.persona = persona;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String name) {
+        this.title = name;
     }
 
     public String getDescription() {

@@ -40,7 +40,7 @@ public class SessionService {
 
     public ChatSessionEntity createChatSession(PersonaEntity persona, List<ChatMessage> messages, List<ChatMessage> processedMessages) {
         ChatSessionEntity session = new ChatSessionEntity();
-        session.setName("<empty>");
+        session.setTitle("<empty>");
         session.setDescription("<empty>");
         session.setPersona(persona);
 
