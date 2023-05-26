@@ -9,6 +9,7 @@ import com.talkforgeai.talkforgeaiserver.service.dto.ChatCompletionResponse;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -41,11 +42,7 @@ public class ChatService {
 
         PersonaEntity persona;
         if (session.isPresent()) {
-            previousMessages = session.get().getChatMessages().stream()
-                .filter(m -> m.getType() == ChatMessageType.UNPROCESSED)
-                .map(messageService::mapToDto)
-                .toList();
-
+            previousMessages = getPreviousMessages(session);
             persona = session.get().getPersona();
         } else {
             persona = personaService.getPersonaByName(request.personaName())
@@ -63,7 +60,6 @@ public class ChatService {
         List<ChatMessage> responseMessages = choices.stream()
             .map(ChatCompletionChoice::getMessage)
             .toList();
-
 
         List<ChatMessage> messagesToSave = new ArrayList<>();
         messagesToSave.add(newUserMessage);
@@ -84,6 +80,20 @@ public class ChatService {
             updatedSession = sessionService.createChatSession(persona, messagesToSave, processedMessagesToSave);
         }
 
+        return createResponse(newUserMessage, processedNewUserMessage, responseMessages, processedMessagesToSave, updatedSession);
+    }
+
+    @NotNull
+    private List<ChatMessage> getPreviousMessages(Optional<ChatSessionEntity> session) {
+        List<ChatMessage> previousMessages;
+        previousMessages = session.get().getChatMessages().stream()
+            .filter(m -> m.getType() == ChatMessageType.UNPROCESSED)
+            .map(messageService::mapToDto)
+            .toList();
+        return previousMessages;
+    }
+
+    private ChatCompletionResponse createResponse(ChatMessage newUserMessage, ChatMessage processedNewUserMessage, List<ChatMessage> responseMessages, List<ChatMessage> processedMessagesToSave, ChatSessionEntity updatedSession) {
         List<ChatMessage> unprocessedMessagesForResponse = new ArrayList<>();
         unprocessedMessagesForResponse.add(newUserMessage);
         unprocessedMessagesForResponse.addAll(responseMessages);
