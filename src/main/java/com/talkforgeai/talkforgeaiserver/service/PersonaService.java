@@ -4,6 +4,7 @@ import com.talkforgeai.talkforgeaiserver.domain.PersonaEntity;
 import com.talkforgeai.talkforgeaiserver.repository.PersonaRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -15,8 +16,11 @@ public class PersonaService {
         this.personaRepository = personaRepository;
     }
 
-    PersonaEntity getPersona(String personaId) {
-        return personaRepository.findById(UUID.fromString(personaId))
-            .orElseThrow(() -> new PersonaException("Persona with ID " + personaId + " not found"));
+    Optional<PersonaEntity> getPersonaById(String personaId) {
+        return personaRepository.findById(UUID.fromString(personaId));
+    }
+
+    Optional<PersonaEntity> getPersonaByName(String personaName) {
+        return personaRepository.findByName(personaName);
     }
 }

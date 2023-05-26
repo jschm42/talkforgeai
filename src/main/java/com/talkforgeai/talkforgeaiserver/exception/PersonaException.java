@@ -1,4 +1,4 @@
-package com.talkforgeai.talkforgeaiserver.service;
+package com.talkforgeai.talkforgeaiserver.exception;
 
 public class PersonaException extends RuntimeException {
     public PersonaException(String message) {

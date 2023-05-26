@@ -1,10 +1,9 @@
 package com.talkforgeai.talkforgeaiserver.service;
 
-import com.talkforgeai.talkforgeaiserver.domain.ChatMessageEntity;
 import com.talkforgeai.talkforgeaiserver.domain.ChatMessageType;
 import com.talkforgeai.talkforgeaiserver.domain.ChatSessionEntity;
 import com.talkforgeai.talkforgeaiserver.domain.PersonaEntity;
-import com.talkforgeai.talkforgeaiserver.repository.ChatSessionRepository;
+import com.talkforgeai.talkforgeaiserver.exception.PersonaException;
 import com.talkforgeai.talkforgeaiserver.service.dto.ChatCompletionRequest;
 import com.talkforgeai.talkforgeaiserver.service.dto.ChatCompletionResponse;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 
 @Service
 public class ChatService {
@@ -22,39 +21,77 @@ public class ChatService {
     private final OpenAIChatService openAIChatService;
     private final PersonaService personaService;
 
-    private final ChatSessionRepository sessionRepository;
+    private final SessionService sessionService;
+
+    private final MessageService messageService;
 
     public ChatService(OpenAIChatService openAIChatService,
-                       ChatSessionRepository sessionRepository,
-                       PersonaService personaService) {
+                       SessionService sessionService,
+                       PersonaService personaService,
+                       MessageService messageService) {
         this.openAIChatService = openAIChatService;
-        this.sessionRepository = sessionRepository;
+        this.sessionService = sessionService;
         this.personaService = personaService;
+        this.messageService = messageService;
     }
 
     public ChatCompletionResponse submit(ChatCompletionRequest request) {
-        PersonaEntity persona = personaService.getPersona(request.personaId());
+        List<ChatMessage> previousMessages = new ArrayList<>();
+        Optional<ChatSessionEntity> session = sessionService.getSession(request.sessionId());
+
+        PersonaEntity persona;
+        if (session.isPresent()) {
+            previousMessages = session.get().getChatMessages().stream()
+                .filter(m -> m.getType() == ChatMessageType.UNPROCESSED)
+                .map(messageService::mapToDto)
+                .toList();
+
+            persona = session.get().getPersona();
+        } else {
+            persona = personaService.getPersonaByName(request.personaName())
+                .orElseThrow(() -> new PersonaException("Persona not found: " + request.personaName()));
+        }
 
         ChatMessage newUserMessage = new ChatMessage(ChatMessageRole.USER.value(), request.prompt());
+        // TODO Postprocessing of new user message
+        ChatMessage processedNewUserMessage = new ChatMessage(ChatMessageRole.USER.value(), request.prompt());
 
-        List<ChatMessage> messages = composeMessagePayload(null, newUserMessage, persona);
+        List<ChatMessage> messagePayload = composeMessagePayload(previousMessages, processedNewUserMessage, persona);
 
-        List<ChatCompletionChoice> choices = openAIChatService.submit(messages);
+        List<ChatCompletionChoice> choices = openAIChatService.submit(messagePayload);
 
-        List<ChatMessage> processedMessages = choices.stream()
+        List<ChatMessage> responseMessages = choices.stream()
             .map(ChatCompletionChoice::getMessage)
             .toList();
 
-        messages.addAll(processedMessages);
+
+        List<ChatMessage> messagesToSave = new ArrayList<>();
+        messagesToSave.add(newUserMessage);
+        messagesToSave.addAll(responseMessages);
+
+        List<ChatMessage> processedMessagesToSave = new ArrayList<>();
+        // TODO Postprocessing of response assistant messages
+        List<ChatMessage> processedResponseMessages = new ArrayList<>();
+        processedResponseMessages.addAll(responseMessages);
+
+        processedMessagesToSave.add(processedNewUserMessage);
+        processedMessagesToSave.addAll(processedResponseMessages);
 
         ChatSessionEntity updatedSession;
-        if (existsChatSession(request.sessionId())) {
-            updatedSession = updateChatSession(request.sessionId(), messages);
+        if (session.isPresent()) {
+            updatedSession = sessionService.updateChatSession(request.sessionId(), messagesToSave, processedMessagesToSave);
         } else {
-            updatedSession = createChatSession(persona, messages);
+            updatedSession = sessionService.createChatSession(persona, messagesToSave, processedMessagesToSave);
         }
 
-        return new ChatCompletionResponse(updatedSession.getId().toString(), processedMessages);
+        List<ChatMessage> unprocessedMessagesForResponse = new ArrayList<>();
+        unprocessedMessagesForResponse.add(newUserMessage);
+        unprocessedMessagesForResponse.addAll(responseMessages);
+        List<ChatMessage> proceccedMessagesForResponse = new ArrayList<>();
+        proceccedMessagesForResponse.add(processedNewUserMessage);
+        proceccedMessagesForResponse.addAll(processedMessagesToSave);
+
+        return new ChatCompletionResponse(updatedSession.getId().toString(), unprocessedMessagesForResponse, unprocessedMessagesForResponse);
     }
 
     private List<ChatMessage> composeMessagePayload(List<ChatMessage> previousMessages, ChatMessage newMessage, PersonaEntity persona) {
@@ -66,41 +103,4 @@ public class ChatService {
         return messages;
     }
 
-    private boolean existsChatSession(String sessionId) {
-        if (sessionId == null || sessionId.isEmpty()) {
-            return false;
-        }
-
-        return sessionRepository.findById(UUID.fromString(sessionId)).isPresent();
-    }
-
-    private ChatSessionEntity updateChatSession(String sessionId, List<ChatMessage> messages) {
-        ChatSessionEntity session = sessionRepository.getReferenceById(UUID.fromString(sessionId));
-        List<ChatMessageEntity> messageEntities = mapToEntity(messages, session, ChatMessageType.DEFAULT);
-        session.getChatMessages().addAll(messageEntities);
-        return sessionRepository.save(session);
-    }
-
-    private ChatSessionEntity createChatSession(PersonaEntity persona, List<ChatMessage> messages) {
-        ChatSessionEntity session = new ChatSessionEntity();
-        session.setPersona(persona);
-        List<ChatMessageEntity> messageEntities = mapToEntity(messages, session, ChatMessageType.DEFAULT);
-        session.getChatMessages().addAll(messageEntities);
-        return sessionRepository.save(session);
-    }
-
-    private List<ChatMessageEntity> mapToEntity(List<ChatMessage> messages, ChatSessionEntity session, ChatMessageType type) {
-        return messages.stream()
-            .map(m -> mapToEntity(m, session, type))
-            .toList();
-    }
-
-    private ChatMessageEntity mapToEntity(ChatMessage message, ChatSessionEntity session, ChatMessageType type) {
-        ChatMessageEntity entity = new ChatMessageEntity();
-        entity.setType(type);
-        entity.setChatSession(session);
-        entity.setMessage(message.getContent());
-        entity.setRole(message.getRole());
-        return entity;
-    }
 }

@@ -1,5 +1,6 @@
 package com.talkforgeai.talkforgeaiserver.domain;
 
+import com.theokanning.openai.completion.chat.ChatMessageRole;
 import jakarta.persistence.*;
 
 import java.util.UUID;
@@ -9,8 +10,13 @@ import java.util.UUID;
 public class ChatMessageEntity {
     @Enumerated(EnumType.STRING)
     ChatMessageType type;
-    String role;
-    String message;
+
+    @Enumerated(EnumType.STRING)
+    ChatMessageRole role;
+
+    @Lob
+    @Column(columnDefinition = "CLOB")
+    String content;
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -20,20 +26,12 @@ public class ChatMessageEntity {
     @JoinColumn(name = "chat_session_id")
     private ChatSessionEntity chatSession;
 
-    public String getRole() {
-        return role;
+    public String getContent() {
+        return content;
     }
 
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public UUID getId() {
@@ -58,5 +56,13 @@ public class ChatMessageEntity {
 
     public void setChatSession(ChatSessionEntity chatSession) {
         this.chatSession = chatSession;
+    }
+
+    public ChatMessageRole getRole() {
+        return role;
+    }
+
+    public void setRole(ChatMessageRole role) {
+        this.role = role;
     }
 }

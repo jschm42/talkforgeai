@@ -10,10 +10,18 @@ public class PersonaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(unique = true, length = 32)
     private String name;
 
+    @Column(length = 256)
     private String description;
+
+    @Lob
+    @Column(columnDefinition = "CLOB")
     private String system;
+
+    @Column(length = 128)
     private String imagePath;
 
     public UUID getId() {
