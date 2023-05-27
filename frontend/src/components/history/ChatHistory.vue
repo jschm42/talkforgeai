@@ -5,7 +5,7 @@
 
     <div class="list-group list-group-flush border-bottom">
 
-      <div v-for="entry in allIndexEntries" :key="entry.sessionId">
+      <div v-for="entry in allSessionEntries" :key="entry.sessionId">
         <a id='{{entry.sessionId}}' :class="getEntryClass(entry.sessionId)"
            class="list-group-item list-group-item-action py-3 lh-sm {{entry.active}}"
            @click="onEntrySelected(entry.sessionId)">
@@ -40,19 +40,16 @@ export default {
     };
   },
   computed: {
-    allIndexEntries() {
-      return this.store.index.entries;
+    allSessionEntries() {
+      return this.store.sessions;
     },
   },
   methods: {
     getEntryClass(sessionId) {
-      if (sessionId === this.store.session.sessionId) {
+      if (sessionId === this.store.sessionId) {
         return 'bg-primary';
       }
       return '';
-    },
-    load() {
-      this.store.loadIndex();
     },
     onEntrySelected(sessionId) {
       console.log('Index selected', sessionId);
