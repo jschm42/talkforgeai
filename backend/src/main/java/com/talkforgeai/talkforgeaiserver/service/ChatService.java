@@ -40,20 +40,21 @@ public class ChatService {
 
     public UUID create(NewChatSessionRequest request) {
         PersonaEntity persona = personaService.getPersonaByName(request.personaName())
-            .orElseThrow(() -> new PersonaException("Persona not found: " + request.personaName()));
+                .orElseThrow(() -> new PersonaException("Persona not found: " + request.personaName()));
 
         ChatSessionEntity session
-            = sessionService.createChatSession(persona, new ArrayList<>(), new ArrayList<>());
+                = sessionService.create(persona, new ArrayList<>(), new ArrayList<>());
 
         return session.getId();
     }
 
     public ChatCompletionResponse submit(UUID sessionId, ChatCompletionRequest request) {
-        ChatSessionEntity session = sessionService.getSession(sessionId)
-            .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
+        ChatSessionEntity session = sessionService.getById(sessionId)
+                .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
 
         PersonaEntity persona = session.getPersona();
         List<ChatMessage> previousMessages = getPreviousMessages(session);
+        boolean isFirstSubmitInSession = previousMessages.isEmpty();
 
         ChatMessage newUserMessage = new ChatMessage(ChatMessageRole.USER.value(), request.prompt());
         // TODO Postprocessing of new user message
@@ -64,8 +65,8 @@ public class ChatService {
         List<ChatCompletionChoice> choices = openAIChatService.submit(messagePayload);
 
         List<ChatMessage> responseMessages = choices.stream()
-            .map(ChatCompletionChoice::getMessage)
-            .toList();
+                .map(ChatCompletionChoice::getMessage)
+                .toList();
 
         List<ChatMessage> messagesToSave = new ArrayList<>();
         messagesToSave.add(newUserMessage);
@@ -79,28 +80,31 @@ public class ChatService {
         processedMessagesToSave.add(processedNewUserMessage);
         processedMessagesToSave.addAll(processedResponseMessages);
 
+        if (isFirstSubmitInSession) {
+            sessionService.update(sessionId, newUserMessage.getContent(), "<empty>");
+        }
         ChatSessionEntity updatedSession
-            = sessionService.updateChatSession(sessionId, messagesToSave, processedMessagesToSave);
+                = sessionService.update(sessionId, messagesToSave, processedMessagesToSave);
 
         return createResponse(newUserMessage, processedNewUserMessage, responseMessages,
-            processedMessagesToSave, updatedSession);
+                processedMessagesToSave, updatedSession);
     }
 
     private List<ChatMessage> getPreviousMessages(ChatSessionEntity session) {
         List<ChatMessage> previousMessages;
         previousMessages = session.getChatMessages().stream()
-            .filter(m -> m.getType() == ChatMessageType.UNPROCESSED)
-            .map(messageService::mapToDto)
-            .toList();
+                .filter(m -> m.getType() == ChatMessageType.UNPROCESSED)
+                .map(messageService::mapToDto)
+                .toList();
         return previousMessages;
     }
 
 
     public List<SessionResponse> getSessions() {
-        List<ChatSessionEntity> allSessions = sessionService.getAllSessions();
+        List<ChatSessionEntity> allSessions = sessionService.getAll();
         return allSessions.stream()
-            .map(this::mapSessionEntity)
-            .toList();
+                .map(this::mapSessionEntity)
+                .toList();
     }
 
     private ChatCompletionResponse createResponse(ChatMessage newUserMessage, ChatMessage processedNewUserMessage, List<ChatMessage> responseMessages, List<ChatMessage> processedMessagesToSave, ChatSessionEntity updatedSession) {
@@ -125,10 +129,9 @@ public class ChatService {
 
     private SessionResponse mapSessionEntity(ChatSessionEntity session) {
         return new SessionResponse(
-            session.getId(),
-            "",
-            ""
-        );
+                session.getId(),
+                session.getTitle(),
+                session.getDescription());
     }
 
 }

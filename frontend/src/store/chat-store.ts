@@ -35,10 +35,11 @@ export const useChatStore = defineStore('chat', {
       console.log('disableConfigHeader');
       this.chat.configHeaderEnabled = false;
     },
-    async loadIndex() {
-      const entries: Session[] = await chatService.readSessionEntries();
-      console.log('Index entries loaded', entries);
-      this.sessions = entries;
+    loadIndex() {
+      chatService.readSessionEntries().then((entries: any) => {
+        console.log('Index entries loaded', entries.data);
+        this.sessions = entries.data;
+      });
     },
     saveIndex() {
       //const indexRaw = toRaw(this.index.entries);
