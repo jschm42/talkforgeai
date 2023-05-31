@@ -6,10 +6,16 @@ module.exports = defineConfig({
   // see https://cli.vuejs.org/config/#devserver-proxy
   devServer: {
     proxy: {
-      '/api': {
+      '^/api': {
         target: 'http://localhost:8090', // this configuration needs to correspond to the Spring Boot backends' application.properties server.port
         ws: true,
         changeOrigin: true,
+      },
+      '^/persona': {
+        target: 'http://localhost:8090',
+        //pathRewrite: {'^/images/': '/persona/'},
+        changeOrigin: true,
+        secure: false,
       },
     },
   },

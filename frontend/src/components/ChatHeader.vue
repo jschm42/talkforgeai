@@ -14,7 +14,7 @@
           <img v-if="isShowPersonaImage(selectedPersona)"
                :alt="selectedPersona.name"
                :src="selectedPersona.imageUrl"
-               class="button-image mx-3"
+               class="persona-icon mx-3"
           />
           <i v-else class="fs-2 bi bi-robot robot-icon"></i>
           <span>{{ selectedPersona.name }} - {{ selectedPersona.description }}</span>
@@ -26,7 +26,8 @@
            class="dropdown-item"
            href="#"
            @click.prevent="onPersonaSelected(persona)">
-          <img v-if="isShowPersonaImage(persona)" :alt="persona.name" :src="persona.imageUrl"/>
+          <img v-if="isShowPersonaImage(persona)" :alt="persona.name" :src="persona.imageUrl"
+               class="persona-icon"/>
           <i v-else class="fs-2 bi bi-robot robot-icon"></i>
           {{ persona.name }} - {{ persona.description }}
         </a>
@@ -82,5 +83,10 @@ export default {
 <style scoped>
 .robot-icon {
   margin-right: 8px;
+}
+
+.persona-icon {
+  width: 32px;
+  height: 32px;
 }
 </style>
