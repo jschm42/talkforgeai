@@ -1,9 +1,11 @@
 import axios from 'axios';
+import Session from '@/store/to/session';
 
 class ChatService {
-  async readSessionEntries() {
+  async readSessionEntries(): Promise<Array<Session>> {
     try {
-      return await axios.get('/api/v1/chat/session');
+      const result = await axios.get('/api/v1/chat/session');
+      return result.data;
     } catch (error) {
       console.error('Error reading index entries: ', error);
     }

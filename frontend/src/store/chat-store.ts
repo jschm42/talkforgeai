@@ -3,13 +3,16 @@ import Session from '@/store/to/session';
 import ChatMessage from '@/store/to/chat-message';
 import Persona from '@/store/to/persona';
 import ChatService from '@/service/chat.service';
+import PersonaService from '@/service/persona.service';
+import ChatSession from '@/store/to/chat-session';
 
 const chatService = new ChatService();
+const personaService = new PersonaService();
 
 export const useChatStore = defineStore('chat', {
   state: () => {
     return {
-      sessionId: '' as string,
+      session: ChatSession,
       messages: [] as Array<ChatMessage>,
       chat: {
         configHeaderEnabled: true,
@@ -35,11 +38,8 @@ export const useChatStore = defineStore('chat', {
       console.log('disableConfigHeader');
       this.chat.configHeaderEnabled = false;
     },
-    loadIndex() {
-      chatService.readSessionEntries().then((entries: any) => {
-        console.log('Index entries loaded', entries.data);
-        this.sessions = entries.data;
-      });
+    async loadIndex() {
+      this.sessions = await chatService.readSessionEntries();
     },
     saveIndex() {
       //const indexRaw = toRaw(this.index.entries);
@@ -67,8 +67,8 @@ export const useChatStore = defineStore('chat', {
     changePersona(personaName: string) {
       // TODO
     },
-    async readPersonas() {
-      //this.persona = await window.personaAPI.readPersonas();
+    async readPersona() {
+      this.persona = await personaService.readPersona();
     },
     getElevenLabsProperties() {
       //return this.session.persona.elevenLabsProperties;

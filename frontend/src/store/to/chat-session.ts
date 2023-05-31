@@ -1,20 +1,16 @@
 import ChatMessage from './chat-message';
-import IdentityUtil from '../../util/identity-util';
-import Persona, {DEFAULT_PERSONA} from './persona';
 
 class ChatSession {
-  sessionId: string;
+  sessionId = null;
   systemMessages: Array<ChatMessage> = [];
   messages: Array<ChatMessage> = [];
   processedMessages: Array<ChatMessage> = [];
-  persona: Persona;
+  persona = null;
 
   constructor() {
-    this.sessionId = IdentityUtil.generateUUID();
     this.systemMessages = [];
     this.messages = [];
     this.processedMessages = [];
-    this.persona = DEFAULT_PERSONA;
   }
 
 }
