@@ -25,7 +25,7 @@ public class PersonaService {
                 personaEntity.getId(),
                 personaEntity.getName(),
                 personaEntity.getDescription(),
-                personaEntity.getImagePath()
+                "/api/v1/persona/image/" + personaEntity.getImagePath()
         );
     }
 

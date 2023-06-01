@@ -12,7 +12,7 @@ const personaService = new PersonaService();
 export const useChatStore = defineStore('chat', {
   state: () => {
     return {
-      session: ChatSession,
+      session: new ChatSession(),
       messages: [] as Array<ChatMessage>,
       chat: {
         configHeaderEnabled: true,
@@ -31,8 +31,9 @@ export const useChatStore = defineStore('chat', {
     },
   },
   actions: {
-    newSession() {
-      // TODO
+    async newSession() {
+      this.session.sessionId = await chatService.createNewSession();
+      this.session.messages = [];
     },
     disableConfigHeader() {
       console.log('disableConfigHeader');
@@ -41,16 +42,9 @@ export const useChatStore = defineStore('chat', {
     async loadIndex() {
       this.sessions = await chatService.readSessionEntries();
     },
-    saveIndex() {
-      //const indexRaw = toRaw(this.index.entries);
-
-      //window.chatIndexAPI.save(indexRaw);
-      //console.log('Index saved', indexRaw);
-    },
-    addIndexEntry(entry: Session) {
-      // Insert entry at the start of the index
-      //this.index.entries.unshift(entry);
-      //this.saveIndex();
+    async submitPrompt(prompt: string) {
+      const result = await chatService.submit(this.session.sessionId, prompt);
+      this.session.messages = result.processedMessages;
     },
     loadChatSession(sessionId: string) {
       //const chatSession = window.chatAPI.loadChatSession(sessionId);
@@ -60,9 +54,6 @@ export const useChatStore = defineStore('chat', {
         //session: chatSession,
         chat: {configHeaderEnabled: false},
       });
-    },
-    async submitStreamPrompt(prompt: string) {
-      //return await chatRenderer.submit(prompt, this.session);
     },
     changePersona(personaName: string) {
       // TODO

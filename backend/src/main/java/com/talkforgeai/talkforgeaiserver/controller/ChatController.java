@@ -19,7 +19,7 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-    @PostMapping("/session/{sessionId}")
+    @PostMapping("/submit/{sessionId}")
     public ChatCompletionResponse submit(@PathVariable("sessionId") UUID sessionId,
                                          @RequestBody ChatCompletionRequest request) {
         return chatService.submit(sessionId, request);

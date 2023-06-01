@@ -18,7 +18,6 @@
 <script>
 
 import {useChatStore} from '@/store/chat-store';
-import Session from '@/store/to/session';
 
 export default {
   name: 'ChatMessageInput',
@@ -40,12 +39,10 @@ export default {
       this.isInputLocked = true;
 
       if (this.store.isEmptySession) {
-        const indexEntry = new Session(this.store.session.sessionId, this.prompt, 'Description', new Date());
-        this.store.addIndexEntry(indexEntry);
-        this.store.saveIndex();
+        await this.store.newSession();
       }
 
-      const result = await this.store.submitStreamPrompt(this.prompt);
+      await this.store.submitPrompt(this.prompt);
 
       this.$emit('submitResultReceived');
       this.prompt = '';
@@ -54,17 +51,15 @@ export default {
       await this.$nextTick(() => {
         this.$refs.promptInputArea.focus();
       });
-
        */
-      return result;
     },
     clearChat() {
       this.store.newSession();
     },
     async testStream() {
-      return this.store.submitStreamPrompt('Explain how to sort an array in java.');
+      await this.store.submitPrompt('Explain how to sort an array in java.');
     },
-  }
+  },
 };
 </script>
 

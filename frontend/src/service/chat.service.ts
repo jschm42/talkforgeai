@@ -11,6 +11,26 @@ class ChatService {
     }
     return [];
   }
+
+  async createNewSession() {
+    try {
+      const result = await axios.post('/api/v1/chat/create', {});
+      return result.data;
+    } catch (error) {
+      console.error('Error creating chat session: ', error);
+    }
+    return null;
+  }
+
+  async submit(sessionId: string, prompt: string) {
+    try {
+      const result = await axios.post(`/api/v1/chat/submit/${sessionId}`, {prompt});
+      return result.data;
+    } catch (error) {
+      console.error('Error submitting prompt: ', error);
+    }
+    return null;
+  }
 }
 
 export default ChatService;
