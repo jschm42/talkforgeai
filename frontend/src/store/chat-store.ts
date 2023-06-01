@@ -33,10 +33,9 @@ export const useChatStore = defineStore('chat', {
   },
   actions: {
     async newSession() {
-      if (this.selectedPersona) {
-        this.sessionId = await chatService.createNewSession(this.selectedPersona.personaId);
-      }
+      this.sessionId = '';
       this.messages = [];
+      this.chat.configHeaderEnabled = true;
     },
     disableConfigHeader() {
       console.log('disableConfigHeader');
@@ -46,6 +45,12 @@ export const useChatStore = defineStore('chat', {
       this.sessions = await chatService.readSessionEntries();
     },
     async submitPrompt(prompt: string) {
+      this.chat.configHeaderEnabled = false;
+      
+      if (!this.sessionId || this.sessionId === '') {
+        this.sessionId = await chatService.createNewSession(this.selectedPersona.personaId);
+      }
+
       const result = await chatService.submit(this.sessionId, prompt);
       this.messages = [...this.messages, ...result.processedMessages];
     },

@@ -65,7 +65,7 @@ export default {
   },
   computed: {
     personaImage() {
-      return window.configAPI.getPersonaImagePath(this.store.session.persona.personaImage);
+      return this.store.selectedPersona.imageUrl;
     },
     messageClass() {
       return {
@@ -73,7 +73,7 @@ export default {
       };
     },
     isShowPersonaIcon() {
-      return this.isAssistant && !this.store.selectedPersona;
+      return this.isAssistant;
     },
     isShowRobotIcon() {
       return this.isAssistant && !this.store.selectedPersona;
@@ -83,9 +83,11 @@ export default {
     },
 
     isAssistant() {
+      console.log('isAssistant', this.message.role);
       return this.message.role === Role.ASSISTANT;
     },
     isUser() {
+      console.log('isUser', this.message.role);
       return this.message.role === Role.USER;
     },
     avatarImageClass() {

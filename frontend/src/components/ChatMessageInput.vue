@@ -35,16 +35,10 @@ export default {
   },
   methods: {
     async submit() {
-      this.store.disableConfigHeader();
       this.isInputLocked = true;
 
-      if (this.store.isEmptySession) {
-        console.log('Creating new Session.');
-        await this.store.newSession();
-      }
-
-      console.log('Submitting Session');
       await this.store.submitPrompt(this.prompt);
+      await this.store.loadIndex();
 
       this.$emit('submitResultReceived');
       this.prompt = '';
