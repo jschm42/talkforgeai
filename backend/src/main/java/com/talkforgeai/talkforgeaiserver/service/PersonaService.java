@@ -3,7 +3,6 @@ package com.talkforgeai.talkforgeaiserver.service;
 import com.talkforgeai.talkforgeaiserver.domain.PersonaEntity;
 import com.talkforgeai.talkforgeaiserver.dto.PersonaResponse;
 import com.talkforgeai.talkforgeaiserver.repository.PersonaRepository;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,17 +21,11 @@ public class PersonaService {
     }
 
     private PersonaResponse mapPersonaResponse(PersonaEntity personaEntity) {
-        String imgUrl = "";
-        if (personaEntity.getImagePath() != null) {
-            Resource file = fileStorageService.loadAsResource(personaEntity.getImagePath());
-            imgUrl = "/persona/" + file.getFilename();
-        }
-
         return new PersonaResponse(
                 personaEntity.getId(),
                 personaEntity.getName(),
                 personaEntity.getDescription(),
-                imgUrl
+                personaEntity.getImagePath()
         );
     }
 
