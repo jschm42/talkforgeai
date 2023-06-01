@@ -47,7 +47,7 @@ export const useChatStore = defineStore('chat', {
     },
     async submitPrompt(prompt: string) {
       const result = await chatService.submit(this.sessionId, prompt);
-      this.messages = result.processedMessages;
+      this.messages = [...this.messages, ...result.processedMessages];
     },
     loadChatSession(sessionId: string) {
       //const chatSession = window.chatAPI.loadChatSession(sessionId);
