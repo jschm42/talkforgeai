@@ -1,9 +1,4 @@
-import ChatMessage from './chat-message';
-
 class ChatSession {
-  sessionId = '';
-  messages: Array<ChatMessage> = [];
-  persona = null;
 
 }
 

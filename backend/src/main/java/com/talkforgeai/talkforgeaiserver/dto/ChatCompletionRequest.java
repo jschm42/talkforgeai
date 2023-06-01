@@ -1,5 +1,7 @@
 package com.talkforgeai.talkforgeaiserver.dto;
 
-public record ChatCompletionRequest(
-    String prompt) {
+import java.util.UUID;
+
+public record ChatCompletionRequest(UUID sessionId,
+                                    String prompt) {
 }

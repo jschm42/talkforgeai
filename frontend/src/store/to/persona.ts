@@ -1,5 +1,5 @@
 class Persona {
-  id: string;
+  personaId: string;
 
   /**
    * Name of the profile
@@ -13,10 +13,10 @@ class Persona {
 
   imageUrl: string;
 
-  constructor(id: string, name: string, description: string, imageUrl: string) {
+  constructor(personaId: string, name: string, description: string, imageUrl: string) {
     this.name = name;
     this.description = description;
-    this.id = id;
+    this.personaId = personaId;
     this.imageUrl = imageUrl;
   }
 }

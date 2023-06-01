@@ -39,8 +39,8 @@ public class ChatService {
     }
 
     public UUID create(NewChatSessionRequest request) {
-        PersonaEntity persona = personaService.getPersonaByName(request.personaName())
-                .orElseThrow(() -> new PersonaException("Persona not found: " + request.personaName()));
+        PersonaEntity persona = personaService.getPersonaById(request.personaId())
+                .orElseThrow(() -> new PersonaException("Persona not found: " + request.personaId()));
 
         ChatSessionEntity session
                 = sessionService.create(persona, new ArrayList<>(), new ArrayList<>());
@@ -48,9 +48,9 @@ public class ChatService {
         return session.getId();
     }
 
-    public ChatCompletionResponse submit(UUID sessionId, ChatCompletionRequest request) {
-        ChatSessionEntity session = sessionService.getById(sessionId)
-                .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
+    public ChatCompletionResponse submit(ChatCompletionRequest request) {
+        ChatSessionEntity session = sessionService.getById(request.sessionId())
+                .orElseThrow(() -> new SessionException("Session not found: " + request.sessionId()));
 
         PersonaEntity persona = session.getPersona();
         List<ChatMessage> previousMessages = getPreviousMessages(session);
@@ -81,10 +81,10 @@ public class ChatService {
         processedMessagesToSave.addAll(processedResponseMessages);
 
         if (isFirstSubmitInSession) {
-            sessionService.update(sessionId, newUserMessage.getContent(), "<empty>");
+            sessionService.update(request.sessionId(), newUserMessage.getContent(), "<empty>");
         }
         ChatSessionEntity updatedSession
-                = sessionService.update(sessionId, messagesToSave, processedMessagesToSave);
+                = sessionService.update(request.sessionId(), messagesToSave, processedMessagesToSave);
 
         return createResponse(newUserMessage, processedNewUserMessage, responseMessages,
                 processedMessagesToSave, updatedSession);

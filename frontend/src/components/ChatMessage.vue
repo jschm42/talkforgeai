@@ -73,11 +73,10 @@ export default {
       };
     },
     isShowPersonaIcon() {
-      return this.isAssistant && !!this.store.session.persona.personaImage;
+      return this.isAssistant && !this.store.selectedPersona;
     },
     isShowRobotIcon() {
-      return this.isAssistant &&
-        (this.store.session.persona.personaImage === undefined || this.store.session.persona.personaImage === null);
+      return this.isAssistant && !this.store.selectedPersona;
     },
     isShowUserIcon() {
       return this.isUser;

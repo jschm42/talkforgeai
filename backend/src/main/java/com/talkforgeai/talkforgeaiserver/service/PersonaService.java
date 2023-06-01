@@ -33,8 +33,8 @@ public class PersonaService {
         return getPersonaResponse(personaRepository.findAll());
     }
 
-    public Optional<PersonaEntity> getPersonaById(String personaId) {
-        return personaRepository.findById(UUID.fromString(personaId));
+    public Optional<PersonaEntity> getPersonaById(UUID personaId) {
+        return personaRepository.findById(personaId);
     }
 
     public Optional<PersonaEntity> getPersonaByName(String personaName) {

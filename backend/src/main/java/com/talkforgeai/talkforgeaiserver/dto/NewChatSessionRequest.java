@@ -1,4 +1,6 @@
 package com.talkforgeai.talkforgeaiserver.dto;
 
-public record NewChatSessionRequest(String personaName) {
+import java.util.UUID;
+
+public record NewChatSessionRequest(UUID personaId) {
 }

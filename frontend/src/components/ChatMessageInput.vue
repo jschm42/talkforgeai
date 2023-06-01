@@ -39,9 +39,11 @@ export default {
       this.isInputLocked = true;
 
       if (this.store.isEmptySession) {
+        console.log('Creating new Session.');
         await this.store.newSession();
       }
 
+      console.log('Submitting Session');
       await this.store.submitPrompt(this.prompt);
 
       this.$emit('submitResultReceived');

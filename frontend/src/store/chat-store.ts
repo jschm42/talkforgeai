@@ -4,7 +4,6 @@ import ChatMessage from '@/store/to/chat-message';
 import Persona from '@/store/to/persona';
 import ChatService from '@/service/chat.service';
 import PersonaService from '@/service/persona.service';
-import ChatSession from '@/store/to/chat-session';
 
 const chatService = new ChatService();
 const personaService = new PersonaService();
@@ -12,13 +11,15 @@ const personaService = new PersonaService();
 export const useChatStore = defineStore('chat', {
   state: () => {
     return {
-      session: new ChatSession(),
+      sessionId: '',
       messages: [] as Array<ChatMessage>,
+      selectedPersona: {} as Persona,
+      personaList: [] as Array<Persona>,
       chat: {
         configHeaderEnabled: true,
         autoSpeak: false,
       },
-      persona: [] as Array<Persona>,
+
       sessions: [] as Array<Session>,
     };
   },
@@ -32,8 +33,10 @@ export const useChatStore = defineStore('chat', {
   },
   actions: {
     async newSession() {
-      this.session.sessionId = await chatService.createNewSession();
-      this.session.messages = [];
+      if (this.selectedPersona) {
+        this.sessionId = await chatService.createNewSession(this.selectedPersona.personaId);
+      }
+      this.messages = [];
     },
     disableConfigHeader() {
       console.log('disableConfigHeader');
@@ -43,8 +46,8 @@ export const useChatStore = defineStore('chat', {
       this.sessions = await chatService.readSessionEntries();
     },
     async submitPrompt(prompt: string) {
-      const result = await chatService.submit(this.session.sessionId, prompt);
-      this.session.messages = result.processedMessages;
+      const result = await chatService.submit(this.sessionId, prompt);
+      this.messages = result.processedMessages;
     },
     loadChatSession(sessionId: string) {
       //const chatSession = window.chatAPI.loadChatSession(sessionId);
@@ -55,11 +58,9 @@ export const useChatStore = defineStore('chat', {
         chat: {configHeaderEnabled: false},
       });
     },
-    changePersona(personaName: string) {
-      // TODO
-    },
     async readPersona() {
-      this.persona = await personaService.readPersona();
+      this.personaList = await personaService.readPersona();
+      this.selectedPersona = this.personaList[0];
     },
     getElevenLabsProperties() {
       //return this.session.persona.elevenLabsProperties;

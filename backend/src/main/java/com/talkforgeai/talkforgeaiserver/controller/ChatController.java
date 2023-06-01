@@ -19,10 +19,9 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-    @PostMapping("/submit/{sessionId}")
-    public ChatCompletionResponse submit(@PathVariable("sessionId") UUID sessionId,
-                                         @RequestBody ChatCompletionRequest request) {
-        return chatService.submit(sessionId, request);
+    @PostMapping("/submit")
+    public ChatCompletionResponse submit(@RequestBody ChatCompletionRequest request) {
+        return chatService.submit(request);
     }
 
     @PostMapping("/create")

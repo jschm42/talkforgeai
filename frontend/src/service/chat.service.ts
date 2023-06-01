@@ -12,9 +12,10 @@ class ChatService {
     return [];
   }
 
-  async createNewSession() {
+  async createNewSession(personaId: string) {
+    console.log('Creating new session with personaId:', personaId);
     try {
-      const result = await axios.post('/api/v1/chat/create', {});
+      const result = await axios.post('/api/v1/chat/create', {personaId});
       return result.data;
     } catch (error) {
       console.error('Error creating chat session: ', error);
@@ -24,7 +25,7 @@ class ChatService {
 
   async submit(sessionId: string, prompt: string) {
     try {
-      const result = await axios.post(`/api/v1/chat/submit/${sessionId}`, {prompt});
+      const result = await axios.post(`/api/v1/chat/submit`, {sessionId, prompt});
       return result.data;
     } catch (error) {
       console.error('Error submitting prompt: ', error);

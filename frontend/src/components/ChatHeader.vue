@@ -49,9 +49,7 @@ export default {
     return {store};
   },
   data() {
-    return {
-      selectedPersona: null,
-    };
+    return {};
   },
   mounted() {
     this.store.readPersona();
@@ -61,7 +59,10 @@ export default {
       return !this.store.chat.configHeaderEnabled;
     },
     personaList() {
-      return this.store.persona;
+      return this.store.personaList;
+    },
+    selectedPersona() {
+      return this.store.selectedPersona;
     },
   },
   methods: {
@@ -69,13 +70,8 @@ export default {
       return !!persona.imageUrl;
     },
     onPersonaSelected(persona) {
-      console.log('ON PERSONA SELECT', persona);
-      this.store.changePersona(persona.name);
-      this.selectedPersona = persona;
+      this.store.selectedPersona = persona;
     },
-  },
-  updated($event) {
-    console.log('ChatHeader updated!', this.store.chat);
   },
 };
 </script>
