@@ -94,6 +94,10 @@ public class ChatService {
         ChatSessionEntity updatedSession
                 = sessionService.update(request.sessionId(), messagesToSave, processedMessagesToSave);
 
+        webSocketService.sendChatRequestStatus(
+                new ChatStatusUpdateMessage(request.sessionId(), "")
+        );
+        
         return createResponse(processedResponseMessages, updatedSession);
     }
 

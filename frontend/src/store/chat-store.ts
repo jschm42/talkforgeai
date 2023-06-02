@@ -31,6 +31,9 @@ export const useChatStore = defineStore('chat', {
     isEmptySession(): boolean {
       return this.messages.length == 0;
     },
+    maxMessageIndex(): number {
+      return this.messages.length - 1;
+    },
   },
   actions: {
     async newSession() {

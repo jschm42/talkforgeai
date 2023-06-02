@@ -28,7 +28,7 @@
 
       </div>
     </div>
-    <footer>FOOTER: {{ messageStatus }}</footer>
+    <footer>{{ getMessageStatus() }}</footer>
   </div>
 
 </template>
@@ -62,11 +62,9 @@ export default {
       role: String,
       content: String,
     },
+    messageIndex: Number,
   },
   computed: {
-    messageStatus() {
-      return this.store.currentStatusMessage;
-    },
     personaImage() {
       return this.store.selectedPersona.imageUrl;
     },
@@ -100,6 +98,13 @@ export default {
     },
   },
   methods: {
+    getMessageStatus() {
+      console.log('MAX INDEX', this.store.maxMessageIndex, this.id);
+      if (this.messageIndex === this.store.maxMessageIndex) {
+        return this.store.currentStatusMessage;
+      }
+      return '';
+    },
     pauseAudio() {
       console.log('Audio paused');
       this.audioState = AudioState.Paused;
@@ -166,5 +171,8 @@ export default {
   font-family: 'Courier New', monospace
 }
 
+footer {
+  font-style: italic;
+}
 
 </style>

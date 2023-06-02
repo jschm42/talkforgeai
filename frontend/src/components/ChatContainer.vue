@@ -3,7 +3,7 @@
   <div ref="entries" class="flex-fill vertical-scrollbar no-horizontal-scrollbar">
 
     <ChatMessage v-for="(message, index) in store.messages" ref="chatMessageRef"
-                 v-bind:key="index" :message="message"></ChatMessage>
+                 v-bind:key="index" :message="message" :messageIndex="index"></ChatMessage>
 
   </div>
   <!-- Input Section -->
