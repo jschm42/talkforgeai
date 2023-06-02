@@ -6,6 +6,7 @@ import com.talkforgeai.talkforgeaiserver.domain.PersonaEntity;
 import com.talkforgeai.talkforgeaiserver.dto.*;
 import com.talkforgeai.talkforgeaiserver.exception.PersonaException;
 import com.talkforgeai.talkforgeaiserver.exception.SessionException;
+import com.talkforgeai.talkforgeaiserver.transformers.MessageProcessor;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
@@ -26,16 +27,20 @@ public class ChatService {
     private final MessageService messageService;
     private final WebSocketService webSocketService;
 
+    private final MessageProcessor messageProcessor;
+
     public ChatService(OpenAIChatService openAIChatService,
                        SessionService sessionService,
                        PersonaService personaService,
                        MessageService messageService,
-                       WebSocketService webSocketService) {
+                       WebSocketService webSocketService,
+                       MessageProcessor messageProcessor) {
         this.openAIChatService = openAIChatService;
         this.sessionService = sessionService;
         this.personaService = personaService;
         this.messageService = messageService;
         this.webSocketService = webSocketService;
+        this.messageProcessor = messageProcessor;
     }
 
     public UUID create(NewChatSessionRequest request) {
@@ -76,14 +81,13 @@ public class ChatService {
         messagesToSave.addAll(responseMessages);
 
         List<ChatMessage> processedMessagesToSave = new ArrayList<>();
-        // TODO Postprocessing of response assistant messages
 
         webSocketService.sendChatRequestStatus(
                 new ChatStatusUpdateMessage(request.sessionId(), "Processing...")
         );
-
-        List<ChatMessage> processedResponseMessages = new ArrayList<>();
-        processedResponseMessages.addAll(responseMessages);
+        List<ChatMessage> processedResponseMessages = responseMessages.stream()
+                .map(messageProcessor::transform)
+                .toList();
 
         processedMessagesToSave.add(processedNewUserMessage);
         processedMessagesToSave.addAll(processedResponseMessages);
@@ -97,7 +101,7 @@ public class ChatService {
         webSocketService.sendChatRequestStatus(
                 new ChatStatusUpdateMessage(request.sessionId(), "")
         );
-        
+
         return createResponse(processedResponseMessages, updatedSession);
     }
 
