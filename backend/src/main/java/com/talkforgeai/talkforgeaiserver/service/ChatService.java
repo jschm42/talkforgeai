@@ -115,7 +115,7 @@ public class ChatService {
         proceccedMessagesForResponse.add(processedNewUserMessage);
         proceccedMessagesForResponse.addAll(processedMessagesToSave);
 
-        return new ChatCompletionResponse(updatedSession.getId().toString(), unprocessedMessagesForResponse, unprocessedMessagesForResponse);
+        return new ChatCompletionResponse(updatedSession.getId().toString(), unprocessedMessagesForResponse, proceccedMessagesForResponse);
     }
 
     private List<ChatMessage> composeMessagePayload(List<ChatMessage> previousMessages, ChatMessage newMessage, PersonaEntity persona) {
