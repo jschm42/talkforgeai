@@ -4,6 +4,7 @@ import ChatMessage from '@/store/to/chat-message';
 import Persona from '@/store/to/persona';
 import ChatService from '@/service/chat.service';
 import PersonaService from '@/service/persona.service';
+import Role from '@/store/to/role';
 
 const chatService = new ChatService();
 const personaService = new PersonaService();
@@ -19,7 +20,7 @@ export const useChatStore = defineStore('chat', {
         configHeaderEnabled: true,
         autoSpeak: false,
       },
-
+      currentStatusMessage: '',
       sessions: [] as Array<Session>,
     };
   },
@@ -46,10 +47,12 @@ export const useChatStore = defineStore('chat', {
     },
     async submitPrompt(prompt: string) {
       this.chat.configHeaderEnabled = false;
-      
+
       if (!this.sessionId || this.sessionId === '') {
         this.sessionId = await chatService.createNewSession(this.selectedPersona.personaId);
       }
+
+      this.messages.push(new ChatMessage(Role.USER, prompt));
 
       const result = await chatService.submit(this.sessionId, prompt);
       this.messages = [...this.messages, ...result.processedMessages];
@@ -72,6 +75,11 @@ export const useChatStore = defineStore('chat', {
     },
     toggleAutoSpeak() {
       this.chat.autoSpeak = !this.chat.autoSpeak;
+    },
+    updateStatus(sessionId: string, message: string) {
+      if (sessionId === this.sessionId) {
+        this.currentStatusMessage = message;
+      }
     },
   },
 

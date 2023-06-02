@@ -30,7 +30,7 @@ nav a.router-link-exact-active {
 </style>
 
 
-<script lang="ts">
+<script>
 import {useChatStore} from '@/store/chat-store';
 import {Client} from '@stomp/stompjs';
 
@@ -70,6 +70,8 @@ export default {
         // called when the client receives a STOMP message from the server
         if (message.body) {
           console.log('got message with body ' + message.body);
+          const data = JSON.parse(message.body);
+          this.store.updateStatus(data.sessionId, data.message);
         } else {
           console.log('got empty message');
         }

@@ -28,7 +28,7 @@
 
       </div>
     </div>
-
+    <footer>FOOTER: {{ messageStatus }}</footer>
   </div>
 
 </template>
@@ -64,6 +64,9 @@ export default {
     },
   },
   computed: {
+    messageStatus() {
+      return this.store.currentStatusMessage;
+    },
     personaImage() {
       return this.store.selectedPersona.imageUrl;
     },
@@ -81,7 +84,6 @@ export default {
     isShowUserIcon() {
       return this.isUser;
     },
-
     isAssistant() {
       console.log('isAssistant', this.message.role);
       return this.message.role === Role.ASSISTANT;

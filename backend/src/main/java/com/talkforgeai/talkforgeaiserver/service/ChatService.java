@@ -3,10 +3,7 @@ package com.talkforgeai.talkforgeaiserver.service;
 import com.talkforgeai.talkforgeaiserver.domain.ChatMessageType;
 import com.talkforgeai.talkforgeaiserver.domain.ChatSessionEntity;
 import com.talkforgeai.talkforgeaiserver.domain.PersonaEntity;
-import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionRequest;
-import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionResponse;
-import com.talkforgeai.talkforgeaiserver.dto.NewChatSessionRequest;
-import com.talkforgeai.talkforgeaiserver.dto.SessionResponse;
+import com.talkforgeai.talkforgeaiserver.dto.*;
 import com.talkforgeai.talkforgeaiserver.exception.PersonaException;
 import com.talkforgeai.talkforgeaiserver.exception.SessionException;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
@@ -27,15 +24,18 @@ public class ChatService {
     private final SessionService sessionService;
 
     private final MessageService messageService;
+    private final WebSocketService webSocketService;
 
     public ChatService(OpenAIChatService openAIChatService,
                        SessionService sessionService,
                        PersonaService personaService,
-                       MessageService messageService) {
+                       MessageService messageService,
+                       WebSocketService webSocketService) {
         this.openAIChatService = openAIChatService;
         this.sessionService = sessionService;
         this.personaService = personaService;
         this.messageService = messageService;
+        this.webSocketService = webSocketService;
     }
 
     public UUID create(NewChatSessionRequest request) {
@@ -62,6 +62,9 @@ public class ChatService {
 
         List<ChatMessage> messagePayload = composeMessagePayload(previousMessages, processedNewUserMessage, persona);
 
+        webSocketService.sendChatRequestStatus(
+                new ChatStatusUpdateMessage(request.sessionId(), "Thinking...")
+        );
         List<ChatCompletionChoice> choices = openAIChatService.submit(messagePayload);
 
         List<ChatMessage> responseMessages = choices.stream()
@@ -74,6 +77,11 @@ public class ChatService {
 
         List<ChatMessage> processedMessagesToSave = new ArrayList<>();
         // TODO Postprocessing of response assistant messages
+
+        webSocketService.sendChatRequestStatus(
+                new ChatStatusUpdateMessage(request.sessionId(), "Processing...")
+        );
+
         List<ChatMessage> processedResponseMessages = new ArrayList<>();
         processedResponseMessages.addAll(responseMessages);
 
@@ -86,8 +94,7 @@ public class ChatService {
         ChatSessionEntity updatedSession
                 = sessionService.update(request.sessionId(), messagesToSave, processedMessagesToSave);
 
-        return createResponse(newUserMessage, processedNewUserMessage, responseMessages,
-                processedMessagesToSave, updatedSession);
+        return createResponse(processedResponseMessages, updatedSession);
     }
 
     private List<ChatMessage> getPreviousMessages(ChatSessionEntity session) {
@@ -107,15 +114,8 @@ public class ChatService {
                 .toList();
     }
 
-    private ChatCompletionResponse createResponse(ChatMessage newUserMessage, ChatMessage processedNewUserMessage, List<ChatMessage> responseMessages, List<ChatMessage> processedMessagesToSave, ChatSessionEntity updatedSession) {
-        List<ChatMessage> unprocessedMessagesForResponse = new ArrayList<>();
-        unprocessedMessagesForResponse.add(newUserMessage);
-        unprocessedMessagesForResponse.addAll(responseMessages);
-        List<ChatMessage> proceccedMessagesForResponse = new ArrayList<>();
-        proceccedMessagesForResponse.add(processedNewUserMessage);
-        proceccedMessagesForResponse.addAll(processedMessagesToSave);
-
-        return new ChatCompletionResponse(updatedSession.getId().toString(), unprocessedMessagesForResponse, proceccedMessagesForResponse);
+    private ChatCompletionResponse createResponse(List<ChatMessage> processedMessages, ChatSessionEntity updatedSession) {
+        return new ChatCompletionResponse(updatedSession.getId().toString(), processedMessages);
     }
 
     private List<ChatMessage> composeMessagePayload(List<ChatMessage> previousMessages, ChatMessage newMessage, PersonaEntity persona) {
