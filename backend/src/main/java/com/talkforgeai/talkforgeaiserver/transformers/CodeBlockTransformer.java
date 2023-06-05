@@ -1,12 +1,14 @@
 package com.talkforgeai.talkforgeaiserver.transformers;
 
+import com.talkforgeai.talkforgeaiserver.transformers.dto.TransformerContext;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CodeBlockTransformer implements Transformer {
 
     @Override
-    public String process(String content) {
+    public String process(String content, TransformerContext context) {
         String regex = "```([a-z]*)\n([\\s\\S]*?)```";
 
         Pattern pattern = Pattern.compile(regex);
@@ -16,9 +18,14 @@ public class CodeBlockTransformer implements Transformer {
             String lang = matcher.group(1);
             String code = matcher.group(2);
 
+            String langClass = "";
+            if (lang != null && !lang.isEmpty()) {
+                langClass = """
+                        class="language-%s\"""".formatted(lang);
+            }
+
             String processed = """
-                    <pre><code class="language-%s">%s</code></pre>
-                    """.formatted(lang, code);
+                    <pre><code %s>%s</code></pre>""".formatted(langClass, code);
 
             content = content.replace(matcher.group(), processed);
             System.out.println("Replaced: " + content);

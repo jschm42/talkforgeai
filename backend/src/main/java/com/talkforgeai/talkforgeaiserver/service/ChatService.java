@@ -28,19 +28,22 @@ public class ChatService {
     private final WebSocketService webSocketService;
 
     private final MessageProcessor messageProcessor;
+    private final FileStorageService fileStorageService;
 
     public ChatService(OpenAIChatService openAIChatService,
                        SessionService sessionService,
                        PersonaService personaService,
                        MessageService messageService,
                        WebSocketService webSocketService,
-                       MessageProcessor messageProcessor) {
+                       MessageProcessor messageProcessor,
+                       FileStorageService fileStorageService) {
         this.openAIChatService = openAIChatService;
         this.sessionService = sessionService;
         this.personaService = personaService;
         this.messageService = messageService;
         this.webSocketService = webSocketService;
         this.messageProcessor = messageProcessor;
+        this.fileStorageService = fileStorageService;
     }
 
     public UUID create(NewChatSessionRequest request) {
@@ -86,7 +89,7 @@ public class ChatService {
                 new ChatStatusUpdateMessage(request.sessionId(), "Processing...")
         );
         List<ChatMessage> processedResponseMessages = responseMessages.stream()
-                .map(messageProcessor::transform)
+                .map(m -> messageProcessor.transform(m, session.getId(), fileStorageService.getDataDirectory()))
                 .toList();
 
         processedMessagesToSave.add(processedNewUserMessage);

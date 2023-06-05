@@ -1,9 +1,20 @@
 package com.talkforgeai.talkforgeaiserver.transformers;
 
+import com.talkforgeai.talkforgeaiserver.transformers.dto.TransformerContext;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.file.Path;
+import java.util.UUID;
+
 public class CodeBlockTransformerTest {
+    TransformerContext context;
+
+    @BeforeEach
+    public void before() {
+        context = new TransformerContext(UUID.randomUUID(), Path.of("/temp"));
+    }
 
 //     "<smiley> \n" +
 //             "\n" +
@@ -47,16 +58,16 @@ public class CodeBlockTransformerTest {
 
         String expected = "Here's an example of how to use the \"Arrays.sort()\" method:\n" +
                 "\n" +
-                "<pre>" +
+                "<pre><code class=\"language-java\">" +
                 "int[] numbers = { 5, 3, 9, 1, 7 };\n" +
                 "Arrays.sort(numbers);\n" +
-                "</pre>\n" +
+                "</code></pre>\n" +
                 "\n" +
                 "<smiley>";
 
         CodeBlockTransformer transformer = new CodeBlockTransformer();
 
-        String processed = transformer.process(content);
+        String processed = transformer.process(content, context);
 
         Assertions.assertEquals(expected, processed);
 
@@ -75,16 +86,16 @@ public class CodeBlockTransformerTest {
 
         String expected = "Here's an example of how to use the \"Arrays.sort()\" method:\n" +
                 "\n" +
-                "<pre>" +
+                "<pre><code >" +
                 "int[] numbers = { 5, 3, 9, 1, 7 };\n" +
                 "Arrays.sort(numbers);\n" +
-                "</pre>\n" +
+                "</code></pre>\n" +
                 "\n" +
                 "<smiley>";
 
         CodeBlockTransformer transformer = new CodeBlockTransformer();
 
-        String processed = transformer.process(content);
+        String processed = transformer.process(content, context);
 
         Assertions.assertEquals(expected, processed);
 

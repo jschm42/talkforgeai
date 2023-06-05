@@ -17,7 +17,7 @@ import static com.theokanning.openai.service.OpenAiService.defaultRetrofit;
 
 @Configuration
 public class OpenAIServiceConfiguration {
-    public static final int TIMEOUT_MS = 50000;
+    public static final int TIMEOUT_MS = 1000 * 60 * 5;
 
     private final OpenAIProperties openAIProperties;
 
