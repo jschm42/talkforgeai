@@ -22,7 +22,7 @@
         <i v-if="audioState === 'playing'" class="bi bi-pause-circle-fill message-icon" role="button"
            @click="pauseAudio"></i>
 
-        <div v-if="audioState === 'loading'" class="spinner-border spinner-icon" role="status">
+        <div v-if="audioState === 'loading'" class="spinner-border spinner-border-sm" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
 
@@ -42,7 +42,7 @@
 
 import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
-import {toRaw} from 'vue';
+import TtsService from '@/service/tts.service';
 
 const AudioState = {
   Loading: 'loading',
@@ -50,6 +50,8 @@ const AudioState = {
   Paused: 'paused',
   Stopped: 'stopped',
 };
+
+const ttsService = new TtsService();
 
 export default {
   name: 'ChatMessage',
@@ -122,8 +124,9 @@ export default {
       console.log('Playing audio');
       this.audioState = AudioState.Loading;
       try {
-        const properties = toRaw(this.store.getElevenLabsProperties());
-        const audioBlob = await window.chatAPI.textToSpeech(this.message.content, properties);
+        //const properties = toRaw(this.store.getElevenLabsProperties());
+        //const audioBlob = await window.chatAPI.textToSpeech(this.message.content, properties);
+        const audioBlob = await ttsService.speak(this.message.content);
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.addEventListener('ended', () => {
@@ -162,10 +165,6 @@ export default {
 
 .message-icon {
   font-size: 1.5em;
-}
-
-.spinner-icon {
-  font-size: 1.0em;
 }
 
 .code-word {
