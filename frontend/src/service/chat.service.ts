@@ -23,6 +23,23 @@ class ChatService {
     return null;
   }
 
+  async getLastResult(sessionId: string) {
+    try {
+      const result = await axios.get(
+        `/api/v1/chat/result/${sessionId}`,
+        {
+          timeout: 50000,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      return result.data;
+    } catch (error) {
+      console.error('Error submitting prompt: ', error);
+    }
+    return null;
+  }
+
   async submit(sessionId: string, prompt: string) {
     try {
       const result = await axios.post(

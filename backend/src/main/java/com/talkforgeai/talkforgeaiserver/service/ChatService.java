@@ -3,32 +3,39 @@ package com.talkforgeai.talkforgeaiserver.service;
 import com.talkforgeai.talkforgeaiserver.domain.ChatMessageType;
 import com.talkforgeai.talkforgeaiserver.domain.ChatSessionEntity;
 import com.talkforgeai.talkforgeaiserver.domain.PersonaEntity;
-import com.talkforgeai.talkforgeaiserver.dto.*;
+import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionRequest;
+import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionResponse;
+import com.talkforgeai.talkforgeaiserver.dto.NewChatSessionRequest;
+import com.talkforgeai.talkforgeaiserver.dto.SessionResponse;
+import com.talkforgeai.talkforgeaiserver.dto.ws.ChatResponseMessage;
+import com.talkforgeai.talkforgeaiserver.dto.ws.ChatStatusMessage;
 import com.talkforgeai.talkforgeaiserver.exception.PersonaException;
 import com.talkforgeai.talkforgeaiserver.exception.SessionException;
 import com.talkforgeai.talkforgeaiserver.transformers.MessageProcessor;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ChatService {
-
     private final OpenAIChatService openAIChatService;
     private final PersonaService personaService;
-
     private final SessionService sessionService;
-
     private final MessageService messageService;
     private final WebSocketService webSocketService;
-
     private final MessageProcessor messageProcessor;
     private final FileStorageService fileStorageService;
+    Logger logger = LoggerFactory.getLogger(ChatService.class);
 
     public ChatService(OpenAIChatService openAIChatService,
                        SessionService sessionService,
@@ -47,6 +54,8 @@ public class ChatService {
     }
 
     public UUID create(NewChatSessionRequest request) {
+        logger.info("Creating new chat session for persona: {}", request.personaId());
+
         PersonaEntity persona = personaService.getPersonaById(request.personaId())
                 .orElseThrow(() -> new PersonaException("Persona not found: " + request.personaId()));
 
@@ -56,7 +65,11 @@ public class ChatService {
         return session.getId();
     }
 
-    public ChatCompletionResponse submit(ChatCompletionRequest request) {
+    @Async
+    @Transactional
+    public CompletableFuture<ChatCompletionResponse> submit(ChatCompletionRequest request) {
+        logger.info("Submitting chat completion request for session: {}", request.sessionId());
+
         ChatSessionEntity session = sessionService.getById(request.sessionId())
                 .orElseThrow(() -> new SessionException("Session not found: " + request.sessionId()));
 
@@ -70,8 +83,8 @@ public class ChatService {
 
         List<ChatMessage> messagePayload = composeMessagePayload(previousMessages, processedNewUserMessage, persona);
 
-        webSocketService.sendChatRequestStatus(
-                new ChatStatusUpdateMessage(request.sessionId(), "Thinking...")
+        webSocketService.sendMessage(
+                new ChatStatusMessage(request.sessionId(), "Thinking...")
         );
         List<ChatCompletionChoice> choices = openAIChatService.submit(messagePayload);
 
@@ -85,8 +98,8 @@ public class ChatService {
 
         List<ChatMessage> processedMessagesToSave = new ArrayList<>();
 
-        webSocketService.sendChatRequestStatus(
-                new ChatStatusUpdateMessage(request.sessionId(), "Processing...")
+        webSocketService.sendMessage(
+                new ChatStatusMessage(request.sessionId(), "Processing...")
         );
         List<ChatMessage> processedResponseMessages = responseMessages.stream()
                 .map(m -> messageProcessor.transform(m, session.getId(), fileStorageService.getDataDirectory()))
@@ -101,11 +114,16 @@ public class ChatService {
         ChatSessionEntity updatedSession
                 = sessionService.update(request.sessionId(), messagesToSave, processedMessagesToSave);
 
-        webSocketService.sendChatRequestStatus(
-                new ChatStatusUpdateMessage(request.sessionId(), "")
+
+        webSocketService.sendMessage(
+                new ChatStatusMessage(request.sessionId(), "")
         );
 
-        return createResponse(processedResponseMessages, updatedSession);
+        webSocketService.sendMessage(
+                new ChatResponseMessage(request.sessionId(), processedResponseMessages)
+        );
+
+        return CompletableFuture.completedFuture(createResponse(processedResponseMessages, updatedSession));
     }
 
     private List<ChatMessage> getPreviousMessages(ChatSessionEntity session) {

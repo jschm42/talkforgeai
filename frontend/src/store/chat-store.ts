@@ -48,6 +48,9 @@ export const useChatStore = defineStore('chat', {
     async loadIndex() {
       this.sessions = await chatService.readSessionEntries();
     },
+    async getLastResult() {
+      return await chatService.getLastResult(this.sessionId);
+    },
     async submitPrompt(prompt: string) {
       this.chat.configHeaderEnabled = false;
 
@@ -57,8 +60,10 @@ export const useChatStore = defineStore('chat', {
 
       this.messages.push(new ChatMessage(Role.USER, prompt));
 
+      console.log('Submitting prompt', this.sessionId, prompt);
       const result = await chatService.submit(this.sessionId, prompt);
-      this.messages = [...this.messages, ...result.processedMessages];
+      console.log('Prompt submitted');
+      //this.messages = [...this.messages, ...result.processedMessages];
     },
     loadChatSession(sessionId: string) {
       //const chatSession = window.chatAPI.loadChatSession(sessionId);

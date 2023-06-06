@@ -8,7 +8,7 @@
       </div>
       <div class="col-md-10">
         <div class="card-body">
-          <div class="card-text" v-html="message.content"></div>
+          <div class="card-text text-start" v-html="message.content"></div>
         </div>
       </div>
       <div class="col-md-1 text-end">
@@ -28,7 +28,11 @@
 
       </div>
     </div>
-    <footer>{{ getMessageStatus() }}</footer>
+    <footer>
+      <div v-if="getMessageStatus() !== ''" class="spinner-border" role="status">
+        <span class="sr-only">{{ getMessageStatus() }}</span>
+      </div>
+    </footer>
   </div>
 
 </template>

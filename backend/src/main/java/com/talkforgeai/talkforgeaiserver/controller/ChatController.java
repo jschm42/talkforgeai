@@ -1,11 +1,12 @@
 package com.talkforgeai.talkforgeaiserver.controller;
 
 import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionRequest;
-import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionResponse;
 import com.talkforgeai.talkforgeaiserver.dto.NewChatSessionRequest;
 import com.talkforgeai.talkforgeaiserver.dto.SessionResponse;
 import com.talkforgeai.talkforgeaiserver.service.ChatService;
 import com.talkforgeai.talkforgeaiserver.service.FileStorageService;
+import com.talkforgeai.talkforgeaiserver.service.MessageService;
+import com.theokanning.openai.completion.chat.ChatMessage;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -24,15 +25,24 @@ import java.util.UUID;
 public class ChatController {
     private final ChatService chatService;
     private final FileStorageService fileStorageService;
+    private final MessageService messageService;
 
-    public ChatController(ChatService chatService, FileStorageService fileStorageService) {
+    public ChatController(ChatService chatService, FileStorageService fileStorageService, MessageService messageService) {
         this.chatService = chatService;
         this.fileStorageService = fileStorageService;
+        this.messageService = messageService;
     }
 
     @PostMapping("/submit")
-    public ChatCompletionResponse submit(@RequestBody ChatCompletionRequest request) {
-        return chatService.submit(request);
+    public void submit(@RequestBody ChatCompletionRequest request) {
+        chatService.submit(request);
+
+        //CompletableFuture.runAsync(() -> chatService.submit(request));
+    }
+
+    @GetMapping("/result/{sessionId}")
+    ChatMessage getResult(@PathVariable UUID sessionId) {
+        return messageService.getLastProcessedMessage(sessionId);
     }
 
     @PostMapping("/create")

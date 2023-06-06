@@ -43,7 +43,11 @@ public class MessageService {
 
     public List<ChatMessageEntity> mapToEntity(List<ChatMessage> messages, ChatSessionEntity session, ChatMessageType type) {
         return messages.stream()
-            .map(m -> mapToEntity(m, session, type))
-            .toList();
+                .map(m -> mapToEntity(m, session, type))
+                .toList();
+    }
+
+    public ChatMessage getLastProcessedMessage(UUID sessionId) {
+        return mapToDto(repository.findLastProcessedMessage(sessionId));
     }
 }
