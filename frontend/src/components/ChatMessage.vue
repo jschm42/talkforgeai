@@ -29,7 +29,8 @@
       </div>
     </div>
     <footer>
-      <div v-if="getMessageStatus() !== ''" class="spinner-border" role="status">
+      <strong class="mx-1">{{ getMessageStatus() }}</strong>
+      <div v-if="getMessageStatus() !== ''" class="spinner-border spinner-border-sm" role="status">
         <span class="sr-only">{{ getMessageStatus() }}</span>
       </div>
     </footer>
