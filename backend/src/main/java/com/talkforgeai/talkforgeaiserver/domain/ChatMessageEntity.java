@@ -2,25 +2,24 @@ package com.talkforgeai.talkforgeaiserver.domain;
 
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
 @Table(name = "CHAT_MESSAGE")
 public class ChatMessageEntity {
-    @NotNull
     @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
     ChatMessageType type;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
     ChatMessageRole role;
 
-    @NotNull
     @Lob
-    @Column(columnDefinition = "CLOB")
+    @Column(columnDefinition = "CLOB", nullable = false)
     String content;
 
     @Id
@@ -29,8 +28,12 @@ public class ChatMessageEntity {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "chat_session_id")
+    @JoinColumn(name = "chat_session_id", nullable = false)
     private ChatSessionEntity chatSession;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_on", nullable = false)
+    private Date createdOn;
 
     public String getContent() {
         return content;
@@ -70,5 +73,13 @@ public class ChatMessageEntity {
 
     public void setRole(ChatMessageRole role) {
         this.role = role;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
     }
 }

@@ -1,9 +1,11 @@
 package com.talkforgeai.talkforgeaiserver.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -14,21 +16,30 @@ public class PersonaEntity {
     @UuidGenerator
     private UUID id;
 
-    @NotNull
-    @Column(unique = true, length = 32)
+    @Column(unique = true, length = 32, nullable = false)
     private String name;
 
-    @NotNull
-    @Column(length = 256)
+    @Column(length = 256, nullable = false)
     private String description;
 
-    @NotNull
     @Lob
     @Column(columnDefinition = "CLOB")
     private String system;
 
     @Column(length = 128)
     private String imagePath;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "persona_property_mapping",
+            joinColumns = {@JoinColumn(name = "persona_id", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "property_id", referencedColumnName = "id")})
+    @MapKey(name = "propertyKey")
+    private Map<String, PropertyEntity> properties = new HashMap<>();
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_on", nullable = false)
+    private Date createdOn;
+
 
     public UUID getId() {
         return id;
@@ -70,4 +81,19 @@ public class PersonaEntity {
         this.imagePath = imagePath;
     }
 
+    public Map<String, PropertyEntity> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, PropertyEntity> properties) {
+        this.properties = properties;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
+    }
 }

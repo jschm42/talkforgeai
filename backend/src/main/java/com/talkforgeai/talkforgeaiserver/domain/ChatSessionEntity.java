@@ -1,11 +1,11 @@
 package com.talkforgeai.talkforgeaiserver.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,21 +18,23 @@ public class ChatSessionEntity {
     private UUID id;
 
     @Size(max = 32)
-    @NotNull
+    @Column(name = "title", nullable = false)
     private String title;
 
     @Size(max = 256)
-    @NotNull
+    @Column(name = "description", nullable = false)
     private String description;
 
-    @NotNull
     @OneToMany(mappedBy = "chatSession", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<ChatMessageEntity> chatMessages = new ArrayList<>();
 
-    @NotNull
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "persona_id", referencedColumnName = "id")
     private PersonaEntity persona;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_on", nullable = false)
+    private Date createdOn;
 
     public UUID getId() {
         return id;
@@ -72,5 +74,13 @@ public class ChatSessionEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
     }
 }

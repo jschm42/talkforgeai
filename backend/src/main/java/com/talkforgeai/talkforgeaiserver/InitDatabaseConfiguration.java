@@ -8,6 +8,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Date;
+
 @Configuration
 public class InitDatabaseConfiguration {
     Logger logger = LoggerFactory.getLogger(InitDatabaseConfiguration.class);
@@ -45,6 +47,7 @@ public class InitDatabaseConfiguration {
         personaEntity.setDescription(description);
         personaEntity.setSystem(system);
         personaEntity.setImagePath(imagePath);
+        personaEntity.setCreatedOn(new Date());
         return personaEntity;
     }
 }
