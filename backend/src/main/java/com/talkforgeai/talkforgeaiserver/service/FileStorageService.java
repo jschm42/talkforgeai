@@ -75,7 +75,7 @@ public class FileStorageService {
     public void copyImagesToHomeDirectory() {
         try {
             // Get the resource for the static folder
-            Resource staticResource = resourceLoader.getResource("classpath:static/persona/");
+            Resource staticResource = resourceLoader.getResource("classpath:persona-import/");
 
             // Get the absolute path of the static folder
             String staticPath = staticResource.getFile().getAbsolutePath();
@@ -83,6 +83,7 @@ public class FileStorageService {
             // Copy each image to the user's home directory
             try (var stream = Files.walk(Path.of(staticPath))) {
                 stream.filter(Files::isRegularFile)
+                        .filter(path -> path.toString().endsWith(".png") || path.toString().endsWith(".jpg"))
                         .forEach(imagePath -> {
                             try {
                                 Path targetPath = getPersonaDirectory().resolve(imagePath.getFileName());

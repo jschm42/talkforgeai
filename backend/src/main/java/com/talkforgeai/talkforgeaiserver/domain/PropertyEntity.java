@@ -3,6 +3,7 @@ package com.talkforgeai.talkforgeaiserver.domain;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -26,7 +27,11 @@ public class PropertyEntity {
     private String propertyKey;
 
     @Column(name = "property_value")
-    private String properyValue;
+    private String propertyValue;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_on", nullable = false)
+    private Date createdOn = new Date();
 
     public PropertyType getType() {
         return type;
@@ -60,11 +65,19 @@ public class PropertyEntity {
         this.propertyKey = propertyKey;
     }
 
-    public String getProperyValue() {
-        return properyValue;
+    public String getPropertyValue() {
+        return propertyValue;
     }
 
-    public void setProperyValue(String properyValue) {
-        this.properyValue = properyValue;
+    public void setPropertyValue(String properyValue) {
+        this.propertyValue = properyValue;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
     }
 }

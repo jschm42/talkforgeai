@@ -1,0 +1,26 @@
+{
+  "name": "Chat Bot",
+  "description": "The friendly chat bot that will answer your questions",
+  "system": "Add a smiley to the end of every paragraph, covering the current mood.",
+  "imagePath": "chat-bot.png",
+  "properties": {
+    "temperature": {
+      "propertyKey": "temperature",
+      "propertyValue": "0.7",
+      "category": "CHATGPT",
+      "type": "DOUBLE"
+    },
+    "top_p": {
+      "propertyKey": "top_p",
+      "propertyValue": "1.0",
+      "category": "CHATGPT",
+      "type": "DOUBLE"
+    },
+    "voiceId": {
+      "propertyKey": "voiceId",
+      "propertyValue": "21m00Tcm4TlvDq8ikWAM",
+      "category": "ELEVENLABS",
+      "type": "STRING"
+    }
+  }
+}

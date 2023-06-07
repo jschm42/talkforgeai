@@ -38,8 +38,7 @@ public class PersonaEntity {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_on", nullable = false)
-    private Date createdOn;
-
+    private Date createdOn = new Date();
 
     public UUID getId() {
         return id;
@@ -95,5 +94,18 @@ public class PersonaEntity {
 
     public void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
+    }
+
+    @Override
+    public String toString() {
+        return "PersonaEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", system='" + system + '\'' +
+                ", imagePath='" + imagePath + '\'' +
+                ", properties=" + properties +
+                ", createdOn=" + createdOn +
+                '}';
     }
 }
