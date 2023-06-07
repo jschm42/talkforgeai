@@ -2,6 +2,8 @@ package com.talkforgeai.talkforgeaiserver.domain;
 
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
@@ -22,6 +24,12 @@ public class ChatMessageEntity {
     @Column(columnDefinition = "CLOB", nullable = false)
     String content;
 
+    @CreationTimestamp
+    Date createdAt;
+
+    @UpdateTimestamp
+    Date modifiedAt;
+
     @Id
     @GeneratedValue
     @UuidGenerator
@@ -30,10 +38,6 @@ public class ChatMessageEntity {
     @ManyToOne
     @JoinColumn(name = "chat_session_id", nullable = false)
     private ChatSessionEntity chatSession;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_on", nullable = false)
-    private Date createdOn;
 
     public String getContent() {
         return content;
@@ -75,11 +79,19 @@ public class ChatMessageEntity {
         this.role = role;
     }
 
-    public Date getCreatedOn() {
-        return createdOn;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(Date modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 }

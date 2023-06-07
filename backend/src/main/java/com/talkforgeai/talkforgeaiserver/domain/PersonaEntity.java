@@ -1,6 +1,8 @@
 package com.talkforgeai.talkforgeaiserver.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
@@ -11,6 +13,12 @@ import java.util.UUID;
 @Entity
 @Table(name = "PERSONA")
 public class PersonaEntity {
+    @CreationTimestamp
+    Date createdAt;
+
+    @UpdateTimestamp
+    Date modifiedAt;
+
     @Id
     @GeneratedValue
     @UuidGenerator
@@ -35,10 +43,6 @@ public class PersonaEntity {
             inverseJoinColumns = {@JoinColumn(name = "property_id", referencedColumnName = "id")})
     @MapKey(name = "propertyKey")
     private Map<String, PropertyEntity> properties = new HashMap<>();
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_on", nullable = false)
-    private Date createdOn = new Date();
 
     public UUID getId() {
         return id;
@@ -88,24 +92,20 @@ public class PersonaEntity {
         this.properties = properties;
     }
 
-    public Date getCreatedOn() {
-        return createdOn;
+
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
-    @Override
-    public String toString() {
-        return "PersonaEntity{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", system='" + system + '\'' +
-                ", imagePath='" + imagePath + '\'' +
-                ", properties=" + properties +
-                ", createdOn=" + createdOn +
-                '}';
+    public Date getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(Date modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 }

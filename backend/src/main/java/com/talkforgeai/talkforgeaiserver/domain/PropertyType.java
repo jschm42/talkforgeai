@@ -2,7 +2,7 @@ package com.talkforgeai.talkforgeaiserver.domain;
 
 public enum PropertyType {
     STRING,
-    NUMBER,
+    INTEGER,
     DOUBLE,
     BOOLEAN
 }

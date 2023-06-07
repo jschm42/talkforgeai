@@ -1,6 +1,8 @@
 package com.talkforgeai.talkforgeaiserver.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
@@ -9,6 +11,12 @@ import java.util.UUID;
 @Entity
 @Table(name = "PROPERTY")
 public class PropertyEntity {
+    @CreationTimestamp
+    Date createdAt;
+
+    @UpdateTimestamp
+    Date modifiedAt;
+
     @Id
     @GeneratedValue
     @UuidGenerator
@@ -28,10 +36,6 @@ public class PropertyEntity {
 
     @Column(name = "property_value")
     private String propertyValue;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_on", nullable = false)
-    private Date createdOn = new Date();
 
     public PropertyType getType() {
         return type;
@@ -73,11 +77,19 @@ public class PropertyEntity {
         this.propertyValue = properyValue;
     }
 
-    public Date getCreatedOn() {
-        return createdOn;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(Date modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 }

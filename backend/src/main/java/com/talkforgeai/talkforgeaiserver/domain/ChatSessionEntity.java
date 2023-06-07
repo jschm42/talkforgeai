@@ -2,6 +2,8 @@ package com.talkforgeai.talkforgeaiserver.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.ArrayList;
@@ -12,6 +14,12 @@ import java.util.UUID;
 @Entity
 @Table(name = "CHAT_SESSION")
 public class ChatSessionEntity {
+    @CreationTimestamp
+    Date createdAt;
+
+    @UpdateTimestamp
+    Date modifiedAt;
+
     @Id
     @GeneratedValue
     @UuidGenerator
@@ -31,10 +39,6 @@ public class ChatSessionEntity {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "persona_id", referencedColumnName = "id")
     private PersonaEntity persona;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_on", nullable = false)
-    private Date createdOn;
 
     public UUID getId() {
         return id;
@@ -76,11 +80,19 @@ public class ChatSessionEntity {
         this.description = description;
     }
 
-    public Date getCreatedOn() {
-        return createdOn;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(Date modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 }

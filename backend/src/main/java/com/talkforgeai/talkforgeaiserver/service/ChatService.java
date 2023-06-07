@@ -1,8 +1,6 @@
 package com.talkforgeai.talkforgeaiserver.service;
 
-import com.talkforgeai.talkforgeaiserver.domain.ChatMessageType;
-import com.talkforgeai.talkforgeaiserver.domain.ChatSessionEntity;
-import com.talkforgeai.talkforgeaiserver.domain.PersonaEntity;
+import com.talkforgeai.talkforgeaiserver.domain.*;
 import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionRequest;
 import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionResponse;
 import com.talkforgeai.talkforgeaiserver.dto.NewChatSessionRequest;
@@ -21,9 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -65,6 +61,16 @@ public class ChatService {
         return session.getId();
     }
 
+    private Map<String, String> mapToGptProperties(Map<String, PropertyEntity> personaProperties) {
+        Map<String, String> gptProperties = new HashMap<>();
+        personaProperties.forEach((key, value) -> {
+            if (value.getCategory() == PropertyCategory.CHATGPT) {
+                gptProperties.put(key, value.getPropertyValue());
+            }
+        });
+        return gptProperties;
+    }
+
     @Async
     @Transactional
     public CompletableFuture<ChatCompletionResponse> submit(ChatCompletionRequest request) {
@@ -86,7 +92,9 @@ public class ChatService {
         webSocketService.sendMessage(
                 new ChatStatusMessage(request.sessionId(), "Thinking...")
         );
-        List<ChatCompletionChoice> choices = openAIChatService.submit(messagePayload);
+
+        List<ChatCompletionChoice> choices
+                = openAIChatService.submit(messagePayload, mapToGptProperties(persona.getProperties()));
 
         List<ChatMessage> responseMessages = choices.stream()
                 .map(ChatCompletionChoice::getMessage)
