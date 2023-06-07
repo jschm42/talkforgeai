@@ -20,15 +20,26 @@ public class OpenAIChatService {
     }
 
     public List<ChatCompletionChoice> submit(List<ChatMessage> messages, Map<String, String> properties) {
-        ChatCompletionRequest completionRequest = ChatCompletionRequest.builder()
-                .messages(messages)
-                .model(properties.get(PropertyKeys.CHATGPT_MODEL))
-                .maxTokens(Integer.valueOf(properties.get(PropertyKeys.CHATGPT_MAX_TOKENS)))
-                .temperature(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TEMPERATURE)))
-                .topP(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TOP_P)))
-                .frequencyPenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)))
-                .presencePenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_PRESENCE_PENALTY)))
-                .build();
+        ChatCompletionRequest completionRequest = ChatCompletionRequest.builder().messages(messages).build();
+
+        if (properties.containsKey(PropertyKeys.CHATGPT_MODEL)) {
+            completionRequest.setModel(properties.get(PropertyKeys.CHATGPT_MODEL));
+        }
+        if (properties.containsKey(PropertyKeys.CHATGPT_MAX_TOKENS)) {
+            completionRequest.setMaxTokens(Integer.valueOf(properties.get(PropertyKeys.CHATGPT_MAX_TOKENS)));
+        }
+        if (properties.containsKey(PropertyKeys.CHATGPT_TEMPERATURE)) {
+            completionRequest.setTemperature(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TEMPERATURE)));
+        }
+        if (properties.containsKey(PropertyKeys.CHATGPT_TOP_P)) {
+            completionRequest.setTopP(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TOP_P)));
+        }
+        if (properties.containsKey(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)) {
+            completionRequest.setFrequencyPenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)));
+        }
+        if (properties.containsKey(PropertyKeys.CHATGPT_PRESENCE_PENALTY)) {
+            completionRequest.setPresencePenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_PRESENCE_PENALTY)));
+        }
 
         return service.createChatCompletion(completionRequest).getChoices();
     }

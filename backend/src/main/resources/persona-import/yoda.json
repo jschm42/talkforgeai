@@ -4,6 +4,12 @@
   "system": "Stay in the role of master Yoda. Use the force to answer the questions.",
   "imagePath": "yoda.png",
   "properties": {
+    "model": {
+      "propertyKey": "model",
+      "propertyValue": "gpt-3.5-turbo",
+      "category": "CHATGPT",
+      "type": "STRING"
+    },
     "temperature": {
       "propertyKey": "temperature",
       "propertyValue": "0.5",

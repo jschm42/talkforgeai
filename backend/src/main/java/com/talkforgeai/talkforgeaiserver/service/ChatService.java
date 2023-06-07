@@ -93,8 +93,12 @@ public class ChatService {
                 new ChatStatusMessage(request.sessionId(), "Thinking...")
         );
 
-        List<ChatCompletionChoice> choices
-                = openAIChatService.submit(messagePayload, mapToGptProperties(persona.getProperties()));
+        List<ChatCompletionChoice> choices = new ArrayList<>();
+        try {
+            choices = openAIChatService.submit(messagePayload, mapToGptProperties(persona.getProperties()));
+        } catch (RuntimeException ex) {
+            logger.error("Error on submission of chat message.", ex);
+        }
 
         List<ChatMessage> responseMessages = choices.stream()
                 .map(ChatCompletionChoice::getMessage)
