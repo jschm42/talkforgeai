@@ -22,6 +22,7 @@ export const useChatStore = defineStore('chat', {
       },
       currentStatusMessage: '',
       sessions: [] as Array<Session>,
+      selectedSessionId: null,
     };
   },
   getters: {
@@ -65,12 +66,14 @@ export const useChatStore = defineStore('chat', {
       console.log('Prompt submitted');
       //this.messages = [...this.messages, ...result.processedMessages];
     },
-    loadChatSession(sessionId: string) {
-      //const chatSession = window.chatAPI.loadChatSession(sessionId);
-      //console.log('Loaded chat session with ID: ' + sessionId, chatSession);
-
+    async loadChatSession(sessionId: string) {
+      const chatSession = await chatService.readSessionEntry(sessionId);
+      console.log('CHAT SESSION LOADED', chatSession);
+      
       this.$patch({
-        //session: chatSession,
+        sessionId: chatSession.id,
+        messages: chatSession.chatMessages,
+        selectedPersona: chatSession.persona,
         chat: {configHeaderEnabled: false},
       });
     },

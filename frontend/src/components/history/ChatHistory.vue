@@ -34,8 +34,6 @@ export default {
   },
   data() {
     return {
-      indexState: this.store.index,
-      selectedIndexId: null,
       isEntrySelected: false,
     };
   },
@@ -47,15 +45,15 @@ export default {
   },
   methods: {
     getEntryClass(sessionId) {
-      if (sessionId === this.store.sessionId) {
+      if (sessionId === this.store.selectedSessionId) {
         return 'bg-primary';
       }
       return '';
     },
-    onEntrySelected(sessionId) {
+    async onEntrySelected(sessionId) {
       console.log('Index selected', sessionId);
-      this.selectedIndexId = sessionId;
-      this.store.loadChatSession(sessionId);
+      this.store.selectedSessionId = sessionId;
+      await this.store.loadChatSession(sessionId);
     },
   },
   mounted() {

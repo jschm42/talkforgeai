@@ -24,6 +24,12 @@ public class MessageService {
         return repository.findAllByChatSessionIdAndType(UUID.fromString(sessionId), type);
     }
 
+    public List<ChatMessage> mapToDto(List<ChatMessageEntity> entities) {
+        return entities.stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
     public ChatMessage mapToDto(ChatMessageEntity entity) {
         ChatMessage dto = new ChatMessage();
         dto.setRole(entity.getRole().value());

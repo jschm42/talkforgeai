@@ -20,7 +20,7 @@ public class PersonaService {
         this.fileStorageService = fileStorageService;
     }
 
-    private PersonaResponse mapPersonaResponse(PersonaEntity personaEntity) {
+    public PersonaResponse mapPersonaResponse(PersonaEntity personaEntity) {
         return new PersonaResponse(
                 personaEntity.getId(),
                 personaEntity.getName(),
@@ -44,4 +44,5 @@ public class PersonaService {
     public List<PersonaResponse> getPersonaResponse(List<PersonaEntity> personaEntities) {
         return personaEntities.stream().map(this::mapPersonaResponse).toList();
     }
+
 }

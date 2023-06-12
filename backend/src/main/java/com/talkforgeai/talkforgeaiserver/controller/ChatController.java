@@ -55,6 +55,11 @@ public class ChatController {
         return chatService.getSessions();
     }
 
+    @GetMapping("/session/{sessionId}")
+    SessionResponse getChatSession(@PathVariable UUID sessionId) {
+        return chatService.getSession(sessionId);
+    }
+
     @GetMapping("/session/{sessionId}/{filename}")
     public ResponseEntity<byte[]> getImage(@PathVariable String sessionId, @PathVariable String filename) {
         try {

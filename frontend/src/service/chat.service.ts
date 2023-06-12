@@ -7,9 +7,17 @@ class ChatService {
       const result = await axios.get('/api/v1/chat/session');
       return result.data;
     } catch (error) {
-      console.error('Error reading index entries: ', error);
+      throw new Error('Error reading index entries: ' + error);
     }
-    return [];
+  }
+
+  async readSessionEntry(sessionId: string): Promise<Session> {
+    try {
+      const result = await axios.get(`/api/v1/chat/session/${sessionId}`);
+      return result.data;
+    } catch (error) {
+      throw new Error('Error reading session entry:  ' + error);
+    }
   }
 
   async createNewSession(personaId: string) {
@@ -18,9 +26,8 @@ class ChatService {
       const result = await axios.post('/api/v1/chat/create', {personaId});
       return result.data;
     } catch (error) {
-      console.error('Error creating chat session: ', error);
+      throw new Error('Error creating chat session: ' + error);
     }
-    return null;
   }
 
   async getLastResult(sessionId: string) {
@@ -35,9 +42,8 @@ class ChatService {
         });
       return result.data;
     } catch (error) {
-      console.error('Error submitting prompt: ', error);
+      throw new Error('Error submitting prompt: ' + error);
     }
-    return null;
   }
 
   async submit(sessionId: string, prompt: string) {
@@ -53,9 +59,8 @@ class ChatService {
         });
       return result.data;
     } catch (error) {
-      console.error('Error submitting prompt: ', error);
+      throw new Error('Error submitting prompt: ' + error);
     }
-    return null;
   }
 }
 

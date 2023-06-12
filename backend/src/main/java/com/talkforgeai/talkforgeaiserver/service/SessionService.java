@@ -8,6 +8,7 @@ import com.talkforgeai.talkforgeaiserver.exception.SessionException;
 import com.talkforgeai.talkforgeaiserver.repository.ChatSessionRepository;
 import com.talkforgeai.talkforgeaiserver.util.StringUtils;
 import com.theokanning.openai.completion.chat.ChatMessage;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -66,7 +67,7 @@ public class SessionService {
         return repository.save(session);
     }
 
-    public List<ChatSessionEntity> getAll() {
-        return repository.findAll();
+    public List<ChatSessionEntity> getAllMostRecentFirst() {
+        return repository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 }

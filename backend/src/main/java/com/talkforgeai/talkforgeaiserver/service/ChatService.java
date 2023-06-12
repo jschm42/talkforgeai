@@ -149,7 +149,7 @@ public class ChatService {
 
 
     public List<SessionResponse> getSessions() {
-        List<ChatSessionEntity> allSessions = sessionService.getAll();
+        List<ChatSessionEntity> allSessions = sessionService.getAllMostRecentFirst();
         return allSessions.stream()
                 .map(this::mapSessionEntity)
                 .toList();
@@ -169,10 +169,24 @@ public class ChatService {
     }
 
     private SessionResponse mapSessionEntity(ChatSessionEntity session) {
+        List<ChatMessageEntity> processedMessages
+                = session.getChatMessages().stream()
+                .filter(m -> m.getType() == ChatMessageType.PROCESSED)
+                .toList();
+
         return new SessionResponse(
                 session.getId(),
                 session.getTitle(),
-                session.getDescription());
+                session.getDescription(),
+                messageService.mapToDto(processedMessages),
+                personaService.mapPersonaResponse(session.getPersona()));
     }
 
+    public SessionResponse getSession(UUID sessionId) {
+        Optional<ChatSessionEntity> session = sessionService.getById(sessionId);
+        if (session.isPresent()) {
+            return mapSessionEntity(session.get());
+        }
+        throw new SessionException("Session not found: " + sessionId);
+    }
 }
