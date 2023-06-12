@@ -6,6 +6,7 @@ class Session {
   id: string;
   title: string;
   description: string;
+  createdAt: Date | undefined;
   chatMessages: ChatMessage[] = [];
   persona: Persona | undefined;
 

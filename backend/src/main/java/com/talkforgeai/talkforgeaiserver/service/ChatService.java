@@ -178,6 +178,7 @@ public class ChatService {
                 session.getId(),
                 session.getTitle(),
                 session.getDescription(),
+                session.getCreatedAt(),
                 messageService.mapToDto(processedMessages),
                 personaService.mapPersonaResponse(session.getPersona()));
     }

@@ -6,14 +6,7 @@
     <div class="list-group list-group-flush border-bottom">
 
       <div v-for="entry in allSessionEntries" :key="entry.id">
-        <a :class="getEntryClass(entry.id)"
-           class="list-group-item list-group-item-action py-3 lh-sm"
-           @click="onEntrySelected(entry.id)">
-          <div class="d-flex w-100 align-items-center justify-content-between">
-            <strong :title="entry.id" class="mb-1 text-truncate">{{ entry.title }}</strong>
-          </div>
-          <!--                    <div class="col-10 mb-1 small">{{ entry.timestamp }}</div>-->
-        </a>
+        <ChatHistoryEntry :entry="entry" @entrySelected="onEntrySelected"/>
       </div>
 
     </div>
@@ -24,9 +17,11 @@
 
 <script>
 import {useChatStore} from '@/store/chat-store';
+import ChatHistoryEntry from '@/components/history/ChatHistoryEntry.vue';
 
 export default {
   name: 'ChatHistory',
+  components: {ChatHistoryEntry},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
 
@@ -44,14 +39,8 @@ export default {
     },
   },
   methods: {
-    getEntryClass(sessionId) {
-      if (sessionId === this.store.selectedSessionId) {
-        return 'bg-primary';
-      }
-      return '';
-    },
     async onEntrySelected(sessionId) {
-      console.log('Index selected', sessionId);
+      console.log('Loading chat session', sessionId);
       this.store.selectedSessionId = sessionId;
       await this.store.loadChatSession(sessionId);
     },

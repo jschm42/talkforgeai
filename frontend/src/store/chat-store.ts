@@ -68,7 +68,6 @@ export const useChatStore = defineStore('chat', {
     },
     async loadChatSession(sessionId: string) {
       const chatSession = await chatService.readSessionEntry(sessionId);
-      console.log('CHAT SESSION LOADED', chatSession);
       
       this.$patch({
         sessionId: chatSession.id,
