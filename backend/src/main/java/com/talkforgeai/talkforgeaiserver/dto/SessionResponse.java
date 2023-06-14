@@ -1,6 +1,6 @@
 package com.talkforgeai.talkforgeaiserver.dto;
 
-import com.theokanning.openai.completion.chat.ChatMessage;
+import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatMessage;
 
 import java.util.Date;
 import java.util.List;
@@ -10,7 +10,7 @@ public record SessionResponse(UUID id,
                               String title,
                               String description,
                               Date createdAt,
-                              List<ChatMessage> chatMessages,
+                              List<OpenAIChatMessage> chatMessages,
                               PersonaResponse persona) {
 
 }

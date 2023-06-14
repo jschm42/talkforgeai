@@ -1,8 +1,8 @@
 package com.talkforgeai.talkforgeaiserver.transformers;
 
+import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatMessage;
 import com.talkforgeai.talkforgeaiserver.service.OpenAIImageService;
 import com.talkforgeai.talkforgeaiserver.transformers.dto.TransformerContext;
-import com.theokanning.openai.completion.chat.ChatMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -26,7 +26,7 @@ public class MessageProcessor {
 
     }
 
-    public ChatMessage transform(ChatMessage message, UUID sessionId, Path dataDirectory) {
+    public OpenAIChatMessage transform(OpenAIChatMessage message, UUID sessionId, Path dataDirectory) {
         String processedContent = message.getContent();
 
         TransformerContext context = new TransformerContext(sessionId, dataDirectory);
@@ -37,7 +37,7 @@ public class MessageProcessor {
         }
 
         logger.info("Transformation done.");
-        return new ChatMessage(message.getRole(), processedContent);
+        return new OpenAIChatMessage(message.getRole(), processedContent);
     }
 
 }

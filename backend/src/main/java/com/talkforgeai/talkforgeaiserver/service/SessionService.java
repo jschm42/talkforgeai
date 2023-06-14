@@ -5,9 +5,9 @@ import com.talkforgeai.talkforgeaiserver.domain.ChatMessageType;
 import com.talkforgeai.talkforgeaiserver.domain.ChatSessionEntity;
 import com.talkforgeai.talkforgeaiserver.domain.PersonaEntity;
 import com.talkforgeai.talkforgeaiserver.exception.SessionException;
+import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatMessage;
 import com.talkforgeai.talkforgeaiserver.repository.ChatSessionRepository;
 import com.talkforgeai.talkforgeaiserver.util.StringUtils;
-import com.theokanning.openai.completion.chat.ChatMessage;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +33,7 @@ public class SessionService {
         return this.repository.findById(sessionId);
     }
 
-    public ChatSessionEntity update(UUID sessionId, List<ChatMessage> messages, List<ChatMessage> processedMessages) {
+    public ChatSessionEntity update(UUID sessionId, List<OpenAIChatMessage> messages, List<OpenAIChatMessage> processedMessages) {
         ChatSessionEntity session = repository.findById(sessionId)
                 .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
 
@@ -49,7 +49,7 @@ public class SessionService {
         repository.save(session);
     }
 
-    public ChatSessionEntity create(PersonaEntity persona, List<ChatMessage> messages, List<ChatMessage> processedMessages) {
+    public ChatSessionEntity create(PersonaEntity persona, List<OpenAIChatMessage> messages, List<OpenAIChatMessage> processedMessages) {
         ChatSessionEntity session = new ChatSessionEntity();
         session.setTitle("<empty>");
         session.setDescription("<empty>");
@@ -58,7 +58,7 @@ public class SessionService {
         return save(messages, processedMessages, session);
     }
 
-    private ChatSessionEntity save(List<ChatMessage> messages, List<ChatMessage> processedMessages, ChatSessionEntity session) {
+    private ChatSessionEntity save(List<OpenAIChatMessage> messages, List<OpenAIChatMessage> processedMessages, ChatSessionEntity session) {
         List<ChatMessageEntity> messageEntities = messageService.mapToEntity(messages, session, ChatMessageType.UNPROCESSED);
         List<ChatMessageEntity> processedMessageEntities = messageService.mapToEntity(processedMessages, session, ChatMessageType.PROCESSED);
 

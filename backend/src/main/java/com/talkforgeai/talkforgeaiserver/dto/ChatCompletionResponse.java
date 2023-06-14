@@ -1,9 +1,9 @@
 package com.talkforgeai.talkforgeaiserver.dto;
 
-import com.theokanning.openai.completion.chat.ChatMessage;
+import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatMessage;
 
 import java.util.List;
 
 public record ChatCompletionResponse(String sessionId,
-                                     List<ChatMessage> processedMessages) {
+                                     List<OpenAIChatMessage> processedMessages) {
 }

@@ -1,6 +1,6 @@
 package com.talkforgeai.talkforgeaiserver.domain;
 
-import com.theokanning.openai.completion.chat.ChatMessageRole;
+import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatMessageRole;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -18,7 +18,7 @@ public class ChatMessageEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    ChatMessageRole role;
+    OpenAIChatMessageRole role;
 
     @Lob
     @Column(columnDefinition = "CLOB", nullable = false)
@@ -71,14 +71,6 @@ public class ChatMessageEntity {
         this.chatSession = chatSession;
     }
 
-    public ChatMessageRole getRole() {
-        return role;
-    }
-
-    public void setRole(ChatMessageRole role) {
-        this.role = role;
-    }
-
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -93,5 +85,13 @@ public class ChatMessageEntity {
 
     public void setModifiedAt(Date modifiedAt) {
         this.modifiedAt = modifiedAt;
+    }
+
+    public OpenAIChatMessageRole getRole() {
+        return role;
+    }
+
+    public void setRole(OpenAIChatMessageRole role) {
+        this.role = role;
     }
 }

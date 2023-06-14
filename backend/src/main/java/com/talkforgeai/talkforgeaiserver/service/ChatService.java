@@ -1,18 +1,13 @@
 package com.talkforgeai.talkforgeaiserver.service;
 
 import com.talkforgeai.talkforgeaiserver.domain.*;
-import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionRequest;
-import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionResponse;
-import com.talkforgeai.talkforgeaiserver.dto.NewChatSessionRequest;
-import com.talkforgeai.talkforgeaiserver.dto.SessionResponse;
+import com.talkforgeai.talkforgeaiserver.dto.*;
 import com.talkforgeai.talkforgeaiserver.dto.ws.ChatResponseMessage;
 import com.talkforgeai.talkforgeaiserver.dto.ws.ChatStatusMessage;
 import com.talkforgeai.talkforgeaiserver.exception.PersonaException;
 import com.talkforgeai.talkforgeaiserver.exception.SessionException;
+import com.talkforgeai.talkforgeaiserver.openai.*;
 import com.talkforgeai.talkforgeaiserver.transformers.MessageProcessor;
-import com.theokanning.openai.completion.chat.ChatCompletionChoice;
-import com.theokanning.openai.completion.chat.ChatMessage;
-import com.theokanning.openai.completion.chat.ChatMessageRole;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +66,44 @@ public class ChatService {
         return gptProperties;
     }
 
+    private OpenAIResponse submit(List<OpenAIChatMessage> messages, Map<String, String> properties) {
+        try {
+            OpenAIRequest request = new OpenAIRequest();
+            request.setMessages(messages);
+
+            // TODO Properties setzen
+            if (properties.containsKey(PropertyKeys.CHATGPT_MAX_TOKENS)) {
+                request.setMaxTokens(Integer.valueOf(properties.get(PropertyKeys.CHATGPT_MAX_TOKENS)));
+            }
+
+            if (properties.containsKey(PropertyKeys.CHATGPT_TOP_P)) {
+                request.setTopP(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TOP_P)));
+            }
+
+            if (properties.containsKey(PropertyKeys.CHATGPT_MODEL)) {
+                request.setModel(properties.get(PropertyKeys.CHATGPT_MODEL));
+            }
+
+            if (properties.containsKey(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)) {
+                request.setFrequencyPenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)));
+            }
+
+            if (properties.containsKey(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)) {
+                request.setPresencePenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_PRESENCE_PENALTY)));
+            }
+
+            if (properties.containsKey(PropertyKeys.CHATGPT_TEMPERATURE)) {
+                request.setTemperature(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TEMPERATURE)));
+            }
+
+            return openAIChatService.submit(request);
+        } catch (Exception e) {
+            logger.error("Error while submitting chat request.", e);
+        }
+
+        return null;
+    }
+
     @Async
     @Transactional
     public CompletableFuture<ChatCompletionResponse> submit(ChatCompletionRequest request) {
@@ -80,40 +113,35 @@ public class ChatService {
                 .orElseThrow(() -> new SessionException("Session not found: " + request.sessionId()));
 
         PersonaEntity persona = session.getPersona();
-        List<ChatMessage> previousMessages = getPreviousMessages(session);
+        List<OpenAIChatMessage> previousMessages = getPreviousMessages(session);
         boolean isFirstSubmitInSession = previousMessages.isEmpty();
 
-        ChatMessage newUserMessage = new ChatMessage(ChatMessageRole.USER.value(), request.prompt());
+        OpenAIChatMessage newUserMessage = new OpenAIChatMessage(OpenAIChatMessageRole.USER, request.prompt());
         // TODO Postprocessing of new user message
-        ChatMessage processedNewUserMessage = new ChatMessage(ChatMessageRole.USER.value(), request.prompt());
+        OpenAIChatMessage processedNewUserMessage = new OpenAIChatMessage(OpenAIChatMessageRole.USER, request.prompt());
 
-        List<ChatMessage> messagePayload = composeMessagePayload(previousMessages, processedNewUserMessage, persona);
+        List<OpenAIChatMessage> messagePayload = composeMessagePayload(previousMessages, processedNewUserMessage, persona);
 
         webSocketService.sendMessage(
                 new ChatStatusMessage(request.sessionId(), "Thinking...")
         );
 
-        List<ChatCompletionChoice> choices = new ArrayList<>();
-        try {
-            choices = openAIChatService.submit(messagePayload, mapToGptProperties(persona.getProperties()));
-        } catch (RuntimeException ex) {
-            logger.error("Error on submission of chat message.", ex);
-        }
+        OpenAIResponse response = submit(messagePayload, mapToGptProperties(persona.getProperties()));
 
-        List<ChatMessage> responseMessages = choices.stream()
-                .map(ChatCompletionChoice::getMessage)
+        List<OpenAIChatMessage> responseMessages = response.getChoices().stream()
+                .map(OpenAIChatCompletionChoice::getMessage)
                 .toList();
 
-        List<ChatMessage> messagesToSave = new ArrayList<>();
+        List<OpenAIChatMessage> messagesToSave = new ArrayList<>();
         messagesToSave.add(newUserMessage);
         messagesToSave.addAll(responseMessages);
 
-        List<ChatMessage> processedMessagesToSave = new ArrayList<>();
+        List<OpenAIChatMessage> processedMessagesToSave = new ArrayList<>();
 
         webSocketService.sendMessage(
                 new ChatStatusMessage(request.sessionId(), "Processing...")
         );
-        List<ChatMessage> processedResponseMessages = responseMessages.stream()
+        List<OpenAIChatMessage> processedResponseMessages = responseMessages.stream()
                 .map(m -> messageProcessor.transform(m, session.getId(), fileStorageService.getDataDirectory()))
                 .toList();
 
@@ -138,8 +166,8 @@ public class ChatService {
         return CompletableFuture.completedFuture(createResponse(processedResponseMessages, updatedSession));
     }
 
-    private List<ChatMessage> getPreviousMessages(ChatSessionEntity session) {
-        List<ChatMessage> previousMessages;
+    private List<OpenAIChatMessage> getPreviousMessages(ChatSessionEntity session) {
+        List<OpenAIChatMessage> previousMessages;
         previousMessages = session.getChatMessages().stream()
                 .filter(m -> m.getType() == ChatMessageType.UNPROCESSED)
                 .map(messageService::mapToDto)
@@ -155,14 +183,14 @@ public class ChatService {
                 .toList();
     }
 
-    private ChatCompletionResponse createResponse(List<ChatMessage> processedMessages, ChatSessionEntity updatedSession) {
+    private ChatCompletionResponse createResponse(List<OpenAIChatMessage> processedMessages, ChatSessionEntity updatedSession) {
         return new ChatCompletionResponse(updatedSession.getId().toString(), processedMessages);
     }
 
-    private List<ChatMessage> composeMessagePayload(List<ChatMessage> previousMessages, ChatMessage newMessage, PersonaEntity persona) {
-        List<ChatMessage> messages = new ArrayList<>();
-        messages.add(new ChatMessage(ChatMessageRole.SYSTEM.value(), SystemService.IMAGE_GEN_SYSTEM));
-        messages.add(new ChatMessage(ChatMessageRole.SYSTEM.value(), persona.getSystem()));
+    private List<OpenAIChatMessage> composeMessagePayload(List<OpenAIChatMessage> previousMessages, OpenAIChatMessage newMessage, PersonaEntity persona) {
+        List<OpenAIChatMessage> messages = new ArrayList<>();
+        messages.add(new OpenAIChatMessage(OpenAIChatMessageRole.SYSTEM, SystemService.IMAGE_GEN_SYSTEM));
+        messages.add(new OpenAIChatMessage(OpenAIChatMessageRole.SYSTEM, persona.getSystem()));
         messages.addAll(previousMessages);
         messages.add(newMessage);
         return messages;

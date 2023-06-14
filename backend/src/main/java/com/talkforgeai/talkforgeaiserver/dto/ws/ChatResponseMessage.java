@@ -1,25 +1,25 @@
 package com.talkforgeai.talkforgeaiserver.dto.ws;
 
-import com.theokanning.openai.completion.chat.ChatMessage;
+import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatMessage;
 
 import java.util.List;
 import java.util.UUID;
 
 public class ChatResponseMessage extends WebsocketMessage {
 
-    private List<ChatMessage> messages;
+    private List<OpenAIChatMessage> messages;
 
-    public ChatResponseMessage(UUID sessionId, List<ChatMessage> messages) {
+    public ChatResponseMessage(UUID sessionId, List<OpenAIChatMessage> messages) {
         super(sessionId, WebsocketMessageType.RESPONSE);
         this.messages = messages;
     }
 
 
-    public List<ChatMessage> getMessages() {
+    public List<OpenAIChatMessage> getMessages() {
         return messages;
     }
 
-    public void setMessages(List<ChatMessage> messages) {
+    public void setMessages(List<OpenAIChatMessage> messages) {
         this.messages = messages;
     }
 }
