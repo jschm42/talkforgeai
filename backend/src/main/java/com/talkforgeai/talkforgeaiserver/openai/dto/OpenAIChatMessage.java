@@ -1,30 +1,39 @@
 package com.talkforgeai.talkforgeaiserver.openai.dto;
 
-public class OpenAIChatMessage {
-    OpenAIChatMessageRole role;
-    String content;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
-    public OpenAIChatMessage() {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record OpenAIChatMessage(
+        Role role,
+        String content,
+        @JsonProperty("function_call") FunctionCall functionCall) {
+
+    public OpenAIChatMessage(Role role, String content) {
+        this(role, content, null);
     }
 
-    public OpenAIChatMessage(OpenAIChatMessageRole role, String content) {
-        this.role = role;
-        this.content = content;
+
+    public enum Role {
+        SYSTEM("system"),
+        USER("user"),
+        ASSISTANT("assistant"),
+        FUNCTION("function");
+
+        private final String value;
+
+        private Role(String value) {
+            this.value = value;
+        }
+
+        @JsonValue
+        public String value() {
+            return this.value;
+        }
     }
 
-    public String getContent() {
-        return content;
+    public record FunctionCall(String name, String arguments) {
     }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public OpenAIChatMessageRole getRole() {
-        return role;
-    }
-
-    public void setRole(OpenAIChatMessageRole role) {
-        this.role = role;
-    }
 }

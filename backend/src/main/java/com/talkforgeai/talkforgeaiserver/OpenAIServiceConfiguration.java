@@ -2,7 +2,6 @@ package com.talkforgeai.talkforgeaiserver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkforgeai.talkforgeaiserver.properties.OpenAIProperties;
-import com.talkforgeai.talkforgeaiserver.service.HttpLoggingInterceptor;
 import com.theokanning.openai.OpenAiApi;
 import com.theokanning.openai.service.OpenAiService;
 import okhttp3.OkHttpClient;
@@ -30,7 +29,6 @@ public class OpenAIServiceConfiguration {
         ObjectMapper mapper = OpenAiService.defaultObjectMapper();
         OkHttpClient client = defaultClient(openAIProperties.apiKey(), Duration.ofMillis(TIMEOUT_MS))
                 .newBuilder()
-                .addInterceptor(new HttpLoggingInterceptor())
                 .build();
         Retrofit retrofit = defaultRetrofit(client, mapper);
 

@@ -6,7 +6,7 @@
   "properties": {
     "model": {
       "propertyKey": "model",
-      "propertyValue": "gpt-3.5-turbo",
+      "propertyValue": "gpt-3.5-turbo-0613",
       "category": "CHATGPT",
       "type": "STRING"
     },

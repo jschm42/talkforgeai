@@ -27,7 +27,7 @@ public class MessageProcessor {
     }
 
     public OpenAIChatMessage transform(OpenAIChatMessage message, UUID sessionId, Path dataDirectory) {
-        String processedContent = message.getContent();
+        String processedContent = message.content();
 
         TransformerContext context = new TransformerContext(sessionId, dataDirectory);
 
@@ -37,7 +37,7 @@ public class MessageProcessor {
         }
 
         logger.info("Transformation done.");
-        return new OpenAIChatMessage(message.getRole(), processedContent);
+        return new OpenAIChatMessage(message.role(), processedContent);
     }
 
 }

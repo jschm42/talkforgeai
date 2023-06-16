@@ -7,7 +7,9 @@ import com.talkforgeai.talkforgeaiserver.dto.ws.ChatStatusMessage;
 import com.talkforgeai.talkforgeaiserver.exception.PersonaException;
 import com.talkforgeai.talkforgeaiserver.exception.SessionException;
 import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatService;
-import com.talkforgeai.talkforgeaiserver.openai.dto.*;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessage;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIRequest;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIResponse;
 import com.talkforgeai.talkforgeaiserver.transformers.MessageProcessor;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -27,6 +29,8 @@ public class ChatService {
     private final WebSocketService webSocketService;
     private final MessageProcessor messageProcessor;
     private final FileStorageService fileStorageService;
+
+    private final FunctionRepository functionRepository;
     Logger logger = LoggerFactory.getLogger(ChatService.class);
 
     public ChatService(OpenAIChatService openAIChatService,
@@ -35,7 +39,8 @@ public class ChatService {
                        MessageService messageService,
                        WebSocketService webSocketService,
                        MessageProcessor messageProcessor,
-                       FileStorageService fileStorageService) {
+                       FileStorageService fileStorageService,
+                       FunctionRepository functionRepository) {
         this.openAIChatService = openAIChatService;
         this.sessionService = sessionService;
         this.personaService = personaService;
@@ -43,6 +48,7 @@ public class ChatService {
         this.webSocketService = webSocketService;
         this.messageProcessor = messageProcessor;
         this.fileStorageService = fileStorageService;
+        this.functionRepository = functionRepository;
     }
 
     public UUID create(NewChatSessionRequest request) {
@@ -97,6 +103,9 @@ public class ChatService {
                 request.setTemperature(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TEMPERATURE)));
             }
 
+            request.setFunctions(functionRepository.getAll());
+
+
             return openAIChatService.submit(request);
         } catch (Exception e) {
             logger.error("Error while submitting chat request.", e);
@@ -117,9 +126,9 @@ public class ChatService {
         List<OpenAIChatMessage> previousMessages = getPreviousMessages(session);
         boolean isFirstSubmitInSession = previousMessages.isEmpty();
 
-        OpenAIChatMessage newUserMessage = new OpenAIChatMessage(OpenAIChatMessageRole.USER, request.prompt());
+        OpenAIChatMessage newUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.prompt());
         // TODO Postprocessing of new user message
-        OpenAIChatMessage processedNewUserMessage = new OpenAIChatMessage(OpenAIChatMessageRole.USER, request.prompt());
+        OpenAIChatMessage processedNewUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.prompt());
 
         List<OpenAIChatMessage> messagePayload = composeMessagePayload(previousMessages, processedNewUserMessage, persona);
 
@@ -129,8 +138,8 @@ public class ChatService {
 
         OpenAIResponse response = submit(messagePayload, mapToGptProperties(persona.getProperties()));
 
-        List<OpenAIChatMessage> responseMessages = response.getChoices().stream()
-                .map(OpenAIChatCompletionChoice::getMessage)
+        List<OpenAIChatMessage> responseMessages = response.choices().stream()
+                .map(OpenAIResponse.ResponseChoice::message)
                 .toList();
 
         List<OpenAIChatMessage> messagesToSave = new ArrayList<>();
@@ -150,7 +159,7 @@ public class ChatService {
         processedMessagesToSave.addAll(processedResponseMessages);
 
         if (isFirstSubmitInSession) {
-            sessionService.update(request.sessionId(), newUserMessage.getContent(), "<empty>");
+            sessionService.update(request.sessionId(), newUserMessage.content(), "<empty>");
         }
         ChatSessionEntity updatedSession
                 = sessionService.update(request.sessionId(), messagesToSave, processedMessagesToSave);
@@ -190,8 +199,8 @@ public class ChatService {
 
     private List<OpenAIChatMessage> composeMessagePayload(List<OpenAIChatMessage> previousMessages, OpenAIChatMessage newMessage, PersonaEntity persona) {
         List<OpenAIChatMessage> messages = new ArrayList<>();
-        messages.add(new OpenAIChatMessage(OpenAIChatMessageRole.SYSTEM, SystemService.IMAGE_GEN_SYSTEM));
-        messages.add(new OpenAIChatMessage(OpenAIChatMessageRole.SYSTEM, persona.getSystem()));
+        messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, SystemService.IMAGE_GEN_SYSTEM));
+        messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, persona.getSystem()));
         messages.addAll(previousMessages);
         messages.add(newMessage);
         return messages;

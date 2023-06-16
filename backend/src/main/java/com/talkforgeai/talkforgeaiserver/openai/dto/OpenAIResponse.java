@@ -1,55 +1,44 @@
 package com.talkforgeai.talkforgeaiserver.openai.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.Date;
 import java.util.List;
 
 
-public class OpenAIResponse {
-    private String id;
-    private Date created;
-    private String model;
+public record OpenAIResponse(String id,
+                             String object,
+                             Date created,
+                             String model,
+                             List<ResponseChoice> choices,
+                             ResponseUsage usage) {
 
-    private OpenAIResponseUsage usage;
+    public record ResponseChoice(Integer index,
+                                 @JsonAlias({"delta"}) OpenAIChatMessage message,
+                                 @JsonProperty("finish_reason") FinishReason finishReason) {
 
-    private List<OpenAIChatCompletionChoice> choices;
+        public enum FinishReason {
+            STOP("stop"),
+            FUNCTION_CALL("function_call");
 
-    public String getId() {
-        return id;
+            final String value;
+
+            FinishReason(String value) {
+                this.value = value;
+            }
+
+            @JsonValue
+            public String getValue() {
+                return value;
+            }
+        }
+
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Date getCreated() {
-        return created;
-    }
-
-    public void setCreated(Date created) {
-        this.created = created;
-    }
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public OpenAIResponseUsage getUsage() {
-        return usage;
-    }
-
-    public void setUsage(OpenAIResponseUsage usage) {
-        this.usage = usage;
-    }
-
-    public List<OpenAIChatCompletionChoice> getChoices() {
-        return choices;
-    }
-
-    public void setChoices(List<OpenAIChatCompletionChoice> choices) {
-        this.choices = choices;
+    public record ResponseUsage(@JsonProperty("prompt_tokens") int promptTokens,
+                                @JsonProperty("completion_tokens") int completionTokens,
+                                @JsonProperty("total_tokens") int totalTokens) {
     }
 }

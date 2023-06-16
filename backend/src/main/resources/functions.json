@@ -1,0 +1,24 @@
+[
+  {
+    "name": "send_email",
+    "description": "Send an email",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "subject": {
+          "type": "string",
+          "description": "The subject of the email"
+        },
+        "body": {
+          "type": "string",
+          "description": "The body of the email"
+        }
+      },
+      "required": [
+        "subject1",
+        "body1"
+      ]
+    },
+    "function_call": "auto"
+  }
+]

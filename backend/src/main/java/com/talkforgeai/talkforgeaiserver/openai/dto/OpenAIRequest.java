@@ -3,6 +3,7 @@ package com.talkforgeai.talkforgeaiserver.openai.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,9 @@ import java.util.Map;
 public class OpenAIRequest {
     String model;
     List<OpenAIChatMessage> messages;
+
+    List<OpenAIFunction> functions;
+
     Double temperature;
     @JsonProperty("top_p")
     Double topP;
@@ -25,6 +29,11 @@ public class OpenAIRequest {
     @JsonProperty("logit_bias")
     Map<String, Integer> logitBias;
     String user;
+
+    public OpenAIRequest() {
+        this.functions = new ArrayList<>();
+        this.messages = new ArrayList<>();
+    }
 
     public String getModel() {
         return model;
@@ -122,4 +131,11 @@ public class OpenAIRequest {
         this.messages = messages;
     }
 
+    public List<OpenAIFunction> getFunctions() {
+        return functions;
+    }
+
+    public void setFunctions(List<OpenAIFunction> functions) {
+        this.functions = functions;
+    }
 }
