@@ -1,6 +1,6 @@
 package com.talkforgeai.talkforgeaiserver.dto;
 
-import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatMessage;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessage;
 
 import java.util.List;
 

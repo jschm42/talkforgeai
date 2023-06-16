@@ -3,7 +3,7 @@ package com.talkforgeai.talkforgeaiserver.controller;
 import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionRequest;
 import com.talkforgeai.talkforgeaiserver.dto.NewChatSessionRequest;
 import com.talkforgeai.talkforgeaiserver.dto.SessionResponse;
-import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatMessage;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessage;
 import com.talkforgeai.talkforgeaiserver.service.ChatService;
 import com.talkforgeai.talkforgeaiserver.service.FileStorageService;
 import com.talkforgeai.talkforgeaiserver.service.MessageService;

@@ -1,6 +1,6 @@
 package com.talkforgeai.talkforgeaiserver.domain;
 
-import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatMessageRole;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessageRole;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;

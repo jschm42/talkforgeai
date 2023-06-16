@@ -1,4 +1,4 @@
-package com.talkforgeai.talkforgeaiserver.openai;
+package com.talkforgeai.talkforgeaiserver.openai.dto;
 
 public class OpenAIChatMessage {
     OpenAIChatMessageRole role;

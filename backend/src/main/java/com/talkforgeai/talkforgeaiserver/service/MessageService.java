@@ -3,7 +3,7 @@ package com.talkforgeai.talkforgeaiserver.service;
 import com.talkforgeai.talkforgeaiserver.domain.ChatMessageEntity;
 import com.talkforgeai.talkforgeaiserver.domain.ChatMessageType;
 import com.talkforgeai.talkforgeaiserver.domain.ChatSessionEntity;
-import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatMessage;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessage;
 import com.talkforgeai.talkforgeaiserver.repository.ChatMessageRepository;
 import org.springframework.stereotype.Service;
 

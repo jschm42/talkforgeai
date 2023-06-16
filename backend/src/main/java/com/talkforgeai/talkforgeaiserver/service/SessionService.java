@@ -5,7 +5,7 @@ import com.talkforgeai.talkforgeaiserver.domain.ChatMessageType;
 import com.talkforgeai.talkforgeaiserver.domain.ChatSessionEntity;
 import com.talkforgeai.talkforgeaiserver.domain.PersonaEntity;
 import com.talkforgeai.talkforgeaiserver.exception.SessionException;
-import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatMessage;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessage;
 import com.talkforgeai.talkforgeaiserver.repository.ChatSessionRepository;
 import com.talkforgeai.talkforgeaiserver.util.StringUtils;
 import org.springframework.data.domain.Sort;

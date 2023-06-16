@@ -1,4 +1,4 @@
-package com.talkforgeai.talkforgeaiserver.openai;
+package com.talkforgeai.talkforgeaiserver.openai.dto;
 
 import java.util.Date;
 import java.util.List;

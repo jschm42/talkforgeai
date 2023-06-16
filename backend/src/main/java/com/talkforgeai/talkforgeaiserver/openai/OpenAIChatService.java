@@ -2,6 +2,8 @@ package com.talkforgeai.talkforgeaiserver.openai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIRequest;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIResponse;
 import com.talkforgeai.talkforgeaiserver.properties.OpenAIProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

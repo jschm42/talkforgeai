@@ -1,6 +1,6 @@
 package com.talkforgeai.talkforgeaiserver.transformers;
 
-import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatMessage;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessage;
 import com.talkforgeai.talkforgeaiserver.service.OpenAIImageService;
 import com.talkforgeai.talkforgeaiserver.transformers.dto.TransformerContext;
 import org.slf4j.Logger;
