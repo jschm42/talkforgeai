@@ -1,13 +1,15 @@
 package com.talkforgeai.talkforgeaiserver.openai.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-//@JsonInclude(JsonInclude.Include.NON_EMPTY)
+//@JsonInclude(JsonInclude.Include.NON_NULL)
 public record OpenAIChatMessage(
         Role role,
         String content,
 
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         @JsonProperty("function_call")
         FunctionCall functionCall) {
 

@@ -15,8 +15,8 @@
         }
       },
       "required": [
-        "subject1",
-        "body1"
+        "subject",
+        "body"
       ]
     },
     "function_call": "auto"

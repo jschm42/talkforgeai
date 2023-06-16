@@ -27,6 +27,10 @@ public class MessageProcessor {
     }
 
     public OpenAIChatMessage transform(OpenAIChatMessage message, UUID sessionId, Path dataDirectory) {
+        if (message.content() == null || message.content().isEmpty()) {
+            return new OpenAIChatMessage(message.role(), "");
+        }
+
         String processedContent = message.content();
 
         TransformerContext context = new TransformerContext(sessionId, dataDirectory);
