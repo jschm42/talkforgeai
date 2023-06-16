@@ -8,7 +8,7 @@
       </div>
       <div class="col-md-10">
         <div class="card-body">
-          <div class="card-text text-start" v-html="message.content"></div>
+          <div class="card-text text-start" v-html="getContent()"></div>
         </div>
       </div>
       <div class="col-md-1 text-end">
@@ -68,6 +68,10 @@ export default {
     message: {
       role: String,
       content: String,
+      function_call: {
+        name: String,
+        arguments: String,
+      },
     },
     messageIndex: Number,
   },
@@ -105,6 +109,14 @@ export default {
     },
   },
   methods: {
+    getContent() {
+      if (this.message.function_call) {
+        const func = this.message.function_call;
+        return `<strong>${func.name}()</strong>`;
+      }
+
+      return this.message.content;
+    },
     getMessageStatus() {
       console.log('MAX INDEX', this.store.maxMessageIndex, this.id);
       if (this.messageIndex === this.store.maxMessageIndex) {

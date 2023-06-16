@@ -2,11 +2,11 @@ package com.talkforgeai.talkforgeaiserver.dto.ws;
 
 import java.util.UUID;
 
-public class ChatStatusMessage extends WebsocketMessage {
+public class WSChatStatusMessage extends WebsocketMessage {
 
     private String status;
 
-    public ChatStatusMessage(UUID sessionId, String status) {
+    public WSChatStatusMessage(UUID sessionId, String status) {
         super(sessionId, WebsocketMessageType.STATUS);
         this.status = status;
     }

@@ -2,8 +2,8 @@ package com.talkforgeai.talkforgeaiserver.service;
 
 import com.talkforgeai.talkforgeaiserver.domain.*;
 import com.talkforgeai.talkforgeaiserver.dto.*;
-import com.talkforgeai.talkforgeaiserver.dto.ws.ChatResponseMessage;
-import com.talkforgeai.talkforgeaiserver.dto.ws.ChatStatusMessage;
+import com.talkforgeai.talkforgeaiserver.dto.ws.WSChatResponseMessage;
+import com.talkforgeai.talkforgeaiserver.dto.ws.WSChatStatusMessage;
 import com.talkforgeai.talkforgeaiserver.exception.PersonaException;
 import com.talkforgeai.talkforgeaiserver.exception.SessionException;
 import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatService;
@@ -119,61 +119,71 @@ public class ChatService {
     public CompletableFuture<ChatCompletionResponse> submit(ChatCompletionRequest request) {
         logger.info("Submitting chat completion request for session: {}", request.sessionId());
 
-        ChatSessionEntity session = sessionService.getById(request.sessionId())
-                .orElseThrow(() -> new SessionException("Session not found: " + request.sessionId()));
+        try {
+            ChatSessionEntity session = sessionService.getById(request.sessionId())
+                    .orElseThrow(() -> new SessionException("Session not found: " + request.sessionId()));
 
-        PersonaEntity persona = session.getPersona();
-        List<OpenAIChatMessage> previousMessages = getPreviousMessages(session);
-        boolean isFirstSubmitInSession = previousMessages.isEmpty();
+            PersonaEntity persona = session.getPersona();
+            List<OpenAIChatMessage> previousMessages = getPreviousMessages(session);
+            boolean isFirstSubmitInSession = previousMessages.isEmpty();
 
-        OpenAIChatMessage newUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.prompt());
-        // TODO Postprocessing of new user message
-        OpenAIChatMessage processedNewUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.prompt());
+            OpenAIChatMessage newUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.prompt());
+            // TODO Postprocessing of new user message
+            OpenAIChatMessage processedNewUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.prompt());
 
-        List<OpenAIChatMessage> messagePayload = composeMessagePayload(previousMessages, processedNewUserMessage, persona);
+            List<OpenAIChatMessage> messagePayload = composeMessagePayload(previousMessages, processedNewUserMessage, persona);
 
-        webSocketService.sendMessage(
-                new ChatStatusMessage(request.sessionId(), "Thinking...")
-        );
+            webSocketService.sendMessage(
+                    new WSChatStatusMessage(request.sessionId(), "Thinking...")
+            );
 
-        OpenAIResponse response = submit(messagePayload, mapToGptProperties(persona.getProperties()));
+            OpenAIResponse response = submit(messagePayload, mapToGptProperties(persona.getProperties()));
 
-        List<OpenAIChatMessage> responseMessages = response.choices().stream()
-                .map(OpenAIResponse.ResponseChoice::message)
-                .toList();
+            List<OpenAIChatMessage> responseMessages = response.choices().stream()
+                    .map(OpenAIResponse.ResponseChoice::message)
+                    .toList();
 
-        List<OpenAIChatMessage> messagesToSave = new ArrayList<>();
-        messagesToSave.add(newUserMessage);
-        messagesToSave.addAll(responseMessages);
+            List<OpenAIChatMessage> messagesToSave = new ArrayList<>();
+            messagesToSave.add(newUserMessage);
+            messagesToSave.addAll(responseMessages);
 
-        List<OpenAIChatMessage> processedMessagesToSave = new ArrayList<>();
+            List<OpenAIChatMessage> processedMessagesToSave = new ArrayList<>();
 
-        webSocketService.sendMessage(
-                new ChatStatusMessage(request.sessionId(), "Processing...")
-        );
-        List<OpenAIChatMessage> processedResponseMessages = responseMessages.stream()
-                .map(m -> messageProcessor.transform(m, session.getId(), fileStorageService.getDataDirectory()))
-                .toList();
+            webSocketService.sendMessage(
+                    new WSChatStatusMessage(request.sessionId(), "Processing...")
+            );
+            List<OpenAIChatMessage> processedResponseMessages = responseMessages.stream()
+                    .map(m -> {
+                        if (m.content() == null) {
+                            return m;
+                        }
+                        return messageProcessor.transform(m, session.getId(), fileStorageService.getDataDirectory());
+                    })
+                    .toList();
 
-        processedMessagesToSave.add(processedNewUserMessage);
-        processedMessagesToSave.addAll(processedResponseMessages);
+            processedMessagesToSave.add(processedNewUserMessage);
+            processedMessagesToSave.addAll(processedResponseMessages);
 
-        if (isFirstSubmitInSession) {
-            sessionService.update(request.sessionId(), newUserMessage.content(), "<empty>");
+            if (isFirstSubmitInSession) {
+                sessionService.update(request.sessionId(), newUserMessage.content(), "<empty>");
+            }
+            ChatSessionEntity updatedSession
+                    = sessionService.update(request.sessionId(), messagesToSave, processedMessagesToSave);
+
+
+            webSocketService.sendMessage(
+                    new WSChatStatusMessage(request.sessionId(), "")
+            );
+
+            webSocketService.sendMessage(
+                    new WSChatResponseMessage(request.sessionId(), processedResponseMessages)
+            );
+
+            return CompletableFuture.completedFuture(createResponse(processedResponseMessages, updatedSession));
+        } catch (Exception e) {
+            logger.error("Error while processing chat request.", e);
         }
-        ChatSessionEntity updatedSession
-                = sessionService.update(request.sessionId(), messagesToSave, processedMessagesToSave);
-
-
-        webSocketService.sendMessage(
-                new ChatStatusMessage(request.sessionId(), "")
-        );
-
-        webSocketService.sendMessage(
-                new ChatResponseMessage(request.sessionId(), processedResponseMessages)
-        );
-
-        return CompletableFuture.completedFuture(createResponse(processedResponseMessages, updatedSession));
+        return null;
     }
 
     private List<OpenAIChatMessage> getPreviousMessages(ChatSessionEntity session) {

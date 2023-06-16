@@ -1,14 +1,15 @@
 package com.talkforgeai.talkforgeaiserver.openai.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+//@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public record OpenAIChatMessage(
         Role role,
         String content,
-        @JsonProperty("function_call") FunctionCall functionCall) {
+
+        @JsonProperty("function_call")
+        FunctionCall functionCall) {
 
     public OpenAIChatMessage(Role role, String content) {
         this(role, content, null);
@@ -33,7 +34,11 @@ public record OpenAIChatMessage(
         }
     }
 
-    public record FunctionCall(String name, String arguments) {
+
+    public record FunctionCall(
+
+            String name,
+            String arguments) {
     }
 
 }

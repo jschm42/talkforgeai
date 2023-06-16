@@ -77,6 +77,7 @@ export default {
 
           if (data.type === 'RESPONSE') {
             this.store.messages = [...this.store.messages, ...data.messages];
+            
             this.$nextTick(() => {
               hljs.highlightAll();
             });

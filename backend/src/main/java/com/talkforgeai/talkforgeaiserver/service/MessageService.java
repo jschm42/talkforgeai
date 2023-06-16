@@ -30,8 +30,11 @@ public class MessageService {
     }
 
     public OpenAIChatMessage mapToDto(ChatMessageEntity entity) {
-        OpenAIChatMessage dto = new OpenAIChatMessage(entity.getRole(), entity.getContent());
-        return dto;
+        OpenAIChatMessage.FunctionCall functionCall = null;
+        if (entity.getFunctionCallName() != null) {
+            functionCall = new OpenAIChatMessage.FunctionCall(entity.getFunctionCallName(), entity.getFunctionCallArguments());
+        }
+        return new OpenAIChatMessage(entity.getRole(), entity.getContent(), functionCall);
     }
 
     private ChatMessageEntity mapToEntity(OpenAIChatMessage message, ChatSessionEntity session, ChatMessageType type) {
@@ -40,6 +43,10 @@ public class MessageService {
         entity.setChatSession(session);
         entity.setContent(message.content());
         entity.setRole(message.role());
+        if (message.functionCall() != null) {
+            entity.setFunctionCallName(message.functionCall().name());
+            entity.setFunctionCallArguments(message.functionCall().arguments());
+        }
         return entity;
     }
 

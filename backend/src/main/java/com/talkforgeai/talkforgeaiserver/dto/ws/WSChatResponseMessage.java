@@ -5,11 +5,11 @@ import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessage;
 import java.util.List;
 import java.util.UUID;
 
-public class ChatResponseMessage extends WebsocketMessage {
+public class WSChatResponseMessage extends WebsocketMessage {
 
     private List<OpenAIChatMessage> messages;
 
-    public ChatResponseMessage(UUID sessionId, List<OpenAIChatMessage> messages) {
+    public WSChatResponseMessage(UUID sessionId, List<OpenAIChatMessage> messages) {
         super(sessionId, WebsocketMessageType.RESPONSE);
         this.messages = messages;
     }

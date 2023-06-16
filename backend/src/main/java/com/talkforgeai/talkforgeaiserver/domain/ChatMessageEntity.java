@@ -21,8 +21,14 @@ public class ChatMessageEntity {
     OpenAIChatMessage.Role role;
 
     @Lob
-    @Column(columnDefinition = "CLOB", nullable = false)
+    @Column(columnDefinition = "CLOB")
     String content;
+
+    String functionCallName;
+
+    @Lob
+    @Column(columnDefinition = "CLOB")
+    String functionCallArguments;
 
     @CreationTimestamp
     Date createdAt;
@@ -93,5 +99,21 @@ public class ChatMessageEntity {
 
     public void setRole(OpenAIChatMessage.Role role) {
         this.role = role;
+    }
+
+    public String getFunctionCallName() {
+        return functionCallName;
+    }
+
+    public void setFunctionCallName(String functionCallName) {
+        this.functionCallName = functionCallName;
+    }
+
+    public String getFunctionCallArguments() {
+        return functionCallArguments;
+    }
+
+    public void setFunctionCallArguments(String functionCallArguments) {
+        this.functionCallArguments = functionCallArguments;
     }
 }

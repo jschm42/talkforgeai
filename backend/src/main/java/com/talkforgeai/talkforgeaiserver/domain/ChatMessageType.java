@@ -2,5 +2,6 @@ package com.talkforgeai.talkforgeaiserver.domain;
 
 public enum ChatMessageType {
     UNPROCESSED,
-    PROCESSED
+    PROCESSED,
+    FUNCTION_CALL
 }
