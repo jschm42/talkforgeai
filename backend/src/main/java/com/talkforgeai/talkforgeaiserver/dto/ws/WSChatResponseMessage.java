@@ -2,24 +2,23 @@ package com.talkforgeai.talkforgeaiserver.dto.ws;
 
 import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessage;
 
-import java.util.List;
 import java.util.UUID;
 
 public class WSChatResponseMessage extends WebsocketMessage {
 
-    private List<OpenAIChatMessage> messages;
+    private OpenAIChatMessage message;
 
-    public WSChatResponseMessage(UUID sessionId, List<OpenAIChatMessage> messages) {
+    public WSChatResponseMessage(UUID sessionId, OpenAIChatMessage message) {
         super(sessionId, WebsocketMessageType.RESPONSE);
-        this.messages = messages;
+        this.message = message;
     }
 
 
-    public List<OpenAIChatMessage> getMessages() {
-        return messages;
+    public OpenAIChatMessage getMessage() {
+        return message;
     }
 
-    public void setMessages(List<OpenAIChatMessage> messages) {
-        this.messages = messages;
+    public void setMessage(OpenAIChatMessage message) {
+        this.message = message;
     }
 }

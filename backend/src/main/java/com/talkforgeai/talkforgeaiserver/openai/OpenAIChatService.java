@@ -24,30 +24,6 @@ public class OpenAIChatService {
         this.openAIProperties = openAIProperties;
     }
 
-//    public OpenAIResponse submit(OpenAIRequest request) {
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//        headers.set("Authorization", "Bearer " + openAIProperties.apiKey());
-//
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        String message = null;
-//        try {
-//            message = objectMapper.writeValueAsString(request);
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        logger.debug("Sending message: {}", message);
-//
-//        HttpEntity<String> entity = new HttpEntity<>(message, headers);
-//
-//        RestTemplate restTemplate = new RestTemplate();
-//
-//        ResponseEntity<OpenAIResponse> response = restTemplate.exchange(openAIProperties.chatUrl(), HttpMethod.POST, entity, OpenAIResponse.class);
-//        return response.getBody();
-//    }
-
     public OpenAIResponse submit(OpenAIRequest openAIRequest) {
         ObjectMapper objectMapper = new ObjectMapper();
         OkHttpClient client = new OkHttpClient.Builder()

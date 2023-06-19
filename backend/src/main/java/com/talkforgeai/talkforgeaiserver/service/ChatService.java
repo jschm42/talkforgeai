@@ -5,6 +5,7 @@ import com.talkforgeai.talkforgeaiserver.dto.*;
 import com.talkforgeai.talkforgeaiserver.dto.ws.WSChatFunctionMessage;
 import com.talkforgeai.talkforgeaiserver.dto.ws.WSChatResponseMessage;
 import com.talkforgeai.talkforgeaiserver.dto.ws.WSChatStatusMessage;
+import com.talkforgeai.talkforgeaiserver.exception.ChatException;
 import com.talkforgeai.talkforgeaiserver.exception.PersonaException;
 import com.talkforgeai.talkforgeaiserver.exception.SessionException;
 import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatService;
@@ -141,7 +142,7 @@ public class ChatService {
             SubmitResult submitResult = submit(request);
             PostProcessingResult result = postProcessSubmitResult(request, submitResult);
 
-            return CompletableFuture.completedFuture(createResponse(result.processedResponseMessages(), result.updatedSession()));
+            return CompletableFuture.completedFuture(createResponse(result.processedResponseMessage(), result.updatedSession()));
         } catch (Exception e) {
             logger.error("Error while processing chat request.", e);
         }
@@ -157,7 +158,7 @@ public class ChatService {
             SubmitResult submitResult = submit(request);
             PostProcessingResult result = postProcessSubmitResult(request, submitResult);
 
-            return CompletableFuture.completedFuture(createResponse(result.processedResponseMessages(), result.updatedSession()));
+            return CompletableFuture.completedFuture(createResponse(result.processedResponseMessage(), result.updatedSession()));
         } catch (Exception e) {
             logger.error("Error while processing chat request.", e);
         }
@@ -166,30 +167,32 @@ public class ChatService {
 
     @NotNull
     private PostProcessingResult postProcessSubmitResult(ChatCompletionRequest request, SubmitResult submitResult) {
-        List<OpenAIChatMessage> responseMessages = submitResult.response().choices().stream()
-                .map(OpenAIResponse.ResponseChoice::message)
-                .toList();
+        if (submitResult.response().choices().isEmpty()) {
+            throw new ChatException("Choices are empty.");
+        }
+
+        OpenAIResponse.ResponseChoice choice = submitResult.response().choices().get(0);
+        logger.info("Finish reason: {}", choice.finishReason());
+        OpenAIChatMessage responseMessage = choice.message();
+
 
         List<OpenAIChatMessage> messagesToSave = new ArrayList<>();
         messagesToSave.add(submitResult.newUserMessage());
-        messagesToSave.addAll(responseMessages);
+        messagesToSave.add(responseMessage);
 
         List<OpenAIChatMessage> processedMessagesToSave = new ArrayList<>();
 
         webSocketService.sendMessage(
                 new WSChatStatusMessage(request.sessionId(), "Processing...")
         );
-        List<OpenAIChatMessage> processedResponseMessages = responseMessages.stream()
-                .map(m -> {
-                    if (m.content() == null) {
-                        return m;
-                    }
-                    return messageProcessor.transform(m, submitResult.session().getId(), fileStorageService.getDataDirectory());
-                })
-                .toList();
+
+        OpenAIChatMessage processedResponseMessage = responseMessage;
+        if (responseMessage.content() != null) {
+            processedResponseMessage = messageProcessor.transform(responseMessage, submitResult.session().getId(), fileStorageService.getDataDirectory());
+        }
 
         processedMessagesToSave.add(submitResult.processedNewUserMessage());
-        processedMessagesToSave.addAll(processedResponseMessages);
+        processedMessagesToSave.add(processedResponseMessage);
 
         if (submitResult.isFirstSubmitInSession()) {
             sessionService.update(request.sessionId(), submitResult.newUserMessage().content(), "<empty>");
@@ -202,21 +205,20 @@ public class ChatService {
                 new WSChatStatusMessage(request.sessionId(), "")
         );
 
-        OpenAIChatMessage lastProceccedMessage = processedResponseMessages.get(0);
 
-        if (lastProceccedMessage.functionCall() != null && lastProceccedMessage.functionCall().name() != null) {
+        if (processedResponseMessage.functionCall() != null && processedResponseMessage.functionCall().name() != null) {
             webSocketService.sendMessage(
                     new WSChatFunctionMessage(request.sessionId(),
-                            lastProceccedMessage.functionCall().name(),
-                            lastProceccedMessage.functionCall().arguments())
+                            processedResponseMessage.functionCall().name(),
+                            processedResponseMessage.functionCall().arguments())
             );
         } else {
             webSocketService.sendMessage(
-                    new WSChatResponseMessage(request.sessionId(), processedResponseMessages)
+                    new WSChatResponseMessage(request.sessionId(), processedResponseMessage)
             );
         }
-        PostProcessingResult result = new PostProcessingResult(processedResponseMessages, updatedSession);
-        return result;
+
+        return new PostProcessingResult(processedResponseMessage, updatedSession);
     }
 
     @NotNull
@@ -267,8 +269,8 @@ public class ChatService {
                 .toList();
     }
 
-    private ChatCompletionResponse createResponse(List<OpenAIChatMessage> processedMessages, ChatSessionEntity updatedSession) {
-        return new ChatCompletionResponse(updatedSession.getId().toString(), processedMessages);
+    private ChatCompletionResponse createResponse(OpenAIChatMessage processedMessage, ChatSessionEntity updatedSession) {
+        return new ChatCompletionResponse(updatedSession.getId().toString(), processedMessage);
     }
 
     private List<OpenAIChatMessage> composeMessagePayload(List<OpenAIChatMessage> previousMessages, OpenAIChatMessage newMessage, PersonaEntity persona) {
@@ -303,12 +305,14 @@ public class ChatService {
         throw new SessionException("Session not found: " + sessionId);
     }
 
-    private record PostProcessingResult(List<OpenAIChatMessage> processedResponseMessages,
+    private record PostProcessingResult(OpenAIChatMessage processedResponseMessage,
                                         ChatSessionEntity updatedSession) {
     }
 
-    private record SubmitResult(ChatSessionEntity session, boolean isFirstSubmitInSession,
-                                OpenAIChatMessage newUserMessage, OpenAIChatMessage processedNewUserMessage,
+    private record SubmitResult(ChatSessionEntity session,
+                                boolean isFirstSubmitInSession,
+                                OpenAIChatMessage newUserMessage,
+                                OpenAIChatMessage processedNewUserMessage,
                                 OpenAIResponse response) {
     }
 }

@@ -76,7 +76,7 @@ export default {
           const data = JSON.parse(message.body);
 
           if (data.type === 'RESPONSE') {
-            this.store.messages = [...this.store.messages, ...data.messages];
+            this.store.messages = [...this.store.messages, data.message];
 
             this.$nextTick(() => {
               hljs.highlightAll();
