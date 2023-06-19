@@ -14,16 +14,16 @@
       </div>
       <div class="col-md-1 text-end">
 
-        <i v-if="audioState === 'stopped'" class="bi bi-play-circle-fill message-icon" role="button"
+        <i v-if="audioState === 'stopped' && isSpeakable" class="bi bi-play-circle-fill message-icon" role="button"
            @click="playAudio"></i>
 
-        <i v-if="audioState === 'paused'" class="bi bi-play-circle-fill message-icon" role="button"
+        <i v-if="audioState === 'paused' && isSpeakable" class="bi bi-play-circle-fill message-icon" role="button"
            @click="playAudio"></i>
 
-        <i v-if="audioState === 'playing'" class="bi bi-pause-circle-fill message-icon" role="button"
+        <i v-if="audioState === 'playing' && isSpeakable" class="bi bi-pause-circle-fill message-icon" role="button"
            @click="pauseAudio"></i>
 
-        <div v-if="audioState === 'loading'" class="spinner-border spinner-border-sm" role="status">
+        <div v-if="audioState === 'loading' && isSpeakable" class="spinner-border spinner-border-sm" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
 
@@ -106,6 +106,9 @@ export default {
     isFunction() {
       console.log('isFunction', this.message.function_call);
       return this.message.function_call;
+    },
+    isSpeakable() {
+      return !this.isFunction;
     },
     avatarImageClass() {
       return {
