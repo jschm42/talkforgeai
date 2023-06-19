@@ -10,13 +10,23 @@ public record OpenAIChatMessage(
         String content,
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
+        String name,
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         @JsonProperty("function_call")
         FunctionCall functionCall) {
 
     public OpenAIChatMessage(Role role, String content) {
-        this(role, content, null);
+        this(role, content, null, null);
     }
 
+    public OpenAIChatMessage(Role role, String content, String name) {
+        this(role, content, name, null);
+    }
+
+    public OpenAIChatMessage(Role role, String content, FunctionCall functionCall) {
+        this(role, content, null, functionCall);
+    }
 
     public enum Role {
         SYSTEM("system"),

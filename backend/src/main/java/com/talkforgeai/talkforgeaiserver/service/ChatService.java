@@ -131,9 +131,9 @@ public class ChatService {
 
         logger.info("Processing function: " + message.functionCall());
 
-        String proccessedFuncContent = "<TODO>";
+        String proccessedFuncContent = "Email send";
 
-        ChatCompletionRequest request = new ChatCompletionRequest(sessionId, proccessedFuncContent);
+        ChatCompletionRequest request = new ChatCompletionRequest(sessionId, proccessedFuncContent, message.functionCall().name());
 
         logger.info("Submitting chat completion request for session: {}", request.sessionId());
 
@@ -228,9 +228,9 @@ public class ChatService {
         List<OpenAIChatMessage> previousMessages = getPreviousMessages(session);
         boolean isFirstSubmitInSession = previousMessages.isEmpty();
 
-        OpenAIChatMessage newUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.prompt());
+        OpenAIChatMessage newUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.content());
         // TODO Postprocessing of new user message
-        OpenAIChatMessage processedNewUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.prompt());
+        OpenAIChatMessage processedNewUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.content());
 
         List<OpenAIChatMessage> messagePayload = composeMessagePayload(previousMessages, processedNewUserMessage, persona);
 

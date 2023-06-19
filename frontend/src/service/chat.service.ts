@@ -46,11 +46,11 @@ class ChatService {
     }
   }
 
-  async submit(sessionId: string, prompt: string) {
+  async submit(sessionId: string, content: string) {
     try {
       const result = await axios.post(
         `/api/v1/chat/submit`,
-        {sessionId, prompt},
+        {sessionId, content},
         {
           timeout: 50000,
           headers: {
