@@ -13,18 +13,20 @@ import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessage;
 import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIRequest;
 import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIResponse;
 import com.talkforgeai.talkforgeaiserver.transformers.MessageProcessor;
-import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ChatService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChatService.class);
     private final OpenAIChatService openAIChatService;
     private final PersonaService personaService;
     private final SessionService sessionService;
@@ -32,9 +34,9 @@ public class ChatService {
     private final WebSocketService webSocketService;
     private final MessageProcessor messageProcessor;
     private final FileStorageService fileStorageService;
-
     private final FunctionRepository functionRepository;
-    Logger logger = LoggerFactory.getLogger(ChatService.class);
+
+    private final TransactionTemplate transactionTemplate;
 
     public ChatService(OpenAIChatService openAIChatService,
                        SessionService sessionService,
@@ -43,7 +45,7 @@ public class ChatService {
                        WebSocketService webSocketService,
                        MessageProcessor messageProcessor,
                        FileStorageService fileStorageService,
-                       FunctionRepository functionRepository) {
+                       FunctionRepository functionRepository, TransactionTemplate transactionTemplate) {
         this.openAIChatService = openAIChatService;
         this.sessionService = sessionService;
         this.personaService = personaService;
@@ -52,59 +54,119 @@ public class ChatService {
         this.messageProcessor = messageProcessor;
         this.fileStorageService = fileStorageService;
         this.functionRepository = functionRepository;
+        this.transactionTemplate = transactionTemplate;
+    }
+
+    private boolean isFunctionCallFromAssistant(OpenAIChatMessage message) {
+        return message.functionCall() != null && message.role() == OpenAIChatMessage.Role.ASSISTANT;
+    }
+
+    public void submitFuncConfirmationAsync(UUID sessionId) {
+        _submitFuncConfirmationAsync(sessionId).whenComplete((response, ex) -> {
+            if (ex != null) {
+                LOGGER.error("Error on function confirm.", ex);
+                Throwable cause = ex.getCause();
+                if (cause instanceof ChatException) {
+                    LOGGER.error("Error on confirmation.", ex);
+                    // Handle the specific exception
+                } else {
+                    LOGGER.error("Unknown error.", ex);
+                    // Handle other exceptions
+                }
+            } else {
+                // Use the response
+                LOGGER.info("Confirmation successful.");
+            }
+        });
+    }
+
+    public void submitAsync(ChatCompletionRequest request) {
+        _submitAsync(request).whenComplete((response, ex) -> {
+            if (ex != null) {
+                Throwable cause = ex.getCause();
+                if (cause instanceof ChatException) {
+                    LOGGER.error("Error on submit.", ex);
+                    // Handle the specific exception
+                } else {
+                    LOGGER.error("Unknown error.", ex);
+                    // Handle other exceptions
+                }
+            } else {
+                // Use the response
+                LOGGER.info("Submission successful.");
+            }
+        });
+    }
+
+    @Async
+    protected CompletableFuture<OpenAIChatMessage> _submitFuncConfirmationAsync(UUID sessionId) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                ChatSessionEntity session = sessionService.getById(sessionId)
+                        .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
+
+                OpenAIChatMessage message = getLastMessage(session)
+                        .orElseThrow(() -> new SessionException("No previous message found."));
+
+                if (!isFunctionCallFromAssistant(message)) {
+                    throw new SessionException("Last message is not a function.");
+                }
+
+                LOGGER.info("Processing function: " + message.functionCall());
+
+                String proccessedFuncContent = "Email send";
+
+                ChatCompletionRequest request = new ChatCompletionRequest(sessionId, proccessedFuncContent, message.functionCall().name());
+
+                LOGGER.info("Submitting chat completion request for session: {}", request.sessionId());
+
+                return processChatRequest(request);
+            } catch (Exception ex) {
+                throw new ChatException("Error while confirmation of function.", ex);
+            }
+        });
+
     }
 
 
     @Async
-    @Transactional
-    public CompletableFuture<ChatCompletionResponse> submitFuncConfirmationAsync(UUID sessionId) {
-        ChatSessionEntity session = sessionService.getById(sessionId)
-                .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
+    protected CompletableFuture<OpenAIChatMessage> _submitAsync(ChatCompletionRequest request) {
+        return CompletableFuture.supplyAsync(() -> {
+            LOGGER.info("Submitting chat completion request for session: {}", request.sessionId());
 
-        OpenAIChatMessage message = getLastMessage(session)
-                .orElseThrow(() -> new SessionException("No previous message found."));
-
-        if (message.role() != OpenAIChatMessage.Role.ASSISTANT || message.functionCall() == null) {
-            throw new SessionException("Last message is not a function.");
-        }
-
-        logger.info("Processing function: " + message.functionCall());
-
-        String proccessedFuncContent = "Email send";
-
-        ChatCompletionRequest request = new ChatCompletionRequest(sessionId, proccessedFuncContent, message.functionCall().name());
-
-        logger.info("Submitting chat completion request for session: {}", request.sessionId());
-
-        try {
-            SubmitResult submitResult = submit(request);
-            PostProcessingResult result = postProcessSubmitResult(request, submitResult);
-
-            return CompletableFuture.completedFuture(createResponse(result.processedResponseMessage(), result.updatedSession()));
-        } catch (Exception e) {
-            logger.error("Error while processing chat request.", e);
-        }
-        return null;
+            try {
+                return processChatRequest(request);
+            } catch (Exception ex) {
+                throw new ChatException("Error while processing chat request.", ex);
+            }
+        });
     }
 
-    @Async
-    @Transactional
-    public CompletableFuture<ChatCompletionResponse> submitAsync(ChatCompletionRequest request) {
-        logger.info("Submitting chat completion request for session: {}", request.sessionId());
-
-        try {
+    @Nullable
+    private OpenAIChatMessage processChatRequest(ChatCompletionRequest request) {
+        return transactionTemplate.execute(status -> {
             SubmitResult submitResult = submit(request);
-            PostProcessingResult result = postProcessSubmitResult(request, submitResult);
+            OpenAIChatMessage processedResponseMessage
+                    = postProcessSubmitResult(request, submitResult);
 
-            return CompletableFuture.completedFuture(createResponse(result.processedResponseMessage(), result.updatedSession()));
-        } catch (Exception e) {
-            logger.error("Error while processing chat request.", e);
-        }
-        return null;
+            if (processedResponseMessage.functionCall() != null && processedResponseMessage.functionCall().name() != null) {
+                webSocketService.sendMessage(
+                        new WSChatFunctionMessage(request.sessionId(),
+                                processedResponseMessage.functionCall().name(),
+                                processedResponseMessage.functionCall().arguments())
+                );
+            } else {
+                webSocketService.sendMessage(
+                        new WSChatResponseMessage(request.sessionId(), processedResponseMessage)
+                );
+            }
+
+            return processedResponseMessage;
+        });
     }
 
     public UUID create(NewChatSessionRequest request) {
-        logger.info("Creating new chat session for persona: {}", request.personaId());
+        LOGGER.info("Creating new chat session for persona: {}", request.personaId());
 
         PersonaEntity persona = personaService.getPersonaById(request.personaId())
                 .orElseThrow(() -> new PersonaException("Persona not found: " + request.personaId()));
@@ -124,16 +186,14 @@ public class ChatService {
     }
 
 
-    @NotNull
-    private PostProcessingResult postProcessSubmitResult(ChatCompletionRequest request, SubmitResult submitResult) {
+    private OpenAIChatMessage postProcessSubmitResult(ChatCompletionRequest request, SubmitResult submitResult) {
         if (submitResult.response().choices().isEmpty()) {
             throw new ChatException("Choices are empty.");
         }
 
         OpenAIResponse.ResponseChoice choice = submitResult.response().choices().get(0);
-        logger.info("Finish reason: {}", choice.finishReason());
+        LOGGER.info("Finish reason: {}", choice.finishReason());
         OpenAIChatMessage responseMessage = choice.message();
-
 
         List<OpenAIChatMessage> messagesToSave = new ArrayList<>();
         messagesToSave.add(submitResult.newUserMessage());
@@ -156,28 +216,15 @@ public class ChatService {
         if (submitResult.isFirstSubmitInSession()) {
             sessionService.update(request.sessionId(), submitResult.newUserMessage().content(), "<empty>");
         }
-        ChatSessionEntity updatedSession
-                = sessionService.update(request.sessionId(), messagesToSave, processedMessagesToSave);
 
+        sessionService.update(request.sessionId(), messagesToSave, processedMessagesToSave);
 
         webSocketService.sendMessage(
                 new WSChatStatusMessage(request.sessionId(), "")
         );
 
+        return processedResponseMessage;
 
-        if (processedResponseMessage.functionCall() != null && processedResponseMessage.functionCall().name() != null) {
-            webSocketService.sendMessage(
-                    new WSChatFunctionMessage(request.sessionId(),
-                            processedResponseMessage.functionCall().name(),
-                            processedResponseMessage.functionCall().arguments())
-            );
-        } else {
-            webSocketService.sendMessage(
-                    new WSChatResponseMessage(request.sessionId(), processedResponseMessage)
-            );
-        }
-
-        return new PostProcessingResult(processedResponseMessage, updatedSession);
     }
 
     @NotNull
@@ -301,14 +348,10 @@ public class ChatService {
 
             return openAIChatService.submit(request);
         } catch (Exception e) {
-            logger.error("Error while submitting chat request.", e);
+            LOGGER.error("Error while submitting chat request.", e);
         }
 
         return null;
-    }
-
-    private record PostProcessingResult(OpenAIChatMessage processedResponseMessage,
-                                        ChatSessionEntity updatedSession) {
     }
 
     private record SubmitResult(ChatSessionEntity session,

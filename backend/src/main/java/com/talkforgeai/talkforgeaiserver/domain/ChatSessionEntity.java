@@ -33,7 +33,7 @@ public class ChatSessionEntity {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @OneToMany(mappedBy = "chatSession", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "chatSession", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ChatMessageEntity> chatMessages = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.ALL)

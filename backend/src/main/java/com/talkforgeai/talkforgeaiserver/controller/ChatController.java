@@ -7,6 +7,8 @@ import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessage;
 import com.talkforgeai.talkforgeaiserver.service.ChatService;
 import com.talkforgeai.talkforgeaiserver.service.FileStorageService;
 import com.talkforgeai.talkforgeaiserver.service.MessageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/chat")
 public class ChatController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChatController.class);
     private final ChatService chatService;
     private final FileStorageService fileStorageService;
     private final MessageService messageService;
