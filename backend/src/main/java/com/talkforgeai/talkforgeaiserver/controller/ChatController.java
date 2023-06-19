@@ -35,10 +35,14 @@ public class ChatController {
 
     @PostMapping("/submit")
     public void submit(@RequestBody ChatCompletionRequest request) {
-        chatService.submit(request);
-
-        //CompletableFuture.runAsync(() -> chatService.submit(request));
+        chatService.submitAsync(request);
     }
+
+    @PostMapping("/submit/function/confirm/{sessionId}")
+    public void submitFunctionConfirm(@PathVariable UUID sessionId) {
+        chatService.submitFuncConfirmationAsync(sessionId);
+    }
+
 
     @GetMapping("/result/{sessionId}")
     OpenAIChatMessage getResult(@PathVariable UUID sessionId) {

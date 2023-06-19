@@ -33,7 +33,7 @@
             Auto speak
           </label>
         </div>
-        <ChatMessageInput @submit-result-received="submitResultReceived"></ChatMessageInput>
+        <ChatMessageInput @submit-submitResult-received="submitResultReceived"></ChatMessageInput>
       </div>
 
       <div id="pills-system" aria-labelledby="pills-system-tab" class="tab-pane fade" role="tabpanel"

@@ -52,6 +52,9 @@ export const useChatStore = defineStore('chat', {
     async getLastResult() {
       return await chatService.getLastResult(this.sessionId);
     },
+    async sendFunctionConfirm(sessionId: string) {
+      const result = await chatService.submitFunctionConfirm(sessionId);
+    },
     async submitPrompt(prompt: string) {
       this.chat.configHeaderEnabled = false;
 
@@ -68,7 +71,7 @@ export const useChatStore = defineStore('chat', {
     },
     async loadChatSession(sessionId: string) {
       const chatSession = await chatService.readSessionEntry(sessionId);
-      
+
       this.$patch({
         sessionId: chatSession.id,
         messages: chatSession.chatMessages,

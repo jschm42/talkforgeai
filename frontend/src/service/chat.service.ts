@@ -62,6 +62,23 @@ class ChatService {
       throw new Error('Error submitting prompt: ' + error);
     }
   }
+
+  async submitFunctionConfirm(sessionId: string) {
+    try {
+      const result = await axios.post(
+        `/api/v1/chat/submit/function/confirm/${sessionId}`,
+        {sessionId},
+        {
+          timeout: 50000,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      return result.data;
+    } catch (error) {
+      throw new Error('Error submitting prompt: ' + error);
+    }
+  }
 }
 
 export default ChatService;

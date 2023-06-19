@@ -8,7 +8,7 @@
   </div>
   <!-- Input Section -->
 
-  <ChatControl @submit-result-received="submitResultReceived"></ChatControl>
+  <ChatControl @submit-submitResult-received="submitResultReceived"></ChatControl>
 
 </template>
 
@@ -77,10 +77,12 @@ export default {
 
           if (data.type === 'RESPONSE') {
             this.store.messages = [...this.store.messages, ...data.messages];
-            
+
             this.$nextTick(() => {
               hljs.highlightAll();
             });
+          } else if (data.type == 'FUNCTION_CALL') {
+            this.store.sendFunctionConfirm(data.sessionId);
           } else if (data.type === 'STATUS') {
             this.store.updateStatus(data.sessionId, data.status);
           } else {
@@ -101,6 +103,7 @@ export default {
     };
     wsClient.activate();
   },
+
 };
 </script>
 
