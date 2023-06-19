@@ -54,68 +54,6 @@ public class ChatService {
         this.functionRepository = functionRepository;
     }
 
-    public UUID create(NewChatSessionRequest request) {
-        logger.info("Creating new chat session for persona: {}", request.personaId());
-
-        PersonaEntity persona = personaService.getPersonaById(request.personaId())
-                .orElseThrow(() -> new PersonaException("Persona not found: " + request.personaId()));
-
-        ChatSessionEntity session
-                = sessionService.create(persona, new ArrayList<>(), new ArrayList<>());
-
-        return session.getId();
-    }
-
-    private Map<String, String> mapToGptProperties(Map<String, PropertyEntity> personaProperties) {
-        Map<String, String> gptProperties = new HashMap<>();
-        personaProperties.forEach((key, value) -> {
-            if (value.getCategory() == PropertyCategory.CHATGPT) {
-                gptProperties.put(key, value.getPropertyValue());
-            }
-        });
-        return gptProperties;
-    }
-
-    private OpenAIResponse submit(List<OpenAIChatMessage> messages, Map<String, String> properties) {
-        try {
-            OpenAIRequest request = new OpenAIRequest();
-            request.setMessages(messages);
-
-            // TODO Properties setzen
-            if (properties.containsKey(PropertyKeys.CHATGPT_MAX_TOKENS)) {
-                request.setMaxTokens(Integer.valueOf(properties.get(PropertyKeys.CHATGPT_MAX_TOKENS)));
-            }
-
-            if (properties.containsKey(PropertyKeys.CHATGPT_TOP_P)) {
-                request.setTopP(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TOP_P)));
-            }
-
-            if (properties.containsKey(PropertyKeys.CHATGPT_MODEL)) {
-                request.setModel(properties.get(PropertyKeys.CHATGPT_MODEL));
-            }
-
-            if (properties.containsKey(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)) {
-                request.setFrequencyPenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)));
-            }
-
-            if (properties.containsKey(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)) {
-                request.setPresencePenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_PRESENCE_PENALTY)));
-            }
-
-            if (properties.containsKey(PropertyKeys.CHATGPT_TEMPERATURE)) {
-                request.setTemperature(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TEMPERATURE)));
-            }
-
-            request.setFunctions(functionRepository.getAll());
-
-
-            return openAIChatService.submit(request);
-        } catch (Exception e) {
-            logger.error("Error while submitting chat request.", e);
-        }
-
-        return null;
-    }
 
     @Async
     @Transactional
@@ -164,6 +102,27 @@ public class ChatService {
         }
         return null;
     }
+
+    public UUID create(NewChatSessionRequest request) {
+        logger.info("Creating new chat session for persona: {}", request.personaId());
+
+        PersonaEntity persona = personaService.getPersonaById(request.personaId())
+                .orElseThrow(() -> new PersonaException("Persona not found: " + request.personaId()));
+
+        ChatSessionEntity session
+                = sessionService.create(persona, new ArrayList<>(), new ArrayList<>());
+
+        return session.getId();
+    }
+
+    public SessionResponse getSession(UUID sessionId) {
+        Optional<ChatSessionEntity> session = sessionService.getById(sessionId);
+        if (session.isPresent()) {
+            return mapSessionEntity(session.get());
+        }
+        throw new SessionException("Session not found: " + sessionId);
+    }
+
 
     @NotNull
     private PostProcessingResult postProcessSubmitResult(ChatCompletionRequest request, SubmitResult submitResult) {
@@ -297,12 +256,55 @@ public class ChatService {
                 personaService.mapPersonaResponse(session.getPersona()));
     }
 
-    public SessionResponse getSession(UUID sessionId) {
-        Optional<ChatSessionEntity> session = sessionService.getById(sessionId);
-        if (session.isPresent()) {
-            return mapSessionEntity(session.get());
+    private Map<String, String> mapToGptProperties(Map<String, PropertyEntity> personaProperties) {
+        Map<String, String> gptProperties = new HashMap<>();
+        personaProperties.forEach((key, value) -> {
+            if (value.getCategory() == PropertyCategory.CHATGPT) {
+                gptProperties.put(key, value.getPropertyValue());
+            }
+        });
+        return gptProperties;
+    }
+
+    private OpenAIResponse submit(List<OpenAIChatMessage> messages, Map<String, String> properties) {
+        try {
+            OpenAIRequest request = new OpenAIRequest();
+            request.setMessages(messages);
+
+            // TODO Properties setzen
+            if (properties.containsKey(PropertyKeys.CHATGPT_MAX_TOKENS)) {
+                request.setMaxTokens(Integer.valueOf(properties.get(PropertyKeys.CHATGPT_MAX_TOKENS)));
+            }
+
+            if (properties.containsKey(PropertyKeys.CHATGPT_TOP_P)) {
+                request.setTopP(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TOP_P)));
+            }
+
+            if (properties.containsKey(PropertyKeys.CHATGPT_MODEL)) {
+                request.setModel(properties.get(PropertyKeys.CHATGPT_MODEL));
+            }
+
+            if (properties.containsKey(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)) {
+                request.setFrequencyPenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)));
+            }
+
+            if (properties.containsKey(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)) {
+                request.setPresencePenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_PRESENCE_PENALTY)));
+            }
+
+            if (properties.containsKey(PropertyKeys.CHATGPT_TEMPERATURE)) {
+                request.setTemperature(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TEMPERATURE)));
+            }
+
+            request.setFunctions(functionRepository.getAll());
+
+
+            return openAIChatService.submit(request);
+        } catch (Exception e) {
+            logger.error("Error while submitting chat request.", e);
         }
-        throw new SessionException("Session not found: " + sessionId);
+
+        return null;
     }
 
     private record PostProcessingResult(OpenAIChatMessage processedResponseMessage,
@@ -315,4 +317,5 @@ public class ChatService {
                                 OpenAIChatMessage processedNewUserMessage,
                                 OpenAIResponse response) {
     }
+
 }
