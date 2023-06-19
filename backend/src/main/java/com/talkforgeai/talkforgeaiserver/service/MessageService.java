@@ -34,7 +34,7 @@ public class MessageService {
         if (entity.getFunctionCallName() != null) {
             functionCall = new OpenAIChatMessage.FunctionCall(entity.getFunctionCallName(), entity.getFunctionCallArguments());
         }
-        return new OpenAIChatMessage(entity.getRole(), entity.getContent(), functionCall);
+        return new OpenAIChatMessage(entity.getRole(), entity.getContent(), entity.getFunctionName(), functionCall);
     }
 
     private ChatMessageEntity mapToEntity(OpenAIChatMessage message, ChatSessionEntity session, ChatMessageType type) {
@@ -43,6 +43,7 @@ public class MessageService {
         entity.setChatSession(session);
         entity.setContent(message.content());
         entity.setRole(message.role());
+        entity.setFunctionName(message.name());
         if (message.functionCall() != null) {
             entity.setFunctionCallName(message.functionCall().name());
             entity.setFunctionCallArguments(message.functionCall().arguments());

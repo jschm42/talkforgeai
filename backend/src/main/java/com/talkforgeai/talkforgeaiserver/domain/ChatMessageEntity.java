@@ -24,6 +24,8 @@ public class ChatMessageEntity {
     @Column(columnDefinition = "CLOB")
     String content;
 
+    String functionName;
+
     String functionCallName;
 
     @Lob
@@ -115,5 +117,13 @@ public class ChatMessageEntity {
 
     public void setFunctionCallArguments(String functionCallArguments) {
         this.functionCallArguments = functionCallArguments;
+    }
+
+    public String getFunctionName() {
+        return functionName;
+    }
+
+    public void setFunctionName(String functionName) {
+        this.functionName = functionName;
     }
 }

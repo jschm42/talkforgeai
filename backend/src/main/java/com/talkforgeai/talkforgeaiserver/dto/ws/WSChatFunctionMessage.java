@@ -1,31 +1,23 @@
 package com.talkforgeai.talkforgeaiserver.dto.ws;
 
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessage;
+
 import java.util.UUID;
 
 public class WSChatFunctionMessage extends WebsocketMessage {
 
-    private String functionName;
-    private String functionArguments;
+    OpenAIChatMessage message;
 
-    public WSChatFunctionMessage(UUID sessionId, String functionName, String functionArguments) {
+    public WSChatFunctionMessage(UUID sessionId, OpenAIChatMessage message) {
         super(sessionId, WebsocketMessageType.FUNCTION_CALL);
-        this.functionName = functionName;
-        this.functionArguments = functionArguments;
+        this.message = message;
     }
 
-    public String getFunctionName() {
-        return functionName;
+    public OpenAIChatMessage getMessage() {
+        return message;
     }
 
-    public void setFunctionName(String functionName) {
-        this.functionName = functionName;
-    }
-
-    public String getFunctionArguments() {
-        return functionArguments;
-    }
-
-    public void setFunctionArguments(String functionArguments) {
-        this.functionArguments = functionArguments;
+    public void setMessage(OpenAIChatMessage message) {
+        this.message = message;
     }
 }

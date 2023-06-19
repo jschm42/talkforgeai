@@ -28,6 +28,10 @@ public record OpenAIChatMessage(
         this(role, content, null, functionCall);
     }
 
+    public OpenAIChatMessage(FunctionCall functionCall) {
+        this(Role.FUNCTION, null, null, functionCall);
+    }
+
     public enum Role {
         SYSTEM("system"),
         USER("user"),

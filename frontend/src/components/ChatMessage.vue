@@ -4,6 +4,7 @@
       <div class="col-md-1">
         <i v-if="isUser" class="fs-1 bi bi-person"></i>
         <img v-else-if="isShowPersonaIcon" :src="personaImage" alt="Assistant" class="persona-icon">
+        <i v-else-if="isFunction" class="fs-1 bi bi-gear"></i>
         <i v-else class="fs-1 bi bi-robot"></i>
       </div>
       <div class="col-md-10">
@@ -43,6 +44,7 @@
 import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
 import TtsService from '@/service/tts.service';
+import hljs from 'highlight.js';
 
 const AudioState = {
   Loading: 'loading',
@@ -101,6 +103,10 @@ export default {
       console.log('isUser', this.message.role);
       return this.message.role === Role.USER;
     },
+    isFunction() {
+      console.log('isFunction', this.message.function_call);
+      return this.message.function_call;
+    },
     avatarImageClass() {
       return {
         'bi-robot': this.message.role === Role.ASSISTANT,
@@ -112,7 +118,9 @@ export default {
     getContent() {
       if (this.message.function_call) {
         const func = this.message.function_call;
-        return `<strong>${func.name}()</strong>`;
+        const argumentsHighlighted = hljs.highlight(func.arguments, {language: 'json'}).value;
+
+        return `<strong>${func.name}(<p>${argumentsHighlighted}</p>)</strong>`;
       }
 
       return this.message.content;

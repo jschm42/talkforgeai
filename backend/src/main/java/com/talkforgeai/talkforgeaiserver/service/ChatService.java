@@ -150,10 +150,14 @@ public class ChatService {
                     = postProcessSubmitResult(request, submitResult);
 
             if (processedResponseMessage.functionCall() != null && processedResponseMessage.functionCall().name() != null) {
+                OpenAIChatMessage funcMessage = new OpenAIChatMessage(
+                        OpenAIChatMessage.Role.FUNCTION,
+                        processedResponseMessage.functionCall().name(),
+                        processedResponseMessage.functionCall()
+                );
+
                 webSocketService.sendMessage(
-                        new WSChatFunctionMessage(request.sessionId(),
-                                processedResponseMessage.functionCall().name(),
-                                processedResponseMessage.functionCall().arguments())
+                        new WSChatFunctionMessage(request.sessionId(), funcMessage)
                 );
             } else {
                 webSocketService.sendMessage(
