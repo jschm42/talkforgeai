@@ -100,46 +100,41 @@ public class ChatService {
 
     @Async
     protected CompletableFuture<OpenAIChatMessage> _submitFuncConfirmationAsync(UUID sessionId) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                ChatSessionEntity session = sessionService.getById(sessionId)
-                        .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
+        try {
+            ChatSessionEntity session = sessionService.getById(sessionId)
+                    .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
 
-                OpenAIChatMessage message = getLastMessage(session)
-                        .orElseThrow(() -> new SessionException("No previous message found."));
+            OpenAIChatMessage message = getLastMessage(session)
+                    .orElseThrow(() -> new SessionException("No previous message found."));
 
-                if (!isFunctionCallFromAssistant(message)) {
-                    throw new SessionException("Last message is not a function.");
-                }
-
-                LOGGER.info("Processing function: " + message.functionCall());
-
-                String proccessedFuncContent = "Email send";
-
-                ChatCompletionRequest request = new ChatCompletionRequest(sessionId, proccessedFuncContent, message.functionCall().name());
-
-                LOGGER.info("Submitting chat completion request for session: {}", request.sessionId());
-
-                return processChatRequest(request);
-            } catch (Exception ex) {
-                throw new ChatException("Error while confirmation of function.", ex);
+            if (!isFunctionCallFromAssistant(message)) {
+                throw new SessionException("Last message is not a function.");
             }
-        });
 
-    }
+            LOGGER.info("Processing function: " + message.functionCall());
 
+            String proccessedFuncContent = "Email send";
 
-    @Async
-    protected CompletableFuture<OpenAIChatMessage> _submitAsync(ChatCompletionRequest request) {
-        return CompletableFuture.supplyAsync(() -> {
+            ChatCompletionRequest request = new ChatCompletionRequest(sessionId, proccessedFuncContent, message.functionCall().name());
+
             LOGGER.info("Submitting chat completion request for session: {}", request.sessionId());
 
-            try {
-                return processChatRequest(request);
-            } catch (Exception ex) {
-                throw new ChatException("Error while processing chat request.", ex);
-            }
-        });
+            return CompletableFuture.completedFuture(processChatRequest(request));
+        } catch (Exception ex) {
+            throw new ChatException("Error while confirmation of function.", ex);
+        }
+
+    }
+    
+    @Async
+    protected CompletableFuture<OpenAIChatMessage> _submitAsync(ChatCompletionRequest request) {
+        LOGGER.info("Submitting chat completion request for session: {}", request.sessionId());
+
+        try {
+            return CompletableFuture.completedFuture(processChatRequest(request));
+        } catch (Exception ex) {
+            throw new ChatException("Error while processing chat request.", ex);
+        }
     }
 
     @Nullable
