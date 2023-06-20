@@ -73,6 +73,10 @@ export default {
         // called when the client receives a STOMP message from the server
         if (message.body) {
           const data = JSON.parse(message.body);
+          if (data.sessionId != this.store.sessionId) {
+            console.log('Message not for this session id.');
+          }
+
           console.log('WS received data' + message.body);
 
           if (data.type === 'RESPONSE') {
