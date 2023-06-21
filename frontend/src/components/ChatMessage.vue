@@ -96,15 +96,12 @@ export default {
       return this.isUser;
     },
     isAssistant() {
-      console.log('isAssistant', this.message.role);
       return this.message.role === Role.ASSISTANT;
     },
     isUser() {
-      console.log('isUser', this.message.role);
       return this.message.role === Role.USER;
     },
     isFunction() {
-      console.log('isFunction', this.message.function_call);
       return this.message.function_call;
     },
     isSpeakable() {
@@ -129,7 +126,6 @@ export default {
       return this.message.content;
     },
     getMessageStatus() {
-      console.log('MAX INDEX', this.store.maxMessageIndex, this.id);
       if (this.messageIndex === this.store.maxMessageIndex) {
         return this.store.currentStatusMessage;
       }

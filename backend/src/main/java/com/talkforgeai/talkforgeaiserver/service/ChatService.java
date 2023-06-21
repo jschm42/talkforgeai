@@ -125,7 +125,7 @@ public class ChatService {
         }
 
     }
-    
+
     @Async
     protected CompletableFuture<OpenAIChatMessage> _submitAsync(ChatCompletionRequest request) {
         LOGGER.info("Submitting chat completion request for session: {}", request.sessionId());
@@ -260,6 +260,7 @@ public class ChatService {
 
     private Optional<OpenAIChatMessage> getLastMessage(ChatSessionEntity session) {
         List<OpenAIChatMessage> previousMessages = getPreviousMessages(session);
+        LOGGER.info("Previous messages: {}", previousMessages);
 
         if (previousMessages != null && !previousMessages.isEmpty()) {
             return Optional.of(previousMessages.get(previousMessages.size() - 1));

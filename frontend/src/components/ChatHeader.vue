@@ -22,7 +22,7 @@
         <span v-else>Choose a persona</span>
       </button>
       <div aria-labelledby="dropdownMenuButton" class="dropdown-menu">
-        <a v-for="persona in personaList" :key="persona.id"
+        <a v-for="persona in personaList" :key="persona.personaId"
            class="dropdown-item"
            href="#"
            @click.prevent="onPersonaSelected(persona)">
