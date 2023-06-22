@@ -4,7 +4,8 @@
       <div class="col-md-1">
         <i v-if="isUser" class="fs-1 bi bi-person"></i>
         <img v-else-if="isShowPersonaIcon" :src="personaImage" alt="Assistant" class="persona-icon">
-        <i v-else-if="isFunction" class="fs-1 bi bi-gear"></i>
+        <i v-else-if="isFunctionCall" class="fs-1 bi bi-gear"></i>
+        <i v-else-if="isFunctionResponse" class="fs-1 bi bi-arrow-return-left"></i>
         <i v-else class="fs-1 bi bi-robot"></i>
       </div>
       <div class="col-md-10">
@@ -99,13 +100,16 @@ export default {
       return this.message.role === Role.ASSISTANT;
     },
     isUser() {
-      return this.message.role === Role.USER;
+      return this.message.role === Role.USER && !this.message.name;
     },
-    isFunction() {
+    isFunctionCall() {
       return this.message.function_call;
     },
+    isFunctionResponse() {
+      return this.message.name && this.message.content;
+    },
     isSpeakable() {
-      return !this.isFunction;
+      return !this.isFunctionCall;
     },
     avatarImageClass() {
       return {

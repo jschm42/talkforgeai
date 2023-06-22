@@ -1,6 +1,7 @@
 package com.talkforgeai.talkforgeaiserver.controller;
 
 import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionRequest;
+import com.talkforgeai.talkforgeaiserver.dto.ChatCompletionResponse;
 import com.talkforgeai.talkforgeaiserver.dto.NewChatSessionRequest;
 import com.talkforgeai.talkforgeaiserver.dto.SessionResponse;
 import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessage;
@@ -37,12 +38,12 @@ public class ChatController {
     }
 
     @PostMapping("/submit")
-    public OpenAIChatMessage submit(@RequestBody ChatCompletionRequest request) {
+    public ChatCompletionResponse submit(@RequestBody ChatCompletionRequest request) {
         return chatService.submitChatRequest(request);
     }
 
     @PostMapping("/submit/function/confirm/{sessionId}")
-    public OpenAIChatMessage submitFunctionConfirm(@PathVariable UUID sessionId) {
+    public ChatCompletionResponse submitFunctionConfirm(@PathVariable UUID sessionId) {
         return chatService.submitFuncConfirmation(sessionId);
     }
 

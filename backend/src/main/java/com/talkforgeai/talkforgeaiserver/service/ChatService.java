@@ -55,7 +55,7 @@ public class ChatService {
         return message.functionCall() != null && message.role() == OpenAIChatMessage.Role.ASSISTANT;
     }
 
-    public OpenAIChatMessage submitFuncConfirmation(UUID sessionId) {
+    public ChatCompletionResponse submitFuncConfirmation(UUID sessionId) {
         try {
             ChatSessionEntity session = sessionService.getById(sessionId)
                     .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
@@ -70,19 +70,26 @@ public class ChatService {
             LOGGER.info("Processing function: " + message.functionCall());
 
             String proccessedFuncContent = "Email send";
+            OpenAIChatMessage proccessedFuncMessage
+                    = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, proccessedFuncContent, message.functionCall().name());
 
-            ChatCompletionRequest request = new ChatCompletionRequest(sessionId, proccessedFuncContent, message.functionCall().name());
+            ChatCompletionRequest request
+                    = new ChatCompletionRequest(sessionId, proccessedFuncContent, message.functionCall().name());
 
             LOGGER.info("Submitting chat completion request for session: {}", request.sessionId());
 
-            return submitChatRequest(request);
+            return submitChatRequest(request, List.of(proccessedFuncMessage));
         } catch (Exception ex) {
             throw new ChatException("Error while confirmation of function.", ex);
         }
     }
 
+    public ChatCompletionResponse submitChatRequest(ChatCompletionRequest request) {
+        return this.submitChatRequest(request, new ArrayList<>());
+    }
+
     @Nullable
-    public OpenAIChatMessage submitChatRequest(ChatCompletionRequest request) {
+    public ChatCompletionResponse submitChatRequest(ChatCompletionRequest request, List<OpenAIChatMessage> additionalResponseMessages) {
         SubmitResult submitResult = submit(request);
         OpenAIChatMessage processedResponseMessage
                 = postProcessSubmitResult(request, submitResult);
@@ -103,7 +110,10 @@ public class ChatService {
             );
         }
 
-        return processedResponseMessage;
+        List<OpenAIChatMessage> responseMessages = new ArrayList<>();
+        responseMessages.addAll(additionalResponseMessages);
+        responseMessages.add(processedResponseMessage);
+        return new ChatCompletionResponse(request.sessionId(), responseMessages);
     }
 
     public UUID create(NewChatSessionRequest request) {
@@ -215,10 +225,6 @@ public class ChatService {
         return allSessions.stream()
                 .map(this::mapSessionEntity)
                 .toList();
-    }
-
-    private ChatCompletionResponse createResponse(OpenAIChatMessage processedMessage, ChatSessionEntity updatedSession) {
-        return new ChatCompletionResponse(updatedSession.getId().toString(), processedMessage);
     }
 
     private List<OpenAIChatMessage> composeMessagePayload(List<OpenAIChatMessage> previousMessages, OpenAIChatMessage newMessage, PersonaEntity persona) {

@@ -64,12 +64,14 @@ export const useChatStore = defineStore('chat', {
       console.log('Submitting prompt', this.sessionId, prompt);
       const result = await chatService.submit(this.sessionId, prompt);
       console.log('Result Message.', result);
-      this.messages = [...this.messages, result];
+      this.messages = [...this.messages, ...result.processedMessages];
 
-      if (result.function_call && result.role === Role.ASSISTANT) {
+      const message = result.processedMessages[result.processedMessages.length - 1];
+      if (message.function_call && message.role === Role.ASSISTANT) {
         const result = await chatService.submitFunctionConfirm(this.sessionId);
+
         console.log('Result Message after Function call.', result);
-        this.messages = [...this.messages, result];
+        this.messages = [...this.messages, ...result.processedMessages];
       }
 
       //console.log('Prompt submitted');
