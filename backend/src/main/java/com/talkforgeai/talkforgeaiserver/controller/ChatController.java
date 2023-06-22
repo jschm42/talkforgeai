@@ -37,15 +37,14 @@ public class ChatController {
     }
 
     @PostMapping("/submit")
-    public void submit(@RequestBody ChatCompletionRequest request) {
-        chatService.submitAsync(request);
+    public OpenAIChatMessage submit(@RequestBody ChatCompletionRequest request) {
+        return chatService.submitChatRequest(request);
     }
 
     @PostMapping("/submit/function/confirm/{sessionId}")
-    public void submitFunctionConfirm(@PathVariable UUID sessionId) {
-        chatService.submitFuncConfirmationAsync(sessionId);
+    public OpenAIChatMessage submitFunctionConfirm(@PathVariable UUID sessionId) {
+        return chatService.submitFuncConfirmation(sessionId);
     }
-
 
     @GetMapping("/result/{sessionId}")
     OpenAIChatMessage getResult(@PathVariable UUID sessionId) {

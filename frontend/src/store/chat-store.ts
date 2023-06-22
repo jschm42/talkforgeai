@@ -52,9 +52,6 @@ export const useChatStore = defineStore('chat', {
     async getLastResult() {
       return await chatService.getLastResult(this.sessionId);
     },
-    async sendFunctionConfirm(sessionId: string) {
-      const result = await chatService.submitFunctionConfirm(sessionId);
-    },
     async submitPrompt(prompt: string) {
       this.chat.configHeaderEnabled = false;
 
@@ -66,8 +63,17 @@ export const useChatStore = defineStore('chat', {
 
       console.log('Submitting prompt', this.sessionId, prompt);
       const result = await chatService.submit(this.sessionId, prompt);
-      console.log('Prompt submitted');
-      //this.messages = [...this.messages, ...result.processedMessages];
+      console.log('Result Message.', result);
+      this.messages = [...this.messages, result];
+
+      if (result.function_call && result.role === Role.ASSISTANT) {
+        const result = await chatService.submitFunctionConfirm(this.sessionId);
+        console.log('Result Message after Function call.', result);
+        this.messages = [...this.messages, result];
+      }
+
+      //console.log('Prompt submitted');
+
     },
     async loadChatSession(sessionId: string) {
       const chatSession = await chatService.readSessionEntry(sessionId);
