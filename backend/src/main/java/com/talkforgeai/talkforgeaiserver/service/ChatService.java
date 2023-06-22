@@ -110,8 +110,7 @@ public class ChatService {
             );
         }
 
-        List<OpenAIChatMessage> responseMessages = new ArrayList<>();
-        responseMessages.addAll(additionalResponseMessages);
+        List<OpenAIChatMessage> responseMessages = new ArrayList<>(additionalResponseMessages);
         responseMessages.add(processedResponseMessage);
         return new ChatCompletionResponse(request.sessionId(), responseMessages);
     }

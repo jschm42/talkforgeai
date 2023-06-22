@@ -6,7 +6,6 @@ import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIRequest;
 import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIResponse;
 import com.talkforgeai.talkforgeaiserver.properties.OpenAIProperties;
 import okhttp3.*;
-import okhttp3.logging.HttpLoggingInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,19 +15,17 @@ import java.io.IOException;
 @Service
 public class OpenAIChatService {
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
-
     private final OpenAIProperties openAIProperties;
+    private final OkHttpClient client;
     Logger logger = LoggerFactory.getLogger(OpenAIChatService.class);
 
-    public OpenAIChatService(OpenAIProperties openAIProperties) {
+    public OpenAIChatService(OpenAIProperties openAIProperties, OkHttpClient client) {
         this.openAIProperties = openAIProperties;
+        this.client = client;
     }
 
     public OpenAIResponse submit(OpenAIRequest openAIRequest) {
         ObjectMapper objectMapper = new ObjectMapper();
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-                .build();
 
         String message = null;
         try {

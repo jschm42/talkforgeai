@@ -1,8 +1,9 @@
 package com.talkforgeai.talkforgeaiserver.transformers;
 
-import com.talkforgeai.talkforgeaiserver.service.OpenAIImageService;
+import com.talkforgeai.talkforgeaiserver.openai.OpenAIImageService;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIImageRequest;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIImageResponse;
 import com.talkforgeai.talkforgeaiserver.transformers.dto.TransformerContext;
-import com.theokanning.openai.image.ImageResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -43,10 +44,10 @@ public class ImageDownloadTransformer implements Transformer {
         while (matcher.find()) {
             String fullTag = matcher.group(0);
             String prompt = matcher.group(1);
-            ImageResult imageResult = service.submit(prompt);
+            OpenAIImageResponse imageResult = service.submit(new OpenAIImageRequest(prompt));
             try {
                 String localFilePath = downloadImage(
-                        imageResult.getData().get(0).getUrl(),
+                        imageResult.data().get(0).url(),
                         context.sessionId(),
                         context.dataDirectory()
                 );
