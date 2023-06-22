@@ -3,11 +3,13 @@ package com.talkforgeai.talkforgeaiserver.dto.ws;
 import java.util.UUID;
 
 public class WebsocketMessage {
-    private UUID sessionId;
+    private final UUID messageId;
+    private final UUID sessionId;
 
-    private WebsocketMessageType type;
+    private final WebsocketMessageType type;
 
     public WebsocketMessage(UUID sessionId, WebsocketMessageType type) {
+        this.messageId = UUID.randomUUID();
         this.sessionId = sessionId;
         this.type = type;
     }
@@ -16,15 +18,12 @@ public class WebsocketMessage {
         return type;
     }
 
-    public void setType(WebsocketMessageType type) {
-        this.type = type;
-    }
 
     public UUID getSessionId() {
         return sessionId;
     }
 
-    public void setSessionId(UUID sessionId) {
-        this.sessionId = sessionId;
+    public UUID getMessageId() {
+        return messageId;
     }
 }

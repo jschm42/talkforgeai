@@ -58,32 +58,26 @@ class WebSocketService {
       // This is needed because this will be executed after a (re)connect
       const subscription = wsClient.subscribe('/topic/messages', message => {
         // called when the client receives a STOMP message from the server
+
         if (message.body) {
           const data = JSON.parse(message.body);
+
+          console.log('WS received data', data);
+
           if (data.sessionId !== this.store.sessionId) {
             console.log('Message not for this session id.');
             return;
           }
 
-          console.log('WS received data' + message.body);
-
           if (data.type === 'RESPONSE') {
             console.log('WS Response-Message ', data.message);
             this.responseHandler(data);
-            // this.store.messages = [...this.store.messages, data.message];
-            //
-            // this.$nextTick(() => {
-            //   hljs.highlightAll();
-            // });
           } else if (data.type === 'FUNCTION_CALL') {
             console.log('WS Function-Message ', data.message);
             this.functionCallHandler(data);
-            // this.store.messages = [...this.store.messages, data.message];
-            // this.store.sendFunctionConfirm(data.sessionId);
           } else if (data.type === 'STATUS') {
             console.log('WS Status-Message ', data.status);
             this.statusUpdateHandler(data);
-            // this.store.updateStatus(data.sessionId, data.status);
           } else {
             console.log('Unknown message type.');
           }

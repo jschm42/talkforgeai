@@ -69,7 +69,18 @@ export default {
       this.store.sendFunctionConfirm(data.sessionId);
     };
 
-    wsService.createClient().activate();
+    const wsClient = wsService.createClient();
+    wsClient.activate();
+
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        console.log('Tab is not active');
+        wsClient.deactivate();
+      } else {
+        console.log('Tab is active');
+        wsClient.activate();
+      }
+    });
 
     // const wsClient = new Client({
     //   brokerURL: `ws://localhost:8090/ws`,
