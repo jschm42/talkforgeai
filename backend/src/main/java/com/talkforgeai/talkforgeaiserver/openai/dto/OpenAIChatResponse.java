@@ -8,12 +8,12 @@ import java.util.Date;
 import java.util.List;
 
 
-public record OpenAIResponse(String id,
-                             String object,
-                             Date created,
-                             String model,
-                             List<ResponseChoice> choices,
-                             ResponseUsage usage) {
+public record OpenAIChatResponse(String id,
+                                 String object,
+                                 Date created,
+                                 String model,
+                                 List<ResponseChoice> choices,
+                                 ResponseUsage usage) {
 
     public record ResponseChoice(Integer index,
                                  @JsonAlias({"delta"}) OpenAIChatMessage message,

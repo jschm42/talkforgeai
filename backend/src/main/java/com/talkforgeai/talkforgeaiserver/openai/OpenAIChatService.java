@@ -2,8 +2,8 @@ package com.talkforgeai.talkforgeaiserver.openai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIRequest;
-import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIResponse;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatRequest;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatResponse;
 import com.talkforgeai.talkforgeaiserver.properties.OpenAIProperties;
 import okhttp3.*;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ public class OpenAIChatService {
         this.client = client;
     }
 
-    public OpenAIResponse submit(OpenAIRequest openAIRequest) {
+    public OpenAIChatResponse submit(OpenAIChatRequest openAIRequest) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         String message = null;
@@ -42,7 +42,7 @@ public class OpenAIChatService {
 
             try (Response response = client.newCall(request).execute()) {
 
-                return objectMapper.readValue(response.body().string(), OpenAIResponse.class);
+                return objectMapper.readValue(response.body().string(), OpenAIChatResponse.class);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

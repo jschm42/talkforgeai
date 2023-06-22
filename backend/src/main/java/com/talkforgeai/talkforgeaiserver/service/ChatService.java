@@ -10,8 +10,8 @@ import com.talkforgeai.talkforgeaiserver.exception.PersonaException;
 import com.talkforgeai.talkforgeaiserver.exception.SessionException;
 import com.talkforgeai.talkforgeaiserver.openai.OpenAIChatService;
 import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatMessage;
-import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIRequest;
-import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIResponse;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatRequest;
+import com.talkforgeai.talkforgeaiserver.openai.dto.OpenAIChatResponse;
 import com.talkforgeai.talkforgeaiserver.transformers.MessageProcessor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -141,7 +141,7 @@ public class ChatService {
             throw new ChatException("Choices are empty.");
         }
 
-        OpenAIResponse.ResponseChoice choice = submitResult.response().choices().get(0);
+        OpenAIChatResponse.ResponseChoice choice = submitResult.response().choices().get(0);
         LOGGER.info("Finish reason: {}", choice.finishReason());
         OpenAIChatMessage responseMessage = choice.message();
 
@@ -196,7 +196,7 @@ public class ChatService {
                 new WSChatStatusMessage(request.sessionId(), "Thinking...")
         );
 
-        OpenAIResponse response = submit(messagePayload, mapToGptProperties(persona.getProperties()));
+        OpenAIChatResponse response = submit(messagePayload, mapToGptProperties(persona.getProperties()));
         return new SubmitResult(session, isFirstSubmitInSession, newUserMessage, processedNewUserMessage, response);
     }
 
@@ -260,9 +260,9 @@ public class ChatService {
         return gptProperties;
     }
 
-    private OpenAIResponse submit(List<OpenAIChatMessage> messages, Map<String, String> properties) {
+    private OpenAIChatResponse submit(List<OpenAIChatMessage> messages, Map<String, String> properties) {
         try {
-            OpenAIRequest request = new OpenAIRequest();
+            OpenAIChatRequest request = new OpenAIChatRequest();
             request.setMessages(messages);
 
             // TODO Properties setzen
@@ -305,7 +305,7 @@ public class ChatService {
                                 boolean isFirstSubmitInSession,
                                 OpenAIChatMessage newUserMessage,
                                 OpenAIChatMessage processedNewUserMessage,
-                                OpenAIResponse response) {
+                                OpenAIChatResponse response) {
     }
 
 }

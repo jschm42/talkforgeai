@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class OpenAIRequest {
+public class OpenAIChatRequest {
     String model;
     List<OpenAIChatMessage> messages;
 
@@ -30,7 +30,7 @@ public class OpenAIRequest {
     Map<String, Integer> logitBias;
     String user;
 
-    public OpenAIRequest() {
+    public OpenAIChatRequest() {
         this.functions = new ArrayList<>();
         this.messages = new ArrayList<>();
     }
