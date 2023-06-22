@@ -35,15 +35,6 @@ export default {
         'bg-info': this.message.role === Role.USER,
       };
     },
-    isShowPersonaIcon() {
-      return this.isAssistant;
-    },
-    isShowRobotIcon() {
-      return this.isAssistant && !this.store.selectedPersona;
-    },
-    isShowUserIcon() {
-      return this.isUser;
-    },
     isAssistant() {
       return this.message.role === Role.ASSISTANT;
     },
@@ -92,7 +83,7 @@ export default {
     <div class="row">
       <div class="col-md-1">
         <i v-if="isUser" class="fs-1 bi bi-person"></i>
-        <img v-else-if="isShowPersonaIcon" :src="personaImage" alt="Assistant" class="persona-icon">
+        <img v-else-if="isAssistant" :src="personaImage" alt="Assistant" class="persona-icon">
         <i v-else-if="isFunctionCall" class="fs-1 bi bi-gear"></i>
         <i v-else-if="isFunctionResponse" class="fs-1 bi bi-arrow-return-left"></i>
         <i v-else class="fs-1 bi bi-robot"></i>
