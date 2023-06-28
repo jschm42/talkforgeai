@@ -4,6 +4,7 @@ import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
 import hljs from 'highlight.js';
 import ChatMessageAudioPlayer from '@/components/ChatMessageAudioPlayer.vue';
+import ChatMessage from '@/store/to/chat-message';
 
 export default {
   name: 'ChatMessage',
@@ -16,14 +17,7 @@ export default {
     return {};
   },
   props: {
-    message: {
-      role: String,
-      content: String,
-      function_call: {
-        name: String,
-        arguments: String,
-      },
-    },
+    message: ChatMessage,
     messageIndex: Number,
   },
   computed: {
@@ -94,7 +88,7 @@ export default {
         </div>
       </div>
       <div class="col-md-1 text-end">
-        <chat-message-audio-player :text="this.message.content"></chat-message-audio-player>
+        <chat-message-audio-player :message="this.message"></chat-message-audio-player>
       </div>
     </div>
     <footer>

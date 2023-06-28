@@ -2,6 +2,12 @@
 import {defineComponent} from 'vue';
 import TtsService from '@/service/tts.service';
 import {useChatStore} from '@/store/chat-store';
+import ChatMessage from '@/store/to/chat-message';
+import Role from '@/store/to/role';
+import HtmlToTextService from '@/service/html-to-text.service';
+
+const ttsService = new TtsService();
+const htmlToTextService = new HtmlToTextService();
 
 export default defineComponent({
   name: 'ChatMessageAudioPlayer',
@@ -15,7 +21,14 @@ export default defineComponent({
     };
   },
   props: {
-    text: String,
+    message: ChatMessage,
+  },
+  mounted() {
+    if (this.store.chat.autoSpeak) {
+      this.playAudio().then(() => {
+        console.log('Audio Played.');
+      });
+    }
   },
   methods: {
     pauseAudio() {
@@ -27,12 +40,19 @@ export default defineComponent({
       this.audioState = AudioState.Stopped;
     },
     async playAudio() {
+      console.log('ROLE', this.message);
+      if (this.message.role !== Role.ASSISTANT) {
+        console.log('Not a speakable message.');
+        return;
+      }
+
+      const plainText = htmlToTextService.removeHtml(this.message.content);
+      console.log('PLAIN TEXT', plainText);
+
       console.log('Playing audio');
       this.audioState = AudioState.Loading;
       try {
-        //const properties = toRaw(this.store.getElevenLabsProperties());
-        //const audioBlob = await window.chatAPI.textToSpeech(this.message.content, properties);
-        const audioBlob = await ttsService.speak(this.text);
+        const audioBlob = await ttsService.speak(plainText);
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.addEventListener('ended', () => {
@@ -56,8 +76,6 @@ const AudioState = {
   Paused: 'paused',
   Stopped: 'stopped',
 };
-
-const ttsService = new TtsService();
 
 
 </script>

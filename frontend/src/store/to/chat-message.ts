@@ -8,13 +8,13 @@ class ChatMessage {
 
   name: string | undefined;
 
-  functionCall: undefined;
+  function_call: undefined;
 
-  constructor(role: Role, content: string, name?: string, functionCall?: undefined) {
+  constructor(role: Role, content: string, name?: string, function_call?: undefined) {
     this.role = role;
     this.content = content;
     this.name = name;
-    this.functionCall = functionCall;
+    this.function_call = function_call;
   }
 }
 
