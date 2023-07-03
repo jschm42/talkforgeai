@@ -2,6 +2,7 @@ package com.talkforgeai.talkforgeaiserver.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkforgeai.talkforgeaiserver.domain.PersonaEntity;
+import com.talkforgeai.talkforgeaiserver.domain.PropertyEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PersonaJsonReaderService {
@@ -35,15 +37,11 @@ public class PersonaJsonReaderService {
                 InputStream inputStream = resource.getInputStream();
                 PersonaEntity persona = mapper.readValue(inputStream, PersonaEntity.class);
 
-                // Map of properties may need additional handling depending on your JSON structure
-                // Assuming the properties in JSON are represented as an array of objects
-                // Each object has two fields: "propertyKey" and "propertyEntity"
-                // Each "propertyEntity" is a JSON object that can be converted to PropertyEntity
-
-//                Map<String, PropertyEntity> properties = persona.getProperties();
-//                for (Map.Entry<String, PropertyEntity> entry : properties.entrySet()) {
-//                    // Do any additional processing with the PropertyEntity if needed
-//                }
+                Map<String, PropertyEntity> properties = persona.getProperties();
+                for (Map.Entry<String, PropertyEntity> entry : properties.entrySet()) {
+                    PropertyEntity propertyEntity = properties.get(entry.getKey());
+                    propertyEntity.setPropertyKey(entry.getKey());
+                }
 
                 personas.add(persona);
             }

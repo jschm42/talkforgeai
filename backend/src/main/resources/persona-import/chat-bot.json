@@ -5,25 +5,21 @@
   "imagePath": "chat-bot.png",
   "properties": {
     "model": {
-      "propertyKey": "model",
       "propertyValue": "gpt-3.5-turbo-0613",
       "category": "CHATGPT",
       "type": "STRING"
     },
     "temperature": {
-      "propertyKey": "temperature",
       "propertyValue": "0.7",
       "category": "CHATGPT",
       "type": "DOUBLE"
     },
     "top_p": {
-      "propertyKey": "top_p",
       "propertyValue": "1.0",
       "category": "CHATGPT",
       "type": "DOUBLE"
     },
     "voiceId": {
-      "propertyKey": "voiceId",
       "propertyValue": "21m00Tcm4TlvDq8ikWAM",
       "category": "ELEVENLABS",
       "type": "STRING"

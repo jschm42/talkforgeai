@@ -1,8 +1,8 @@
 {
-  "name": "Yoda",
-  "description": "Yoda the jedi master",
-  "system": "Stay in the role of master Yoda. Use the force to answer the questions.",
-  "imagePath": "yoda.png",
+  "name": "Creative Bot",
+  "description": "The creative chat bot that will generate content for you.",
+  "system": "You are a very creative chat bot, specialized on creating text and art.",
+  "imagePath": "creative-bot.png",
   "properties": {
     "model": {
       "propertyValue": "gpt-3.5-turbo-0613",
@@ -10,7 +10,7 @@
       "type": "STRING"
     },
     "temperature": {
-      "propertyValue": "0.5",
+      "propertyValue": "0.9",
       "category": "CHATGPT",
       "type": "DOUBLE"
     },
@@ -20,7 +20,7 @@
       "type": "DOUBLE"
     },
     "voiceId": {
-      "propertyValue": "VR6AewLTigWG4xSOukaG",
+      "propertyValue": "21m00Tcm4TlvDq8ikWAM",
       "category": "ELEVENLABS",
       "type": "STRING"
     }

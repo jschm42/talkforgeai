@@ -35,7 +35,7 @@ public class TTSService {
 
         ElevenLabsRequest ttsRequest = new ElevenLabsRequest();
         ttsRequest.setText(request.getText());
-        ttsRequest.setModelId("eleven_monolingual_v1");
+        ttsRequest.setModelId("eleven_multilingual_v1");
 
         ObjectMapper mapper = new ObjectMapper();
         String str = "";
