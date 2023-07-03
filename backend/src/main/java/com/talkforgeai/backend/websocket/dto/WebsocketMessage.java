@@ -1,4 +1,4 @@
-package com.talkforgeai.backend.dto.ws;
+package com.talkforgeai.backend.websocket.dto;
 
 import java.util.UUID;
 

@@ -1,7 +1,7 @@
-package com.talkforgeai.backend.controller;
+package com.talkforgeai.backend.voice.controller;
 
-import com.talkforgeai.backend.dto.TTSRequest;
-import com.talkforgeai.backend.service.TTSService;
+import com.talkforgeai.backend.voice.dto.TTSRequest;
+import com.talkforgeai.backend.voice.service.TTSService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

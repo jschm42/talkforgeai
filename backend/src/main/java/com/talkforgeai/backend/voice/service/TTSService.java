@@ -1,10 +1,10 @@
-package com.talkforgeai.backend.service;
+package com.talkforgeai.backend.voice.service;
 
-import com.talkforgeai.backend.dto.TTSRequest;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
 import com.talkforgeai.backend.persona.domain.PropertyCategory;
 import com.talkforgeai.backend.persona.domain.PropertyEntity;
 import com.talkforgeai.backend.persona.service.PersonaService;
+import com.talkforgeai.backend.voice.dto.TTSRequest;
 import com.talkforgeai.service.elevenlabs.ElevenLabsService;
 import com.talkforgeai.service.elevenlabs.ElevenlabsRequestProperties;
 import com.talkforgeai.service.elevenlabs.dto.ElevenLabsRequest;

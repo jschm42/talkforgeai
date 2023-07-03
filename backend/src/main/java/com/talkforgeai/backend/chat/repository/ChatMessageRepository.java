@@ -14,7 +14,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, 
     List<ChatMessageEntity> findAllByChatSessionIdAndType(UUID sessionId, ChatMessageType type);
 
     @Query("select cm from ChatMessageEntity cm where cm.chatSession.id = ?1 " +
-            "and cm.type = com.talkforgeai.backend.domain.ChatMessageType.PROCESSED " +
+            "and cm.type = com.talkforgeai.backend.chat.domain.ChatMessageType.PROCESSED " +
             "order by cm.id asc")
     ChatMessageEntity findLastProcessedMessage(UUID sessionId);
 }

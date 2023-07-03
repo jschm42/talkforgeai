@@ -1,8 +1,7 @@
-package com.talkforgeai.backend.controller;
+package com.talkforgeai.backend.voice.controller;
 
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.service.openai.OpenAIWhisperService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,7 +13,6 @@ public class WhisperController {
 
     private final OpenAIWhisperService openAIWhisperService;
 
-    @Autowired
     private final FileStorageService fileStorageService;
 
     public WhisperController(OpenAIWhisperService openAIWhisperService, FileStorageService fileStorageService) {

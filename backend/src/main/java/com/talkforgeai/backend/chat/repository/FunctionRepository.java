@@ -1,4 +1,4 @@
-package com.talkforgeai.backend.service;
+package com.talkforgeai.backend.chat.repository;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

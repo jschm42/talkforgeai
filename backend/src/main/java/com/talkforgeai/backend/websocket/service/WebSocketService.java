@@ -1,8 +1,8 @@
-package com.talkforgeai.backend.service;
+package com.talkforgeai.backend.websocket.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.talkforgeai.backend.dto.ws.WebsocketMessage;
+import com.talkforgeai.backend.websocket.dto.WebsocketMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

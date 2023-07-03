@@ -1,4 +1,4 @@
-package com.talkforgeai.backend.dto;
+package com.talkforgeai.backend.voice.dto;
 
 import java.util.UUID;
 

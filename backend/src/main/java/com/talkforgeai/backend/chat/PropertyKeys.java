@@ -1,4 +1,4 @@
-package com.talkforgeai.backend.dto;
+package com.talkforgeai.backend.chat;
 
 public final class PropertyKeys {
     public static final String ELEVENLABS_VOICEID = "voiceId";
