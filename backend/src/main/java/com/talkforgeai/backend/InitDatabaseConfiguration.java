@@ -1,7 +1,7 @@
 package com.talkforgeai.backend;
 
-import com.talkforgeai.backend.repository.PersonaRepository;
-import com.talkforgeai.backend.service.PersonaJsonReaderService;
+import com.talkforgeai.backend.persona.repository.PersonaRepository;
+import com.talkforgeai.backend.persona.service.PersonaJsonReaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;

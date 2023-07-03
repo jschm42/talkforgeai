@@ -1,9 +1,10 @@
 package com.talkforgeai.backend.service;
 
-import com.talkforgeai.backend.domain.PersonaEntity;
-import com.talkforgeai.backend.domain.PropertyCategory;
-import com.talkforgeai.backend.domain.PropertyEntity;
 import com.talkforgeai.backend.dto.TTSRequest;
+import com.talkforgeai.backend.persona.domain.PersonaEntity;
+import com.talkforgeai.backend.persona.domain.PropertyCategory;
+import com.talkforgeai.backend.persona.domain.PropertyEntity;
+import com.talkforgeai.backend.persona.service.PersonaService;
 import com.talkforgeai.service.elevenlabs.ElevenLabsService;
 import com.talkforgeai.service.elevenlabs.ElevenlabsRequestProperties;
 import com.talkforgeai.service.elevenlabs.dto.ElevenLabsRequest;

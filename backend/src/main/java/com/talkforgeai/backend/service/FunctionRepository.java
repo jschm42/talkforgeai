@@ -2,6 +2,7 @@ package com.talkforgeai.backend.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.talkforgeai.backend.persona.service.PersonaJsonReaderService;
 import com.talkforgeai.service.openai.dto.OpenAIFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
