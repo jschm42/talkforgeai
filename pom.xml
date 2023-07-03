@@ -17,6 +17,7 @@
     <modules>
         <module>frontend</module>
         <module>backend</module>
+        <module>service</module>
     </modules>
     <properties>
         <java.version>17</java.version>
