@@ -1,4 +1,4 @@
-package com.talkforgeai.backend.elevenlabs.dto;
+package com.talkforgeai.service.elevenlabs.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

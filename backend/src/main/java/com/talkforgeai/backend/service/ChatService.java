@@ -8,11 +8,12 @@ import com.talkforgeai.backend.dto.ws.WSChatStatusMessage;
 import com.talkforgeai.backend.exception.ChatException;
 import com.talkforgeai.backend.exception.PersonaException;
 import com.talkforgeai.backend.exception.SessionException;
-import com.talkforgeai.backend.openai.OpenAIChatService;
-import com.talkforgeai.backend.openai.dto.OpenAIChatMessage;
-import com.talkforgeai.backend.openai.dto.OpenAIChatRequest;
-import com.talkforgeai.backend.openai.dto.OpenAIChatResponse;
+import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
+import com.talkforgeai.service.openai.OpenAIChatService;
+import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
+import com.talkforgeai.service.openai.dto.OpenAIChatRequest;
+import com.talkforgeai.service.openai.dto.OpenAIChatResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import java.util.*;
 @Service
 public class ChatService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChatService.class);
+
     private final OpenAIChatService openAIChatService;
     private final PersonaService personaService;
     private final SessionService sessionService;
@@ -32,6 +34,7 @@ public class ChatService {
     private final MessageProcessor messageProcessor;
     private final FileStorageService fileStorageService;
     private final FunctionRepository functionRepository;
+
 
     public ChatService(OpenAIChatService openAIChatService,
                        SessionService sessionService,

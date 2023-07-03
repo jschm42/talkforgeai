@@ -1,4 +1,4 @@
-package com.talkforgeai.backend.properties;
+package com.talkforgeai.service.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

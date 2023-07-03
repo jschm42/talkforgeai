@@ -1,10 +1,10 @@
-package com.talkforgeai.backend.elevenlabs;
+package com.talkforgeai.service.elevenlabs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.talkforgeai.backend.elevenlabs.dto.ElevenLabsApiRequest;
-import com.talkforgeai.backend.elevenlabs.dto.ElevenLabsRequest;
-import com.talkforgeai.backend.properties.ElevenlabsProperties;
+import com.talkforgeai.service.elevenlabs.dto.ElevenLabsApiRequest;
+import com.talkforgeai.service.elevenlabs.dto.ElevenLabsRequest;
+import com.talkforgeai.service.properties.ElevenlabsProperties;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ import java.io.IOException;
 
 @Service
 public class ElevenLabsService {
-    public static final okhttp3.MediaType JSON = okhttp3.MediaType.get("application/json; charset=utf-8");
+    public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     private static final String VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
 

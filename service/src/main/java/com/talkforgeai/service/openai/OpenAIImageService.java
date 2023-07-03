@@ -1,24 +1,21 @@
-package com.talkforgeai.backend.openai;
+package com.talkforgeai.service.openai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.talkforgeai.backend.openai.dto.OpenAIImageRequest;
-import com.talkforgeai.backend.openai.dto.OpenAIImageResponse;
-import com.talkforgeai.backend.properties.OpenAIProperties;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import com.talkforgeai.service.openai.dto.OpenAIImageRequest;
+import com.talkforgeai.service.openai.dto.OpenAIImageResponse;
+import com.talkforgeai.service.properties.OpenAIProperties;
+import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
-import static com.talkforgeai.backend.openai.OpenAIChatService.JSON;
-
 @Service
 public class OpenAIImageService {
+    public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+
     private final OkHttpClient client;
 
     private final OpenAIProperties openAIProperties;
@@ -56,12 +53,5 @@ public class OpenAIImageService {
             throw new RuntimeException(e);
         }
 
-//
-//        CreateImageRequest imageRequest = new CreateImageRequest();
-//        imageRequest.setPrompt(imagePrompt);
-//        imageRequest.setN(1);
-//        imageRequest.setSize("512x512");
-//        imageRequest.setResponseFormat("url");
-//        return service.createImage(imageRequest);
     }
 }

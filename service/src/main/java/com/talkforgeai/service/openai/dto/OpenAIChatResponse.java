@@ -1,4 +1,4 @@
-package com.talkforgeai.backend.openai.dto;
+package com.talkforgeai.service.openai.dto;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;

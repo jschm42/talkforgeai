@@ -1,4 +1,4 @@
-package com.talkforgeai.backend.openai.dto;
+package com.talkforgeai.service.openai.dto;
 
 public record OpenAIImageRequest(String prompt, int n, String size) {
 

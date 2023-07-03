@@ -1,4 +1,4 @@
-package com.talkforgeai.backend.elevenlabs;
+package com.talkforgeai.service.elevenlabs;
 
 public class ElevenlabsRequestProperties {
     public static final String TEXT = "text";

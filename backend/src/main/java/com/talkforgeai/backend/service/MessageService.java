@@ -3,8 +3,8 @@ package com.talkforgeai.backend.service;
 import com.talkforgeai.backend.domain.ChatMessageEntity;
 import com.talkforgeai.backend.domain.ChatMessageType;
 import com.talkforgeai.backend.domain.ChatSessionEntity;
-import com.talkforgeai.backend.openai.dto.OpenAIChatMessage;
 import com.talkforgeai.backend.repository.ChatMessageRepository;
+import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

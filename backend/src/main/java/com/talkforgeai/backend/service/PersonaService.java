@@ -3,6 +3,7 @@ package com.talkforgeai.backend.service;
 import com.talkforgeai.backend.domain.PersonaEntity;
 import com.talkforgeai.backend.dto.PersonaResponse;
 import com.talkforgeai.backend.repository.PersonaRepository;
+import com.talkforgeai.backend.storage.FileStorageService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

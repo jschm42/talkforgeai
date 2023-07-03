@@ -1,6 +1,6 @@
-package com.talkforgeai.backend.service;
+package com.talkforgeai.service.openai;
 
-import com.talkforgeai.backend.properties.OpenAIProperties;
+import com.talkforgeai.service.properties.OpenAIProperties;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,31 +15,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Service
-public class WhisperService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WhisperService.class);
-    private final FileStorageService fileStorageService;
-
+public class OpenAIWhisperService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenAIWhisperService.class);
     private final OpenAIProperties openAIProperties;
 
-    public WhisperService(FileStorageService fileStorageService, OpenAIProperties openAIProperties) {
-        this.fileStorageService = fileStorageService;
+    public OpenAIWhisperService(OpenAIProperties openAIProperties) {
         this.openAIProperties = openAIProperties;
     }
 
-    public ResponseEntity<String> convert(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> convert(@RequestParam("file") MultipartFile file, Path uploadDirectory) {
         try {
-            // Save the file locally
-            Path uploadDir = fileStorageService.getDataDirectory().resolve("uploads");
-
             try {
-                Files.createDirectories(uploadDir);
+                Files.createDirectories(uploadDirectory);
                 LOGGER.info("Upload directory created successfully");
             } catch (IOException e) {
                 LOGGER.error("Failed to create directory: " + e.getMessage());
             }
 
-            Path path = uploadDir.resolve("audio.wav");
-
+            Path path = uploadDirectory.resolve("audio.wav");
 
             LOGGER.info("Tansfering upload file to '{}'...", path);
             file.transferTo(path);

@@ -12,16 +12,11 @@
     <artifactId>backend</artifactId>
     <packaging>jar</packaging>
 
-    <properties>
-        <maven.compiler.source>20</maven.compiler.source>
-        <maven.compiler.target>20</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.talkforgeai</groupId>
             <artifactId>service</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

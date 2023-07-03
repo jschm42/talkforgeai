@@ -1,6 +1,6 @@
 package com.talkforgeai.backend.dto;
 
-import com.talkforgeai.backend.openai.dto.OpenAIChatMessage;
+import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
 
 import java.util.Date;
 import java.util.List;

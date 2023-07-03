@@ -4,9 +4,9 @@ import com.talkforgeai.backend.domain.PersonaEntity;
 import com.talkforgeai.backend.domain.PropertyCategory;
 import com.talkforgeai.backend.domain.PropertyEntity;
 import com.talkforgeai.backend.dto.TTSRequest;
-import com.talkforgeai.backend.elevenlabs.ElevenLabsService;
-import com.talkforgeai.backend.elevenlabs.ElevenlabsRequestProperties;
-import com.talkforgeai.backend.elevenlabs.dto.ElevenLabsRequest;
+import com.talkforgeai.service.elevenlabs.ElevenLabsService;
+import com.talkforgeai.service.elevenlabs.ElevenlabsRequestProperties;
+import com.talkforgeai.service.elevenlabs.dto.ElevenLabsRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

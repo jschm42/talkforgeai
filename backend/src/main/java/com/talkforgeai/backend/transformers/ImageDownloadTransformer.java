@@ -1,9 +1,9 @@
 package com.talkforgeai.backend.transformers;
 
-import com.talkforgeai.backend.openai.OpenAIImageService;
-import com.talkforgeai.backend.openai.dto.OpenAIImageRequest;
-import com.talkforgeai.backend.openai.dto.OpenAIImageResponse;
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
+import com.talkforgeai.service.openai.OpenAIImageService;
+import com.talkforgeai.service.openai.dto.OpenAIImageRequest;
+import com.talkforgeai.service.openai.dto.OpenAIImageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

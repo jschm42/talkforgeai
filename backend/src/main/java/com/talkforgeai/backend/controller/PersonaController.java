@@ -1,8 +1,8 @@
 package com.talkforgeai.backend.controller;
 
 import com.talkforgeai.backend.dto.PersonaResponse;
-import com.talkforgeai.backend.service.FileStorageService;
 import com.talkforgeai.backend.service.PersonaService;
+import com.talkforgeai.backend.storage.FileStorageService;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package com.talkforgeai.backend;
+package com.talkforgeai.service;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;

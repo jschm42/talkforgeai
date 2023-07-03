@@ -1,10 +1,10 @@
-package com.talkforgeai.backend.openai;
+package com.talkforgeai.service.openai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.talkforgeai.backend.openai.dto.OpenAIChatRequest;
-import com.talkforgeai.backend.openai.dto.OpenAIChatResponse;
-import com.talkforgeai.backend.properties.OpenAIProperties;
+import com.talkforgeai.service.openai.dto.OpenAIChatRequest;
+import com.talkforgeai.service.openai.dto.OpenAIChatResponse;
+import com.talkforgeai.service.properties.OpenAIProperties;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
