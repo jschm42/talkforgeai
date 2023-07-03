@@ -1,13 +1,7 @@
 package com.talkforgeai.talkforgeaiserver.dto;
 
-public class TTSRequest {
-    private String text;
+import java.util.UUID;
 
-    public String getText() {
-        return text;
-    }
+public record TTSRequest(String text, UUID personaId) {
 
-    public void setText(String text) {
-        this.text = text;
-    }
 }

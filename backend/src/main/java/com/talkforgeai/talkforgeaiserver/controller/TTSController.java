@@ -12,17 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/tts")
 public class TTSController {
 
-    private final TTSService ttsService;
+    private final TTSService TTSService;
 
-    public TTSController(TTSService ttsService) {
-        this.ttsService = ttsService;
-
+    public TTSController(TTSService TTSService) {
+        this.TTSService = TTSService;
     }
 
     @PostMapping(value = "/stream",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public byte[] speak(@RequestBody TTSRequest request) {
-        return ttsService.speak(request);
+
+
+        return TTSService.streamVoice(request);
     }
 }

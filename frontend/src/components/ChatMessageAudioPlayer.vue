@@ -49,10 +49,10 @@ export default defineComponent({
       const plainText = htmlToTextService.removeHtml(this.message.content);
       console.log('PLAIN TEXT', plainText);
 
-      console.log('Playing audio');
+      console.log('Playing audio', this.store.selectedPersona);
       this.audioState = AudioState.Loading;
       try {
-        const audioBlob = await ttsService.speak(plainText);
+        const audioBlob = await ttsService.speak(plainText, this.store.selectedPersona.personaId);
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.addEventListener('ended', () => {

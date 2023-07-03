@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 class TtsService {
-  async speak(text: string) {
+  async speak(text: string, personaId: string) {
     try {
       const result = await axios.post(
         `/api/v1/tts/stream`,
-        {text},
+        {text, personaId},
         {
           timeout: 50000,
           headers: {
