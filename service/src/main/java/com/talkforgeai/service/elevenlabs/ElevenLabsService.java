@@ -8,7 +8,6 @@ import com.talkforgeai.service.properties.ElevenlabsProperties;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -19,7 +18,6 @@ public class ElevenLabsService {
 
     private static final String VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
 
-    @Autowired
     private final OkHttpClient client;
     private final ElevenlabsProperties properties;
     Logger logger = LoggerFactory.getLogger(ElevenLabsService.class);

@@ -19,8 +19,11 @@ public class OpenAIWhisperService {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenAIWhisperService.class);
     private final OpenAIProperties openAIProperties;
 
-    public OpenAIWhisperService(OpenAIProperties openAIProperties) {
+    private final OkHttpClient client;
+
+    public OpenAIWhisperService(OpenAIProperties openAIProperties, OkHttpClient client) {
         this.openAIProperties = openAIProperties;
+        this.client = client;
     }
 
     public ResponseEntity<String> convert(@RequestParam("file") MultipartFile file, Path uploadDirectory) {
@@ -50,8 +53,6 @@ public class OpenAIWhisperService {
 
     private String callWhisperAPI(File file) {
         final String uri = "https://api.openai.com/v1/audio/transcriptions";
-
-        OkHttpClient client = new OkHttpClient();
 
         RequestBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
