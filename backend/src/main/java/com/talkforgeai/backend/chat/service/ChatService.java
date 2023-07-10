@@ -7,9 +7,7 @@ import com.talkforgeai.backend.chat.dto.ChatCompletionRequest;
 import com.talkforgeai.backend.chat.dto.ChatCompletionResponse;
 import com.talkforgeai.backend.chat.exception.ChatException;
 import com.talkforgeai.backend.chat.repository.FunctionRepository;
-import com.talkforgeai.backend.persona.domain.PersonaEntity;
-import com.talkforgeai.backend.persona.domain.PropertyCategory;
-import com.talkforgeai.backend.persona.domain.PropertyEntity;
+import com.talkforgeai.backend.persona.domain.*;
 import com.talkforgeai.backend.persona.exception.PersonaException;
 import com.talkforgeai.backend.persona.service.PersonaService;
 import com.talkforgeai.backend.session.domain.ChatSessionEntity;
@@ -48,6 +46,8 @@ public class ChatService {
     private final FileStorageService fileStorageService;
     private final FunctionRepository functionRepository;
 
+    private final SystemService systemService;
+
 
     public ChatService(OpenAIChatService openAIChatService,
                        SessionService sessionService,
@@ -56,7 +56,8 @@ public class ChatService {
                        WebSocketService webSocketService,
                        MessageProcessor messageProcessor,
                        FileStorageService fileStorageService,
-                       FunctionRepository functionRepository) {
+                       FunctionRepository functionRepository,
+                       SystemService systemService) {
         this.openAIChatService = openAIChatService;
         this.sessionService = sessionService;
         this.personaService = personaService;
@@ -65,6 +66,7 @@ public class ChatService {
         this.messageProcessor = messageProcessor;
         this.fileStorageService = fileStorageService;
         this.functionRepository = functionRepository;
+        this.systemService = systemService;
     }
 
     private boolean isFunctionCallFromAssistant(OpenAIChatMessage message) {
@@ -212,7 +214,7 @@ public class ChatService {
                 new WSChatStatusMessage(request.sessionId(), "Thinking...")
         );
 
-        OpenAIChatResponse response = submit(messagePayload, mapToGptProperties(persona.getProperties()));
+        OpenAIChatResponse response = submit(messagePayload, persona);
         return new SubmitResult(session, isFirstSubmitInSession, newUserMessage, processedNewUserMessage, response);
     }
 
@@ -244,7 +246,12 @@ public class ChatService {
 
     private List<OpenAIChatMessage> composeMessagePayload(List<OpenAIChatMessage> previousMessages, OpenAIChatMessage newMessage, PersonaEntity persona) {
         List<OpenAIChatMessage> messages = new ArrayList<>();
-        messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, SystemService.IMAGE_GEN_SYSTEM));
+
+        List<GlobalSystem> globalSystems = persona.getGlobalSystems();
+        globalSystems.forEach(s -> {
+            messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(s)));
+        });
+
         messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, persona.getSystem()));
         messages.addAll(previousMessages);
         messages.add(newMessage);
@@ -276,7 +283,9 @@ public class ChatService {
         return gptProperties;
     }
 
-    private OpenAIChatResponse submit(List<OpenAIChatMessage> messages, Map<String, String> properties) {
+    private OpenAIChatResponse submit(List<OpenAIChatMessage> messages, PersonaEntity persona) {
+        Map<String, String> properties = mapToGptProperties(persona.getProperties());
+
         try {
             OpenAIChatRequest request = new OpenAIChatRequest();
             request.setMessages(messages);
@@ -306,8 +315,11 @@ public class ChatService {
                 request.setTemperature(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TEMPERATURE)));
             }
 
-            request.setFunctions(functionRepository.getAll());
 
+            List<RequestFunction> requestFunctions = persona.getRequestFunctions();
+            if (!requestFunctions.isEmpty()) {
+                request.setFunctions(functionRepository.getByRequestFunctions(requestFunctions));
+            }
 
             return openAIChatService.submit(request);
         } catch (Exception e) {

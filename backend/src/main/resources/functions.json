@@ -1,6 +1,6 @@
 [
   {
-    "name": "send_email",
+    "name": "SEND_EMAIL",
     "description": "Send an email",
     "parameters": {
       "type": "object",

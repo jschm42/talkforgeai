@@ -1,6 +1,11 @@
 {
   "name": "Chat Bot",
   "description": "The friendly chat bot that will answer your questions",
+  "globalSystems": [
+  ],
+  "requestFunctions": [
+    "SEND_EMAIL"
+  ],
   "system": "Add a smiley to the end of every paragraph, covering the current mood.",
   "imagePath": "chat-bot.png",
   "properties": {

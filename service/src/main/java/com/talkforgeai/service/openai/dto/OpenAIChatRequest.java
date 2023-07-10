@@ -31,7 +31,6 @@ public class OpenAIChatRequest {
     String user;
 
     public OpenAIChatRequest() {
-        this.functions = new ArrayList<>();
         this.messages = new ArrayList<>();
     }
 

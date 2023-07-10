@@ -5,10 +5,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "PERSONA")
@@ -34,15 +31,37 @@ public class PersonaEntity {
     @Column(columnDefinition = "CLOB")
     private String system;
 
+    @Enumerated(EnumType.STRING)
+    private List<GlobalSystem> globalSystems = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    private List<RequestFunction> requestFunctions = new ArrayList<>();
+
     @Column(length = 128)
     private String imagePath;
-
+    
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "persona_property_mapping",
             joinColumns = {@JoinColumn(name = "persona_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "property_id", referencedColumnName = "id")})
     @MapKey(name = "propertyKey")
     private Map<String, PropertyEntity> properties = new HashMap<>();
+
+    public List<RequestFunction> getRequestFunctions() {
+        return requestFunctions;
+    }
+
+    public void setRequestFunctions(List<RequestFunction> requestFunctions) {
+        this.requestFunctions = requestFunctions;
+    }
+
+    public List<GlobalSystem> getGlobalSystems() {
+        return globalSystems;
+    }
+
+    public void setGlobalSystems(List<GlobalSystem> globalSystems) {
+        this.globalSystems = globalSystems;
+    }
 
     public UUID getId() {
         return id;

@@ -2,6 +2,7 @@ package com.talkforgeai.backend.chat.repository;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.talkforgeai.backend.persona.domain.RequestFunction;
 import com.talkforgeai.backend.persona.service.PersonaJsonReaderService;
 import com.talkforgeai.service.openai.dto.OpenAIFunction;
 import org.slf4j.Logger;
@@ -24,6 +25,14 @@ public class FunctionRepository {
 
     public FunctionRepository() {
         this.resourcePatternResolver = new PathMatchingResourcePatternResolver();
+    }
+
+    public List<OpenAIFunction> getByRequestFunctions(List<RequestFunction> requestFunctions) {
+        List<String> requestFuncNames = requestFunctions.stream().map(Enum::name).toList();
+
+        return this.getAll().stream()
+                .filter(f -> requestFuncNames.contains(f.name()))
+                .toList();
     }
 
     public List<OpenAIFunction> getAll() {
