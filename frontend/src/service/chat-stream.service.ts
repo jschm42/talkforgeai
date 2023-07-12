@@ -5,10 +5,9 @@ class ChatStreamService {
 
   async streamSubmit(
     sessionId: string, content: string, messageCallback: (content: string[], isDone: boolean) => void) {
-    const response = await fetch('http://localhost:8090/api/v1/chat/submit', {
-      method: 'post',
+    const response = await fetch('http://localhost:8090/api/v1/chat/stream/submit', {
+      method: 'POST',
       headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
 
@@ -28,9 +27,10 @@ class ChatStreamService {
 
     while (!done) {
       const row = await reader.read();
+      console.log('ROW: ', row);
 
       const data = decoder.decode(row.value, {stream: true});
-      //console.log('DATA: ', data);
+      console.log('DATA: ', data);
       //const json = JSON.parse(data);
       const content = this.parseStreamResponse(data);
 

@@ -37,7 +37,7 @@ export default {
     async submit() {
       this.isInputLocked = true;
 
-      await this.store.submitPrompt(this.prompt);
+      await this.store.streamPrompt(this.prompt);
       await this.store.loadIndex();
 
       this.$emit('submitResultReceived');
