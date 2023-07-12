@@ -5,8 +5,10 @@ import Persona from '@/store/to/persona';
 import ChatService from '@/service/chat.service';
 import PersonaService from '@/service/persona.service';
 import Role from '@/store/to/role';
+import ChatStreamService from '@/service/chat-stream.service';
 
 const chatService = new ChatService();
+const chatStreamService = new ChatStreamService();
 const personaService = new PersonaService();
 
 export const useChatStore = defineStore('chat', {
@@ -73,6 +75,40 @@ export const useChatStore = defineStore('chat', {
         console.log('Result Message after Function call.', result);
         this.messages = [...this.messages, ...result.processedMessages];
       }
+
+      //console.log('Prompt submitted');
+
+    },
+    async streamPrompt(prompt: string) {
+      this.chat.configHeaderEnabled = false;
+
+      if (!this.sessionId || this.sessionId === '') {
+        this.sessionId = await chatService.createNewSession(this.selectedPersona.personaId);
+      }
+
+      this.messages.push(new ChatMessage(Role.USER, prompt));
+
+      console.log('Submitting prompt', this.sessionId, prompt);
+
+      const lastMessage = this.messages[this.messages.length - 1];
+
+      await chatStreamService.streamSubmit(this.sessionId, prompt, (content, isDone) => {
+        content.forEach(c => {
+          lastMessage.content += c;
+        });
+      });
+
+      // const result = await chatService.submit(this.sessionId, prompt);
+      // console.log('Result Message.', result);
+      // this.messages = [...this.messages, ...result.processedMessages];
+      //
+      // const message = result.processedMessages[result.processedMessages.length - 1];
+      // if (message.function_call && message.role === Role.ASSISTANT) {
+      //   const result = await chatService.submitFunctionConfirm(this.sessionId);
+      //
+      //   console.log('Result Message after Function call.', result);
+      //   this.messages = [...this.messages, ...result.processedMessages];
+      // }
 
       //console.log('Prompt submitted');
 
