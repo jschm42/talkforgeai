@@ -7,7 +7,10 @@ import com.talkforgeai.backend.chat.dto.ChatCompletionRequest;
 import com.talkforgeai.backend.chat.dto.ChatCompletionResponse;
 import com.talkforgeai.backend.chat.exception.ChatException;
 import com.talkforgeai.backend.chat.repository.FunctionRepository;
-import com.talkforgeai.backend.persona.domain.*;
+import com.talkforgeai.backend.persona.domain.PersonaEntity;
+import com.talkforgeai.backend.persona.domain.PropertyCategory;
+import com.talkforgeai.backend.persona.domain.PropertyEntity;
+import com.talkforgeai.backend.persona.domain.RequestFunction;
 import com.talkforgeai.backend.persona.exception.PersonaException;
 import com.talkforgeai.backend.persona.service.PersonaService;
 import com.talkforgeai.backend.session.domain.ChatSessionEntity;
@@ -46,9 +49,6 @@ public class ChatService {
     private final FileStorageService fileStorageService;
     private final FunctionRepository functionRepository;
 
-    private final SystemService systemService;
-
-
     public ChatService(OpenAIChatService openAIChatService,
                        SessionService sessionService,
                        PersonaService personaService,
@@ -56,8 +56,7 @@ public class ChatService {
                        WebSocketService webSocketService,
                        MessageProcessor messageProcessor,
                        FileStorageService fileStorageService,
-                       FunctionRepository functionRepository,
-                       SystemService systemService) {
+                       FunctionRepository functionRepository) {
         this.openAIChatService = openAIChatService;
         this.sessionService = sessionService;
         this.personaService = personaService;
@@ -66,7 +65,6 @@ public class ChatService {
         this.messageProcessor = messageProcessor;
         this.fileStorageService = fileStorageService;
         this.functionRepository = functionRepository;
-        this.systemService = systemService;
     }
 
     private boolean isFunctionCallFromAssistant(OpenAIChatMessage message) {
@@ -201,14 +199,14 @@ public class ChatService {
                 .orElseThrow(() -> new SessionException("Session not found: " + request.sessionId()));
 
         PersonaEntity persona = session.getPersona();
-        List<OpenAIChatMessage> previousMessages = getPreviousMessages(session);
+        List<OpenAIChatMessage> previousMessages = messageService.getPreviousMessages(session);
         boolean isFirstSubmitInSession = previousMessages.isEmpty();
 
         OpenAIChatMessage newUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.content());
         // TODO Postprocessing of new user message
         OpenAIChatMessage processedNewUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.content());
 
-        List<OpenAIChatMessage> messagePayload = composeMessagePayload(previousMessages, processedNewUserMessage, persona);
+        List<OpenAIChatMessage> messagePayload = messageService.composeMessagePayload(previousMessages, processedNewUserMessage, persona);
 
         webSocketService.sendMessage(
                 new WSChatStatusMessage(request.sessionId(), "Thinking...")
@@ -218,17 +216,9 @@ public class ChatService {
         return new SubmitResult(session, isFirstSubmitInSession, newUserMessage, processedNewUserMessage, response);
     }
 
-    private List<OpenAIChatMessage> getPreviousMessages(ChatSessionEntity session) {
-        List<OpenAIChatMessage> previousMessages;
-        previousMessages = session.getChatMessages().stream()
-                .filter(m -> m.getType() == ChatMessageType.UNPROCESSED)
-                .map(messageService::mapToDto)
-                .toList();
-        return previousMessages;
-    }
 
     private Optional<OpenAIChatMessage> getLastMessage(ChatSessionEntity session) {
-        List<OpenAIChatMessage> previousMessages = getPreviousMessages(session);
+        List<OpenAIChatMessage> previousMessages = messageService.getPreviousMessages(session);
         LOGGER.info("Previous messages: {}", previousMessages);
 
         if (previousMessages != null && !previousMessages.isEmpty()) {
@@ -244,19 +234,6 @@ public class ChatService {
                 .toList();
     }
 
-    private List<OpenAIChatMessage> composeMessagePayload(List<OpenAIChatMessage> previousMessages, OpenAIChatMessage newMessage, PersonaEntity persona) {
-        List<OpenAIChatMessage> messages = new ArrayList<>();
-
-        List<GlobalSystem> globalSystems = persona.getGlobalSystems();
-        globalSystems.forEach(s -> {
-            messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(s)));
-        });
-
-        messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, persona.getSystem()));
-        messages.addAll(previousMessages);
-        messages.add(newMessage);
-        return messages;
-    }
 
     private SessionResponse mapSessionEntity(ChatSessionEntity session) {
         List<ChatMessageEntity> processedMessages
