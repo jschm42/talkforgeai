@@ -75,11 +75,15 @@ class ChatStreamService {
     let newContent = originalString;
     let match;
     while ((match = regex.exec(originalString)) !== null) {
-      const lang = match[2];
+      let lang = match[2];
+      if (lang && lang.startsWith('language-')) {
+        lang = lang.substring(9);
+      }
+
       const hljsLang = hljs.getLanguage(lang);
       let highlighted = '';
       if (hljsLang) {
-        highlighted = hljs.highlight(match[2], match[3]).value;
+        highlighted = hljs.highlight(lang, match[3]).value;
       } else {
         highlighted = hljs.highlightAuto(match[3]).value;
       }
