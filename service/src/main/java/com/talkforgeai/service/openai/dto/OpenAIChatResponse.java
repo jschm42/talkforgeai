@@ -1,6 +1,5 @@
 package com.talkforgeai.service.openai.dto;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -16,7 +15,7 @@ public record OpenAIChatResponse(String id,
                                  ResponseUsage usage) {
 
     public record ResponseChoice(Integer index,
-                                 @JsonAlias({"delta"}) OpenAIChatMessage message,
+                                 OpenAIChatMessage delta,
                                  @JsonProperty("finish_reason") FinishReason finishReason) {
 
         public enum FinishReason {

@@ -1,3 +1,8 @@
+import ChatMessage from '@/store/to/chat-message';
+import Role from '@/store/to/role';
+import {useChatStore} from '@/store/chat-store';
+import ChatChoice from '@/store/to/chat-choice';
+
 const STREAM_REGEX = /{"content":(.*?)},/;
 const QUOTE_REGEX = /\\"/;
 
@@ -5,6 +10,9 @@ class ChatStreamService {
 
   async streamSubmit(
     sessionId: string, content: string, messageCallback: (content: string[], isDone: boolean) => void) {
+
+    const store = useChatStore();
+
     const response = await fetch('http://localhost:8090/api/v1/chat/stream/submit', {
       method: 'POST',
       headers: {
@@ -25,35 +33,48 @@ class ChatStreamService {
     const decoder = new TextDecoder();
     let done = false;
 
+    const newMessage = new ChatMessage(Role.ASSISTANT, '');
+    store.messages.push(newMessage);
+
     while (!done) {
       const row = await reader.read();
-      console.log('ROW: ', row);
 
       const data = decoder.decode(row.value, {stream: true});
       console.log('DATA: ', data);
-      //const json = JSON.parse(data);
-      const content = this.parseStreamResponse(data);
 
-      console.log('PARSED: ', content);
+      if (this.hasJSONDate(data)) {
+        const chatChoice = this.parseStreamResponse(data);
+        console.log('PARSED STREAM DATA: ', chatChoice);
+        const lastMessage = store.messages[store.messages.length - 1];
+        if (chatChoice?.delta && chatChoice.delta.content) {
+          lastMessage.content += chatChoice?.delta.content;
+        }
+      }
+
       done = row.done;
 
-      messageCallback(content, done);
+      //messageCallback(content, done);
     }
 
     console.log('Stream complete');
 
   }
 
-  parseStreamResponse(data: string) {
-    // FIXME Does not parse the content corretly, if a " is inside
-    // return data.split('\n\n').
-    //   filter(e => e.length > 0).
-    //   map(e => STREAM_REGEX.exec(e)).
-    //   filter(e => e != null).
-    //   map(p => {
-    //     return p == null ? '' : p[1];
-    //   });
-    return data.split('\n\n').map(d => d.substring(5));
+  hasJSONDate(data: string): boolean {
+    return data.indexOf('{') != -1;
+  }
+
+  parseStreamResponse(data: string): ChatChoice | undefined {
+    console.log('DATA TO PARSE: ', data);
+    const startIndexJson = data.indexOf('{');
+    try {
+      const json = JSON.parse(data.substring(startIndexJson));
+      console.log('JSON: ', json);
+      return json;
+    } catch (err) {
+      console.log('Cannot parse JSON in Message.', err);
+      return undefined;
+    }
   }
 
 }

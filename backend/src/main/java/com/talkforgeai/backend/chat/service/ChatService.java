@@ -77,10 +77,10 @@ public class ChatService {
                     .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
 
             OpenAIChatMessage message = getLastMessage(session)
-                    .orElseThrow(() -> new SessionException("No previous message found."));
+                    .orElseThrow(() -> new SessionException("No previous delta found."));
 
             if (!isFunctionCallFromAssistant(message)) {
-                throw new SessionException("Last message is not a function.");
+                throw new SessionException("Last delta is not a function.");
             }
 
             LOGGER.info("Processing function: " + message.functionCall());
@@ -159,7 +159,7 @@ public class ChatService {
 
         OpenAIChatResponse.ResponseChoice choice = submitResult.response().choices().get(0);
         LOGGER.info("Finish reason: {}", choice.finishReason());
-        OpenAIChatMessage responseMessage = choice.message();
+        OpenAIChatMessage responseMessage = choice.delta();
 
         List<OpenAIChatMessage> messagesToSave = new ArrayList<>();
         messagesToSave.add(submitResult.newUserMessage());
@@ -203,7 +203,7 @@ public class ChatService {
         boolean isFirstSubmitInSession = previousMessages.isEmpty();
 
         OpenAIChatMessage newUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.content());
-        // TODO Postprocessing of new user message
+        // TODO Postprocessing of new user delta
         OpenAIChatMessage processedNewUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.content());
 
         List<OpenAIChatMessage> messagePayload = messageService.composeMessagePayload(previousMessages, processedNewUserMessage, persona);

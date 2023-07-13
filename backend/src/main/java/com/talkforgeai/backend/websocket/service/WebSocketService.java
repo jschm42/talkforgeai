@@ -21,7 +21,7 @@ public class WebSocketService {
     public void sendMessage(WebsocketMessage message) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            logger.info("Sending message over websocket: {}", message);
+            logger.info("Sending delta over websocket: {}", message);
             this.template.convertAndSend("/topic/messages", mapper.writeValueAsString(message));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
