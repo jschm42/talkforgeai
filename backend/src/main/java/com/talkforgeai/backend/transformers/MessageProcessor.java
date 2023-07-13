@@ -25,6 +25,7 @@ public class MessageProcessor {
         this.fileStorageService = fileStorageService;
 
         transformers.add(new CodeBlockTransformer());
+        transformers.add(new NewLineTransformer());
         transformers.add(new ImageDownloadTransformer(openAIImageService));
 
     }

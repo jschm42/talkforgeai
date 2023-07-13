@@ -3,6 +3,7 @@ import Role from '@/store/to/role';
 import {useChatStore} from '@/store/chat-store';
 import ChatChoice from '@/store/to/chat-choice';
 import axios from 'axios';
+import hljs from 'highlight.js';
 
 const STREAM_REGEX = /{"content":(.*?)},/;
 const QUOTE_REGEX = /\\"/;
@@ -60,8 +61,33 @@ class ChatStreamService {
     console.log('Stream complete');
 
     const processedMessage = await this.postProcessLastMessage(sessionId);
+    processedMessage.content = this.replaceCodeContent(processedMessage.content);
+
     store.messages.pop();
     store.messages.push(processedMessage);
+
+  }
+
+  replaceCodeContent(originalString: string) {
+    // Use a regular expression to find the code tag and its content.
+    const regex = /(<code class="(.*)">)([\s\S]*?)(<\/code>)/g;
+
+    let newContent = originalString;
+    let match;
+    while ((match = regex.exec(originalString)) !== null) {
+      const lang = match[2];
+      const hljsLang = hljs.getLanguage(lang);
+      let highlighted = '';
+      if (hljsLang) {
+        highlighted = hljs.highlight(match[2], match[3]).value;
+      } else {
+        highlighted = hljs.highlightAuto(match[3]).value;
+      }
+
+      newContent = newContent.replace(match[0], `${match[1]}${highlighted}${match[4]}`);
+    }
+
+    return newContent;
   }
 
   hasJSONData(data: string): boolean {

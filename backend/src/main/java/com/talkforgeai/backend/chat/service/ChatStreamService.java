@@ -74,8 +74,11 @@ public class ChatStreamService {
         boolean isFirstSubmitInSession = previousMessages.isEmpty();
 
         OpenAIChatMessage newUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.content());
+        sessionService.saveMessage(session.getId(), newUserMessage, ChatMessageType.UNPROCESSED);
+
         // TODO Postprocessing of new user delta
         OpenAIChatMessage processedNewUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.content());
+        sessionService.saveMessage(session.getId(), processedNewUserMessage, ChatMessageType.PROCESSED);
 
         List<OpenAIChatMessage> messagePayload = messageService.composeMessagePayload(previousMessages, processedNewUserMessage, persona);
 
