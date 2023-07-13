@@ -26,6 +26,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ChatStreamService {
@@ -81,11 +83,11 @@ public class ChatStreamService {
                 new WSChatStatusMessage(request.sessionId(), "Thinking...")
         );
 
-        return submit(messagePayload, persona);
+        return submit(session.getId(), messagePayload, persona);
 //        return new SubmitResult(session, isFirstSubmitInSession, newUserMessage, processedNewUserMessage, response);
     }
 
-    private SseEmitter submit(List<OpenAIChatMessage> messages, PersonaEntity persona) {
+    private SseEmitter submit(UUID sessionId, List<OpenAIChatMessage> messages, PersonaEntity persona) {
         Map<String, String> properties = mapToGptProperties(persona.getProperties());
 
         try {
@@ -123,7 +125,17 @@ public class ChatStreamService {
                 request.setFunctions(functionRepository.getByRequestFunctions(requestFunctions));
             }
 
-            return openAIChatService.stream(request);
+
+            SseEmitter emitter = new SseEmitter();
+            CompletableFuture.runAsync(() -> {
+                openAIChatService.stream(request, emitter, message -> {
+                    webSocketService.sendMessage(
+                            new WSChatStatusMessage(sessionId, "Done!!")
+                    );
+                });
+            });
+
+            return emitter;
         } catch (Exception e) {
             LOGGER.error("Error while submitting chat request.", e);
         }

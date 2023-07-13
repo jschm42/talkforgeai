@@ -2,6 +2,7 @@ package com.talkforgeai.service.openai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
 import com.talkforgeai.service.openai.dto.OpenAIChatRequest;
 import com.talkforgeai.service.openai.dto.OpenAIChatResponse;
 import com.talkforgeai.service.properties.OpenAIProperties;
@@ -14,7 +15,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 public class OpenAIChatService {
@@ -56,66 +56,61 @@ public class OpenAIChatService {
         }
     }
 
-    public SseEmitter stream(OpenAIChatRequest openAIRequest) {
-        SseEmitter emitter = new SseEmitter();
+    public void stream(OpenAIChatRequest openAIRequest, SseEmitter emitter, ResultCallback resultCallback) {
         openAIRequest.setStream(true);
 
-        CompletableFuture.runAsync(() -> {
+        ObjectMapper objectMapper = new ObjectMapper();
 
-            ObjectMapper objectMapper = new ObjectMapper();
+        String message = null;
+        try {
+            message = objectMapper.writeValueAsString(openAIRequest);
 
-            String message = null;
-            try {
-                message = objectMapper.writeValueAsString(openAIRequest);
+            RequestBody body = RequestBody.create(message, JSON);
+            Request request = new Request.Builder()
+                    .url(openAIProperties.chatUrl())
+                    .header("Authorization", "Bearer " + openAIProperties.apiKey())
+                    .post(body)
+                    .build();
 
-                RequestBody body = RequestBody.create(message, JSON);
-                Request request = new Request.Builder()
-                        .url(openAIProperties.chatUrl())
-                        .header("Authorization", "Bearer " + openAIProperties.apiKey())
-                        .post(body)
-                        .build();
+            logger.debug("Sending delta: {}", message);
 
-                logger.debug("Sending delta: {}", message);
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    emitter.completeWithError(e);
+                }
 
-                client.newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                        emitter.completeWithError(e);
-                    }
-
-                    @Override
-                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                        if (!response.isSuccessful()) {
-                            emitter.completeWithError(new RuntimeException("Unexpected code " + response));
-                        } else {
-                            try (ResponseBody responseBody = response.body()) {
-                                try (BufferedReader bufferedReader = new BufferedReader(responseBody.charStream())) {
-                                    String line;
-                                    while ((line = bufferedReader.readLine()) != null) {
-                                        String responseMessageChunk = parseLine(line);
-                                        if (responseMessageChunk != null) {
-                                            logger.info("SENDING: {}", responseMessageChunk);
-                                            emitter.send(responseMessageChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
-                                            try {
-                                                Thread.sleep(20);
-                                            } catch (InterruptedException e) {
-                                                throw new RuntimeException(e);
-                                            }
+                @Override
+                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                    if (!response.isSuccessful()) {
+                        emitter.completeWithError(new RuntimeException("Unexpected code " + response));
+                    } else {
+                        try (ResponseBody responseBody = response.body()) {
+                            try (BufferedReader bufferedReader = new BufferedReader(responseBody.charStream())) {
+                                String line;
+                                while ((line = bufferedReader.readLine()) != null) {
+                                    String responseMessageChunk = parseLine(line);
+                                    if (responseMessageChunk != null) {
+                                        logger.info("SENDING: {}", responseMessageChunk);
+                                        emitter.send(responseMessageChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
+                                        try {
+                                            Thread.sleep(20);
+                                        } catch (InterruptedException e) {
+                                            throw new RuntimeException(e);
                                         }
                                     }
                                 }
                             }
-                            emitter.complete();
                         }
+                        emitter.complete();
+                        resultCallback.call(new OpenAIChatMessage(OpenAIChatMessage.Role.ASSISTANT, "Done!"));
                     }
-                });
+                }
+            });
 
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        return emitter;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String parseLine(String line) {
