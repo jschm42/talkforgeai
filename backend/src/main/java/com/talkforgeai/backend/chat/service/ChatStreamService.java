@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ChatStreamService {
@@ -127,12 +126,8 @@ public class ChatStreamService {
 
 
             SseEmitter emitter = new SseEmitter();
-            CompletableFuture.runAsync(() -> {
-                openAIChatService.stream(request, emitter, message -> {
-                    webSocketService.sendMessage(
-                            new WSChatStatusMessage(sessionId, "Done!!")
-                    );
-                });
+            openAIChatService.stream(request, emitter, message -> {
+                handleResultMessage(sessionId, message);
             });
 
             return emitter;
@@ -141,6 +136,16 @@ public class ChatStreamService {
         }
 
         return null;
+    }
+
+    private void handleResultMessage(UUID sessionId, OpenAIChatMessage message) {
+        List<OpenAIChatMessage> unprocessedMessagesToSave = List.of(message);
+        List<OpenAIChatMessage> processedMessagesToSave = List.of(message);
+        sessionService.update(sessionId, unprocessedMessagesToSave, processedMessagesToSave);
+
+        webSocketService.sendMessage(
+                new WSChatStatusMessage(sessionId, "")
+        );
     }
 
     private Map<String, String> mapToGptProperties(Map<String, PropertyEntity> personaProperties) {

@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 public class OpenAIChatService {
@@ -82,6 +83,8 @@ public class OpenAIChatService {
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                    StringBuilder finalContent = new StringBuilder();
+
                     if (!response.isSuccessful()) {
                         emitter.completeWithError(new RuntimeException("Unexpected code " + response));
                     } else {
@@ -89,10 +92,12 @@ public class OpenAIChatService {
                             try (BufferedReader bufferedReader = new BufferedReader(responseBody.charStream())) {
                                 String line;
                                 while ((line = bufferedReader.readLine()) != null) {
-                                    String responseMessageChunk = parseLine(line);
-                                    if (responseMessageChunk != null) {
-                                        logger.info("SENDING: {}", responseMessageChunk);
-                                        emitter.send(responseMessageChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
+                                    Optional<OpenAIChatResponse.ResponseChoice> responseChoice = parseLine(line);
+                                    if (responseChoice.isPresent()) {
+                                        finalContent.append(responseChoice.get().delta().content());
+                                        String responseChunk = choiceToJSON(responseChoice.get());
+                                        logger.info("SENDING: {}", responseChunk);
+                                        emitter.send(responseChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
                                         try {
                                             Thread.sleep(20);
                                         } catch (InterruptedException e) {
@@ -103,7 +108,7 @@ public class OpenAIChatService {
                             }
                         }
                         emitter.complete();
-                        resultCallback.call(new OpenAIChatMessage(OpenAIChatMessage.Role.ASSISTANT, "Done!"));
+                        resultCallback.call(new OpenAIChatMessage(OpenAIChatMessage.Role.ASSISTANT, finalContent.toString()));
                     }
                 }
             });
@@ -113,20 +118,28 @@ public class OpenAIChatService {
         }
     }
 
-    private String parseLine(String line) {
+    private String choiceToJSON(OpenAIChatResponse.ResponseChoice choice) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(choice);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Cannot parse choice.", e);
+        }
+    }
+
+    private Optional<OpenAIChatResponse.ResponseChoice> parseLine(String line) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         int jsonStartIndex = line.indexOf('{');
         if (jsonStartIndex == -1) {
-            return null;
+            return Optional.empty();
         }
 
         String jsonContent = line.substring(jsonStartIndex);
 
         try {
             OpenAIChatResponse openAIChatResponse = objectMapper.readValue(jsonContent, OpenAIChatResponse.class);
-            OpenAIChatResponse.ResponseChoice choice = openAIChatResponse.choices().get(0);
-            return objectMapper.writeValueAsString(choice);
+            return Optional.of(openAIChatResponse.choices().get(0));
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error while parsing chunk line from stream.", e);
         }
