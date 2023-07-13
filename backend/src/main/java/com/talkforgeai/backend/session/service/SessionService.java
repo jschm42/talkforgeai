@@ -34,6 +34,19 @@ public class SessionService {
         return this.repository.findById(sessionId);
     }
 
+
+    public ChatMessageEntity saveMessage(UUID sessionId, OpenAIChatMessage message, ChatMessageType type) {
+        ChatSessionEntity session = repository.findById(sessionId)
+                .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
+
+        ChatMessageEntity chatMessageEntity = messageService.mapToEntity(message, session, type);
+        session.getChatMessages().add(chatMessageEntity);
+
+        repository.save(session);
+        return chatMessageEntity;
+    }
+
+
     public ChatSessionEntity update(UUID sessionId, List<OpenAIChatMessage> messages, List<OpenAIChatMessage> processedMessages) {
         ChatSessionEntity session = repository.findById(sessionId)
                 .orElseThrow(() -> new SessionException("Session not found: " + sessionId));

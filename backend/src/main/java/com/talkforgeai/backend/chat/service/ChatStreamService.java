@@ -1,6 +1,7 @@
 package com.talkforgeai.backend.chat.service;
 
 import com.talkforgeai.backend.chat.PropertyKeys;
+import com.talkforgeai.backend.chat.domain.ChatMessageType;
 import com.talkforgeai.backend.chat.dto.ChatCompletionRequest;
 import com.talkforgeai.backend.chat.repository.FunctionRepository;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
@@ -93,7 +94,6 @@ public class ChatStreamService {
             OpenAIChatRequest request = new OpenAIChatRequest();
             request.setMessages(messages);
 
-            // TODO Properties setzen
             if (properties.containsKey(PropertyKeys.CHATGPT_MAX_TOKENS)) {
                 request.setMaxTokens(Integer.valueOf(properties.get(PropertyKeys.CHATGPT_MAX_TOKENS)));
             }
@@ -124,7 +124,6 @@ public class ChatStreamService {
                 request.setFunctions(functionRepository.getByRequestFunctions(requestFunctions));
             }
 
-
             SseEmitter emitter = new SseEmitter();
             openAIChatService.stream(request, emitter, message -> {
                 handleResultMessage(sessionId, message);
@@ -139,9 +138,7 @@ public class ChatStreamService {
     }
 
     private void handleResultMessage(UUID sessionId, OpenAIChatMessage message) {
-        List<OpenAIChatMessage> unprocessedMessagesToSave = List.of(message);
-        List<OpenAIChatMessage> processedMessagesToSave = List.of(message);
-        sessionService.update(sessionId, unprocessedMessagesToSave, processedMessagesToSave);
+        sessionService.saveMessage(sessionId, message, ChatMessageType.UNPROCESSED);
 
         webSocketService.sendMessage(
                 new WSChatStatusMessage(sessionId, "")

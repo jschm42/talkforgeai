@@ -24,8 +24,8 @@ public class MessageService {
         this.systemService = systemService;
     }
 
-    public List<ChatMessageEntity> getMessages(String sessionId, ChatMessageType type) {
-        return repository.findAllByChatSessionIdAndType(UUID.fromString(sessionId), type);
+    public List<ChatMessageEntity> getMessages(UUID sessionId, ChatMessageType type) {
+        return repository.findAllByChatSessionIdAndType(sessionId, type);
     }
 
     public List<OpenAIChatMessage> mapToDto(List<ChatMessageEntity> entities) {
@@ -42,7 +42,7 @@ public class MessageService {
         return new OpenAIChatMessage(entity.getRole(), entity.getContent(), entity.getFunctionName(), functionCall);
     }
 
-    private ChatMessageEntity mapToEntity(OpenAIChatMessage message, ChatSessionEntity session, ChatMessageType type) {
+    public ChatMessageEntity mapToEntity(OpenAIChatMessage message, ChatSessionEntity session, ChatMessageType type) {
         ChatMessageEntity entity = new ChatMessageEntity();
         entity.setType(type);
         entity.setChatSession(session);

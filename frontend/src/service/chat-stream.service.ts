@@ -2,6 +2,7 @@ import ChatMessage from '@/store/to/chat-message';
 import Role from '@/store/to/role';
 import {useChatStore} from '@/store/chat-store';
 import ChatChoice from '@/store/to/chat-choice';
+import axios from 'axios';
 
 const STREAM_REGEX = /{"content":(.*?)},/;
 const QUOTE_REGEX = /\\"/;
@@ -42,7 +43,7 @@ class ChatStreamService {
       const data = decoder.decode(row.value, {stream: true});
       console.log('DATA: ', data);
 
-      if (this.hasJSONDate(data)) {
+      if (this.hasJSONData(data)) {
         const chatChoice = this.parseStreamResponse(data);
         console.log('PARSED STREAM DATA: ', chatChoice);
         const lastMessage = store.messages[store.messages.length - 1];
@@ -58,19 +59,38 @@ class ChatStreamService {
 
     console.log('Stream complete');
 
+    const processedMessage = await this.postProcessLastMessage(sessionId);
+    store.messages.pop();
+    store.messages.push(processedMessage);
   }
 
-  hasJSONDate(data: string): boolean {
+  hasJSONData(data: string): boolean {
     return data.indexOf('{') != -1;
+  }
+
+  async postProcessLastMessage(sessionId: string): Promise<ChatMessage> {
+    try {
+      const result = await axios.get(`/api/v1/chat/session/${sessionId}/postprocess/last`);
+      return result.data;
+    } catch (error) {
+      throw new Error('Error reading session entry:  ' + error);
+    }
   }
 
   parseStreamResponse(data: string): ChatChoice | undefined {
     console.log('DATA TO PARSE: ', data);
     const startIndexJson = data.indexOf('{');
     try {
-      const json = JSON.parse(data.substring(startIndexJson));
-      console.log('JSON: ', json);
-      return json;
+      const json = data.substring(startIndexJson);
+      const choice = JSON.parse(json);
+
+      if (choice.delta && choice.delta.content) {
+        const content = choice.delta.content;
+        choice.delta.content = content.replaceAll('\n\n', '<p/>').replaceAll('\n', '<br/>');
+      }
+
+      console.log('CHOICE: ', choice);
+      return choice;
     } catch (err) {
       console.log('Cannot parse JSON in Message.', err);
       return undefined;

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -81,4 +82,13 @@ public class ChatController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/session/{sessionId}/postprocess/last")
+    public ResponseEntity<OpenAIChatMessage> postProcessLastMessage(@PathVariable("sessionId") UUID sessionId) {
+        Optional<OpenAIChatMessage> openAIChatMessage = chatService.postProcessLastMessage(sessionId);
+        return openAIChatMessage
+                .map(message -> new ResponseEntity<>(message, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
+    }
+
 }

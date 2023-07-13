@@ -18,7 +18,6 @@ import com.talkforgeai.backend.session.dto.NewChatSessionRequest;
 import com.talkforgeai.backend.session.dto.SessionResponse;
 import com.talkforgeai.backend.session.exception.SessionException;
 import com.talkforgeai.backend.session.service.SessionService;
-import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
 import com.talkforgeai.backend.websocket.dto.WSChatFunctionMessage;
 import com.talkforgeai.backend.websocket.dto.WSChatResponseMessage;
@@ -46,7 +45,6 @@ public class ChatService {
     private final MessageService messageService;
     private final WebSocketService webSocketService;
     private final MessageProcessor messageProcessor;
-    private final FileStorageService fileStorageService;
     private final FunctionRepository functionRepository;
 
     public ChatService(OpenAIChatService openAIChatService,
@@ -55,7 +53,6 @@ public class ChatService {
                        MessageService messageService,
                        WebSocketService webSocketService,
                        MessageProcessor messageProcessor,
-                       FileStorageService fileStorageService,
                        FunctionRepository functionRepository) {
         this.openAIChatService = openAIChatService;
         this.sessionService = sessionService;
@@ -63,7 +60,6 @@ public class ChatService {
         this.messageService = messageService;
         this.webSocketService = webSocketService;
         this.messageProcessor = messageProcessor;
-        this.fileStorageService = fileStorageService;
         this.functionRepository = functionRepository;
     }
 
@@ -151,7 +147,6 @@ public class ChatService {
         throw new SessionException("Session not found: " + sessionId);
     }
 
-
     private OpenAIChatMessage postProcessSubmitResult(ChatCompletionRequest request, SubmitResult submitResult) {
         if (submitResult.response().choices().isEmpty()) {
             throw new ChatException("Choices are empty.");
@@ -173,7 +168,7 @@ public class ChatService {
 
         OpenAIChatMessage processedResponseMessage = responseMessage;
         if (responseMessage.content() != null) {
-            processedResponseMessage = messageProcessor.transform(responseMessage, submitResult.session().getId(), fileStorageService.getDataDirectory());
+            processedResponseMessage = messageProcessor.transform(responseMessage, submitResult.session().getId());
         }
 
         processedMessagesToSave.add(submitResult.processedNewUserMessage());
@@ -304,6 +299,21 @@ public class ChatService {
         }
 
         return null;
+    }
+
+    public Optional<OpenAIChatMessage> postProcessLastMessage(UUID sessionId) {
+        List<ChatMessageEntity> messages = messageService.getMessages(sessionId, ChatMessageType.UNPROCESSED);
+
+        ChatMessageEntity lastMessage;
+        if (!messages.isEmpty()) {
+            lastMessage = messages.get(messages.size() - 1);
+            OpenAIChatMessage openAIChatMessage = messageService.mapToDto(lastMessage);
+            OpenAIChatMessage transformed = messageProcessor.transform(openAIChatMessage, sessionId);
+
+            sessionService.saveMessage(sessionId, transformed, ChatMessageType.PROCESSED);
+            return Optional.of(transformed);
+        }
+        return Optional.empty();
     }
 
     private record SubmitResult(ChatSessionEntity session,
