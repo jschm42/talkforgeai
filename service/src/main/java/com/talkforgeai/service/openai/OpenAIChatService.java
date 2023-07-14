@@ -84,6 +84,9 @@ public class OpenAIChatService {
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                     StringBuilder finalContent = new StringBuilder();
+                    boolean isFunctionCall = false;
+                    StringBuilder finalFunctionArguments = new StringBuilder();
+                    String functionName = null;
 
                     if (!response.isSuccessful()) {
                         emitter.completeWithError(new RuntimeException("Unexpected code " + response));
@@ -94,7 +97,18 @@ public class OpenAIChatService {
                                 while ((line = bufferedReader.readLine()) != null) {
                                     Optional<OpenAIChatResponse.ResponseChoice> responseChoice = parseLine(line);
                                     if (responseChoice.isPresent()) {
-                                        finalContent.append(responseChoice.get().delta().content());
+                                        OpenAIChatMessage delta = responseChoice.get().delta();
+
+                                        if (delta.functionCall() != null) {
+                                            isFunctionCall = true;
+                                            if (functionName == null) {
+                                                functionName = delta.functionCall().name();
+                                            }
+                                            finalFunctionArguments.append(delta.functionCall().arguments());
+                                        } else {
+                                            finalContent.append(delta.content());
+                                        }
+
                                         String responseChunk = choiceToJSON(responseChoice.get());
                                         logger.info("SENDING: {}", responseChunk);
                                         emitter.send(responseChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
@@ -108,7 +122,14 @@ public class OpenAIChatService {
                             }
                         }
                         emitter.complete();
-                        resultCallback.call(new OpenAIChatMessage(OpenAIChatMessage.Role.ASSISTANT, finalContent.toString()));
+
+                        if (isFunctionCall) {
+                            OpenAIChatMessage.FunctionCall functionCall
+                                    = new OpenAIChatMessage.FunctionCall(functionName, finalFunctionArguments.toString());
+                            resultCallback.call(new OpenAIChatMessage(functionCall));
+                        } else {
+                            resultCallback.call(new OpenAIChatMessage(OpenAIChatMessage.Role.ASSISTANT, finalContent.toString()));
+                        }
                     }
                 }
             });

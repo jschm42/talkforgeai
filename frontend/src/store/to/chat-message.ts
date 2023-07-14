@@ -1,5 +1,10 @@
 import Role from './role';
 
+class FunctionCall {
+  name: string | undefined;
+  arguments: string | undefined;
+}
+
 class ChatMessage {
 
   role: Role;
@@ -8,9 +13,9 @@ class ChatMessage {
 
   name: string | undefined;
 
-  function_call: undefined;
+  function_call: FunctionCall | undefined;
 
-  constructor(role: Role, content: string, name?: string, function_call?: undefined) {
+  constructor(role: Role, content: string, name?: string, function_call?: FunctionCall) {
     this.role = role;
     this.content = content;
     this.name = name;
@@ -19,3 +24,4 @@ class ChatMessage {
 }
 
 export default ChatMessage;
+export {FunctionCall};

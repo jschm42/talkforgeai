@@ -1,4 +1,4 @@
-import ChatMessage from '@/store/to/chat-message';
+import ChatMessage, {FunctionCall} from '@/store/to/chat-message';
 import Role from '@/store/to/role';
 import {useChatStore} from '@/store/chat-store';
 import ChatChoice from '@/store/to/chat-choice';
@@ -40,6 +40,7 @@ class ChatStreamService {
     const newMessage = new ChatMessage(Role.ASSISTANT, '');
     store.messages.push(newMessage);
 
+    let isFunctionCall = false;
     while (!done) {
       const row = await reader.read();
 
@@ -50,9 +51,23 @@ class ChatStreamService {
         const chatChoice = this.parseStreamResponse(data);
         console.log('PARSED STREAM DATA: ', chatChoice);
         const lastMessage = store.messages[store.messages.length - 1];
-        if (chatChoice?.delta && chatChoice.delta.content) {
-          lastMessage.content += chatChoice?.delta.content;
+
+        if (chatChoice?.delta) {
+          if (chatChoice.delta.content) {
+            lastMessage.content += chatChoice?.delta.content;
+          } else if (chatChoice.delta.function_call && chatChoice.delta.function_call.arguments) {
+            console.log('FUNCTION CALL', chatChoice.delta.function_call);
+            isFunctionCall = true;
+
+            if (!lastMessage.function_call) {
+              lastMessage.function_call = new FunctionCall();
+            }
+
+            lastMessage.function_call.name = chatChoice?.delta.function_call.name;
+            lastMessage.function_call.arguments += chatChoice?.delta.function_call.arguments;
+          }
         }
+
       }
 
       done = row.done;
@@ -62,12 +77,13 @@ class ChatStreamService {
 
     console.log('Stream complete');
 
-    const processedMessage = await this.postProcessLastMessage(sessionId);
-    processedMessage.content = highlightingService.replaceCodeContent(processedMessage.content);
+    if (!isFunctionCall) {
+      const processedMessage = await this.postProcessLastMessage(sessionId);
+      processedMessage.content = highlightingService.replaceCodeContent(processedMessage.content);
 
-    store.messages.pop();
-    store.messages.push(processedMessage);
-
+      store.messages.pop();
+      store.messages.push(processedMessage);
+    }
   }
 
   hasJSONData(data: string): boolean {
