@@ -139,7 +139,11 @@ public class OpenAIChatService {
 
         try {
             OpenAIChatResponse openAIChatResponse = objectMapper.readValue(jsonContent, OpenAIChatResponse.class);
-            return Optional.of(openAIChatResponse.choices().get(0));
+            OpenAIChatResponse.ResponseChoice responseChoice = openAIChatResponse.choices().get(0);
+            if (responseChoice.finishReason() == OpenAIChatResponse.ResponseChoice.FinishReason.STOP) {
+                return Optional.empty();
+            }
+            return Optional.of(responseChoice);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error while parsing chunk line from stream.", e);
         }
