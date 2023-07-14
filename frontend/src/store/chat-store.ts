@@ -6,10 +6,12 @@ import ChatService from '@/service/chat.service';
 import PersonaService from '@/service/persona.service';
 import Role from '@/store/to/role';
 import ChatStreamService from '@/service/chat-stream.service';
+import HighlightingService from '@/service/highlighting.service';
 
 const chatService = new ChatService();
 const chatStreamService = new ChatStreamService();
 const personaService = new PersonaService();
+const highlightingService = new HighlightingService();
 
 export const useChatStore = defineStore('chat', {
   state: () => {
@@ -98,23 +100,11 @@ export const useChatStore = defineStore('chat', {
         });
       });
 
-      // const result = await chatService.submit(this.sessionId, prompt);
-      // console.log('Result Message.', result);
-      // this.messages = [...this.messages, ...result.processedMessages];
-      //
-      // const message = result.processedMessages[result.processedMessages.length - 1];
-      // if (message.function_call && message.role === Role.ASSISTANT) {
-      //   const result = await chatService.submitFunctionConfirm(this.sessionId);
-      //
-      //   console.log('Result Message after Function call.', result);
-      //   this.messages = [...this.messages, ...result.processedMessages];
-      // }
-
-      //console.log('Prompt submitted');
-
     },
     async loadChatSession(sessionId: string) {
       const chatSession = await chatService.readSessionEntry(sessionId);
+
+      highlightingService.highlightCodeInChatMessage(chatSession.chatMessages);
 
       this.$patch({
         sessionId: chatSession.id,
@@ -122,13 +112,11 @@ export const useChatStore = defineStore('chat', {
         selectedPersona: chatSession.persona,
         chat: {configHeaderEnabled: false},
       });
+
     },
     async readPersona() {
       this.personaList = await personaService.readPersona();
       this.selectedPersona = this.personaList[0];
-    },
-    getElevenLabsProperties() {
-      //return this.session.persona.elevenLabsProperties;
     },
     toggleAutoSpeak() {
       this.chat.autoSpeak = !this.chat.autoSpeak;
