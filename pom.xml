@@ -9,15 +9,16 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.talkforgeai</groupId>
-    <artifactId>talkforgeai-server</artifactId>
+    <artifactId>talkforgeai</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>talkforgeai-server</name>
-    <description>talkforgeai-server</description>
+    <name>talkforgeai</name>
+    <description>talkforgeai</description>
     <modules>
         <module>frontend</module>
         <module>backend</module>
         <module>service</module>
+        <module>app</module>
     </modules>
     <properties>
         <maven.compiler.source>19</maven.compiler.source>
