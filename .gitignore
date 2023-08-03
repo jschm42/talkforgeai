@@ -34,7 +34,8 @@ build/
 
 node_modules/
 
-backend/src/main/resources/public/
+app/src/main/resources/public/
+app/target
 backend/target
 frontend/dist/
 frontend/node/
