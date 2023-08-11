@@ -26,7 +26,7 @@ export default {
     },
     messageClass() {
       return {
-        'bg-info': this.message.role === Role.USER,
+        'text-bg-primary': this.message.role === Role.USER,
       };
     },
     isAssistant() {
