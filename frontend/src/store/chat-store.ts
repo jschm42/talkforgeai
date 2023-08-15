@@ -26,7 +26,7 @@ export const useChatStore = defineStore('chat', {
       },
       currentStatusMessage: '',
       sessions: [] as Array<Session>,
-      selectedSessionId: null,
+      selectedSessionId: '',
     };
   },
   getters: {
@@ -53,7 +53,7 @@ export const useChatStore = defineStore('chat', {
     resetChat() {
       this.messages = [];
       this.currentStatusMessage = '';
-      this.selectedSessionId = null;
+      this.selectedSessionId = '';
       this.sessions = [];
       this.chat.autoSpeak = false;
       this.chat.configHeaderEnabled = true;
@@ -69,37 +69,14 @@ export const useChatStore = defineStore('chat', {
     async getLastResult() {
       return await chatService.getLastResult(this.sessionId);
     },
-    async submitPrompt(prompt: string) {
-      this.chat.configHeaderEnabled = false;
-
-      if (!this.sessionId || this.sessionId === '') {
-        this.sessionId = await chatService.createNewSession(this.selectedPersona.personaId);
-      }
-
-      this.messages.push(new ChatMessage(Role.USER, prompt));
-
-      console.log('Submitting prompt', this.sessionId, prompt);
-      const result = await chatService.submit(this.sessionId, prompt);
-      console.log('Result Message.', result);
-      this.messages = [...this.messages, ...result.processedMessages];
-
-      const message = result.processedMessages[result.processedMessages.length - 1];
-      if (message.function_call && message.role === Role.ASSISTANT) {
-        const result = await chatService.submitFunctionConfirm(this.sessionId);
-
-        console.log('Result Message after Function call.', result);
-        this.messages = [...this.messages, ...result.processedMessages];
-      }
-
-      //console.log('Prompt submitted');
-
-    },
     async streamPrompt(prompt: string) {
       this.chat.configHeaderEnabled = false;
 
       if (!this.sessionId || this.sessionId === '') {
         this.sessionId = await chatService.createNewSession(this.selectedPersona.personaId);
       }
+
+      this.selectedSessionId = this.sessionId;
 
       this.messages.push(new ChatMessage(Role.USER, prompt));
 

@@ -81,6 +81,11 @@ export default {
   },
   mounted() {
     this.store.readPersona();
+
+    if (this.store.personaList && this.store.personaList.length > 0) {
+      this.store.selectPersona(this.store.personaList[0]);
+    }
+
   },
 };
 

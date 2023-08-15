@@ -32,6 +32,8 @@ export default {
   },
   methods: {
     getEntryClass(sessionId) {
+      console.log('GET ENTRY CLASS 1', sessionId);
+      console.log('GET ENTRY CLASS 2', this.store.selectedSessionId);
       if (sessionId === this.store.selectedSessionId) {
         return 'bg-primary';
       }
@@ -39,7 +41,7 @@ export default {
     },
     formatTimestamp(timestamp) {
       if (timestamp) {
-        return format(new Date(timestamp), 'MM/dd/yyyy');
+        return format(new Date(timestamp), 'MM/dd/yyyy HH:mm:ss');
       }
     },
   },

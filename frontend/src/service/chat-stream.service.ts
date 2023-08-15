@@ -45,11 +45,11 @@ class ChatStreamService {
       const row = await reader.read();
 
       const data = decoder.decode(row.value, {stream: true});
-      console.log('DATA: ', data);
+      //console.log('DATA: ', data);
 
       if (this.hasJSONData(data)) {
         const chatChoice = this.parseStreamResponse(data);
-        console.log('PARSED STREAM DATA: ', chatChoice);
+        //console.log('PARSED STREAM DATA: ', chatChoice);
         const lastMessage = store.messages[store.messages.length - 1];
 
         if (chatChoice?.delta) {
@@ -100,7 +100,7 @@ class ChatStreamService {
   }
 
   parseStreamResponse(data: string): ChatChoice | undefined {
-    console.log('DATA TO PARSE: ', data);
+    //console.log('DATA TO PARSE: ', data);
     const startIndexJson = data.indexOf('{');
     try {
       const json = data.substring(startIndexJson);
@@ -111,7 +111,7 @@ class ChatStreamService {
         choice.delta.content = content.replaceAll('\n\n', '<p/>').replaceAll('\n', '<br/>');
       }
 
-      console.log('CHOICE: ', choice);
+      //console.log('CHOICE: ', choice);
       return choice;
     } catch (err) {
       console.log('Cannot parse JSON in Message.', err);

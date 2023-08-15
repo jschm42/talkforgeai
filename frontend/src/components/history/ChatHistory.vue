@@ -1,6 +1,8 @@
 <template>
   <div class="p-3 full-height vertical-scrollbar shadow">
 
+    <button @click="onNewSession">New Chat</button>
+
     <div class="list-group list-group-flush border-bottom">
 
       <div v-for="entry in allSessionEntries" :key="entry.id">
@@ -41,6 +43,9 @@ export default {
       console.log('Loading chat session', sessionId);
       this.store.selectedSessionId = sessionId;
       await this.store.loadChatSession(sessionId);
+    },
+    onNewSession() {
+      this.store.newSession();
     },
   },
   changed() {

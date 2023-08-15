@@ -26,7 +26,7 @@ class WebSocketService {
       //   passcode: "password"
       // }
       debug: msg => {
-        console.log('WS: ', msg);
+        //console.log('WS: ', msg);
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,

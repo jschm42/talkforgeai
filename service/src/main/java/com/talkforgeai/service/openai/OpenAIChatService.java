@@ -43,7 +43,7 @@ public class OpenAIChatService {
                     .post(body)
                     .build();
 
-            logger.debug("Sending delta: {}", message);
+            //logger.debug("Sending delta: {}", message);
 
             try (Response response = client.newCall(request).execute()) {
 
@@ -73,7 +73,7 @@ public class OpenAIChatService {
                     .post(body)
                     .build();
 
-            logger.debug("Sending delta: {}", message);
+            //logger.debug("Sending delta: {}", message);
 
             client.newCall(request).enqueue(new Callback() {
                 @Override
@@ -110,7 +110,7 @@ public class OpenAIChatService {
                                         }
 
                                         String responseChunk = choiceToJSON(responseChoice.get());
-                                        logger.info("SENDING: {}", responseChunk);
+                                        //logger.info("SENDING: {}", responseChunk);
                                         emitter.send(responseChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
                                         try {
                                             Thread.sleep(20);
