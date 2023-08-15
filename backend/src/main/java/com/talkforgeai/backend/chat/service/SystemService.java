@@ -14,7 +14,7 @@ public class SystemService {
             "\"A painting of a stormy sea with a lighthouse in the distance,\" or \"A photograph of a city street at night, illuminated by neon lights.\". " +
             "Place the content between the following tags: <image-prompt></image-prompt>.";
 
-    String getContent(GlobalSystem system) {
+    public String getContent(GlobalSystem system) {
         if (Objects.requireNonNull(system) == GlobalSystem.IMAGE_GEN) {
             return IMAGE_GEN_SYSTEM;
         }

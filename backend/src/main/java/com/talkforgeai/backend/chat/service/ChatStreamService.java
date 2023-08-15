@@ -8,12 +8,9 @@ import com.talkforgeai.backend.persona.domain.PersonaEntity;
 import com.talkforgeai.backend.persona.domain.PropertyCategory;
 import com.talkforgeai.backend.persona.domain.PropertyEntity;
 import com.talkforgeai.backend.persona.domain.RequestFunction;
-import com.talkforgeai.backend.persona.service.PersonaService;
 import com.talkforgeai.backend.session.domain.ChatSessionEntity;
 import com.talkforgeai.backend.session.exception.SessionException;
 import com.talkforgeai.backend.session.service.SessionService;
-import com.talkforgeai.backend.storage.FileStorageService;
-import com.talkforgeai.backend.transformers.MessageProcessor;
 import com.talkforgeai.backend.websocket.dto.WSChatStatusMessage;
 import com.talkforgeai.backend.websocket.service.WebSocketService;
 import com.talkforgeai.service.openai.OpenAIChatService;
@@ -34,35 +31,19 @@ public class ChatStreamService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChatStreamService.class);
 
     private final OpenAIChatService openAIChatService;
-    private final PersonaService personaService;
     private final SessionService sessionService;
-    private final MessageService messageService;
     private final WebSocketService webSocketService;
-    private final MessageProcessor messageProcessor;
-    private final FileStorageService fileStorageService;
     private final FunctionRepository functionRepository;
-
-    private final SystemService systemService;
 
 
     public ChatStreamService(OpenAIChatService openAIChatService,
                              SessionService sessionService,
-                             PersonaService personaService,
-                             MessageService messageService,
                              WebSocketService webSocketService,
-                             MessageProcessor messageProcessor,
-                             FileStorageService fileStorageService,
-                             FunctionRepository functionRepository,
-                             SystemService systemService) {
+                             FunctionRepository functionRepository) {
         this.openAIChatService = openAIChatService;
         this.sessionService = sessionService;
-        this.personaService = personaService;
-        this.messageService = messageService;
         this.webSocketService = webSocketService;
-        this.messageProcessor = messageProcessor;
-        this.fileStorageService = fileStorageService;
         this.functionRepository = functionRepository;
-        this.systemService = systemService;
     }
 
     public SseEmitter submit(ChatCompletionRequest request) {
@@ -70,7 +51,7 @@ public class ChatStreamService {
                 .orElseThrow(() -> new SessionException("Session not found: " + request.sessionId()));
 
         PersonaEntity persona = session.getPersona();
-        List<OpenAIChatMessage> previousMessages = messageService.getPreviousMessages(session);
+        List<OpenAIChatMessage> previousMessages = sessionService.getPreviousMessages(session);
         boolean isFirstSubmitInSession = previousMessages.isEmpty();
 
         OpenAIChatMessage newUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.content());
@@ -80,7 +61,7 @@ public class ChatStreamService {
         OpenAIChatMessage processedNewUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.content());
         sessionService.saveMessage(session.getId(), processedNewUserMessage, ChatMessageType.PROCESSED);
 
-        List<OpenAIChatMessage> messagePayload = messageService.composeMessagePayload(previousMessages, processedNewUserMessage, persona);
+        List<OpenAIChatMessage> messagePayload = sessionService.composeMessagePayload(previousMessages, processedNewUserMessage, persona);
 
         webSocketService.sendMessage(
                 new WSChatStatusMessage(request.sessionId(), "Thinking...")

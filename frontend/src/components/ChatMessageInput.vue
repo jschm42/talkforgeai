@@ -38,7 +38,7 @@ export default {
       this.isInputLocked = true;
 
       await this.store.streamPrompt(this.prompt);
-      await this.store.loadIndex();
+      await this.store.loadIndex(this.store.selectedPersona.personaId);
 
       this.$emit('submitResultReceived');
       this.prompt = '';

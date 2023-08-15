@@ -76,7 +76,7 @@ export default {
       return !!persona.imageUrl;
     },
     onPersonaSelected(persona) {
-      this.store.selectedPersona = persona;
+      this.store.selectPersona(persona);
     },
   },
   mounted() {

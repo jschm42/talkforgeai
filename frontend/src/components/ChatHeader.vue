@@ -1,38 +1,6 @@
 <template>
   <div id="prompt-configuration-panel" class="p-2">
-    <div class="dropdown">
-      <button
-        id="dropdownMenuButton"
-        :disabled="isDisabled"
-        aria-expanded="false"
-        aria-haspopup="true"
-        class="btn btn-secondary dropdown-toggle"
-        data-bs-toggle="dropdown"
-        type="button"
-      >
-        <div v-if="selectedPersona">
-          <img v-if="isShowPersonaImage(selectedPersona)"
-               :alt="selectedPersona.name"
-               :src="selectedPersona.imageUrl"
-               class="persona-icon mx-3"
-          />
-          <i v-else class="fs-2 bi bi-robot robot-icon"></i>
-          <span>{{ selectedPersona.name }} - {{ selectedPersona.description }}</span>
-        </div>
-        <span v-else>Choose a persona</span>
-      </button>
-      <div aria-labelledby="dropdownMenuButton" class="dropdown-menu">
-        <a v-for="persona in personaList" :key="persona.personaId"
-           class="dropdown-item"
-           href="#"
-           @click.prevent="onPersonaSelected(persona)">
-          <img v-if="isShowPersonaImage(persona)" :alt="persona.name" :src="persona.imageUrl"
-               class="persona-icon"/>
-          <i v-else class="fs-2 bi bi-robot robot-icon"></i>
-          {{ persona.name }} - {{ persona.description }}
-        </a>
-      </div>
-    </div>
+    <!-- TODO Check if still needed -->
   </div>
 
 </template>

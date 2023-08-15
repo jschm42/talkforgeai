@@ -50,8 +50,21 @@ export const useChatStore = defineStore('chat', {
       console.log('disableConfigHeader');
       this.chat.configHeaderEnabled = false;
     },
-    async loadIndex() {
-      this.sessions = await chatService.readSessionEntries();
+    resetChat() {
+      this.messages = [];
+      this.currentStatusMessage = '';
+      this.selectedSessionId = null;
+      this.sessions = [];
+      this.chat.autoSpeak = false;
+      this.chat.configHeaderEnabled = true;
+    },
+    async selectPersona(persona: Persona) {
+      this.selectedPersona = persona;
+      this.resetChat();
+      await this.loadIndex(persona.personaId);
+    },
+    async loadIndex(personaId: string) {
+      this.sessions = await chatService.readSessionEntries(personaId);
     },
     async getLastResult() {
       return await chatService.getLastResult(this.sessionId);

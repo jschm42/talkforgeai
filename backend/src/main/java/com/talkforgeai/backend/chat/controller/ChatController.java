@@ -3,9 +3,9 @@ package com.talkforgeai.backend.chat.controller;
 import com.talkforgeai.backend.chat.dto.ChatCompletionRequest;
 import com.talkforgeai.backend.chat.dto.ChatCompletionResponse;
 import com.talkforgeai.backend.chat.service.ChatService;
-import com.talkforgeai.backend.chat.service.MessageService;
 import com.talkforgeai.backend.session.dto.NewChatSessionRequest;
 import com.talkforgeai.backend.session.dto.SessionResponse;
+import com.talkforgeai.backend.session.service.SessionService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
 import org.slf4j.Logger;
@@ -30,12 +30,12 @@ public class ChatController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChatController.class);
     private final ChatService chatService;
     private final FileStorageService fileStorageService;
-    private final MessageService messageService;
+    private final SessionService sessionService;
 
-    public ChatController(ChatService chatService, FileStorageService fileStorageService, MessageService messageService) {
+    public ChatController(ChatService chatService, FileStorageService fileStorageService, SessionService sessionService) {
         this.chatService = chatService;
         this.fileStorageService = fileStorageService;
-        this.messageService = messageService;
+        this.sessionService = sessionService;
     }
 
     @PostMapping("/submit")
@@ -50,7 +50,7 @@ public class ChatController {
 
     @GetMapping("/result/{sessionId}")
     OpenAIChatMessage getResult(@PathVariable UUID sessionId) {
-        return messageService.getLastProcessedMessage(sessionId);
+        return sessionService.getLastProcessedMessage(sessionId);
     }
 
     @PostMapping("/create")
@@ -58,14 +58,15 @@ public class ChatController {
         return chatService.create(request);
     }
 
-    @GetMapping("/session")
-    List<SessionResponse> getChatSessions() {
-        return chatService.getSessions();
+
+    @GetMapping("/persona/{personaId}/sessions")
+    List<SessionResponse> getChatSessions(@PathVariable UUID personaId) {
+        return sessionService.getSessions(personaId);
     }
 
     @GetMapping("/session/{sessionId}")
     SessionResponse getChatSession(@PathVariable UUID sessionId) {
-        return chatService.getSession(sessionId);
+        return sessionService.getSession(sessionId);
     }
 
     @GetMapping("/session/{sessionId}/{filename}")

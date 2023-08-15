@@ -2,9 +2,12 @@ package com.talkforgeai.backend.session.service;
 
 import com.talkforgeai.backend.chat.domain.ChatMessageEntity;
 import com.talkforgeai.backend.chat.domain.ChatMessageType;
-import com.talkforgeai.backend.chat.service.MessageService;
+import com.talkforgeai.backend.chat.repository.ChatMessageRepository;
+import com.talkforgeai.backend.chat.service.SystemService;
+import com.talkforgeai.backend.persona.domain.GlobalSystem;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
 import com.talkforgeai.backend.session.domain.ChatSessionEntity;
+import com.talkforgeai.backend.session.dto.SessionResponse;
 import com.talkforgeai.backend.session.exception.SessionException;
 import com.talkforgeai.backend.session.repository.ChatSessionRepository;
 import com.talkforgeai.backend.util.StringUtils;
@@ -12,18 +15,24 @@ import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class SessionService {
-    private final ChatSessionRepository repository;
-    private final MessageService messageService;
+    private final ChatMessageRepository messageRepository;
+    private final ChatSessionRepository sessionRepository;
+    private final SessionMapper sessionMapper;
 
-    public SessionService(ChatSessionRepository repository, MessageService messageService) {
-        this.repository = repository;
-        this.messageService = messageService;
+    private final SystemService systemService;
+
+    public SessionService(ChatSessionRepository sessionRepository, SessionMapper sessionMapper, ChatMessageRepository messageRepository, SystemService systemService) {
+        this.sessionRepository = sessionRepository;
+        this.sessionMapper = sessionMapper;
+        this.messageRepository = messageRepository;
+        this.systemService = systemService;
     }
 
     public Optional<ChatSessionEntity> getById(UUID sessionId) {
@@ -31,36 +40,43 @@ public class SessionService {
             return Optional.empty();
         }
 
-        return this.repository.findById(sessionId);
+        return this.sessionRepository.findById(sessionId);
     }
 
 
-    public ChatMessageEntity saveMessage(UUID sessionId, OpenAIChatMessage message, ChatMessageType type) {
-        ChatSessionEntity session = repository.findById(sessionId)
-                .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
-
-        ChatMessageEntity chatMessageEntity = messageService.mapToEntity(message, session, type);
-        session.getChatMessages().add(chatMessageEntity);
-
-        repository.save(session);
-        return chatMessageEntity;
+    public SessionResponse getSession(UUID sessionId) {
+        Optional<ChatSessionEntity> session = getById(sessionId);
+        if (session.isPresent()) {
+            return sessionMapper.mapSessionEntity(session.get());
+        }
+        throw new SessionException("Session not found: " + sessionId);
     }
 
+    public List<SessionResponse> getSessions(UUID personaId) {
+        List<ChatSessionEntity> allSessions = sessionRepository.getAllByPersonaId(
+                personaId,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        return allSessions.stream()
+                .map(sessionMapper::mapSessionEntity)
+                .toList();
+    }
 
     public ChatSessionEntity update(UUID sessionId, List<OpenAIChatMessage> messages, List<OpenAIChatMessage> processedMessages) {
-        ChatSessionEntity session = repository.findById(sessionId)
+        ChatSessionEntity session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
 
         return save(messages, processedMessages, session);
     }
 
     public void update(UUID sessionId, String title, String description) {
-        ChatSessionEntity session = repository.findById(sessionId)
+        ChatSessionEntity session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
 
         session.setTitle(StringUtils.maxLengthString(title, 29) + "...");
         session.setDescription(StringUtils.maxLengthString(description, 256));
-        repository.save(session);
+        sessionRepository.save(session);
     }
 
     public ChatSessionEntity create(PersonaEntity persona, List<OpenAIChatMessage> messages, List<OpenAIChatMessage> processedMessages) {
@@ -73,15 +89,63 @@ public class SessionService {
     }
 
     private ChatSessionEntity save(List<OpenAIChatMessage> messages, List<OpenAIChatMessage> processedMessages, ChatSessionEntity session) {
-        List<ChatMessageEntity> messageEntities = messageService.mapToEntity(messages, session, ChatMessageType.UNPROCESSED);
-        List<ChatMessageEntity> processedMessageEntities = messageService.mapToEntity(processedMessages, session, ChatMessageType.PROCESSED);
+        List<ChatMessageEntity> messageEntities = sessionMapper.mapToEntity(messages, session, ChatMessageType.UNPROCESSED);
+        List<ChatMessageEntity> processedMessageEntities = sessionMapper.mapToEntity(processedMessages, session, ChatMessageType.PROCESSED);
 
         session.getChatMessages().addAll(messageEntities);
         session.getChatMessages().addAll(processedMessageEntities);
-        return repository.save(session);
+        return sessionRepository.save(session);
     }
 
     public List<ChatSessionEntity> getAllMostRecentFirst() {
-        return repository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+        return sessionRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+    }
+
+
+    public List<ChatMessageEntity> getMessages(UUID sessionId, ChatMessageType type) {
+        return messageRepository.findAllByChatSessionIdAndType(sessionId, type);
+    }
+
+    public OpenAIChatMessage getLastProcessedMessage(UUID sessionId) {
+        return sessionMapper.mapToDto(messageRepository.findLastProcessedMessage(sessionId));
+    }
+
+    public List<OpenAIChatMessage> getPreviousMessages(ChatSessionEntity session) {
+        List<OpenAIChatMessage> previousMessages;
+        previousMessages = session.getChatMessages().stream()
+                .filter(m -> m.getType() == ChatMessageType.UNPROCESSED)
+                .map(sessionMapper::mapToDto)
+                .toList();
+        return previousMessages;
+    }
+
+    public List<OpenAIChatMessage> composeMessagePayload(List<OpenAIChatMessage> previousMessages, OpenAIChatMessage newMessage, PersonaEntity persona) {
+        List<OpenAIChatMessage> messages = new ArrayList<>();
+
+        List<GlobalSystem> globalSystems = persona.getGlobalSystems();
+        globalSystems.forEach(s -> {
+            messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(s)));
+        });
+
+        messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, persona.getSystem()));
+        messages.addAll(previousMessages);
+        messages.add(newMessage);
+        return messages;
+    }
+
+
+    public ChatMessageEntity saveMessage(UUID sessionId, OpenAIChatMessage message, ChatMessageType type) {
+        ChatSessionEntity session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
+
+        ChatMessageEntity chatMessageEntity = sessionMapper.mapToEntity(message, session, type);
+        session.getChatMessages().add(chatMessageEntity);
+
+        sessionRepository.save(session);
+        return chatMessageEntity;
+    }
+
+    public OpenAIChatMessage mapToOpenAIMessage(ChatMessageEntity chatMessageEntity) {
+        return sessionMapper.mapToDto(chatMessageEntity);
     }
 }

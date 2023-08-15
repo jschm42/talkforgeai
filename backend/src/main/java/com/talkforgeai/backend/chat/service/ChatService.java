@@ -15,7 +15,6 @@ import com.talkforgeai.backend.persona.exception.PersonaException;
 import com.talkforgeai.backend.persona.service.PersonaService;
 import com.talkforgeai.backend.session.domain.ChatSessionEntity;
 import com.talkforgeai.backend.session.dto.NewChatSessionRequest;
-import com.talkforgeai.backend.session.dto.SessionResponse;
 import com.talkforgeai.backend.session.exception.SessionException;
 import com.talkforgeai.backend.session.service.SessionService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
@@ -42,7 +41,6 @@ public class ChatService {
     private final OpenAIChatService openAIChatService;
     private final PersonaService personaService;
     private final SessionService sessionService;
-    private final MessageService messageService;
     private final WebSocketService webSocketService;
     private final MessageProcessor messageProcessor;
     private final FunctionRepository functionRepository;
@@ -50,14 +48,12 @@ public class ChatService {
     public ChatService(OpenAIChatService openAIChatService,
                        SessionService sessionService,
                        PersonaService personaService,
-                       MessageService messageService,
                        WebSocketService webSocketService,
                        MessageProcessor messageProcessor,
                        FunctionRepository functionRepository) {
         this.openAIChatService = openAIChatService;
         this.sessionService = sessionService;
         this.personaService = personaService;
-        this.messageService = messageService;
         this.webSocketService = webSocketService;
         this.messageProcessor = messageProcessor;
         this.functionRepository = functionRepository;
@@ -139,14 +135,6 @@ public class ChatService {
         return session.getId();
     }
 
-    public SessionResponse getSession(UUID sessionId) {
-        Optional<ChatSessionEntity> session = sessionService.getById(sessionId);
-        if (session.isPresent()) {
-            return mapSessionEntity(session.get());
-        }
-        throw new SessionException("Session not found: " + sessionId);
-    }
-
     private OpenAIChatMessage postProcessSubmitResult(ChatCompletionRequest request, SubmitResult submitResult) {
         if (submitResult.response().choices().isEmpty()) {
             throw new ChatException("Choices are empty.");
@@ -194,14 +182,14 @@ public class ChatService {
                 .orElseThrow(() -> new SessionException("Session not found: " + request.sessionId()));
 
         PersonaEntity persona = session.getPersona();
-        List<OpenAIChatMessage> previousMessages = messageService.getPreviousMessages(session);
+        List<OpenAIChatMessage> previousMessages = sessionService.getPreviousMessages(session);
         boolean isFirstSubmitInSession = previousMessages.isEmpty();
 
         OpenAIChatMessage newUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.content());
         // TODO Postprocessing of new user delta
         OpenAIChatMessage processedNewUserMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, request.content());
 
-        List<OpenAIChatMessage> messagePayload = messageService.composeMessagePayload(previousMessages, processedNewUserMessage, persona);
+        List<OpenAIChatMessage> messagePayload = sessionService.composeMessagePayload(previousMessages, processedNewUserMessage, persona);
 
         webSocketService.sendMessage(
                 new WSChatStatusMessage(request.sessionId(), "Thinking...")
@@ -213,7 +201,7 @@ public class ChatService {
 
 
     private Optional<OpenAIChatMessage> getLastMessage(ChatSessionEntity session) {
-        List<OpenAIChatMessage> previousMessages = messageService.getPreviousMessages(session);
+        List<OpenAIChatMessage> previousMessages = sessionService.getPreviousMessages(session);
         LOGGER.info("Previous messages: {}", previousMessages);
 
         if (previousMessages != null && !previousMessages.isEmpty()) {
@@ -222,28 +210,6 @@ public class ChatService {
         return Optional.empty();
     }
 
-    public List<SessionResponse> getSessions() {
-        List<ChatSessionEntity> allSessions = sessionService.getAllMostRecentFirst();
-        return allSessions.stream()
-                .map(this::mapSessionEntity)
-                .toList();
-    }
-
-
-    private SessionResponse mapSessionEntity(ChatSessionEntity session) {
-        List<ChatMessageEntity> processedMessages
-                = session.getChatMessages().stream()
-                .filter(m -> m.getType() == ChatMessageType.PROCESSED)
-                .toList();
-
-        return new SessionResponse(
-                session.getId(),
-                session.getTitle(),
-                session.getDescription(),
-                session.getCreatedAt(),
-                messageService.mapToDto(processedMessages),
-                personaService.mapPersonaResponse(session.getPersona()));
-    }
 
     private Map<String, String> mapToGptProperties(Map<String, PropertyEntity> personaProperties) {
         Map<String, String> gptProperties = new HashMap<>();
@@ -302,12 +268,12 @@ public class ChatService {
     }
 
     public Optional<OpenAIChatMessage> postProcessLastMessage(UUID sessionId) {
-        List<ChatMessageEntity> messages = messageService.getMessages(sessionId, ChatMessageType.UNPROCESSED);
+        List<ChatMessageEntity> messages = sessionService.getMessages(sessionId, ChatMessageType.UNPROCESSED);
 
         ChatMessageEntity lastMessage;
         if (!messages.isEmpty()) {
             lastMessage = messages.get(messages.size() - 1);
-            OpenAIChatMessage openAIChatMessage = messageService.mapToDto(lastMessage);
+            OpenAIChatMessage openAIChatMessage = sessionService.mapToOpenAIMessage(lastMessage);
             OpenAIChatMessage transformed = messageProcessor.transform(openAIChatMessage, sessionId);
 
             sessionService.saveMessage(sessionId, transformed, ChatMessageType.PROCESSED);

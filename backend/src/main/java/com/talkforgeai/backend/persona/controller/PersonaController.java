@@ -2,6 +2,7 @@ package com.talkforgeai.backend.persona.controller;
 
 import com.talkforgeai.backend.persona.dto.PersonaResponse;
 import com.talkforgeai.backend.persona.service.PersonaService;
+import com.talkforgeai.backend.session.service.SessionService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -24,7 +25,7 @@ public class PersonaController {
     private final PersonaService personaService;
     private final FileStorageService fileStorageService;
 
-    public PersonaController(PersonaService personaService, FileStorageService fileStorageService) {
+    public PersonaController(PersonaService personaService, FileStorageService fileStorageService, SessionService sessionService) {
         this.personaService = personaService;
         this.fileStorageService = fileStorageService;
     }

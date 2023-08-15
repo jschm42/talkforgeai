@@ -3,7 +3,6 @@ package com.talkforgeai.backend.persona.service;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
 import com.talkforgeai.backend.persona.dto.PersonaResponse;
 import com.talkforgeai.backend.persona.repository.PersonaRepository;
-import com.talkforgeai.backend.storage.FileStorageService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,20 +13,11 @@ import java.util.UUID;
 public class PersonaService {
 
     private final PersonaRepository personaRepository;
-    private final FileStorageService fileStorageService;
+    private final PersonaMapper personaMapper;
 
-    public PersonaService(PersonaRepository personaRepository, FileStorageService fileStorageService) {
+    public PersonaService(PersonaRepository personaRepository, PersonaMapper personaMapper) {
         this.personaRepository = personaRepository;
-        this.fileStorageService = fileStorageService;
-    }
-
-    public PersonaResponse mapPersonaResponse(PersonaEntity personaEntity) {
-        return new PersonaResponse(
-                personaEntity.getId(),
-                personaEntity.getName(),
-                personaEntity.getDescription(),
-                "/api/v1/persona/image/" + personaEntity.getImagePath()
-        );
+        this.personaMapper = personaMapper;
     }
 
     public List<PersonaResponse> getAllPersona() {
@@ -43,7 +33,7 @@ public class PersonaService {
     }
 
     public List<PersonaResponse> getPersonaResponse(List<PersonaEntity> personaEntities) {
-        return personaEntities.stream().map(this::mapPersonaResponse).toList();
+        return personaEntities.stream().map(personaMapper::mapPersonaResponse).toList();
     }
 
 }

@@ -1,8 +1,6 @@
 <template>
   <div class="p-3 full-height vertical-scrollbar shadow">
 
-    <!--<Toolbar></Toolbar>-->
-
     <div class="list-group list-group-flush border-bottom">
 
       <div v-for="entry in allSessionEntries" :key="entry.id">
@@ -44,9 +42,6 @@ export default {
       this.store.selectedSessionId = sessionId;
       await this.store.loadChatSession(sessionId);
     },
-  },
-  mounted() {
-    this.store.loadIndex();
   },
   changed() {
     console.log('History-Component changed');
