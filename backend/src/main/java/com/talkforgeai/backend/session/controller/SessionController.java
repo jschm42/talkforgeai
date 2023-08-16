@@ -47,6 +47,11 @@ public class SessionController {
         return sessionService.getSession(sessionId);
     }
 
+    @DeleteMapping("/{sessionId}")
+    void deleteSession(@PathVariable UUID sessionId) {
+        sessionService.deleteSession(sessionId);
+    }
+
     @GetMapping("/{sessionId}/{filename}")
     public ResponseEntity<byte[]> getImage(@PathVariable String sessionId, @PathVariable String filename) {
         try {

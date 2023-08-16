@@ -92,7 +92,7 @@ class ChatStreamService {
 
   async postProcessLastMessage(sessionId: string): Promise<ChatMessage> {
     try {
-      const result = await axios.get(`/api/v1/chat/session/${sessionId}/postprocess/last`);
+      const result = await axios.get(`/api/v1/session/${sessionId}/postprocess/last`);
       return result.data;
     } catch (error) {
       throw new Error('Error reading session entry:  ' + error);

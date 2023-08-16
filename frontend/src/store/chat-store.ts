@@ -41,10 +41,16 @@ export const useChatStore = defineStore('chat', {
     },
   },
   actions: {
-    async newSession() {
-      this.sessionId = '';
-      this.messages = [];
-      this.chat.configHeaderEnabled = true;
+    newSession() {
+      this.$patch({
+        sessionId: '',
+        messages: [],
+        chat: {
+          configHeaderEnabled: true,
+        },
+        currentStatusMessage: '',
+        selectedSessionId: '',
+      });
     },
     disableConfigHeader() {
       console.log('disableConfigHeader');
@@ -102,6 +108,26 @@ export const useChatStore = defineStore('chat', {
         selectedPersona: chatSession.persona,
         chat: {configHeaderEnabled: false},
       });
+
+    },
+    async updateSessionTitle(sessionId: string, newTitle: string) {
+      await chatService.updateSessionTitle(sessionId, newTitle);
+    },
+    async deleteChatSession(sessionId: string) {
+      await chatService.deleteSession(this.sessionId);
+      this.selectedSessionId = '';
+
+      const foundSession = this.sessions.find((e) => e.id === sessionId);
+      if (foundSession) {
+        this.sessions.splice(this.sessions.indexOf(foundSession), 1);
+      }
+
+      if (this.sessions.length > 0) {
+        this.selectedSessionId = this.sessions[0].id;
+        await this.loadChatSession(this.selectedSessionId);
+      } else {
+        this.resetChat();
+      }
 
     },
     async readPersona() {

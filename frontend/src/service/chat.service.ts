@@ -30,6 +30,24 @@ class ChatService {
     }
   }
 
+  async deleteSession(sessionId: string) {
+    console.log(`Deleting session ${sessionId}.`);
+
+    try {
+      const result = await axios.delete(
+        `/api/v1/session/${sessionId}`,
+        {
+          timeout: 50000,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      return result.data;
+    } catch (error) {
+      throw new Error('Error reading session entry:  ' + error);
+    }
+  }
+
   async updateSessionTitle(sessionId: string, newTitle: string) {
     console.log(`Updating title of session ${sessionId} to ${newTitle}.`);
 
@@ -47,10 +65,6 @@ class ChatService {
     } catch (error) {
       throw new Error('Error reading session entry:  ' + error);
     }
-  }
-
-  async deleteSession(sessionId: string, newTitle: string) {
-    console.log(`Deleting session ${sessionId}.`);
   }
 
   async getLastResult(sessionId: string) {

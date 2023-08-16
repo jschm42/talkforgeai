@@ -162,4 +162,9 @@ public class SessionService {
         session.setTitle(request.newTitle());
         sessionRepository.save(session);
     }
+
+    @Transactional
+    public void deleteSession(UUID sessionId) {
+        sessionRepository.deleteById(sessionId);
+    }
 }

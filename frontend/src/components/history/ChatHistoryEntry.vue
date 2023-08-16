@@ -11,7 +11,7 @@
         <p class="small overflow-hidden">{{ formatTimestamp(entry.createdAt) }}</p>
       </div>
       <div class="col-2 d-inline-flex flex-row-reverse my-2">
-        <div v-if="isEditMode">
+        <div v-if="isEditMode || isDeleteMode">
           <i class="bi bi-check" role="button" @click="onClickConfirm"></i>
           <i class="bi bi-x" role="button" @click="onClickCancel"></i>
         </div>
@@ -41,6 +41,7 @@ export default {
   data() {
     return {
       isEditMode: false,
+      isDeleteMode: false,
       title: '',
       oldTitle: '',
     };
@@ -59,7 +60,7 @@ export default {
   },
   methods: {
     getEntryClass() {
-      if (this.isSelected) {
+      if (this.entry.id === this.store.selectedSessionId) {
         return 'bg-primary';
       }
       return '';
@@ -71,19 +72,26 @@ export default {
     },
     onClickDelete() {
       console.log('DELETE');
+      this.isDeleteMode = true;
     },
     onClickEdit() {
       console.log('EDIT');
       this.isEditMode = true;
     },
-    onClickConfirm() {
-      this.oldTitle = this.title;
-      this.isEditMode = false;
-      chatService.updateSessionTitle(this.store.sessionId, this.title);
+    async onClickConfirm() {
+      if (this.isEditMode) {
+        this.oldTitle = this.title;
+        this.isEditMode = false;
+        await this.store.updateSessionTitle(this.store.sessionId, this.title);
+      } else if (this.isDeleteMode) {
+        this.isDeleteMode = false;
+        await this.store.deleteChatSession(this.store.sessionId);
+      }
     },
     onClickCancel() {
       this.title = this.oldTitle;
       this.isEditMode = false;
+      this.isDeleteMode = false;
     },
   },
   mounted() {

@@ -40,9 +40,11 @@ export default {
   },
   methods: {
     async onEntrySelected(sessionId) {
-      console.log('Loading chat session', sessionId);
-      this.store.selectedSessionId = sessionId;
-      await this.store.loadChatSession(sessionId);
+      if (this.store.selectedSessionId !== sessionId) {
+        console.log('Loading chat session', sessionId);
+        this.store.selectedSessionId = sessionId;
+        await this.store.loadChatSession(sessionId);
+      }
     },
     onNewSession() {
       this.store.newSession();
