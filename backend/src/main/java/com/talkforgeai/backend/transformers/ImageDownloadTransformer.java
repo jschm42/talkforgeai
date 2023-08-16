@@ -90,6 +90,6 @@ public class ImageDownloadTransformer implements Transformer {
             ex.printStackTrace();
         }
 
-        return "/api/v1/chat/session/" + sessionId + "/" + fileName;
+        return "/api/v1/session/" + sessionId + "/" + fileName;
     }
 }
