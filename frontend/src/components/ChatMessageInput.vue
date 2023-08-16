@@ -1,9 +1,5 @@
 <template>
   <div class="input-group">
-    <div id="new-session-button" class="input-group-text">
-      <i class="bi bi-x-circle" role="button" style="font-size: 2em" @click="clearChat"></i>
-      <i class="bi bi-6-square" role="button" style="font-size: 2em" @click="testStream"></i>
-    </div>
     <textarea ref="promptInputArea" v-model="prompt" :disabled="isInputLocked" class="form-control shadow"
               placeholder="Enter prompt..."
               rows="5"
@@ -48,12 +44,6 @@ export default {
         this.$refs.promptInputArea.focus();
       });
        */
-    },
-    clearChat() {
-      this.store.newSession();
-    },
-    async testStream() {
-      await this.store.submitPrompt('Explain how to sort an array in java.');
     },
   },
 };

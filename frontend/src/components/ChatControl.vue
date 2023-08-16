@@ -27,7 +27,7 @@
     <div id="pills-tabContent" class="tab-content">
       <div id="pills-message" aria-labelledby="pills-message-tab" class="tab-pane fade show active"
            role="tabpanel" tabindex="0">
-        <div class="form-check">
+        <div class="col-2 form-check">
           <input id="flexCheckDefault" class="form-check-input" type="checkbox" @change="toggleAutoSpeak">
           <label class="form-check-label" for="flexCheckDefault">
             Auto speak

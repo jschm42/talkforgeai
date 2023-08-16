@@ -1,7 +1,7 @@
 <template>
   <div class="p-3 full-height vertical-scrollbar shadow">
 
-    <button @click="onNewSession">New Chat</button>
+    <button class="col-12 my-2" @click="onNewSession">New Chat</button>
 
     <div class="list-group list-group-flush border-bottom">
 

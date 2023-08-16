@@ -1,12 +1,19 @@
 <template>
 
   <a :class="getEntryClass(entry.id)"
-     class="list-group-item list-group-item-action py-3 lh-sm"
+     class="list-group-item list-group-item-action py-1 px-1 lh-sm"
      @click="$emit('entrySelected', entry.id)">
-    <div class="d-flex w-100 align-items-center justify-content-between">
-      <strong :title="getTitle" class="mb-1 text-truncate">{{ entry.title }}</strong>
+
+    <div class="row p-0 m-0">
+      <div class="col-10 text-start">
+        <h5 class="overflow-hidden">{{ entry.title }}</h5>
+        <p class="small overflow-hidden">{{ formatTimestamp(entry.createdAt) }}</p>
+      </div>
+      <div class="col-2 d-inline-flex flex-row-reverse my-2">
+        <i class="bi bi-trash" role="button"></i>
+        <i class="bi bi-pencil mx-3" role="button"></i>
+      </div>
     </div>
-    <div class="col-10 mb-1 small">{{ formatTimestamp(entry.createdAt) }}</div>
   </a>
 
 </template>
@@ -49,5 +56,8 @@ export default {
 </script>
 
 <style scoped>
+i {
+  float: right;
+}
 
 </style>
