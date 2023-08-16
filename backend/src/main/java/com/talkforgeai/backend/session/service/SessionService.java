@@ -8,10 +8,12 @@ import com.talkforgeai.backend.persona.domain.GlobalSystem;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
 import com.talkforgeai.backend.session.domain.ChatSessionEntity;
 import com.talkforgeai.backend.session.dto.SessionResponse;
+import com.talkforgeai.backend.session.dto.UpdateSessionTitleRequest;
 import com.talkforgeai.backend.session.exception.SessionException;
 import com.talkforgeai.backend.session.repository.ChatSessionRepository;
 import com.talkforgeai.backend.util.StringUtils;
 import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -63,6 +65,7 @@ public class SessionService {
                 .toList();
     }
 
+    @Transactional
     public ChatSessionEntity update(UUID sessionId, List<OpenAIChatMessage> messages, List<OpenAIChatMessage> processedMessages) {
         ChatSessionEntity session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
@@ -70,6 +73,7 @@ public class SessionService {
         return save(messages, processedMessages, session);
     }
 
+    @Transactional
     public void update(UUID sessionId, String title, String description) {
         ChatSessionEntity session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
@@ -79,6 +83,7 @@ public class SessionService {
         sessionRepository.save(session);
     }
 
+    @Transactional
     public ChatSessionEntity create(PersonaEntity persona, List<OpenAIChatMessage> messages, List<OpenAIChatMessage> processedMessages) {
         ChatSessionEntity session = new ChatSessionEntity();
         session.setTitle("<empty>");
@@ -134,6 +139,7 @@ public class SessionService {
     }
 
 
+    @Transactional
     public ChatMessageEntity saveMessage(UUID sessionId, OpenAIChatMessage message, ChatMessageType type) {
         ChatSessionEntity session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
@@ -147,5 +153,13 @@ public class SessionService {
 
     public OpenAIChatMessage mapToOpenAIMessage(ChatMessageEntity chatMessageEntity) {
         return sessionMapper.mapToDto(chatMessageEntity);
+    }
+
+    public void updateSessionTitle(UUID sessionId, UpdateSessionTitleRequest request) {
+        ChatSessionEntity session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
+
+        session.setTitle(request.newTitle());
+        sessionRepository.save(session);
     }
 }

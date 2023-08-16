@@ -4,7 +4,7 @@ import Session from '@/store/to/session';
 class ChatService {
   async readSessionEntries(personaId: string): Promise<Array<Session>> {
     try {
-      const result = await axios.get(`/api/v1/chat/persona/${personaId}/sessions`);
+      const result = await axios.get(`/api/v1/session/${personaId}/sessions`);
       return result.data;
     } catch (error) {
       throw new Error('Error reading index entries: ' + error);
@@ -13,7 +13,7 @@ class ChatService {
 
   async readSessionEntry(sessionId: string): Promise<Session> {
     try {
-      const result = await axios.get(`/api/v1/chat/session/${sessionId}`);
+      const result = await axios.get(`/api/v1/session/${sessionId}`);
       return result.data;
     } catch (error) {
       throw new Error('Error reading session entry:  ' + error);
@@ -23,11 +23,34 @@ class ChatService {
   async createNewSession(personaId: string) {
     console.log('Creating new session with personaId:', personaId);
     try {
-      const result = await axios.post('/api/v1/chat/create', {personaId});
+      const result = await axios.post('/api/v1/session/create', {personaId});
       return result.data;
     } catch (error) {
       throw new Error('Error creating chat session: ' + error);
     }
+  }
+
+  async updateSessionTitle(sessionId: string, newTitle: string) {
+    console.log(`Updating title of session ${sessionId} to ${newTitle}.`);
+
+    try {
+      const result = await axios.post(
+        `/api/v1/session/${sessionId}/title`,
+        {newTitle},
+        {
+          timeout: 50000,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      return result.data;
+    } catch (error) {
+      throw new Error('Error reading session entry:  ' + error);
+    }
+  }
+
+  async deleteSession(sessionId: string, newTitle: string) {
+    console.log(`Deleting session ${sessionId}.`);
   }
 
   async getLastResult(sessionId: string) {
