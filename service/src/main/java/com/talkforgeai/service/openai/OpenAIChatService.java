@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
 import com.talkforgeai.service.openai.dto.OpenAIChatRequest;
 import com.talkforgeai.service.openai.dto.OpenAIChatResponse;
+import com.talkforgeai.service.openai.dto.OpenAIChatStreamResponse;
 import com.talkforgeai.service.properties.OpenAIProperties;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
@@ -95,7 +96,7 @@ public class OpenAIChatService {
                             try (BufferedReader bufferedReader = new BufferedReader(responseBody.charStream())) {
                                 String line;
                                 while ((line = bufferedReader.readLine()) != null) {
-                                    Optional<OpenAIChatResponse.ResponseChoice> responseChoice = parseLine(line);
+                                    Optional<OpenAIChatStreamResponse.StreamResponseChoice> responseChoice = parseLine(line);
                                     if (responseChoice.isPresent()) {
                                         OpenAIChatMessage delta = responseChoice.get().delta();
 
@@ -139,7 +140,7 @@ public class OpenAIChatService {
         }
     }
 
-    private String choiceToJSON(OpenAIChatResponse.ResponseChoice choice) {
+    private String choiceToJSON(OpenAIChatStreamResponse.StreamResponseChoice choice) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.writeValueAsString(choice);
@@ -148,7 +149,7 @@ public class OpenAIChatService {
         }
     }
 
-    private Optional<OpenAIChatResponse.ResponseChoice> parseLine(String line) {
+    private Optional<OpenAIChatStreamResponse.StreamResponseChoice> parseLine(String line) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         int jsonStartIndex = line.indexOf('{');
@@ -159,12 +160,12 @@ public class OpenAIChatService {
         String jsonContent = line.substring(jsonStartIndex);
 
         try {
-            OpenAIChatResponse openAIChatResponse = objectMapper.readValue(jsonContent, OpenAIChatResponse.class);
-            OpenAIChatResponse.ResponseChoice responseChoice = openAIChatResponse.choices().get(0);
-            if (responseChoice.finishReason() == OpenAIChatResponse.ResponseChoice.FinishReason.STOP) {
+            OpenAIChatStreamResponse openAIChatStreamResponse = objectMapper.readValue(jsonContent, OpenAIChatStreamResponse.class);
+            OpenAIChatStreamResponse.StreamResponseChoice streamResponseChoice = openAIChatStreamResponse.choices().get(0);
+            if (streamResponseChoice.finishReason() == OpenAIChatStreamResponse.StreamResponseChoice.FinishReason.STOP) {
                 return Optional.empty();
             }
-            return Optional.of(responseChoice);
+            return Optional.of(streamResponseChoice);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error while parsing chunk line from stream.", e);
         }

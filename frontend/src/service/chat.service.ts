@@ -30,6 +30,20 @@ class ChatService {
     }
   }
 
+  async generateSessionTitle(sessionId: string, userMessageContent: string, assistantMessageContent: string) {
+    console.log('Generating title for session:', sessionId);
+    try {
+      const result = await axios.post(`/api/v1/session/${sessionId}/title/generate`,
+        {
+          userMessageContent,
+          assistantMessageContent,
+        });
+      return result.data;
+    } catch (error) {
+      throw new Error('Error creating chat session: ' + error);
+    }
+  }
+
   async deleteSession(sessionId: string) {
     console.log(`Deleting session ${sessionId}.`);
 

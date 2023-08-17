@@ -7,13 +7,19 @@ import com.talkforgeai.backend.chat.service.SystemService;
 import com.talkforgeai.backend.persona.domain.GlobalSystem;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
 import com.talkforgeai.backend.session.domain.ChatSessionEntity;
+import com.talkforgeai.backend.session.dto.GenerateSessionTitleRequest;
+import com.talkforgeai.backend.session.dto.GenerateSessionTitleResponse;
 import com.talkforgeai.backend.session.dto.SessionResponse;
 import com.talkforgeai.backend.session.dto.UpdateSessionTitleRequest;
 import com.talkforgeai.backend.session.exception.SessionException;
 import com.talkforgeai.backend.session.repository.ChatSessionRepository;
 import com.talkforgeai.backend.util.StringUtils;
+import com.talkforgeai.service.openai.OpenAIChatService;
 import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
+import com.talkforgeai.service.openai.dto.OpenAIChatRequest;
+import com.talkforgeai.service.openai.dto.OpenAIChatResponse;
 import jakarta.transaction.Transactional;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -30,11 +36,14 @@ public class SessionService {
 
     private final SystemService systemService;
 
-    public SessionService(ChatSessionRepository sessionRepository, SessionMapper sessionMapper, ChatMessageRepository messageRepository, SystemService systemService) {
+    private final OpenAIChatService openAIChatService;
+
+    public SessionService(ChatSessionRepository sessionRepository, SessionMapper sessionMapper, ChatMessageRepository messageRepository, SystemService systemService, OpenAIChatService openAIChatService) {
         this.sessionRepository = sessionRepository;
         this.sessionMapper = sessionMapper;
         this.messageRepository = messageRepository;
         this.systemService = systemService;
+        this.openAIChatService = openAIChatService;
     }
 
     public Optional<ChatSessionEntity> getById(UUID sessionId) {
@@ -167,4 +176,35 @@ public class SessionService {
     public void deleteSession(UUID sessionId) {
         sessionRepository.deleteById(sessionId);
     }
+
+    @Transactional
+    public GenerateSessionTitleResponse generateSessionTitle(UUID sessionId, GenerateSessionTitleRequest request) {
+        ChatSessionEntity session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
+
+        OpenAIChatRequest titleRequest = getTitleRequest(request);
+
+        OpenAIChatResponse response = openAIChatService.submit(titleRequest);
+        String generatedTitle = response.choices().get(0).message().content();
+
+        session.setTitle(generatedTitle);
+        sessionRepository.save(session);
+
+        return new GenerateSessionTitleResponse(generatedTitle);
+    }
+
+    @NotNull
+    private OpenAIChatRequest getTitleRequest(GenerateSessionTitleRequest request) {
+        OpenAIChatRequest titleRequest = new OpenAIChatRequest();
+        titleRequest.setModel("gpt-3.5-turbo");
+
+        String content = """
+                Generate a title in less than 6 words for the following message:\\n User=%s\\n Assistant=%s\\n
+                """.formatted(request.userMessageContent(), request.assistantMessageContent());
+
+        OpenAIChatMessage titleMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, content);
+        titleRequest.setMessages(List.of(titleMessage));
+        return titleRequest;
+    }
+
 }

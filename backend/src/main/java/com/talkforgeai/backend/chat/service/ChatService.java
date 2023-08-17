@@ -142,7 +142,7 @@ public class ChatService {
 
         OpenAIChatResponse.ResponseChoice choice = submitResult.response().choices().get(0);
         LOGGER.info("Finish reason: {}", choice.finishReason());
-        OpenAIChatMessage responseMessage = choice.delta();
+        OpenAIChatMessage responseMessage = choice.message();
 
         List<OpenAIChatMessage> messagesToSave = new ArrayList<>();
         messagesToSave.add(submitResult.newUserMessage());

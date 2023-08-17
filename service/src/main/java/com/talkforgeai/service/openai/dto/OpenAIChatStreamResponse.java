@@ -7,16 +7,16 @@ import java.util.Date;
 import java.util.List;
 
 
-public record OpenAIChatResponse(String id,
-                                 String object,
-                                 Date created,
-                                 String model,
-                                 List<ResponseChoice> choices,
-                                 ResponseUsage usage) {
+public record OpenAIChatStreamResponse(String id,
+                                       String object,
+                                       Date created,
+                                       String model,
+                                       List<StreamResponseChoice> choices,
+                                       ResponseUsage usage) {
 
-    public record ResponseChoice(Integer index,
-                                 OpenAIChatMessage message,
-                                 @JsonProperty("finish_reason") FinishReason finishReason) {
+    public record StreamResponseChoice(Integer index,
+                                       OpenAIChatMessage delta,
+                                       @JsonProperty("finish_reason") FinishReason finishReason) {
 
         public enum FinishReason {
             STOP("stop"),

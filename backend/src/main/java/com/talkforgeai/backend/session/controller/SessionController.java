@@ -1,9 +1,7 @@
 package com.talkforgeai.backend.session.controller;
 
 import com.talkforgeai.backend.chat.service.ChatService;
-import com.talkforgeai.backend.session.dto.NewChatSessionRequest;
-import com.talkforgeai.backend.session.dto.SessionResponse;
-import com.talkforgeai.backend.session.dto.UpdateSessionTitleRequest;
+import com.talkforgeai.backend.session.dto.*;
 import com.talkforgeai.backend.session.service.SessionService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
@@ -81,8 +79,13 @@ public class SessionController {
     }
 
     @PostMapping("/{sessionId}/title")
-    void updateSessionTitle(@PathVariable UUID sessionId, @RequestBody UpdateSessionTitleRequest request) {
+    public void updateSessionTitle(@PathVariable UUID sessionId, @RequestBody UpdateSessionTitleRequest request) {
         sessionService.updateSessionTitle(sessionId, request);
     }
 
+    @PostMapping("/{sessionId}/title/generate")
+    @ResponseBody
+    public GenerateSessionTitleResponse generateSessionTitle(@PathVariable UUID sessionId, @RequestBody GenerateSessionTitleRequest request) {
+        return sessionService.generateSessionTitle(sessionId, request);
+    }
 }

@@ -90,6 +90,7 @@ export const useChatStore = defineStore('chat', {
 
       await chatStreamService.streamSubmit(this.sessionId, prompt, chunkUpdateCallback);
 
+      await this.generateSessionTitle(this.sessionId);
     },
     async loadChatSession(sessionId: string) {
       const chatSession = await chatService.readSessionEntry(sessionId);
@@ -106,6 +107,22 @@ export const useChatStore = defineStore('chat', {
     },
     async updateSessionTitle(sessionId: string, newTitle: string) {
       await chatService.updateSessionTitle(sessionId, newTitle);
+    },
+    async generateSessionTitle(sessionId: string) {
+      const userMessage = this.messages.find(m => m.role === Role.USER);
+      const userMessageContent = userMessage ? userMessage.content : '';
+
+      const assistantMessage = this.messages.find(m => m.role === Role.ASSISTANT);
+      const assistantMessageContent = assistantMessage ? assistantMessage.content : '';
+
+      const response = await chatService.generateSessionTitle(sessionId, userMessageContent, assistantMessageContent);
+      console.log('Generated title response', response);
+      if (response) {
+        const currentSession = this.sessions.find(s => s.id === this.selectedSessionId);
+        if (currentSession) {
+          currentSession.title = response.generatedTitle;
+        }
+      }
     },
     async deleteChatSession(sessionId: string) {
       await chatService.deleteSession(this.sessionId);

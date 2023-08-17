@@ -27,7 +27,7 @@ public class ChatSessionEntity {
     @UuidGenerator
     private UUID id;
 
-    @Size(max = 32)
+    @Size(max = 256)
     @Column(name = "title", nullable = false)
     private String title;
 
