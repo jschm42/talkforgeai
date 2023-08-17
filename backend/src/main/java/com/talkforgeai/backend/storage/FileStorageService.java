@@ -18,9 +18,9 @@ import java.nio.file.StandardCopyOption;
 @Service
 public class FileStorageService {
     public static final String TALK_FORGE_DIR = ".talkforgeai";
+    public static final Logger LOGGER = LoggerFactory.getLogger(FileStorageService.class);
     private final String fileBasePath = "src/main/resources/static/persona";
     private final ResourceLoader resourceLoader;
-    Logger logger = LoggerFactory.getLogger(FileStorageService.class);
 
     public FileStorageService(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
@@ -32,19 +32,23 @@ public class FileStorageService {
                 .normalize();
     }
 
+    public Path getPersonaImportDirectory() {
+        return getDataDirectory().resolve("import/persona");
+    }
+
     public Path getPersonaDirectory() {
         return getDataDirectory().resolve("persona");
     }
-
 
     public void createDataDirectories() {
         try {
             Files.createDirectories(getDataDirectory());
             Files.createDirectories(getPersonaDirectory());
+            Files.createDirectories(getPersonaImportDirectory());
 
-            logger.info("Directories created successfully");
+            LOGGER.info("Directories created successfully");
         } catch (IOException e) {
-            logger.error("Failed to create directory: " + e.getMessage());
+            LOGGER.error("Failed to create directory: " + e.getMessage());
         }
     }
 
@@ -73,10 +77,23 @@ public class FileStorageService {
     }
 
     public void copyImagesToHomeDirectory() {
-        try {
-            // Get the resource for the static folder
-            Resource staticResource = resourceLoader.getResource("classpath:persona-import/");
+        Path personaImportDirectory = getPersonaImportDirectory();
 
+        // Copy images from the personaImportDirectory
+        try (var stream = Files.walk(personaImportDirectory)) {
+            stream.filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".png") || path.toString().endsWith(".jpg"))
+                    .forEach(imagePath -> {
+                        extracted(imagePath);
+                    });
+        } catch (IOException e) {
+            LOGGER.error("Failed to access persona import directory.", e);
+        }
+
+        // Get the resource for the static folder
+        Resource staticResource = resourceLoader.getResource("classpath:persona-import/");
+
+        try {
             // Get the absolute path of the static folder
             String staticPath = staticResource.getFile().getAbsolutePath();
 
@@ -85,19 +102,22 @@ public class FileStorageService {
                 stream.filter(Files::isRegularFile)
                         .filter(path -> path.toString().endsWith(".png") || path.toString().endsWith(".jpg"))
                         .forEach(imagePath -> {
-                            try {
-                                Path targetPath = getPersonaDirectory().resolve(imagePath.getFileName());
-                                //Files.createDirectories(targetPath.getParent());
-                                Files.copy(imagePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                            } catch (IOException e) {
-                                System.out.println("Failed to copy image: " + e.getMessage());
-                            }
+                            extracted(imagePath);
                         });
             }
-
-            System.out.println("Images copied successfully!");
         } catch (IOException e) {
-            System.out.println("Failed to copy images: " + e.getMessage());
+            LOGGER.error("Failed to access persona resources.", e);
+        }
+
+        LOGGER.info("Images copied successfully.");
+    }
+
+    private void extracted(Path imagePath) {
+        try {
+            Path targetPath = getPersonaDirectory().resolve(imagePath.getFileName());
+            Files.copy(imagePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            LOGGER.error("Failed to copy image {}", imagePath, e);
         }
     }
 }

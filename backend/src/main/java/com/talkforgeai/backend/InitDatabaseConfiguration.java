@@ -24,7 +24,7 @@ public class InitDatabaseConfiguration {
                 if (personaRepository.findByName(persona.getName()).isPresent()) {
                     logger.info("Persona {} already exists. Skipping.", persona.getName());
                 } else {
-                    logger.info("Importing Persona: {}", persona);
+                    logger.info("Importing Persona {}", persona.getName());
                     personaRepository.save(persona);
                 }
             });
