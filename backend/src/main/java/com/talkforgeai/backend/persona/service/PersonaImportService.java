@@ -140,9 +140,14 @@ public class PersonaImportService {
 
     private void copyImage(Path imagePath) {
         try {
-            LOGGER.info("Copying image {}", imagePath);
             Path targetPath = fileStorageService.getPersonaDirectory().resolve(imagePath.getFileName());
-            Files.copy(imagePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+            if (!Files.exists(targetPath)) {
+                LOGGER.info("Copying image {}", imagePath);
+                Files.copy(imagePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            } else {
+                LOGGER.info("Skipping copying image {}. File already exists in the target directory.", imagePath);
+            }
         } catch (IOException e) {
             LOGGER.error("Failed to copy image {}", imagePath, e);
         }
