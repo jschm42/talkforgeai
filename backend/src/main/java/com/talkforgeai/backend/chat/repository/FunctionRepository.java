@@ -3,7 +3,7 @@ package com.talkforgeai.backend.chat.repository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkforgeai.backend.persona.domain.RequestFunction;
-import com.talkforgeai.backend.persona.service.PersonaJsonReaderService;
+import com.talkforgeai.backend.persona.service.PersonaImportService;
 import com.talkforgeai.service.openai.dto.OpenAIFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ import java.util.List;
 public class FunctionRepository {
 
     private final ResourcePatternResolver resourcePatternResolver;
-    Logger logger = LoggerFactory.getLogger(PersonaJsonReaderService.class);
+    Logger logger = LoggerFactory.getLogger(PersonaImportService.class);
 
     public FunctionRepository() {
         this.resourcePatternResolver = new PathMatchingResourcePatternResolver();

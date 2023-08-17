@@ -10,5 +10,7 @@ import java.util.UUID;
 @Repository
 public interface PersonaRepository extends JpaRepository<PersonaEntity, UUID> {
 
+    boolean existsByName(String name);
+
     Optional<PersonaEntity> findByName(String name);
 }
