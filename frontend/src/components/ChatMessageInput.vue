@@ -33,17 +33,15 @@ export default {
     async submit() {
       this.isInputLocked = true;
 
-      await this.store.streamPrompt(this.prompt);
+      await this.store.streamPrompt(this.prompt, () => {
+        this.$emit('chunkUpdateReceived');
+      });
       await this.store.loadIndex(this.store.selectedPersona.personaId);
 
+      console.log('Sending submitResultReceived');
       this.$emit('submitResultReceived');
       this.prompt = '';
       this.isInputLocked = false;
-      /*
-      await this.$nextTick(() => {
-        this.$refs.promptInputArea.focus();
-      });
-       */
     },
   },
 };

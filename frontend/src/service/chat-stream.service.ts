@@ -12,8 +12,7 @@ const highlightingService = new HighlightingService();
 
 class ChatStreamService {
 
-  async streamSubmit(
-    sessionId: string, content: string, messageCallback: (content: string[], isDone: boolean) => void) {
+  async streamSubmit(sessionId: string, content: string, chunkUpdateCallback: () => void) {
 
     const store = useChatStore();
 
@@ -55,6 +54,7 @@ class ChatStreamService {
         if (chatChoice?.delta) {
           if (chatChoice.delta.content) {
             lastMessage.content += chatChoice?.delta.content;
+            chunkUpdateCallback();
           } else if (chatChoice.delta.function_call && chatChoice.delta.function_call.arguments) {
             console.log('FUNCTION CALL', chatChoice.delta.function_call);
             isFunctionCall = true;
@@ -71,8 +71,6 @@ class ChatStreamService {
       }
 
       done = row.done;
-
-      //messageCallback(content, done);
     }
 
     console.log('Stream complete');

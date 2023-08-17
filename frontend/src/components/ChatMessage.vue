@@ -52,6 +52,9 @@ export default {
     },
   },
   methods: {
+    async playAudio() {
+      await this.$refs.chatMessageAudioPlayerRef.playAudio();
+    },
     getContent() {
       if (this.message.function_call) {
         const func = this.message.function_call;
@@ -88,7 +91,7 @@ export default {
         </div>
       </div>
       <div class="col-md-1 text-end">
-        <chat-message-audio-player :message="this.message"></chat-message-audio-player>
+        <chat-message-audio-player ref="chatMessageAudioPlayerRef" :message="this.message"></chat-message-audio-player>
       </div>
     </div>
     <footer>

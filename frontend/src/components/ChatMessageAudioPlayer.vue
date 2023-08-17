@@ -1,5 +1,5 @@
 <script>
-import {defineComponent} from 'vue';
+import {defineComponent, toRaw} from 'vue';
 import TtsService from '@/service/tts.service';
 import {useChatStore} from '@/store/chat-store';
 import ChatMessage from '@/store/to/chat-message';
@@ -23,13 +23,6 @@ export default defineComponent({
   props: {
     message: ChatMessage,
   },
-  mounted() {
-    if (this.store.chat.autoSpeak) {
-      this.playAudio().then(() => {
-        console.log('Audio Played.');
-      });
-    }
-  },
   methods: {
     pauseAudio() {
       console.log('Audio paused');
@@ -40,12 +33,13 @@ export default defineComponent({
       this.audioState = AudioState.Stopped;
     },
     async playAudio() {
-      console.log('ROLE', this.message);
+      console.log('ROLE', toRaw(this.message));
       if (this.message.role !== Role.ASSISTANT) {
         console.log('Not a speakable message.');
         return;
       }
 
+      console.log('HTML TEXT', this.message.content);
       const plainText = htmlToTextService.removeHtml(this.message.content);
       console.log('PLAIN TEXT', plainText);
 
@@ -81,20 +75,27 @@ const AudioState = {
 </script>
 
 <template>
-  <i v-if="audioState === 'stopped'" class="bi bi-play-circle-fill message-icon" role="button"
+  <i v-if="audioState === 'stopped'" class="bi bi-play-circle message-icon play-icon" role="button"
      @click="playAudio"></i>
 
-  <i v-if="audioState === 'paused'" class="bi bi-play-circle-fill message-icon" role="button"
+  <i v-if="audioState === 'paused'" class="bi bi-play-circle message-icon play-icon" role="button"
      @click="playAudio"></i>
 
-  <i v-if="audioState === 'playing'" class="bi bi-pause-circle-fill message-icon" role="button"
+  <i v-if="audioState === 'playing'" class="bi bi-pause-circle message-icon play-icon" role="button"
      @click="pauseAudio"></i>
 
-  <div v-if="audioState === 'loading'" class="spinner-border spinner-border-sm" role="status">
+  <div v-if="audioState === 'loading'" class="spinner-border spinner-border-sm loading-icon" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
 </template>
 
 <style scoped>
+.play-icon {
+  font-size: 2em;
+}
 
+.loading-icon {
+  width: 2em;
+  height: 2em;
+}
 </style>

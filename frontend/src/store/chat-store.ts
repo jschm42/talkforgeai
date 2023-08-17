@@ -75,7 +75,7 @@ export const useChatStore = defineStore('chat', {
     async getLastResult() {
       return await chatService.getLastResult(this.sessionId);
     },
-    async streamPrompt(prompt: string) {
+    async streamPrompt(prompt: string, chunkUpdateCallback: () => void) {
       this.chat.configHeaderEnabled = false;
 
       if (!this.sessionId || this.sessionId === '') {
@@ -88,13 +88,7 @@ export const useChatStore = defineStore('chat', {
 
       console.log('Submitting prompt', this.sessionId, prompt);
 
-      const lastMessage = this.messages[this.messages.length - 1];
-
-      await chatStreamService.streamSubmit(this.sessionId, prompt, (content, isDone) => {
-        content.forEach(c => {
-          lastMessage.content += c;
-        });
-      });
+      await chatStreamService.streamSubmit(this.sessionId, prompt, chunkUpdateCallback);
 
     },
     async loadChatSession(sessionId: string) {

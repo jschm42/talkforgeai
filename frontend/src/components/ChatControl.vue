@@ -27,13 +27,17 @@
     <div id="pills-tabContent" class="tab-content">
       <div id="pills-message" aria-labelledby="pills-message-tab" class="tab-pane fade show active"
            role="tabpanel" tabindex="0">
-        <div class="col-2 form-check">
-          <input id="flexCheckDefault" class="form-check-input" type="checkbox" @change="toggleAutoSpeak">
-          <label class="form-check-label" for="flexCheckDefault">
-            Auto speak
-          </label>
+        <div class="col-12">
+          <div class="form-check form-switch d-flex">
+            <input id="flexCheckDefault" class="form-check-input" role="switch" type="checkbox"
+                   @change="toggleAutoSpeak">
+            <label class="form-check-label mx-2" for="flexCheckDefault">
+              Auto speak
+            </label>
+          </div>
         </div>
-        <ChatMessageInput @submit-submitResult-received="submitResultReceived"></ChatMessageInput>
+        <ChatMessageInput @submit-result-received="submitResultReceived"
+                          @chunk-update-received="chunkUpdateReceived"></ChatMessageInput>
       </div>
 
       <div id="pills-system" aria-labelledby="pills-system-tab" class="tab-pane fade" role="tabpanel"
@@ -68,6 +72,9 @@ export default {
     submitResultReceived() {
       this.$emit('submitResultReceived');
     },
+    chunkUpdateReceived() {
+      this.$emit('chunkUpdateReceived');
+    },
   },
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
@@ -77,5 +84,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>

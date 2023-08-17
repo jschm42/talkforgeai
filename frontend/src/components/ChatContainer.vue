@@ -8,7 +8,8 @@
   </div>
   <!-- Input Section -->
 
-  <ChatControl @submit-submitResult-received="submitResultReceived"></ChatControl>
+  <ChatControl @submit-result-received="submitResultReceived"
+               @chunk-update-received="chunkUpdateReceived"></ChatControl>
 
 </template>
 
@@ -33,16 +34,18 @@ export default {
   },
   components: {ChatHeader, ChatControl, ChatMessage},
   methods: {
-    submitResultReceived() {
+    async submitResultReceived() {
       console.log('Submit Result Received');
-      // Scroll to bottom
-      this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
 
-      if (this.store.autoSpeak) {
+      if (this.store.chat.autoSpeak) {
         console.log('Auto speaking last Chat-Message.');
         const lastChatMessage = this.$refs.chatMessageRef.slice(-1)[0];
-        lastChatMessage.playAudio();
+        await lastChatMessage.playAudio();
       }
+    },
+    chunkUpdateReceived() {
+      // Scroll to bottom
+      this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
     },
   },
   updated() {
@@ -50,14 +53,6 @@ export default {
   },
   mounted() {
     const wsService = new WebSocketService();
-
-    // wsService.responseHandler = (data) => {
-    //   this.store.messages = [...this.store.messages, data.message];
-    //
-    //   this.$nextTick(() => {
-    //     hljs.highlightAll();
-    //   });
-    // };
 
     wsService.statusUpdateHandler = (data) => {
       this.store.updateStatus(data.sessionId, data.status);
