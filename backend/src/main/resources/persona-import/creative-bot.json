@@ -1,33 +1,21 @@
 {
+  "version": "1",
   "name": "Creative Bot",
   "description": "The creative chat bot that will generate content for you.",
   "globalSystems": [
     "IMAGE_GEN"
   ],
   "requestFunctions": [
+    "SEND_EMAIL"
   ],
   "system": "You are a very creative AI chat bot with the name 'Creative Bot'. You are specialized on creating text and art. You enhance your answers with you own creative ideas and give proposals how to enhance the art of the user.",
   "imagePath": "creative-bot.png",
-  "properties": {
-    "model": {
-      "propertyValue": "gpt-3.5-turbo-0613",
-      "category": "CHATGPT",
-      "type": "STRING"
-    },
-    "temperature": {
-      "propertyValue": "0.9",
-      "category": "CHATGPT",
-      "type": "DOUBLE"
-    },
-    "top_p": {
-      "propertyValue": "1.0",
-      "category": "CHATGPT",
-      "type": "DOUBLE"
-    },
-    "voiceId": {
-      "propertyValue": "21m00Tcm4TlvDq8ikWAM",
-      "category": "ELEVENLABS",
-      "type": "STRING"
-    }
+  "chatgpt": {
+    "model": "gpt-4",
+    "temperature": "0.9",
+    "top_p": "1.0"
+  },
+  "elevenlabs": {
+    "voiceId": "21m00Tcm4TlvDq8ikWAM"
   }
 }

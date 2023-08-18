@@ -199,8 +199,8 @@ public class SessionService {
         titleRequest.setModel("gpt-3.5-turbo");
 
         String content = """
-                Generate a title in less than 6 words for the following message:\\n User=%s\\n Assistant=%s\\n
-                """.formatted(request.userMessageContent(), request.assistantMessageContent());
+                Generate a title in less than 6 words for the following message: %s
+                """.formatted(request.userMessageContent());
 
         OpenAIChatMessage titleMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, content);
         titleRequest.setMessages(List.of(titleMessage));
