@@ -34,13 +34,16 @@ public class PersonaImportService {
 
     private final ResourceLoader resourceLoader;
 
+    private final ResourcePatternResolver resourceResolver;
+
     private final PersonaRepository personaRepository;
 
-    public PersonaImportService(FileStorageService fileStorageService, ResourceLoader resourceLoader, PersonaRepository personaRepository) {
+    public PersonaImportService(FileStorageService fileStorageService, ResourceLoader resourceLoader, PersonaRepository personaRepository, ResourcePatternResolver resourceResolver) {
         this.resourceLoader = resourceLoader;
         this.resourcePatternResolver = new PathMatchingResourcePatternResolver();
         this.fileStorageService = fileStorageService;
         this.personaRepository = personaRepository;
+        this.resourceResolver = resourceResolver;
     }
 
     @Transactional
@@ -107,19 +110,26 @@ public class PersonaImportService {
     }
 
     private void copyPersonaImagesFromResources() {
-        // Get the resource for the static folder
-        Resource staticResource = resourceLoader.getResource("classpath:persona-import/");
+        // The prefix "classpath*:" allows resources to be loaded from the classpath, matching the given pattern
+        String personaImgPattern = "classpath*:persona-import/*.{jpg,png}";
 
         try {
-            // Get the absolute path of the static folder
-            String staticPath = staticResource.getFile().getAbsolutePath();
+            // Get Resource array for the static folder
+            Resource[] imageResources = resourceResolver.getResources(personaImgPattern);
 
-            // Copy each image to the user's home directory
-            try (var stream = Files.walk(Path.of(staticPath))) {
-                stream.filter(Files::isRegularFile)
-                        .filter(path -> path.toString().endsWith(".png") || path.toString().endsWith(".jpg"))
-                        .forEach(this::copyImage);
+            // Iterate each image resource and copy to target destination
+            for (Resource imageResource : imageResources) {
+                if (imageResource.isReadable()) {
+                    try (InputStream resourceStream = imageResource.getInputStream()) {
+                        // You need to redefine your copyImage method to accept InputStream
+                        String imageName = imageResource.getFilename();
+                        copyImage(resourceStream, imageName);
+                    } catch (IOException e) {
+                        LOGGER.error("Failed to read image resource.", e);
+                    }
+                }
             }
+
         } catch (IOException e) {
             LOGGER.error("Failed to access persona resources.", e);
         }
@@ -150,6 +160,21 @@ public class PersonaImportService {
             }
         } catch (IOException e) {
             LOGGER.error("Failed to copy image {}", imagePath, e);
+        }
+    }
+
+    private void copyImage(InputStream imageStream, String imageName) {
+        try {
+            Path targetPath = fileStorageService.getPersonaDirectory().resolve(imageName);
+
+            if (!Files.exists(targetPath)) {
+                LOGGER.info("Copying image {}", imageName);
+                Files.copy(imageStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            } else {
+                LOGGER.info("Skipping copying image {}. File already exists in the target directory.", imageName);
+            }
+        } catch (IOException e) {
+            LOGGER.error("Failed to copy image {}", imageName, e);
         }
     }
 
