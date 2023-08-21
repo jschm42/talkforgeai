@@ -17,7 +17,7 @@ public class OkHttpClientConfiguration {
                 .callTimeout(TIMEOUT_MS, MILLISECONDS)
                 .readTimeout(TIMEOUT_MS, MILLISECONDS)
                 .writeTimeout(TIMEOUT_MS, MILLISECONDS)
-                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                 .build();
     }
 }

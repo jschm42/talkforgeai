@@ -1,6 +1,7 @@
 <template>
   <div id="prompt-configuration-panel" class="p-2">
     <!-- TODO Check if still needed -->
+    {{ infoString }}
   </div>
 
 </template>
@@ -23,6 +24,9 @@ export default {
     this.store.readPersona();
   },
   computed: {
+    infoString() {
+      return `${this.store.selectedPersona.name} - ${this.store.selectedSessionId}`;
+    },
     isDisabled() {
       return !this.store.chat.configHeaderEnabled;
     },

@@ -57,16 +57,21 @@ export const useChatStore = defineStore('chat', {
       this.chat.configHeaderEnabled = false;
     },
     resetChat() {
-      this.messages = [];
-      this.currentStatusMessage = '';
-      this.selectedSessionId = '';
-      this.sessions = [];
-      this.chat.autoSpeak = false;
-      this.chat.configHeaderEnabled = true;
+      this.$patch({
+        sessionId: '',
+        messages: [],
+        currentStatusMessage: '',
+        selectedSessionId: '',
+        sessions: [],
+        chat: {
+          autoSpeak: false,
+          configHeaderEnabled: true,
+        },
+      });
     },
     async selectPersona(persona: Persona) {
-      this.selectedPersona = persona;
       this.resetChat();
+      this.selectedPersona = persona;
       await this.loadIndex(persona.personaId);
     },
     async loadIndex(personaId: string) {
