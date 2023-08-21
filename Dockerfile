@@ -1,7 +1,7 @@
 # We will use OpenJDK 20
 FROM ghcr.io/graalvm/jdk-community:20.0.1
 
-# 8080 is the port number the application will use
+# 8090 is the port number the application will use
 EXPOSE 8090
 
 # Set up a volume for the data directory
