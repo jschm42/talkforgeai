@@ -18,7 +18,6 @@ import ChatControl from './ChatControl.vue';
 import ChatMessage from './ChatMessage.vue';
 import ChatHeader from './ChatHeader.vue';
 import {useChatStore} from '@/store/chat-store';
-import WebSocketService from '@/service/web-socket.service';
 
 export default {
   name: 'ChatContainer',
@@ -52,29 +51,29 @@ export default {
     console.log('Chat-Component updated');
   },
   mounted() {
-    const wsService = new WebSocketService();
+    // const wsService = new WebSocketService();
 
-    wsService.statusUpdateHandler = (data) => {
-      this.store.updateStatus(data.sessionId, data.status);
-    };
+    // wsService.statusUpdateHandler = (data) => {
+    //   this.store.updateStatus(data.sessionId, data.status);
+    // };
 
     // wsService.functionCallHandler = (data) => {
     //   this.store.messages = [...this.store.messages, data.message];
     //   this.store.sendFunctionConfirm(data.sessionId);
     // };
 
-    const wsClient = wsService.createClient();
-    wsClient.activate();
-
-    document.addEventListener('visibilitychange', function() {
-      if (document.hidden) {
-        console.log('Tab is not active');
-        wsClient.deactivate();
-      } else {
-        console.log('Tab is active');
-        wsClient.activate();
-      }
-    });
+    // const wsClient = wsService.createClient();
+    // wsClient.activate();
+    //
+    // document.addEventListener('visibilitychange', function() {
+    //   if (document.hidden) {
+    //     console.log('Tab is not active');
+    //     wsClient.deactivate();
+    //   } else {
+    //     console.log('Tab is active');
+    //     wsClient.activate();
+    //   }
+    // });
 
   },
 

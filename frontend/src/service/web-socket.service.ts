@@ -20,7 +20,7 @@ class WebSocketService {
 
   createClient() {
     const wsClient = new Client({
-      brokerURL: `ws://localhost:8090/ws`,
+      brokerURL: `ws://${window.location.host}/ws`,
       // connectHeaders: {
       //   login: "user",
       //   passcode: "password"

@@ -11,12 +11,6 @@ module.exports = defineConfig({
         ws: true,
         changeOrigin: true,
       },
-      '^/persona': {
-        target: 'http://localhost:8090',
-        //pathRewrite: {'^/images/': '/persona/'},
-        changeOrigin: true,
-        secure: false,
-      },
     },
   },
   // Change build paths to make them Maven compatible
