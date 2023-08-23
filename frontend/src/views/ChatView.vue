@@ -1,4 +1,5 @@
 <template>
+  <h1>TalkforgeAI</h1>
   <div class="row g-1 full-height">
     <!-- History Column -->
     <div class="col-2">
