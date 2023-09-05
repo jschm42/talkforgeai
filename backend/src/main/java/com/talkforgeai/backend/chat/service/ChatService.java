@@ -65,6 +65,7 @@ public class ChatService {
 
     public ChatCompletionResponse submitFuncConfirmation(UUID sessionId) {
         try {
+
             ChatSessionEntity session = sessionService.getById(sessionId)
                     .orElseThrow(() -> new SessionException("Session not found: " + sessionId));
 

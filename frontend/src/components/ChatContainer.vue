@@ -1,22 +1,21 @@
 <template>
-  <ChatHeader></ChatHeader>
-  <div ref="entries" class="flex-fill vertical-scrollbar no-horizontal-scrollbar">
+  <div class="d-flex flex-column full-height">
+    <div ref="entries" class="flex-grow-1 vertical-scrollbar no-horizontal-scrollbar">
+      <ChatMessage v-for="(message, index) in store.messages" ref="chatMessageRef" v-bind:key="index"
+                   :message="message" :messageIndex="index"></ChatMessage>
+    </div>
+    <!-- Input Section -->
 
-    <ChatMessage v-for="(message, index) in store.messages" ref="chatMessageRef"
-                 v-bind:key="index" :message="message" :messageIndex="index"></ChatMessage>
-
+    <div class="flex-shrink-0">
+      <ChatControl @submit-result-received="submitResultReceived"
+                   @chunk-update-received="chunkUpdateReceived"></ChatControl>
+    </div>
   </div>
-  <!-- Input Section -->
-
-  <ChatControl @submit-result-received="submitResultReceived"
-               @chunk-update-received="chunkUpdateReceived"></ChatControl>
-
 </template>
 
 <script>
 import ChatControl from './ChatControl.vue';
 import ChatMessage from './ChatMessage.vue';
-import ChatHeader from './ChatHeader.vue';
 import {useChatStore} from '@/store/chat-store';
 
 export default {
@@ -31,7 +30,7 @@ export default {
   data() {
     return {};
   },
-  components: {ChatHeader, ChatControl, ChatMessage},
+  components: {ChatControl, ChatMessage},
   methods: {
     async submitResultReceived() {
       console.log('Submit Result Received');
@@ -81,5 +80,16 @@ export default {
 </script>
 
 <style scoped>
+.vertical-scrollbar {
+  overflow-y: auto;
+}
+
+.no-horizontal-scrollbar {
+  overflow-x: hidden;
+}
+
+.full-height {
+  height: 100vh;
+}
 
 </style>

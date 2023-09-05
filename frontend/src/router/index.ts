@@ -1,10 +1,17 @@
 import {createRouter, createWebHashHistory, RouteRecordRaw} from 'vue-router';
+import PersonaChoiceView from '@/views/PersonaChoiceView.vue';
 import ChatView from '@/views/ChatView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
+    component: PersonaChoiceView,
+  },
+  {
+    path: '/chat/:personaId',
+    name: 'chat',
     component: ChatView,
+    props: true,
   },
   // {
   //   path: '/about',

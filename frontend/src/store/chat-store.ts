@@ -74,6 +74,16 @@ export const useChatStore = defineStore('chat', {
       this.selectedPersona = persona;
       await this.loadIndex(persona.personaId);
     },
+    async selectPersonaById(personaId: string) {
+      console.log('selectPersonaById', personaId);
+      const persona = this.personaList.find(p => p.personaId === personaId);
+      console.log('selectedPersona', persona);
+      if (persona) {
+        this.resetChat();
+        this.selectedPersona = persona;
+        await this.loadIndex(persona.personaId);
+      }
+    },
     async loadIndex(personaId: string) {
       this.sessions = await chatService.readSessionEntries(personaId);
     },

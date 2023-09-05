@@ -1,22 +1,28 @@
 <template>
-  <h1>TalkforgeAI</h1>
-  <div class="row g-1 full-height">
-    <!-- History Column -->
-    <div class="col-2">
-      <ChatPersonaList></ChatPersonaList>
+  <div class="p-2">
+    <div class="row">
+
     </div>
 
-    <!-- History Column -->
-    <div class="col-2">
-      <ChatHistory></ChatHistory>
-    </div>
-    <!-- End History Column -->
+    <div class="row g-1 full-height">
+      <!-- History Column -->
+      <div class="col-3">
+        <ChatHeader></ChatHeader>
+        <ChatHistory></ChatHistory>
+      </div>
+      <!-- End History Column -->
 
-    <!-- Chat Column -->
-    <div class="col-8 gx-3 full-height">
-      <div class="d-flex flex-column full-height">
+      <div class="col-9">
         <ChatContainer></ChatContainer>
       </div>
+
+      <!-- Chat Column -->
+      <!--      <div class="col-9 gx-3 full-height">-->
+      <!--        <div class="d-flex flex-column full-height">-->
+
+      <!--          <ChatContainer></ChatContainer>-->
+      <!--        </div>-->
+      <!--      </div>-->
     </div>
   </div>
 </template>
@@ -25,12 +31,22 @@
 import {defineComponent} from 'vue';
 import ChatContainer from '@/components/ChatContainer.vue';
 import ChatHistory from '@/components/history/ChatHistory.vue';
-import ChatPersonaList from '@/components/ChatPersonaList.vue';
+import ChatHeader from '@/components/ChatHeader.vue';
+import {useChatStore} from '@/store/chat-store';
 
 export default defineComponent({
-  components: {ChatPersonaList, ChatHistory, ChatContainer},
+  components: {ChatHeader, ChatHistory, ChatContainer},
+  props: ['personaId'],
+  setup() {
+    const store = useChatStore(); // Call useMyStore() inside the setup function
+    return {store};
+  },
   data() {
     return {};
+  },
+  mounted() {
+    this.store.selectPersonaById(this.personaId).then(() => {
+    });
   },
 });
 </script>
