@@ -1,5 +1,8 @@
 <template>
   <div class="container p-3">
+    <div class="row my-3">
+      <h1>Talkforge AI</h1>
+    </div>
     <div class="row">
       <div v-for="persona in personaList" :key="persona.personaId" class="col-md-3">
         <div class="card mb-3"
