@@ -12,75 +12,81 @@ const highlightingService = new HighlightingService();
 
 class ChatStreamService {
 
+  async sleep(delay: number) {
+    return new Promise((resolve) => setTimeout(resolve, delay));
+  }
+
   async streamSubmit(sessionId: string, content: string, chunkUpdateCallback: () => void) {
 
     const store = useChatStore();
-
-    const response = await fetch('http://localhost:8090/api/v1/chat/stream/submit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-
-      //make sure to serialize your JSON body
-      body: JSON.stringify({sessionId, content}),
-    });
-
-    if (!response.body) {
-      console.error('ReadableStream not yet supported in this browser.');
-      return;
-    }
-
-    const reader = response.body.getReader();
-
-    const decoder = new TextDecoder();
-    let done = false;
+    // let isFunctionCall = false;
 
     const newMessage = new ChatMessage(Role.ASSISTANT, '');
     store.messages.push(newMessage);
 
-    let isFunctionCall = false;
-    while (!done) {
-      const row = await reader.read();
+    return new Promise((resolve, reject): void => {
+      const evtSource = new EventSource('/api/v1/chat/stream/submit?sessionId=' + sessionId + '&content=' + content);
 
-      const data = decoder.decode(row.value, {stream: true});
-      //console.log('DATA: ', data);
+      evtSource.onmessage = (event) => {
+        // const data = JSON.parse(event.data);
+        console.log('DATA: ', event.data);
 
-      if (this.hasJSONData(data)) {
-        const chatChoice = this.parseStreamResponse(data);
-        //console.log('PARSED STREAM DATA: ', chatChoice);
-        const lastMessage = store.messages[store.messages.length - 1];
+        // Process received data as required by your application
+        this.processData(event.data, store, chunkUpdateCallback);
+      };
 
-        if (chatChoice?.delta) {
-          if (chatChoice.delta.content) {
-            lastMessage.content += chatChoice?.delta.content;
-            chunkUpdateCallback();
-          } else if (chatChoice.delta.function_call && chatChoice.delta.function_call.arguments) {
-            console.log('FUNCTION CALL', chatChoice.delta.function_call);
-            isFunctionCall = true;
+      evtSource.onerror = (event) => {
+        console.log('onError: ', event);
+        evtSource.close();
+        resolve(event);
+      };
+      
+      evtSource.addEventListener('stream-finished', (event) => {
+        console.log('COMPLETE: ', event);
 
-            if (!lastMessage.function_call) {
-              lastMessage.function_call = new FunctionCall();
-            }
+        evtSource.close();
+        resolve(event);
+      });
+    });
 
-            lastMessage.function_call.name = chatChoice?.delta.function_call.name;
-            lastMessage.function_call.arguments += chatChoice?.delta.function_call.arguments;
+    //
+    // console.log('Stream complete');
+    //
+    // if (!isFunctionCall) {
+    //   const processedMessage = await this.postProcessLastMessage(sessionId);
+    //   processedMessage.content = highlightingService.replaceCodeContent(processedMessage.content);
+    //
+    //   store.messages.pop();
+    //   store.messages.push(processedMessage);
+    // }
+  }
+
+  processData(data: string, store: any, chunkUpdateCallback: () => void) {
+
+    if (this.hasJSONData(data)) {
+      const chatChoice = this.parseStreamResponse(data);
+      //console.log('PARSED STREAM DATA: ', chatChoice);
+      const lastMessage = store.messages[store.messages.length - 1];
+
+      if (chatChoice?.delta) {
+        if (chatChoice.delta.content) {
+          console.log('UPDATING MESSAGE', chatChoice?.delta.content);
+          lastMessage.content += chatChoice?.delta.content;
+          //await this.sleep(500);
+          chunkUpdateCallback();
+        } else if (chatChoice.delta.function_call && chatChoice.delta.function_call.arguments) {
+          console.log('FUNCTION CALL', chatChoice.delta.function_call);
+          // isFunctionCall = true;
+
+          if (!lastMessage.function_call) {
+            lastMessage.function_call = new FunctionCall();
           }
-        }
 
+          lastMessage.function_call.name = chatChoice?.delta.function_call.name;
+          lastMessage.function_call.arguments += chatChoice?.delta.function_call.arguments;
+        }
       }
 
-      done = row.done;
-    }
-
-    console.log('Stream complete');
-
-    if (!isFunctionCall) {
-      const processedMessage = await this.postProcessLastMessage(sessionId);
-      processedMessage.content = highlightingService.replaceCodeContent(processedMessage.content);
-
-      store.messages.pop();
-      store.messages.push(processedMessage);
     }
   }
 
@@ -98,18 +104,18 @@ class ChatStreamService {
   }
 
   parseStreamResponse(data: string): ChatChoice | undefined {
-    //console.log('DATA TO PARSE: ', data);
-    const startIndexJson = data.indexOf('{');
+    console.log('DATA TO PARSE: ', data);
+    //const startIndexJson = data.indexOf('{');
     try {
-      const json = data.substring(startIndexJson);
-      const choice = JSON.parse(json);
+      //const json = data.substring(startIndexJson);
+      const choice = JSON.parse(data);
 
       if (choice.delta && choice.delta.content) {
         const content = choice.delta.content;
         choice.delta.content = content.replaceAll('\n\n', '<p/>').replaceAll('\n', '<br/>');
       }
 
-      //console.log('CHOICE: ', choice);
+      console.log('CHOICE: ', choice);
       return choice;
     } catch (err) {
       console.log('Cannot parse JSON in Message.', err);

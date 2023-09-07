@@ -8,8 +8,9 @@ module.exports = defineConfig({
     proxy: {
       '^/api': {
         target: 'http://localhost:8090', // this configuration needs to correspond to the Spring Boot backends' application.properties server.port
-        ws: true,
         changeOrigin: true,
+        ws: true, // websockets
+        compress: false, // deactivates compression, which is enabled by default. Needed for SSE.
       },
     },
   },

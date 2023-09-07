@@ -21,9 +21,9 @@ import java.util.Optional;
 @Service
 public class OpenAIChatService {
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+    public static final Logger LOGGER = LoggerFactory.getLogger(OpenAIChatService.class);
     private final OpenAIProperties openAIProperties;
     private final OkHttpClient client;
-    Logger logger = LoggerFactory.getLogger(OpenAIChatService.class);
 
     public OpenAIChatService(OpenAIProperties openAIProperties, OkHttpClient client) {
         this.openAIProperties = openAIProperties;
@@ -79,6 +79,7 @@ public class OpenAIChatService {
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    LOGGER.error("Error while streaming chat request.", e);
                     emitter.completeWithError(e);
                 }
 
@@ -90,6 +91,7 @@ public class OpenAIChatService {
                     String functionName = null;
 
                     if (!response.isSuccessful()) {
+                        LOGGER.error("Response not successful: {}", response);
                         emitter.completeWithError(new RuntimeException("Unexpected code " + response));
                     } else {
                         try (ResponseBody responseBody = response.body()) {
@@ -111,7 +113,7 @@ public class OpenAIChatService {
                                         }
 
                                         String responseChunk = choiceToJSON(responseChoice.get());
-                                        //logger.info("SENDING: {}", responseChunk);
+                                        LOGGER.info("SENDING: {}", responseChunk);
                                         emitter.send(responseChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
                                         try {
                                             Thread.sleep(20);
@@ -122,6 +124,9 @@ public class OpenAIChatService {
                                 }
                             }
                         }
+                        LOGGER.info("SENDING stream finished");
+                        emitter.send(SseEmitter.event().name("stream-finished").build());
+                        LOGGER.info("SENDING complete");
                         emitter.complete();
 
                         if (isFunctionCall) {

@@ -30,18 +30,27 @@ export default {
     };
   },
   methods: {
-    async submit() {
+    submit() {
       this.isInputLocked = true;
 
-      await this.store.streamPrompt(this.prompt, () => {
-        this.$emit('chunkUpdateReceived');
-      });
-      await this.store.loadIndex(this.store.selectedPersona.personaId);
+      this.store.currentStatusMessage = 'Thinking...';
+      try {
+        this.store.streamPrompt(this.prompt, () => {
+          this.$emit('chunkUpdateReceived');
+        });
+        this.store.currentStatusMessage = 'Updating...';
+        //await this.store.loadIndex(this.store.selectedPersona.personaId);
+        this.store.currentStatusMessage = '';
+      } catch (error) {
+        console.error(error);
+        this.store.currentStatusMessage = 'Error: ' + error;
+      } finally {
+        this.isInputLocked = false;
+      }
 
       console.log('Sending submitResultReceived');
       this.$emit('submitResultReceived');
       this.prompt = '';
-      this.isInputLocked = false;
     },
   },
 };
