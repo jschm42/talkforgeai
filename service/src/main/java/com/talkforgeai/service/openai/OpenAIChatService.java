@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class OpenAIChatService {
@@ -85,6 +86,7 @@ public class OpenAIChatService {
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                    LOGGER.error("Response received: {}", response);
                     StringBuilder finalContent = new StringBuilder();
                     boolean isFunctionCall = false;
                     StringBuilder finalFunctionArguments = new StringBuilder();
@@ -115,19 +117,14 @@ public class OpenAIChatService {
                                         String responseChunk = choiceToJSON(responseChoice.get());
                                         LOGGER.info("SENDING: {}", responseChunk);
                                         emitter.send(responseChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
-                                        try {
-                                            Thread.sleep(20);
-                                        } catch (InterruptedException e) {
-                                            throw new RuntimeException(e);
-                                        }
+                                        TimeUnit.MILLISECONDS.sleep(50);
                                     }
                                 }
+                            } catch (IOException | InterruptedException ex) {
+                                LOGGER.error("Error while streaming.", ex);
                             }
                         }
-                        LOGGER.info("SENDING stream finished");
-                        emitter.send(SseEmitter.event().name("stream-finished").build());
-                        LOGGER.info("SENDING complete");
-                        emitter.complete();
+
 
                         if (isFunctionCall) {
                             OpenAIChatMessage.FunctionCall functionCall
@@ -136,6 +133,16 @@ public class OpenAIChatService {
                         } else {
                             resultCallback.call(new OpenAIChatMessage(OpenAIChatMessage.Role.ASSISTANT, finalContent.toString()));
                         }
+
+                        LOGGER.info("SENDING stream finished");
+                        emitter.send(
+                                SseEmitter.event()
+                                        .name("stream-done")
+                                        .data("finished", org.springframework.http.MediaType.APPLICATION_JSON)
+                                        .build()
+                        );
+                        LOGGER.info("SENDING complete");
+                        emitter.complete();
                     }
                 }
             });

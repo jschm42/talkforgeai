@@ -19,17 +19,20 @@ class ChatStreamService {
   async streamSubmit(sessionId: string, content: string, chunkUpdateCallback: () => void) {
 
     const store = useChatStore();
-    // let isFunctionCall = false;
+    const isFunctionCall = false;
 
     const newMessage = new ChatMessage(Role.ASSISTANT, '');
     store.messages.push(newMessage);
+
+    store.currentStatusMessage = 'Thinking...';
 
     return new Promise((resolve, reject): void => {
       const evtSource = new EventSource('/api/v1/chat/stream/submit?sessionId=' + sessionId + '&content=' + content);
 
       evtSource.onmessage = (event) => {
         // const data = JSON.parse(event.data);
-        console.log('DATA: ', event.data);
+        //console.log('DATA: ', event.data);
+        console.log('Source Message', event);
 
         // Process received data as required by your application
         this.processData(event.data, store, chunkUpdateCallback);
@@ -38,9 +41,11 @@ class ChatStreamService {
       evtSource.onerror = (event) => {
         console.log('onError: ', event);
         evtSource.close();
+        store.currentStatusMessage = '';
+        this.postStreamProcessing(store, sessionId, isFunctionCall).then();
         resolve(event);
       };
-      
+
       evtSource.addEventListener('stream-finished', (event) => {
         console.log('COMPLETE: ', event);
 
@@ -48,17 +53,16 @@ class ChatStreamService {
         resolve(event);
       });
     });
+  }
 
-    //
-    // console.log('Stream complete');
-    //
-    // if (!isFunctionCall) {
-    //   const processedMessage = await this.postProcessLastMessage(sessionId);
-    //   processedMessage.content = highlightingService.replaceCodeContent(processedMessage.content);
-    //
-    //   store.messages.pop();
-    //   store.messages.push(processedMessage);
-    // }
+  async postStreamProcessing(store: any, sessionId: string, isFunctionCall: boolean) {
+    if (!isFunctionCall) {
+      const processedMessage = await this.postProcessLastMessage(sessionId);
+      processedMessage.content = highlightingService.replaceCodeContent(processedMessage.content);
+
+      store.messages.pop();
+      store.messages.push(processedMessage);
+    }
   }
 
   processData(data: string, store: any, chunkUpdateCallback: () => void) {
@@ -70,7 +74,7 @@ class ChatStreamService {
 
       if (chatChoice?.delta) {
         if (chatChoice.delta.content) {
-          console.log('UPDATING MESSAGE', chatChoice?.delta.content);
+          //console.log('UPDATING MESSAGE', chatChoice?.delta.content);
           lastMessage.content += chatChoice?.delta.content;
           //await this.sleep(500);
           chunkUpdateCallback();
@@ -104,7 +108,7 @@ class ChatStreamService {
   }
 
   parseStreamResponse(data: string): ChatChoice | undefined {
-    console.log('DATA TO PARSE: ', data);
+    //console.log('DATA TO PARSE: ', data);
     //const startIndexJson = data.indexOf('{');
     try {
       //const json = data.substring(startIndexJson);
@@ -115,7 +119,7 @@ class ChatStreamService {
         choice.delta.content = content.replaceAll('\n\n', '<p/>').replaceAll('\n', '<br/>');
       }
 
-      console.log('CHOICE: ', choice);
+      //console.log('CHOICE: ', choice);
       return choice;
     } catch (err) {
       console.log('Cannot parse JSON in Message.', err);

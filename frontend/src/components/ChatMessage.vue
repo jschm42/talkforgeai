@@ -26,7 +26,8 @@ export default {
     },
     messageClass() {
       return {
-        'text-bg-primary': this.message.role === Role.USER,
+        'role-user': this.message.role === Role.USER,
+        'role-assistant': this.message.role === Role.ASSISTANT,
       };
     },
     isAssistant() {
@@ -50,6 +51,9 @@ export default {
         'bi-person-fill': this.message.role === Role.USER,
       };
     },
+    statusMessage() {
+      return this.store.currentStatusMessage;
+    },
   },
   methods: {
     async playAudio() {
@@ -67,7 +71,7 @@ export default {
     },
     getMessageStatus() {
       if (this.messageIndex === this.store.maxMessageIndex) {
-        return this.store.currentStatusMessage;
+        return this.statusMessage;
       }
       return '';
     },
@@ -106,11 +110,11 @@ export default {
 
 <style scoped>
 .role-user {
-
+  background-color: #2c3e50;
 }
 
 .role-assistant {
-
+  background-color: #000000;
 }
 
 .role-icon {
