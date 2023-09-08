@@ -8,7 +8,6 @@ import com.talkforgeai.service.openai.dto.OpenAIChatResponse;
 import com.talkforgeai.service.openai.dto.OpenAIChatStreamResponse;
 import com.talkforgeai.service.properties.OpenAIProperties;
 import okhttp3.*;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -77,78 +76,67 @@ public class OpenAIChatService {
 
             //logger.debug("Sending delta: {}", message);
 
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                    LOGGER.error("Error while streaming chat request.", e);
-                    emitter.completeWithError(e);
-                }
+            Response response = client.newCall(request).execute();
+            LOGGER.error("Response received: {}", response);
+            StringBuilder finalContent = new StringBuilder();
+            boolean isFunctionCall = false;
+            StringBuilder finalFunctionArguments = new StringBuilder();
+            String functionName = null;
 
-                @Override
-                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                    LOGGER.error("Response received: {}", response);
-                    StringBuilder finalContent = new StringBuilder();
-                    boolean isFunctionCall = false;
-                    StringBuilder finalFunctionArguments = new StringBuilder();
-                    String functionName = null;
+            if (!response.isSuccessful()) {
+                LOGGER.error("Response not successful: {}", response);
+                emitter.completeWithError(new RuntimeException("Unexpected code " + response));
+            } else {
+                ResponseBody responseBody = response.body();
+                try (BufferedReader bufferedReader = new BufferedReader(responseBody.charStream())) {
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        Optional<OpenAIChatStreamResponse.StreamResponseChoice> responseChoice = parseLine(line);
+                        if (responseChoice.isPresent()) {
+                            OpenAIChatMessage delta = responseChoice.get().delta();
 
-                    if (!response.isSuccessful()) {
-                        LOGGER.error("Response not successful: {}", response);
-                        emitter.completeWithError(new RuntimeException("Unexpected code " + response));
-                    } else {
-                        try (ResponseBody responseBody = response.body()) {
-                            try (BufferedReader bufferedReader = new BufferedReader(responseBody.charStream())) {
-                                String line;
-                                while ((line = bufferedReader.readLine()) != null) {
-                                    Optional<OpenAIChatStreamResponse.StreamResponseChoice> responseChoice = parseLine(line);
-                                    if (responseChoice.isPresent()) {
-                                        OpenAIChatMessage delta = responseChoice.get().delta();
-
-                                        if (delta.functionCall() != null) {
-                                            isFunctionCall = true;
-                                            if (functionName == null) {
-                                                functionName = delta.functionCall().name();
-                                            }
-                                            finalFunctionArguments.append(delta.functionCall().arguments());
-                                        } else {
-                                            finalContent.append(delta.content());
-                                        }
-
-                                        String responseChunk = choiceToJSON(responseChoice.get());
-                                        LOGGER.info("SENDING: {}", responseChunk);
-                                        emitter.send(responseChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
-                                        TimeUnit.MILLISECONDS.sleep(50);
-                                    }
+                            if (delta.functionCall() != null) {
+                                isFunctionCall = true;
+                                if (functionName == null) {
+                                    functionName = delta.functionCall().name();
                                 }
-                            } catch (IOException | InterruptedException ex) {
-                                LOGGER.error("Error while streaming.", ex);
+                                finalFunctionArguments.append(delta.functionCall().arguments());
+                            } else {
+                                finalContent.append(delta.content());
                             }
+
+                            String responseChunk = choiceToJSON(responseChoice.get());
+                            LOGGER.info("SENDING: {}", responseChunk);
+                            emitter.send(responseChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
+                            TimeUnit.MILLISECONDS.sleep(50);
                         }
-
-
-                        if (isFunctionCall) {
-                            OpenAIChatMessage.FunctionCall functionCall
-                                    = new OpenAIChatMessage.FunctionCall(functionName, finalFunctionArguments.toString());
-                            resultCallback.call(new OpenAIChatMessage(functionCall));
-                        } else {
-                            resultCallback.call(new OpenAIChatMessage(OpenAIChatMessage.Role.ASSISTANT, finalContent.toString()));
-                        }
-
-                        LOGGER.info("SENDING stream finished");
-                        emitter.send(
-                                SseEmitter.event()
-                                        .name("stream-done")
-                                        .data("finished", org.springframework.http.MediaType.APPLICATION_JSON)
-                                        .build()
-                        );
-                        LOGGER.info("SENDING complete");
-                        emitter.complete();
                     }
+                } catch (IOException | InterruptedException ex) {
+                    emitter.completeWithError(ex);
+                    LOGGER.error("Error while streaming.", ex);
                 }
-            });
 
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+                if (isFunctionCall) {
+                    OpenAIChatMessage.FunctionCall functionCall
+                            = new OpenAIChatMessage.FunctionCall(functionName, finalFunctionArguments.toString());
+                    resultCallback.call(new OpenAIChatMessage(functionCall));
+                } else {
+                    resultCallback.call(new OpenAIChatMessage(OpenAIChatMessage.Role.ASSISTANT, finalContent.toString()));
+                }
+
+                LOGGER.info("SENDING stream finished");
+                emitter.send(
+                        SseEmitter.event()
+                                .name("stream-done")
+                                .data("finished", org.springframework.http.MediaType.APPLICATION_JSON)
+                                .build()
+                );
+                LOGGER.info("SENDING complete");
+                emitter.complete();
+            }
+
+        } catch (IOException e) {
+            LOGGER.error("Error while streaming.", e);
         }
     }
 
