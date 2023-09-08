@@ -23,15 +23,14 @@ class ChatStreamService {
 
     const newMessage = new ChatMessage(Role.ASSISTANT, '');
     store.messages.push(newMessage);
-
-    store.currentStatusMessage = 'Thinking...';
+    store.updateStatus('Thinking...', 'running');
 
     return new Promise((resolve, reject): void => {
-      const evtSource = new EventSource('/api/v1/chat/stream/submitxxx?sessionId=' + sessionId + '&content=' + content);
+      const evtSource = new EventSource('/api/v1/chat/stream/submit?sessionId=' + sessionId + '&content=' + content);
 
       evtSource.addEventListener('complete', (event) => {
         console.log('COMPLETE: ', event);
-        store.currentStatusMessage = '';
+        store.updateStatus('');
         evtSource.close();
         this.postStreamProcessing(store, sessionId, isFunctionCall).then();
         resolve(event);
@@ -45,7 +44,7 @@ class ChatStreamService {
       evtSource.onerror = (event) => {
         console.log('onError: ', event);
         evtSource.close();
-        store.currentStatusMessage = 'Error while streaming.';
+        store.updateStatus('Error while streaming.', 'error');
         resolve(event);
       };
 

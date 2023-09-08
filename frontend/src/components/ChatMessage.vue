@@ -54,6 +54,9 @@ export default {
     statusMessage() {
       return this.store.currentStatusMessage;
     },
+    statusMessageType() {
+      return this.store.currentStatusMessageType;
+    },
   },
   methods: {
     async playAudio() {
@@ -72,6 +75,12 @@ export default {
     getMessageStatus() {
       if (this.messageIndex === this.store.maxMessageIndex) {
         return this.statusMessage;
+      }
+      return '';
+    },
+    getMessageStatusType() {
+      if (this.messageIndex === this.store.maxMessageIndex) {
+        return this.statusMessageType;
       }
       return '';
     },
@@ -100,9 +109,10 @@ export default {
     </div>
     <footer>
       <strong class="mx-1">{{ getMessageStatus() }}</strong>
-      <div v-if="getMessageStatus() !== ''" class="spinner-border spinner-border-sm" role="status">
+      <div v-if="getMessageStatusType() === 'running'" class="spinner-border spinner-border-sm" role="status">
         <span class="sr-only">{{ getMessageStatus() }}</span>
       </div>
+      <i v-else-if="getMessageStatusType() === 'error'" class="bi bi-exclamation-lg bg-danger"></i>
     </footer>
   </div>
 

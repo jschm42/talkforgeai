@@ -25,6 +25,7 @@ export const useChatStore = defineStore('chat', {
         autoSpeak: false,
       },
       currentStatusMessage: '',
+      currentStatusMessageType: '',
       sessions: [] as Array<Session>,
       selectedSessionId: '',
     };
@@ -161,10 +162,9 @@ export const useChatStore = defineStore('chat', {
     toggleAutoSpeak() {
       this.chat.autoSpeak = !this.chat.autoSpeak;
     },
-    updateStatus(sessionId: string, message: string) {
-      if (sessionId === this.sessionId) {
-        this.currentStatusMessage = message;
-      }
+    updateStatus(message: string, type = '') {
+      this.currentStatusMessage = message;
+      this.currentStatusMessageType = type;
     },
   },
 
