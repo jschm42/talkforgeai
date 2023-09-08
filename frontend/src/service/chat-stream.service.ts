@@ -27,33 +27,25 @@ class ChatStreamService {
     store.currentStatusMessage = 'Thinking...';
 
     return new Promise((resolve, reject): void => {
-      const evtSource = new EventSource('/api/v1/chat/stream/submitXX?sessionId=' + sessionId + '&content=' + content);
+      const evtSource = new EventSource('/api/v1/chat/stream/submitxxx?sessionId=' + sessionId + '&content=' + content);
 
-      const completeFunc = (event: Event) => {
+      evtSource.addEventListener('complete', (event) => {
         console.log('COMPLETE: ', event);
         store.currentStatusMessage = '';
         evtSource.close();
         this.postStreamProcessing(store, sessionId, isFunctionCall).then();
         resolve(event);
-      };
+      });
 
       evtSource.onmessage = (event) => {
-        // const data = JSON.parse(event.data);
-        //console.log('DATA: ', event.data);
         console.log('Source Message', event);
-
-        if (event.data === 'stream-done') {
-          completeFunc(event);
-        } else {
-          // Process received data as required by your application
-          this.processData(event.data, store, chunkUpdateCallback);
-        }
+        this.processData(event.data, store, chunkUpdateCallback);
       };
 
       evtSource.onerror = (event) => {
         console.log('onError: ', event);
         evtSource.close();
-        store.currentStatusMessage = '';
+        store.currentStatusMessage = 'Error while streaming.';
         resolve(event);
       };
 

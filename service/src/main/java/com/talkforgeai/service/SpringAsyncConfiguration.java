@@ -1,6 +1,7 @@
-package com.talkforgeai.backend;
+package com.talkforgeai.service;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -12,11 +13,17 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class SpringAsyncConfiguration implements AsyncConfigurer {
 
+    @Bean(name = "sseTaskExecutor")
     @Override
     public Executor getAsyncExecutor() {
-        ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-        threadPoolTaskExecutor.initialize();
-        return threadPoolTaskExecutor;
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(2);
+        executor.setQueueCapacity(500);
+        executor.setThreadNamePrefix("SseLookup-");
+        executor.initialize();
+        executor.initialize();
+        return executor;
     }
 
     @Override

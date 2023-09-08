@@ -108,12 +108,9 @@ public class ChatStreamService {
                 request.setFunctions(functionRepository.getByRequestFunctions(requestFunctions));
             }
 
-            SseEmitter emitter = new SseEmitter();
-            openAIChatService.stream(request, emitter, message -> {
+            return openAIChatService.stream(request, message -> {
                 handleResultMessage(sessionId, message);
             });
-
-            return emitter;
         } catch (Exception e) {
             LOGGER.error("Error while submitting chat request.", e);
         }

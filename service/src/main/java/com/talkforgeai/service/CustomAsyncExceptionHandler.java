@@ -1,4 +1,4 @@
-package com.talkforgeai.backend;
+package com.talkforgeai.service;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 
