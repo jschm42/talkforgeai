@@ -124,7 +124,7 @@ export default {
 }
 
 .role-assistant {
-  background-color: #000000;
+//background-color: #000000;
 }
 
 .role-icon {
