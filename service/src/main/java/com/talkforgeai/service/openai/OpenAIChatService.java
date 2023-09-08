@@ -126,11 +126,14 @@ public class OpenAIChatService {
 
                 LOGGER.info("SENDING stream finished");
                 emitter.send(
-                        SseEmitter.event()
-                                .name("stream-done")
-                                .data("finished", org.springframework.http.MediaType.APPLICATION_JSON)
-                                .build()
+                        "stream-done", org.springframework.http.MediaType.TEXT_PLAIN
                 );
+//                emitter.send(
+//                        SseEmitter.event()
+//                                .name("stream-done")
+//                                .data("finished", org.springframework.http.MediaType.TEXT_PLAIN)
+//                                .build()
+//                );
                 LOGGER.info("SENDING complete");
                 emitter.complete();
             }
