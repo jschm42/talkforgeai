@@ -11,6 +11,7 @@ import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -28,6 +29,9 @@ public class OpenAIChatService {
     private final OkHttpClient client;
 
     private final Executor taskExecutor;
+
+    @Value("${server.servlet.async.timeout:10000}")
+    private long asyncTimeout;
 
     public OpenAIChatService(OpenAIProperties openAIProperties, OkHttpClient client, @Qualifier("sseTaskExecutor") Executor taskExecutor) {
         this.openAIProperties = openAIProperties;
@@ -64,7 +68,8 @@ public class OpenAIChatService {
     }
 
     public SseEmitter stream(OpenAIChatRequest openAIRequest, ResultCallback resultCallback) {
-        SseEmitter emitter = new SseEmitter();
+        LOGGER.info("Setting async timeout to {}", asyncTimeout);
+        SseEmitter emitter = new SseEmitter(asyncTimeout);
         openAIRequest.setStream(true);
         ObjectMapper objectMapper = new ObjectMapper();
 
