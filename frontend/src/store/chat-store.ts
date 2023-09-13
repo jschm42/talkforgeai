@@ -21,6 +21,7 @@ export const useChatStore = defineStore('chat', {
       selectedPersona: {} as Persona,
       personaList: [] as Array<Persona>,
       chat: {
+        locked: false,
         configHeaderEnabled: true,
         autoSpeak: false,
       },
@@ -105,6 +106,8 @@ export const useChatStore = defineStore('chat', {
       console.log('Submitting prompt', this.sessionId, prompt);
 
       await chatStreamService.streamSubmit(this.sessionId, prompt, chunkUpdateCallback);
+      await this.generateSessionTitle(this.sessionId);
+      await this.loadIndex(this.selectedPersona.personaId);
     },
     async loadChatSession(sessionId: string) {
       const chatSession = await chatService.readSessionEntry(sessionId);
@@ -122,6 +125,14 @@ export const useChatStore = defineStore('chat', {
     async updateSessionTitle(sessionId: string, newTitle: string) {
       await chatService.updateSessionTitle(sessionId, newTitle);
     },
+    hasEmptySessionTitle(sessionId: string) {
+      const currentSession = this.sessions.find(s => s.id === sessionId);
+      console.log('currentSession', currentSession);
+      if (currentSession) {
+        return currentSession.title === '' || currentSession.title === undefined || currentSession.title === '<empty>';
+      }
+      return true;
+    },
     async generateSessionTitle(sessionId: string) {
       const userMessage = this.messages.find(m => m.role === Role.USER);
       const userMessageContent = userMessage ? userMessage.content : '';
@@ -129,13 +140,24 @@ export const useChatStore = defineStore('chat', {
       const assistantMessage = this.messages.find(m => m.role === Role.ASSISTANT);
       const assistantMessageContent = assistantMessage ? assistantMessage.content : '';
 
-      const response = await chatService.generateSessionTitle(sessionId, userMessageContent, assistantMessageContent);
-      console.log('Generated title response', response);
-      if (response) {
-        const currentSession = this.sessions.find(s => s.id === this.selectedSessionId);
-        if (currentSession) {
-          currentSession.title = response.generatedTitle;
+      if (this.hasEmptySessionTitle(sessionId)) {
+        this.updateStatus('Generating title...', 'running');
+
+        try {
+          const response = await chatService.generateSessionTitle(sessionId, userMessageContent,
+            assistantMessageContent);
+          console.log('Generated title response', response);
+          if (response) {
+            const currentSession = this.sessions.find(s => s.id === this.selectedSessionId);
+            if (currentSession) {
+              currentSession.title = response.generatedTitle;
+            }
+          }
+        } finally {
+          this.updateStatus('');
         }
+      } else {
+        console.log('Session title already set. Skipping generation.');
       }
     },
     async deleteChatSession(sessionId: string) {
@@ -165,6 +187,10 @@ export const useChatStore = defineStore('chat', {
     updateStatus(message: string, type = '') {
       this.currentStatusMessage = message;
       this.currentStatusMessageType = type;
+    },
+    removeStatus() {
+      this.currentStatusMessage = '';
+      this.currentStatusMessageType = '';
     },
   },
 

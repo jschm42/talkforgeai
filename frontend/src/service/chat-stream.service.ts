@@ -29,8 +29,7 @@ class ChatStreamService {
       const evtSource = new EventSource('/api/v1/chat/stream/submit?sessionId=' + sessionId + '&content=' + content);
 
       evtSource.addEventListener('complete', (event) => {
-        console.log('COMPLETE: ', event);
-        store.updateStatus('');
+        store.removeStatus();
         evtSource.close();
         this.postStreamProcessing(store, sessionId, isFunctionCall).then();
         resolve(event);
