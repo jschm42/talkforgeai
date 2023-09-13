@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "@stomp/stompjs": "^7.0.0",
-    "stomp": "^0.1.1"
-  }
-}

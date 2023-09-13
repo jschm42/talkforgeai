@@ -128,7 +128,7 @@ public class OpenAIChatService {
                     }
 
                     String responseChunk = choiceToJSON(responseChoice.get());
-                    LOGGER.info("SENDING: {}", responseChunk);
+                    //LOGGER.info("SENDING: {}", responseChunk);
                     emitter.send(responseChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
                     TimeUnit.MILLISECONDS.sleep(50);
                 }
