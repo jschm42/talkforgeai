@@ -22,11 +22,9 @@ public class ChatStreamController {
         this.chatStreamService = chatStreamService;
     }
 
-    @GetMapping("/submit")
-    public SseEmitter submit(@RequestParam("sessionId") UUID sessionId,
-                             @RequestParam("content") String content) {
-
-        ChatCompletionRequest request = new ChatCompletionRequest(sessionId, content);
+    @PostMapping("/submit")
+    @ResponseBody
+    public SseEmitter submit(@RequestBody ChatCompletionRequest request) {
         return chatStreamService.submit(request);
     }
 }

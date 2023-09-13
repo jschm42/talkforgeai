@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories("com.talkforgeai.backend")
 @EntityScan("com.talkforgeai.backend")
 public class TalkforgeaiServerApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(TalkforgeaiServerApplication.class, args);
     }

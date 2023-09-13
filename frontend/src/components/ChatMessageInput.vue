@@ -38,12 +38,9 @@ export default {
         this.store.streamPrompt(this.prompt, () => {
           this.$emit('chunkUpdateReceived');
         });
-        this.store.currentStatusMessage = 'Updating...';
-        //await this.store.loadIndex(this.store.selectedPersona.personaId);
-        this.store.currentStatusMessage = '';
       } catch (error) {
         console.error(error);
-        this.store.currentStatusMessage = 'Error: ' + error;
+        this.store.updateStatus('Error: ' + error, 'error');
       } finally {
         this.isInputLocked = false;
       }

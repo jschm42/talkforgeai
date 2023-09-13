@@ -102,6 +102,7 @@ export const useChatStore = defineStore('chat', {
       this.selectedSessionId = this.sessionId;
 
       this.messages.push(new ChatMessage(Role.USER, prompt));
+      chunkUpdateCallback();
 
       console.log('Submitting prompt', this.sessionId, prompt);
 

@@ -25,29 +25,46 @@ class ChatStreamService {
     store.messages.push(newMessage);
     store.updateStatus('Thinking...', 'running');
 
-    return new Promise((resolve, reject): void => {
-      const evtSource = new EventSource('/api/v1/chat/stream/submit?sessionId=' + sessionId + '&content=' + content);
+    const sse = await this.fetchSSE(content, sessionId);
+    const reader = sse.body?.getReader();
 
-      evtSource.addEventListener('complete', (event) => {
-        store.removeStatus();
-        evtSource.close();
-        this.postStreamProcessing(store, sessionId, isFunctionCall).then();
-        resolve(event);
-      });
+    if (reader) {
+      while (true) {
+        const {done, value} = await reader.read();
+        if (done) {
+          store.removeStatus();
+          break;
+        }
+        if (value) {
+          const text = new TextDecoder('utf-8').decode(value);
+          this.processData(text, store, chunkUpdateCallback);
+        }
+      }
+    }
 
-      evtSource.onmessage = (event) => {
-        console.log('Source Message', event);
-        this.processData(event.data, store, chunkUpdateCallback);
-      };
-
-      evtSource.onerror = (event) => {
-        console.log('onError: ', event);
-        evtSource.close();
-        store.updateStatus('Error while streaming.', 'error');
-        resolve(event);
-      };
-
-    });
+    // return new Promise((resolve, reject): void => {
+    //   const evtSource = new EventSource('/api/v1/chat/stream/submit?sessionId=' + sessionId + '&content=' + content);
+    //
+    //   evtSource.addEventListener('complete', (event) => {
+    //     store.removeStatus();
+    //     evtSource.close();
+    //     this.postStreamProcessing(store, sessionId, isFunctionCall).then();
+    //     resolve(event);
+    //   });
+    //
+    //   evtSource.onmessage = (event) => {
+    //     console.log('Source Message', event);
+    //     this.processData(event.data, store, chunkUpdateCallback);
+    //   };
+    //
+    //   evtSource.onerror = (event) => {
+    //     console.log('onError: ', event);
+    //     evtSource.close();
+    //     store.updateStatus('Error while streaming.', 'error');
+    //     resolve(event);
+    //   };
+    //
+    // });
   }
 
   async postStreamProcessing(store: any, sessionId: string, isFunctionCall: boolean) {
@@ -120,6 +137,22 @@ class ChatStreamService {
       console.log('Cannot parse JSON in Message.', err);
       return undefined;
     }
+  }
+
+  async fetchSSE(content: string, sessionId: string): Promise<Response> {
+    return await fetch('/api/v1/chat/stream/submit', {
+      method: 'POST',
+      cache: 'no-cache',
+      keepalive: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
+      },
+      body: JSON.stringify({
+        content,
+        sessionId,
+      }),
+    });
   }
 
 }
