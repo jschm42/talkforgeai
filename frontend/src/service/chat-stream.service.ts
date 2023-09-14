@@ -12,6 +12,8 @@ const highlightingService = new HighlightingService();
 
 class ChatStreamService {
 
+  buffer = '';
+
   async sleep(delay: number) {
     return new Promise((resolve) => setTimeout(resolve, delay));
   }
@@ -36,25 +38,40 @@ class ChatStreamService {
         const {done, value} = await reader.read();
         if (done) {
           console.log("STREAM DONE");
-          //await this.postStreamProcessing(store, sessionId, isFunctionCall);
+          await this.postStreamProcessing(store, sessionId, isFunctionCall);
           store.removeStatus();
           break;
         }
         if (value) {
           const chunk = decoder.decode(value, {stream: true});
-          console.log("CHUNK", chunk);
+          //console.log("CHUNK", chunk);
           partial += chunk;
           const parts = partial.split('\n');
           partial = parts.pop() || '';
+          this.buffer = '';
           for (const part of parts) {
             if (part && part.startsWith("data:")) {
                 const data = part.substring(5);
                 this.processData(data, store, chunkUpdateCallback);
+                await this.sleep(100);
             }
           }
         }
       }
     }
+  }
+
+   escapeHtml(html: string) {
+    // // Create a temporary element to encode the HTML
+    // const temp = document.createElement('div');
+    // temp.textContent = html;
+    //
+    // // Get the encoded HTML as plain text
+    // return temp.innerHTML;
+     console.log("VOR REPLACE", html);
+     const t =  html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+     console.log("NACH REPLACE", t);
+      return t;
   }
 
   async postStreamProcessing(store: any, sessionId: string, isFunctionCall: boolean) {
@@ -70,15 +87,16 @@ class ChatStreamService {
   processData(data: string, store: any, chunkUpdateCallback: () => void) {
 
     if (this.hasJSONData(data)) {
-      const chatChoice = this.parseStreamResponse(data);
-      //console.log('PARSED STREAM DATA: ', chatChoice);
+      const chatChoice = JSON.parse(data);
       const lastMessage = store.messages[store.messages.length - 1];
 
       if (chatChoice?.delta) {
         if (chatChoice.delta.content) {
           //console.log('UPDATING MESSAGE', chatChoice?.delta.content);
-          lastMessage.content += chatChoice?.delta.content;
-          //await this.sleep(500);
+          let newContent = chatChoice?.delta.content;
+          newContent = this.escapeHtml(newContent)
+          newContent = newContent.replaceAll(/\n/g, '<br/>');
+          lastMessage.content += newContent;
           chunkUpdateCallback();
         } else if (chatChoice.delta.function_call && chatChoice.delta.function_call.arguments) {
           console.log('FUNCTION CALL', chatChoice.delta.function_call);
@@ -106,26 +124,6 @@ class ChatStreamService {
       return result.data;
     } catch (error) {
       throw new Error('Error reading session entry:  ' + error);
-    }
-  }
-
-  parseStreamResponse(data: string): ChatChoice | undefined {
-    //console.log('DATA TO PARSE: ', data);
-    //const startIndexJson = data.indexOf('{');
-    try {
-      //const json = data.substring(startIndexJson);
-      const choice = JSON.parse(data);
-
-      if (choice.delta && choice.delta.content) {
-        const content = choice.delta.content;
-        choice.delta.content = content.replaceAll('\n\n', '<p/>').replaceAll('\n', '<br/>');
-      }
-
-      //console.log('CHOICE: ', choice);
-      return choice;
-    } catch (err) {
-      console.log('Cannot parse JSON in Message.', err);
-      return undefined;
     }
   }
 

@@ -47,27 +47,14 @@ public class OpenAIChatService {
             RequestBody body = RequestBody.create(message, JSON);
 
             Headers.Builder headersBuilder = new Headers.Builder();
-            String apiUrl = "";
-            String apiKey = "";
-            if (openAIProperties.usePostman()) {
-                apiUrl = openAIProperties.postmanChatUrl();
-                apiKey = openAIProperties.postmanApiKey();
-                LOGGER.debug("Using postman Mock-Server {} with requestId={}.", apiUrl, openAIProperties.postmanRequestId());
-                headersBuilder.add("x-mock-response-id", openAIProperties.postmanRequestId());
-            } else {
-                apiUrl = openAIProperties.chatUrl();
-                apiKey = openAIProperties.apiKey();
-            }
-
-            headersBuilder.add("Authorization", "Bearer " + apiKey);
+            String apiUrl = openAIProperties.chatUrl();
+            headersBuilder.add("Authorization", "Bearer " + openAIProperties.apiKey());
 
             Request request = new Request.Builder()
                     .url(apiUrl)
                     .headers(headersBuilder.build())
                     .post(body)
                     .build();
-
-            //logger.debug("Sending delta: {}", message);
 
             try (Response response = client.newCall(request).execute()) {
 
@@ -159,7 +146,6 @@ public class OpenAIChatService {
                     String responseChunk = choiceToJSON(responseChoice.get());
                     //LOGGER.info("SENDING: {}", responseChunk);
                     emitter.send(responseChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
-                    //TimeUnit.MILLISECONDS.sleep(50);
                 }
             }
         } catch (IOException ex) {
