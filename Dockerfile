@@ -11,4 +11,4 @@ VOLUME /data
 COPY ./app/target/app-*.jar /usr/local/lib/talkforgeai.jar
 
 # startup command
-CMD java -Dtalkforge.data-directory=/data -jar /usr/local/lib/talkforgeai.jar --spring.config.additional-location=/usr/local/talkforgeai/talkforgeai.properties
+CMD java -DTALKFORGE_DATADIR=/data -jar /usr/local/lib/talkforgeai.jar --spring.config.additional-location=/usr/local/talkforgeai/talkforgeai.properties

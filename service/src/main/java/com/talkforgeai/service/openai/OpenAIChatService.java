@@ -116,6 +116,7 @@ public class OpenAIChatService {
                 Optional<OpenAIChatStreamResponse.StreamResponseChoice> responseChoice = parseLine(line);
                 if (responseChoice.isPresent()) {
                     OpenAIChatMessage delta = responseChoice.get().delta();
+                    LOGGER.debug("Delta: {}", delta);
 
                     if (delta.functionCall() != null) {
                         isFunctionCall = true;

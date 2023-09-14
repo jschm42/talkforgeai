@@ -25,46 +25,36 @@ class ChatStreamService {
     store.messages.push(newMessage);
     store.updateStatus('Thinking...', 'running');
 
-    const sse = await this.fetchSSE(content, sessionId);
-    const reader = sse.body?.getReader();
+    const response = await this.fetchSSE(content, sessionId);
+    const reader = response.body?.getReader();
 
+    // Iterate over stream
     if (reader) {
-      while (true) {
+      const decoder = new TextDecoder('utf-8');
+      let partial = '';
+      while (true) { // eslint-disable-line no-constant-condition
         const {done, value} = await reader.read();
         if (done) {
+          console.log("STREAM DONE");
+          //await this.postStreamProcessing(store, sessionId, isFunctionCall);
           store.removeStatus();
           break;
         }
         if (value) {
-          const text = new TextDecoder('utf-8').decode(value);
-          this.processData(text, store, chunkUpdateCallback);
+          const chunk = decoder.decode(value, {stream: true});
+          console.log("CHUNK", chunk);
+          partial += chunk;
+          const parts = partial.split('\n');
+          partial = parts.pop() || '';
+          for (const part of parts) {
+            if (part && part.startsWith("data:")) {
+                const data = part.substring(5);
+                this.processData(data, store, chunkUpdateCallback);
+            }
+          }
         }
       }
     }
-
-    // return new Promise((resolve, reject): void => {
-    //   const evtSource = new EventSource('/api/v1/chat/stream/submit?sessionId=' + sessionId + '&content=' + content);
-    //
-    //   evtSource.addEventListener('complete', (event) => {
-    //     store.removeStatus();
-    //     evtSource.close();
-    //     this.postStreamProcessing(store, sessionId, isFunctionCall).then();
-    //     resolve(event);
-    //   });
-    //
-    //   evtSource.onmessage = (event) => {
-    //     console.log('Source Message', event);
-    //     this.processData(event.data, store, chunkUpdateCallback);
-    //   };
-    //
-    //   evtSource.onerror = (event) => {
-    //     console.log('onError: ', event);
-    //     evtSource.close();
-    //     store.updateStatus('Error while streaming.', 'error');
-    //     resolve(event);
-    //   };
-    //
-    // });
   }
 
   async postStreamProcessing(store: any, sessionId: string, isFunctionCall: boolean) {
