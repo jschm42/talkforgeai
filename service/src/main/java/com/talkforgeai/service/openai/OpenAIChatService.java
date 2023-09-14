@@ -2,10 +2,7 @@ package com.talkforgeai.service.openai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
-import com.talkforgeai.service.openai.dto.OpenAIChatRequest;
-import com.talkforgeai.service.openai.dto.OpenAIChatResponse;
-import com.talkforgeai.service.openai.dto.OpenAIChatStreamResponse;
+import com.talkforgeai.service.openai.dto.*;
 import com.talkforgeai.service.properties.OpenAIProperties;
 import okhttp3.*;
 import org.slf4j.Logger;
@@ -20,6 +17,8 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class OpenAIChatService {
@@ -45,11 +44,26 @@ public class OpenAIChatService {
         String message = null;
         try {
             message = objectMapper.writeValueAsString(openAIRequest);
-
             RequestBody body = RequestBody.create(message, JSON);
+
+            Headers.Builder headersBuilder = new Headers.Builder();
+            String apiUrl = "";
+            String apiKey = "";
+            if (openAIProperties.usePostman()) {
+                apiUrl = openAIProperties.postmanChatUrl();
+                apiKey = openAIProperties.postmanApiKey();
+                LOGGER.debug("Using postman Mock-Server {} with requestId={}.", apiUrl, openAIProperties.postmanRequestId());
+                headersBuilder.add("x-mock-response-id", openAIProperties.postmanRequestId());
+            } else {
+                apiUrl = openAIProperties.chatUrl();
+                apiKey = openAIProperties.apiKey();
+            }
+
+            headersBuilder.add("Authorization", "Bearer " + apiKey);
+
             Request request = new Request.Builder()
-                    .url(openAIProperties.chatUrl())
-                    .header("Authorization", "Bearer " + openAIProperties.apiKey())
+                    .url(apiUrl)
+                    .headers(headersBuilder.build())
                     .post(body)
                     .build();
 
@@ -79,15 +93,28 @@ public class OpenAIChatService {
                 message = objectMapper.writeValueAsString(openAIRequest);
 
                 RequestBody body = RequestBody.create(message, JSON);
+
+                Headers.Builder headersBuilder = new Headers.Builder();
+                String apiUrl = "";
+                if (openAIProperties.usePostman()) {
+                    apiUrl = openAIProperties.postmanChatUrl();
+                    LOGGER.debug("Using postman Mock-Server {} with requestId={}.", apiUrl, openAIProperties.postmanRequestId());
+                    headersBuilder.add("x-api-key", openAIProperties.postmanApiKey());
+                    headersBuilder.add("x-mock-response-id", openAIProperties.postmanRequestId());
+                } else {
+                    apiUrl = openAIProperties.chatUrl();
+                    headersBuilder.add("Authorization", "Bearer " + openAIProperties.apiKey());
+                }
+
                 Request request = new Request.Builder()
-                        .url(openAIProperties.chatUrl())
-                        .header("Authorization", "Bearer " + openAIProperties.apiKey())
+                        .url(apiUrl)
+                        .headers(headersBuilder.build())
                         .post(body)
                         .build();
 
                 Response response = client.newCall(request).execute();
                 LOGGER.error("Response received: {}", response);
-                StringBuilder finalContent = new StringBuilder();
+
                 boolean isFunctionCall = false;
                 StringBuilder finalFunctionArguments = new StringBuilder();
                 String functionName = null;
@@ -96,7 +123,7 @@ public class OpenAIChatService {
                     LOGGER.error("Response not successful: {}", response);
                     emitter.completeWithError(new RuntimeException("Unexpected code " + response));
                 } else {
-                    parseStreamResponse(resultCallback, response, isFunctionCall, functionName, finalFunctionArguments, finalContent, emitter);
+                    parseStreamResponse(resultCallback, response, isFunctionCall, functionName, finalFunctionArguments, emitter);
                 }
 
             } catch (IOException e) {
@@ -108,7 +135,8 @@ public class OpenAIChatService {
         return emitter;
     }
 
-    private void parseStreamResponse(ResultCallback resultCallback, Response response, boolean isFunctionCall, String functionName, StringBuilder finalFunctionArguments, StringBuilder finalContent, SseEmitter emitter) throws IOException {
+    private void parseStreamResponse(ResultCallback resultCallback, Response response, boolean isFunctionCall, String functionName, StringBuilder finalFunctionArguments, SseEmitter emitter) throws IOException {
+        StringBuilder finalContent = new StringBuilder();
         ResponseBody responseBody = response.body();
         try (BufferedReader bufferedReader = new BufferedReader(responseBody.charStream())) {
             String line;
@@ -131,10 +159,10 @@ public class OpenAIChatService {
                     String responseChunk = choiceToJSON(responseChoice.get());
                     //LOGGER.info("SENDING: {}", responseChunk);
                     emitter.send(responseChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
-                    TimeUnit.MILLISECONDS.sleep(50);
+                    //TimeUnit.MILLISECONDS.sleep(50);
                 }
             }
-        } catch (IOException | InterruptedException ex) {
+        } catch (IOException ex) {
             emitter.completeWithError(ex);
             LOGGER.error("Error while streaming.", ex);
         }
