@@ -107,7 +107,7 @@ export const useChatStore = defineStore('chat', {
       console.log('Submitting prompt', this.sessionId, prompt);
 
       await chatStreamService.streamSubmit(this.sessionId,  prompt, chunkUpdateCallback);
-      //await this.generateSessionTitle(this.sessionId);
+      await this.generateSessionTitle(this.sessionId);
       await this.loadIndex(this.selectedPersona.personaId);
     },
     async loadChatSession(sessionId: string) {

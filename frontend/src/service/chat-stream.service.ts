@@ -6,7 +6,7 @@ import HighlightingService from '@/service/highlighting.service';
 
 const highlightingService = new HighlightingService();
 
-const DELAY_TIME = 50;
+const DELAY_TIME = 20;
 const DEBOUNCE_TIME = 500;
 
 class ChatStreamService {
