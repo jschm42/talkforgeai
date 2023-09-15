@@ -54,10 +54,6 @@ export const useChatStore = defineStore('chat', {
         selectedSessionId: '',
       });
     },
-    disableConfigHeader() {
-      console.log('disableConfigHeader');
-      this.chat.configHeaderEnabled = false;
-    },
     resetChat() {
       this.$patch({
         sessionId: '',
@@ -71,26 +67,20 @@ export const useChatStore = defineStore('chat', {
         },
       });
     },
-    async selectPersona(persona: Persona) {
+    async selectPersona(persona: Persona):Promise<void> {
       this.resetChat();
       this.selectedPersona = persona;
       await this.loadIndex(persona.personaId);
     },
-    async selectPersonaById(personaId: string) {
-      console.log('selectPersonaById', personaId);
+    async selectPersonaById(personaId: string):Promise<void> {
       const persona = this.personaList.find(p => p.personaId === personaId);
       console.log('selectedPersona', persona);
       if (persona) {
-        this.resetChat();
-        this.selectedPersona = persona;
-        await this.loadIndex(persona.personaId);
+        await this.selectPersona(persona);
       }
     },
-    async loadIndex(personaId: string) {
+    async loadIndex(personaId: string):Promise<void> {
       this.sessions = await chatService.readSessionEntries(personaId);
-    },
-    async getLastResult() {
-      return await chatService.getLastResult(this.sessionId);
     },
     async streamPrompt(prompt: string,  chunkUpdateCallback: () => void) {
       this.chat.configHeaderEnabled = false;

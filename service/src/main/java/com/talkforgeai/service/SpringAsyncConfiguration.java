@@ -20,8 +20,8 @@ public class SpringAsyncConfiguration implements AsyncConfigurer {
         executor.setCorePoolSize(2);
         executor.setMaxPoolSize(2);
         executor.setQueueCapacity(500);
+        executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadNamePrefix("SseLookup-");
-        executor.initialize();
         executor.initialize();
         return executor;
     }
