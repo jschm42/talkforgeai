@@ -1,25 +1,18 @@
 import ChatMessage, {FunctionCall} from '@/store/to/chat-message';
 import Role from '@/store/to/role';
 import {useChatStore} from '@/store/chat-store';
-import ChatChoice from '@/store/to/chat-choice';
 import axios from 'axios';
 import HighlightingService from '@/service/highlighting.service';
 
-const STREAM_REGEX = /{"content":(.*?)},/;
-const QUOTE_REGEX = /\\"/;
-
 const highlightingService = new HighlightingService();
 
+const DELAY_TIME = 50;
+const DEBOUNCE_TIME = 500;
+
 class ChatStreamService {
-
-  buffer = '';
-
-  async sleep(delay: number) {
-    return new Promise((resolve) => setTimeout(resolve, delay));
-  }
+  _buffer = '';
 
   async streamSubmit(sessionId: string, content: string, chunkUpdateCallback: () => void) {
-
     const store = useChatStore();
     const isFunctionCall = false;
 
@@ -30,48 +23,33 @@ class ChatStreamService {
     const response = await this.fetchSSE(content, sessionId);
     const reader = response.body?.getReader();
 
-    // Iterate over stream
-    if (reader) {
-      const decoder = new TextDecoder('utf-8');
-      let partial = '';
-      while (true) { // eslint-disable-line no-constant-condition
-        const {done, value} = await reader.read();
-        if (done) {
-          console.log("STREAM DONE");
-          await this.postStreamProcessing(store, sessionId, isFunctionCall);
-          store.removeStatus();
-          break;
-        }
-        if (value) {
-          const chunk = decoder.decode(value, {stream: true});
-          //console.log("CHUNK", chunk);
-          partial += chunk;
-          const parts = partial.split('\n');
-          partial = parts.pop() || '';
-          this.buffer = '';
-          for (const part of parts) {
-            if (part && part.startsWith("data:")) {
-                const data = part.substring(5);
-                this.processData(data, store, chunkUpdateCallback);
-                await this.sleep(100);
-            }
-          }
+    if (!reader) return;
+
+    const decoder = new TextDecoder('utf-8');
+    let partial = '';
+
+    let isReading = true;
+    while (isReading) {
+      const {done, value} = await reader.read();
+
+      if (done) {
+        await this.postStreamProcessing(store, sessionId, isFunctionCall);
+        store.removeStatus();
+        isReading = false;
+      } else if (value) {
+        const chunk = decoder.decode(value, {stream: true});
+        partial += chunk;
+        const parts = partial.split('\n');
+        partial = parts.pop() || '';
+        this._buffer = '';
+        for (const part of parts) {
+          if (!part.startsWith("data:")) continue;
+          const data = part.substring(5);
+          this.processData(data, store, chunkUpdateCallback);
+          await this.sleep(DELAY_TIME);
         }
       }
     }
-  }
-
-   escapeHtml(html: string) {
-    // // Create a temporary element to encode the HTML
-    // const temp = document.createElement('div');
-    // temp.textContent = html;
-    //
-    // // Get the encoded HTML as plain text
-    // return temp.innerHTML;
-     console.log("VOR REPLACE", html);
-     const t =  html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-     console.log("NACH REPLACE", t);
-      return t;
   }
 
   async postStreamProcessing(store: any, sessionId: string, isFunctionCall: boolean) {
@@ -84,41 +62,56 @@ class ChatStreamService {
     }
   }
 
-  processData(data: string, store: any, chunkUpdateCallback: () => void) {
+  private escapeHtml(html: string): string {
+    const tagsToReplace: { [key: string]: string } = {
+      '<': '&lt;',
+      '>': '&gt;',
+    };
 
-    if (this.hasJSONData(data)) {
-      const chatChoice = JSON.parse(data);
-      const lastMessage = store.messages[store.messages.length - 1];
+    return html.replace(/[<>]/g, (tag: string) => tagsToReplace[tag] || tag);
+  }
 
-      if (chatChoice?.delta) {
-        if (chatChoice.delta.content) {
-          //console.log('UPDATING MESSAGE', chatChoice?.delta.content);
-          let newContent = chatChoice?.delta.content;
-          newContent = this.escapeHtml(newContent)
-          newContent = newContent.replaceAll(/\n/g, '<br/>');
-          lastMessage.content += newContent;
-          chunkUpdateCallback();
-        } else if (chatChoice.delta.function_call && chatChoice.delta.function_call.arguments) {
-          console.log('FUNCTION CALL', chatChoice.delta.function_call);
-          // isFunctionCall = true;
+  private async sleep(delay: number) {
+    return new Promise((resolve) => setTimeout(resolve, delay));
+  }
 
-          if (!lastMessage.function_call) {
-            lastMessage.function_call = new FunctionCall();
-          }
+  private debounce(func: () => void, delay: number) {
+    let debounceTimer: ReturnType<typeof setTimeout>;
+    return () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => func.apply(this), delay);
+    };
+  }
 
-          lastMessage.function_call.name = chatChoice?.delta.function_call.name;
-          lastMessage.function_call.arguments += chatChoice?.delta.function_call.arguments;
-        }
+  private processData(data: string, store: any, chunkUpdateCallback: () => void) {
+    if (!this.hasJSONData(data)) return;
+
+    const chatChoice = JSON.parse(data);
+    const lastMessage = store.messages[store.messages.length - 1];
+
+    if (!chatChoice?.delta) return;
+
+    if (chatChoice.delta.content) {
+      let newContent = this.escapeHtml(chatChoice.delta.content);
+      newContent = newContent.replaceAll(/\n/g, '<br/>');
+      lastMessage.content += newContent;
+      this.debounce(chunkUpdateCallback, DEBOUNCE_TIME);
+    }
+
+    if (chatChoice.delta.function_call?.arguments) {
+      if (!lastMessage?.function_call) {
+        lastMessage.function_call = new FunctionCall();
       }
-
+      lastMessage.function_call.name = chatChoice.delta.function_call.name;
+      lastMessage.function_call.arguments += chatChoice.delta.function_call.arguments;
     }
   }
 
-  hasJSONData(data: string): boolean {
+  private hasJSONData(data: string): boolean {
     return data.indexOf('{') != -1;
   }
 
-  async postProcessLastMessage(sessionId: string): Promise<ChatMessage> {
+  private async postProcessLastMessage(sessionId: string): Promise<ChatMessage> {
     try {
       const result = await axios.get(`/api/v1/session/${sessionId}/postprocess/last`);
       return result.data;
@@ -127,7 +120,7 @@ class ChatStreamService {
     }
   }
 
-  async fetchSSE(content: string, sessionId: string): Promise<Response> {
+  private  async fetchSSE(content: string, sessionId: string): Promise<Response> {
     return await fetch('/api/v1/chat/stream/submit', {
       method: 'POST',
       cache: 'no-cache',
