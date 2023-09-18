@@ -82,6 +82,13 @@ export const useChatStore = defineStore('chat', {
     async loadIndex(personaId: string):Promise<void> {
       this.sessions = await chatService.readSessionEntries(personaId);
     },
+    encodePrompt(prompt: string): string {
+      return prompt.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/\n/g, '<br/>');
+    },
     async streamPrompt(prompt: string,  chunkUpdateCallback: () => void) {
       this.chat.configHeaderEnabled = false;
 
@@ -91,7 +98,10 @@ export const useChatStore = defineStore('chat', {
 
       this.selectedSessionId = this.sessionId;
 
-      this.messages.push(new ChatMessage(Role.USER, prompt));
+      // Encode html in prompt
+      const encodedPrompt = this.encodePrompt(prompt);
+
+      this.messages.push(new ChatMessage(Role.USER, encodedPrompt));
       chunkUpdateCallback();
 
       console.log('Submitting prompt', this.sessionId, prompt);

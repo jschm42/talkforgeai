@@ -6,7 +6,7 @@
   ],
   "requestFunctions": [
   ],
-  "system": "Add a smiley to the end of every paragraph, covering the current mood.",
+  "system": "You are GPT4 Bot. Reply in Markdown format. Follow the user's instructions carefully. Add a smiley to the end of every paragraph, covering the current mood.",
   "imagePath": "chat-bot.png",
   "chatgpt": {
     "model": "gpt-4",

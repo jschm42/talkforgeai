@@ -18,6 +18,13 @@ public class CodeBlockTransformer implements Transformer {
             String lang = matcher.group(1);
             String code = matcher.group(2);
 
+            // HTML-Encode the code
+//            code = code.replaceAll("&", "&amp;");
+//            code = code.replaceAll("<", "&lt;");
+//            code = code.replaceAll(">", "&gt;");
+//            code = code.replaceAll("\"", "&quot;");
+//            code = code.replaceAll("'", "&#039;");
+
             String langClass = "";
             if (lang != null && !lang.isEmpty()) {
                 langClass = """
