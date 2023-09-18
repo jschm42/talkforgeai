@@ -1,7 +1,6 @@
 package com.talkforgeai.backend.transformers;
 
 import com.talkforgeai.backend.storage.FileStorageService;
-import com.talkforgeai.backend.transformers.dto.HTMLEncoderTransformer;
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
 import com.talkforgeai.service.openai.OpenAIImageService;
 import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
@@ -26,10 +25,8 @@ public class MessageProcessor {
         this.fileStorageService = fileStorageService;
 
         transformers.add(new CodeBlockTransformer());
-        transformers.add(new HTMLEncoderTransformer());
         transformers.add(new NewLineTransformer());
         transformers.add(new ImageDownloadTransformer(openAIImageService));
-
     }
 
     public OpenAIChatMessage transform(OpenAIChatMessage message, UUID sessionId) {

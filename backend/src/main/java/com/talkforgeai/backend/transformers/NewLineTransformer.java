@@ -10,11 +10,11 @@ public class NewLineTransformer implements Transformer {
     }
 
     private String replaceOutsideCodeBlock(String str) {
-        String[] parts = str.split("(?=<code)|(?<=</code>)");
+        String[] parts = str.split("(?=<pre><code)|(?<=</code></pre>)");
         StringBuilder result = new StringBuilder();
 
         for (String part : parts) {
-            if (!part.startsWith("<code")) {
+            if (!part.startsWith("<pre")) {
                 part = part
                         .replaceAll("\n\n", "<p/>")
                         .replaceAll("\n", "<br/>");
