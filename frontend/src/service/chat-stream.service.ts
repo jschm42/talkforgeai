@@ -19,6 +19,7 @@ class ChatStreamService {
     const newMessage = new ChatMessage(Role.ASSISTANT, '');
     store.messages.push(newMessage);
     store.updateStatus('Thinking...', 'running');
+    chunkUpdateCallback();
 
     const response = await this.fetchSSE(content, sessionId);
     const reader = response.body?.getReader();
@@ -29,6 +30,9 @@ class ChatStreamService {
     let partial = '';
 
     let isReading = true;
+
+    const debounceFunc = this.debounce(chunkUpdateCallback, DEBOUNCE_TIME);
+
     while (isReading) {
       const {done, value} = await reader.read();
 
@@ -45,7 +49,7 @@ class ChatStreamService {
         for (const part of parts) {
           if (!part.startsWith("data:")) continue;
           const data = part.substring(5);
-          this.processData(data, store, chunkUpdateCallback);
+          this.processData(data, store, debounceFunc);
           await this.sleep(DELAY_TIME);
         }
       }
@@ -79,11 +83,11 @@ class ChatStreamService {
     let debounceTimer: ReturnType<typeof setTimeout>;
     return () => {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => func.apply(this), delay);
+      debounceTimer = setTimeout( () => {func.apply(this);}, delay);
     };
   }
 
-  private processData(data: string, store: any, chunkUpdateCallback: () => void) {
+  private processData(data: string, store: any, debounceFunc: () => void) {
     if (!this.hasJSONData(data)) return;
 
     const chatChoice = JSON.parse(data);
@@ -95,7 +99,8 @@ class ChatStreamService {
       let newContent = this.escapeHtml(chatChoice.delta.content);
       newContent = newContent.replaceAll(/\n/g, '<br/>');
       lastMessage.content += newContent;
-      this.debounce(chunkUpdateCallback, DEBOUNCE_TIME);
+
+      debounceFunc();
     }
 
     if (chatChoice.delta.function_call?.arguments) {

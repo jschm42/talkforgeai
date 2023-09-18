@@ -43,6 +43,7 @@ export default {
     },
     chunkUpdateReceived() {
       // Scroll to bottom
+      console.log("Scrolling to bottom!!!!");
       this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
     },
   },
