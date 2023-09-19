@@ -108,6 +108,14 @@
             <artifactId>logging-interceptor</artifactId>
             <version>4.9.1</version>
         </dependency>
+
+        <!-- PlantUML -->
+        <dependency>
+            <groupId>net.sourceforge.plantuml</groupId>
+            <artifactId>plantuml</artifactId>
+            <version>8059</version>
+        </dependency>
+
     </dependencies>
 
 </project>
