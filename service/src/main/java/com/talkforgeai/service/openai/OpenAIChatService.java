@@ -2,7 +2,10 @@ package com.talkforgeai.service.openai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.talkforgeai.service.openai.dto.*;
+import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
+import com.talkforgeai.service.openai.dto.OpenAIChatRequest;
+import com.talkforgeai.service.openai.dto.OpenAIChatResponse;
+import com.talkforgeai.service.openai.dto.OpenAIChatStreamResponse;
 import com.talkforgeai.service.properties.OpenAIProperties;
 import okhttp3.*;
 import org.slf4j.Logger;
@@ -16,9 +19,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class OpenAIChatService {
@@ -82,6 +82,10 @@ public class OpenAIChatService {
                 RequestBody body = RequestBody.create(message, JSON);
 
                 Headers.Builder headersBuilder = new Headers.Builder();
+
+                // GZIP compression is not supported by the SSEEmitter
+                headersBuilder.add("Accept-Encoding", "identity");
+
                 String apiUrl = "";
                 if (openAIProperties.usePostman()) {
                     apiUrl = openAIProperties.postmanChatUrl();
