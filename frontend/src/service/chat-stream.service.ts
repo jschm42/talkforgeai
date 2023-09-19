@@ -2,17 +2,22 @@ import ChatMessage, {FunctionCall} from '@/store/to/chat-message';
 import Role from '@/store/to/role';
 import {useChatStore} from '@/store/chat-store';
 import axios from 'axios';
+import debounce from 'lodash/debounce';
 import HighlightingService from '@/service/highlighting.service';
 
 const highlightingService = new HighlightingService();
 
 const DELAY_TIME = 20;
-const DEBOUNCE_TIME = 500;
+const DEBOUNCE_TIME = 200;
+const DEBOUNCE_MAXWAIT = 1000;
 
 class ChatStreamService {
   _buffer = '';
 
   async streamSubmit(sessionId: string, content: string, chunkUpdateCallback: () => void) {
+    const debouncedUpdateCallback = debounce(chunkUpdateCallback, DEBOUNCE_TIME, {maxWait: DEBOUNCE_MAXWAIT});
+
+
     const store = useChatStore();
     const isFunctionCall = false;
 
@@ -31,8 +36,6 @@ class ChatStreamService {
 
     let isReading = true;
 
-    const debounceFunc = this.debounce(chunkUpdateCallback, DEBOUNCE_TIME);
-
     while (isReading) {
       const {done, value} = await reader.read();
 
@@ -49,7 +52,7 @@ class ChatStreamService {
         for (const part of parts) {
           if (!part.startsWith("data:")) continue;
           const data = part.substring(5);
-          this.processData(data, store, debounceFunc);
+          this.processData(data, store, debouncedUpdateCallback);
           await this.sleep(DELAY_TIME);
         }
       }
@@ -79,15 +82,7 @@ class ChatStreamService {
     return new Promise((resolve) => setTimeout(resolve, delay));
   }
 
-  private debounce(func: () => void, delay: number) {
-    let debounceTimer: ReturnType<typeof setTimeout>;
-    return () => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout( () => {func.apply(this);}, delay);
-    };
-  }
-
-  private processData(data: string, store: any, debounceFunc: () => void) {
+  private processData(data: string, store: any, debouncedUpdateCallback: () => void) {
     if (!this.hasJSONData(data)) return;
 
     const chatChoice = JSON.parse(data);
@@ -99,8 +94,8 @@ class ChatStreamService {
       let newContent = this.escapeHtml(chatChoice.delta.content);
       newContent = newContent.replaceAll(/\n/g, '<br/>');
       lastMessage.content += newContent;
-
-      debounceFunc();
+      // SEND UPDATE
+        debouncedUpdateCallback();
     }
 
     if (chatChoice.delta.function_call?.arguments) {
