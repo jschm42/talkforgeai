@@ -17,7 +17,6 @@ class ChatStreamService {
   async streamSubmit(sessionId: string, content: string, chunkUpdateCallback: () => void) {
     const debouncedUpdateCallback = debounce(chunkUpdateCallback, DEBOUNCE_TIME, {maxWait: DEBOUNCE_MAXWAIT});
 
-
     const store = useChatStore();
     const isFunctionCall = false;
 
