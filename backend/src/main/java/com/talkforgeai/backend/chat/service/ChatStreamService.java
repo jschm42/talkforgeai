@@ -16,10 +16,12 @@ import com.talkforgeai.backend.websocket.service.WebSocketService;
 import com.talkforgeai.service.openai.OpenAIChatService;
 import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
 import com.talkforgeai.service.openai.dto.OpenAIChatRequest;
+import com.talkforgeai.service.openai.dto.OpenAIChatStreamResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import reactor.core.publisher.Flux;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +48,7 @@ public class ChatStreamService {
         this.functionRepository = functionRepository;
     }
 
-    public SseEmitter submit(ChatCompletionRequest request) {
+    public Flux<ServerSentEvent<OpenAIChatStreamResponse.StreamResponseChoice>> submit(ChatCompletionRequest request) {
         ChatSessionEntity session = sessionService.getById(request.sessionId())
                 .orElseThrow(() -> new SessionException("Session not found: " + request.sessionId()));
 
@@ -71,7 +73,7 @@ public class ChatStreamService {
 //        return new SubmitResult(session, isFirstSubmitInSession, newUserMessage, processedNewUserMessage, response);
     }
 
-    private SseEmitter submit(UUID sessionId, List<OpenAIChatMessage> messages, PersonaEntity persona) {
+    private Flux<ServerSentEvent<OpenAIChatStreamResponse.StreamResponseChoice>> submit(UUID sessionId, List<OpenAIChatMessage> messages, PersonaEntity persona) {
         Map<String, String> properties = mapToGptProperties(persona.getProperties());
 
         try {
@@ -108,8 +110,15 @@ public class ChatStreamService {
                 request.setFunctions(functionRepository.getByRequestFunctions(requestFunctions));
             }
 
+            StringBuilder finalContent = new StringBuilder();
+
             return openAIChatService.stream(request, message -> {
-                handleResultMessage(sessionId, message);
+            }).doOnNext(response -> {
+                finalContent.append(response.data().delta().content());
+            }).doOnComplete(() -> {
+                handleResultMessage(sessionId, new OpenAIChatMessage(
+                        OpenAIChatMessage.Role.ASSISTANT,
+                        finalContent.toString()));
             });
         } catch (Exception e) {
             LOGGER.error("Error while submitting chat request.", e);

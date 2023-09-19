@@ -2,12 +2,12 @@ package com.talkforgeai.backend.chat.controller;
 
 import com.talkforgeai.backend.chat.dto.ChatCompletionRequest;
 import com.talkforgeai.backend.chat.service.ChatStreamService;
+import com.talkforgeai.service.openai.dto.OpenAIChatStreamResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import java.util.UUID;
+import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/api/v1/chat/stream")
@@ -21,7 +21,7 @@ public class ChatStreamController {
 
     @PostMapping("/submit")
     @ResponseBody
-    public SseEmitter submit(@RequestBody ChatCompletionRequest request) {
+    public Flux<ServerSentEvent<OpenAIChatStreamResponse.StreamResponseChoice>> submit(@RequestBody ChatCompletionRequest request) {
         return chatStreamService.submit(request);
     }
 }

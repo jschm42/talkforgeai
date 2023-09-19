@@ -49,7 +49,7 @@ class ChatStreamService {
         partial = parts.pop() || '';
         this._buffer = '';
         for (const part of parts) {
-          if (!part.startsWith("data:")) continue;
+          if (!part.startsWith('data:')) continue;
           const data = part.substring(5);
           this.processData(data, store, debouncedUpdateCallback);
           await this.sleep(DELAY_TIME);
@@ -93,8 +93,7 @@ class ChatStreamService {
       let newContent = this.escapeHtml(chatChoice.delta.content);
       newContent = newContent.replaceAll(/\n/g, '<br/>');
       lastMessage.content += newContent;
-      // SEND UPDATE
-        debouncedUpdateCallback();
+      debouncedUpdateCallback();
     }
 
     if (chatChoice.delta.function_call?.arguments) {
@@ -119,7 +118,7 @@ class ChatStreamService {
     }
   }
 
-  private  async fetchSSE(content: string, sessionId: string): Promise<Response> {
+  private async fetchSSE(content: string, sessionId: string): Promise<Response> {
     return await fetch('/api/v1/chat/stream/submit', {
       method: 'POST',
       cache: 'no-cache',
