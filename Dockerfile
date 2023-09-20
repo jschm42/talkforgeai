@@ -7,7 +7,7 @@ EXPOSE 8090
 
 # Install dependencies
 # freetype is required for the font rendering in PlantUML
-RUN apk add --no-cache freetype
+RUN apk add --no-cache graphviz
 
 # Set up a volume for the data directory
 VOLUME /data
