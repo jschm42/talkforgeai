@@ -1,5 +1,7 @@
 <template>
   <div class="d-flex flex-column full-height">
+    <ChatConfig></ChatConfig>
+
     <div ref="entries" class="flex-grow-1 vertical-scrollbar no-horizontal-scrollbar">
       <ChatMessage v-for="(message, index) in store.messages" ref="chatMessageRef" v-bind:key="index"
                    :message="message" :messageIndex="index"></ChatMessage>
@@ -17,6 +19,7 @@
 import ChatControl from './ChatControl.vue';
 import ChatMessage from './ChatMessage.vue';
 import {useChatStore} from '@/store/chat-store';
+import ChatConfig from '@/components/ChatConfig.vue';
 
 export default {
   name: 'ChatContainer',
@@ -30,7 +33,7 @@ export default {
   data() {
     return {};
   },
-  components: {ChatControl, ChatMessage},
+  components: {ChatConfig, ChatControl, ChatMessage},
   methods: {
     async submitResultReceived() {
       console.log('Submit Result Received');
@@ -43,7 +46,7 @@ export default {
     },
     chunkUpdateReceived() {
       // Scroll to bottom
-      console.log("Scrolling to bottom!!!!");
+      console.log('Scrolling to bottom!!!!');
       this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
     },
   },
