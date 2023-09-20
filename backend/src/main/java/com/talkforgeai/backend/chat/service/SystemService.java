@@ -14,15 +14,11 @@ public class SystemService {
             "\"A painting of a stormy sea with a lighthouse in the distance,\" or \"A photograph of a city street at night, illuminated by neon lights.\". " +
             "Place the content between the following tags: <image-prompt></image-prompt>.";
 
-    public static final String PLANTUML_GEN_SYSTEM = "Always put PlantUML code between the following tags: <plantuml></plantuml>.";
-
     public String getContent(GlobalSystem system) {
         Objects.requireNonNull(system, "Global system cannot be null.");
 
         if (system == GlobalSystem.IMAGE_GEN) {
             return IMAGE_GEN_SYSTEM;
-        } else if (system == GlobalSystem.PLANTUML_GEN) {
-            return PLANTUML_GEN_SYSTEM;
         }
 
         throw new ChatException("Unknown global system: " + system);

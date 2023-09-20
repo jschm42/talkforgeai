@@ -2,6 +2,7 @@ package com.talkforgeai.backend.transformers;
 
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
 import com.talkforgeai.service.plantuml.PlantUMLService;
+import net.sourceforge.plantuml.core.DiagramDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,7 @@ import java.util.regex.Pattern;
 @Component
 public class PlantUMLTransformer implements Transformer {
     private static final Logger LOGGER = LoggerFactory.getLogger(PlantUMLTransformer.class);
-    private static final Pattern UrlRegEx = Pattern.compile("```([a-z]*)\n@startuml\n([\\s\\S]*?)```", Pattern.MULTILINE);
+    private static final Pattern UrlRegEx = Pattern.compile("```(.*)\n@startuml\n([\\s\\S]*?)```", Pattern.MULTILINE);
     final String template = """
             <div class="card shadow">
               <div class="card-body">
@@ -55,7 +56,7 @@ public class PlantUMLTransformer implements Transformer {
                 throw new RuntimeException(ioEx);
             }
 
-            service.generateUmlDiagram(code, localFilePath.toString());
+            DiagramDescription diagramDescription = service.generateUmlDiagram(code, localFilePath.toString());
 
             String imageUrl = "/api/v1/session/" + context.sessionId() + "/" + fileName;
 

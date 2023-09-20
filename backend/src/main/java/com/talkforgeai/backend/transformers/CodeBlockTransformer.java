@@ -9,7 +9,7 @@ public class CodeBlockTransformer implements Transformer {
 
     @Override
     public String process(String content, TransformerContext context) {
-        String regex = "```([a-z]*)\n([\\s\\S]*?)```";
+        String regex = "```(.*)\n([\\s\\S]*?)```";
 
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(content);
