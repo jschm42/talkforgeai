@@ -15,6 +15,8 @@
 
 import {useChatStore} from '@/store/chat-store';
 
+const allowedKeys = ['model', 'temperature', 'top_p'];
+
 export default {
   name: 'ChatConfig',
   setup() {
@@ -32,7 +34,7 @@ export default {
 
       if (this.store.selectedPersona.properties) {
         Object.keys(this.store.selectedPersona.properties).filter((key) => {
-          return key === 'model' || key === 'temperature';
+          return allowedKeys.indexOf(key) !== -1;
         }).forEach((key) => {
           result.push({key: key, value: this.store.selectedPersona.properties[key]});
         });
