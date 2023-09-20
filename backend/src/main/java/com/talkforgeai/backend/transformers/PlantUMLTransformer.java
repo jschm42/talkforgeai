@@ -19,11 +19,13 @@ public class PlantUMLTransformer implements Transformer {
     private static final Logger LOGGER = LoggerFactory.getLogger(PlantUMLTransformer.class);
     private static final Pattern UrlRegEx = Pattern.compile("```(.*)\n@startuml\n([\\s\\S]*?)```", Pattern.MULTILINE);
     final String template = """
+            %s
             <div class="card shadow">
               <div class="card-body">
                 <img src='%s' title='%s'>
               </div>
             </div>
+            %s
             """;
     private final PlantUMLService service;
 
@@ -57,11 +59,13 @@ public class PlantUMLTransformer implements Transformer {
             }
 
             DiagramDescription diagramDescription = service.generateUmlDiagram(code, localFilePath.toString());
+            LOGGER.info("Generated PlantUML diagram: {}", diagramDescription.getDescription());
 
             String imageUrl = "/api/v1/session/" + context.sessionId() + "/" + fileName;
 
             // Perform your Mustache template replacement here
-            content = content.replace(fullTag, template.formatted(imageUrl, code));
+            String formattedContent = template.formatted(NO_LB_MARKER_START, imageUrl, code, NO_LB_MARKER_END);
+            content = content.replace(fullTag, formattedContent);
         }
 
         return content;
