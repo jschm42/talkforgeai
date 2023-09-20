@@ -1,7 +1,7 @@
 <template>
   <!-- Align the badges horizontally -->
 
-  <div class="container">
+  <div class="container p-0 m-0">
     <div class="d-flex flex-row">
       <div v-for="item in properties" :key="item.key" class="p-1">
         <span :class="badgeColor(item.key)" class="badge rounded-pill">{{ item.key }}: {{ item.value }}</span>
