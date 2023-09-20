@@ -4,6 +4,12 @@ FROM ghcr.io/graalvm/jdk-community:20.0.1
 # 8090 is the port number the application will use
 EXPOSE 8090
 
+# Install dependencies
+# libfreetype6 is required for the font rendering in PlantUML
+RUN apt-get update && apt-get install -y \
+    libfreetype6 \
+    && rm -rf /var/lib/apt/lists/* \
+
 # Set up a volume for the data directory
 VOLUME /data
 
