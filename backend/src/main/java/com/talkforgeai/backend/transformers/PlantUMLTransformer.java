@@ -20,8 +20,6 @@ public class PlantUMLTransformer implements Transformer {
     final String template = """
             <div class="card shadow">
               <div class="card-body">
-                <!--<h5 class="card-title">Card title</h5>-->
-                <!--<h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>-->
                 <img src='%s' title='%s'>
               </div>
             </div>
