@@ -67,29 +67,29 @@ export const useChatStore = defineStore('chat', {
         },
       });
     },
-    async selectPersona(persona: Persona):Promise<void> {
+    async selectPersona(persona: Persona): Promise<void> {
       this.resetChat();
       this.selectedPersona = persona;
       await this.loadIndex(persona.personaId);
     },
-    async selectPersonaById(personaId: string):Promise<void> {
+    async selectPersonaById(personaId: string): Promise<void> {
       const persona = this.personaList.find(p => p.personaId === personaId);
       console.log('selectedPersona', persona);
       if (persona) {
         await this.selectPersona(persona);
       }
     },
-    async loadIndex(personaId: string):Promise<void> {
+    async loadIndex(personaId: string): Promise<void> {
       this.sessions = await chatService.readSessionEntries(personaId);
     },
     encodePrompt(prompt: string): string {
-      return prompt.replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/\n/g, '<br/>');
+      return prompt.replace(/&/g, '&amp;').
+        replace(/</g, '&lt;').
+        replace(/>/g, '&gt;').
+        replace(/"/g, '&quot;').
+        replace(/\n/g, '<br/>');
     },
-    async streamPrompt(prompt: string,  chunkUpdateCallback: () => void) {
+    async streamPrompt(prompt: string, chunkUpdateCallback: () => void) {
       this.chat.configHeaderEnabled = false;
 
       if (!this.sessionId || this.sessionId === '') {
@@ -106,7 +106,7 @@ export const useChatStore = defineStore('chat', {
 
       console.log('Submitting prompt', this.sessionId, prompt);
 
-      await chatStreamService.streamSubmit(this.sessionId,  prompt, chunkUpdateCallback);
+      await chatStreamService.streamSubmit(this.sessionId, prompt, chunkUpdateCallback);
       await this.generateSessionTitle(this.sessionId);
       await this.loadIndex(this.selectedPersona.personaId);
     },

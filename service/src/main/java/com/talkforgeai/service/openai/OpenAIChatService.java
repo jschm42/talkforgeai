@@ -2,7 +2,6 @@ package com.talkforgeai.service.openai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
 import com.talkforgeai.service.openai.dto.OpenAIChatRequest;
 import com.talkforgeai.service.openai.dto.OpenAIChatResponse;
 import com.talkforgeai.service.openai.dto.OpenAIChatStreamResponse;
@@ -12,15 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -45,9 +43,7 @@ public class OpenAIChatService {
         this.openAIProperties = openAIProperties;
         this.client = client;
         this.taskExecutor = taskExecutor;
-        this.webClient = webClientBuilder
-                .baseUrl(openAIProperties.chatUrl())
-                .build();
+        this.webClient = webClientBuilder.build();
     }
 
     ExchangeFilterFunction logRequest() {
@@ -103,9 +99,24 @@ public class OpenAIChatService {
         LOGGER.info("Setting async timeout to {}", asyncTimeout);
         openAIRequest.setStream(true);
 
+        LOGGER.info("Chat Stream Request Body: {}", openAIRequest);
+
+        String uri = openAIProperties.chatUrl();
+        HttpHeaders headers = new HttpHeaders();
+
+        if (openAIProperties.usePostman()) {
+            uri = openAIProperties.postmanChatUrl();
+            headers.add("x-api-key", openAIProperties.postmanApiKey());
+            headers.add("x-mock-response-id", openAIProperties.postmanRequestId());
+        } else {
+            headers.add("Authorization", "Bearer " + openAIProperties.apiKey());
+        }
+
         return webClient.post()
-                .uri(openAIProperties.chatUrl())
-                .header("Authorization", "Bearer " + openAIProperties.apiKey())
+                .uri(uri)
+                .headers(httpHeaders -> {
+                    httpHeaders.addAll(headers);
+                })
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .accept(org.springframework.http.MediaType.TEXT_EVENT_STREAM)
                 .bodyValue(openAIRequest)
@@ -143,54 +154,6 @@ public class OpenAIChatService {
                 .doOnComplete(() -> {
                     LOGGER.info("Stream completed.");
                 });
-    }
-
-    private void parseStreamResponse(ResultCallback resultCallback, Response response, boolean isFunctionCall, String functionName, StringBuilder finalFunctionArguments, SseEmitter emitter) throws IOException {
-        StringBuilder finalContent = new StringBuilder();
-        ResponseBody responseBody = response.body();
-        try (BufferedReader bufferedReader = new BufferedReader(responseBody.charStream())) {
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                Optional<OpenAIChatStreamResponse.StreamResponseChoice> responseChoice = parseLine(line);
-                if (responseChoice.isPresent()) {
-                    OpenAIChatMessage delta = responseChoice.get().delta();
-                    LOGGER.debug("Delta: {}", delta);
-
-                    if (delta.functionCall() != null) {
-                        isFunctionCall = true;
-                        if (functionName == null) {
-                            functionName = delta.functionCall().name();
-                        }
-                        finalFunctionArguments.append(delta.functionCall().arguments());
-                    } else {
-                        finalContent.append(delta.content());
-                    }
-
-                    String responseChunk = choiceToJSON(responseChoice.get());
-                    //LOGGER.info("SENDING: {}", responseChunk);
-                    emitter.send(responseChunk, org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
-                }
-            }
-        } catch (IOException ex) {
-            emitter.completeWithError(ex);
-            LOGGER.error("Error while streaming.", ex);
-        }
-
-        if (isFunctionCall) {
-            OpenAIChatMessage.FunctionCall functionCall
-                    = new OpenAIChatMessage.FunctionCall(functionName, finalFunctionArguments.toString());
-            resultCallback.call(new OpenAIChatMessage(functionCall));
-        } else {
-            resultCallback.call(new OpenAIChatMessage(OpenAIChatMessage.Role.ASSISTANT, finalContent.toString()));
-        }
-
-        LOGGER.info("SENDING stream finished");
-//        emitter.send(
-//                "stream-done", org.springframework.http.MediaType.TEXT_PLAIN
-//        );
-        emitter.send(SseEmitter.event().name("complete").data("Stream has ended"));
-        LOGGER.info("SENDING complete");
-        emitter.complete();
     }
 
     private String choiceToJSON(OpenAIChatStreamResponse.StreamResponseChoice choice) {

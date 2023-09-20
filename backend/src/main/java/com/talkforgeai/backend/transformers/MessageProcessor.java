@@ -4,6 +4,7 @@ import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
 import com.talkforgeai.service.openai.OpenAIImageService;
 import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
+import com.talkforgeai.service.plantuml.PlantUMLService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,18 +16,21 @@ import java.util.UUID;
 @Component
 public class MessageProcessor {
     private final OpenAIImageService openAIImageService;
+    private final PlantUMLService plantUMLService;
     private final FileStorageService fileStorageService;
 
     Logger logger = LoggerFactory.getLogger(MessageProcessor.class);
     List<Transformer> transformers = new ArrayList<>();
 
-    public MessageProcessor(OpenAIImageService imageService, FileStorageService fileStorageService) {
+    public MessageProcessor(OpenAIImageService imageService, FileStorageService fileStorageService, PlantUMLService plantUMLService) {
         this.openAIImageService = imageService;
         this.fileStorageService = fileStorageService;
+        this.plantUMLService = plantUMLService;
 
+        transformers.add(new PlantUMLTransformer(plantUMLService));
         transformers.add(new CodeBlockTransformer());
         transformers.add(new NewLineTransformer());
-        transformers.add(new ImageDownloadTransformer(openAIImageService));
+        transformers.add(new ImageDownloadTransformer(imageService));
     }
 
     public OpenAIChatMessage transform(OpenAIChatMessage message, UUID sessionId) {

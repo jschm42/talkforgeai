@@ -63,7 +63,7 @@ public class ImageDownloadTransformer implements Transformer {
     }
 
     private String downloadImage(String imageUrl, UUID sessionId, Path dataDirectory) throws IOException {
-        String fileName = UUID.randomUUID() + ".png";
+        String fileName = UUID.randomUUID() + "_image.png";
         Path subDirectoryPath = dataDirectory.resolve("chat").resolve(sessionId.toString());
         Path localFilePath = subDirectoryPath.resolve(fileName);
 

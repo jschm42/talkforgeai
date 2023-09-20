@@ -137,4 +137,23 @@ public class OpenAIChatRequest {
     public void setFunctions(List<OpenAIFunction> functions) {
         this.functions = functions;
     }
+
+    @Override
+    public String toString() {
+        return "OpenAIChatRequest{" +
+                "model='" + model + '\'' +
+                ", messages=" + messages +
+                ", functions=" + functions +
+                ", temperature=" + temperature +
+                ", topP=" + topP +
+                ", n=" + n +
+                ", stream=" + stream +
+                ", stop=" + stop +
+                ", maxTokens=" + maxTokens +
+                ", presencePenalty=" + presencePenalty +
+                ", frequencyPenalty=" + frequencyPenalty +
+                ", logitBias=" + logitBias +
+                ", user='" + user + '\'' +
+                '}';
+    }
 }

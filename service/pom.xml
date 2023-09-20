@@ -11,4 +11,11 @@
 
     <artifactId>service</artifactId>
     <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.sourceforge.plantuml</groupId>
+            <artifactId>plantuml</artifactId>
+        </dependency>
+    </dependencies>
 </project>
