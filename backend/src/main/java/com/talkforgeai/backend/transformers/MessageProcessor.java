@@ -15,18 +15,15 @@ import java.util.UUID;
 
 @Component
 public class MessageProcessor {
-    private final OpenAIImageService openAIImageService;
-    private final PlantUMLService plantUMLService;
     private final FileStorageService fileStorageService;
 
     Logger logger = LoggerFactory.getLogger(MessageProcessor.class);
     List<Transformer> transformers = new ArrayList<>();
 
     public MessageProcessor(OpenAIImageService imageService, FileStorageService fileStorageService, PlantUMLService plantUMLService) {
-        this.openAIImageService = imageService;
         this.fileStorageService = fileStorageService;
-        this.plantUMLService = plantUMLService;
 
+        transformers.add(new LaTeXTransformer());
         transformers.add(new PlantUMLTransformer(plantUMLService));
         transformers.add(new CodeBlockTransformer());
         transformers.add(new NewLineTransformer());

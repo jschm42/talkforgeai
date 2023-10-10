@@ -1,6 +1,16 @@
 const {defineConfig} = require('@vue/cli-service');
 module.exports = defineConfig({
+  runtimeCompiler: true,
   transpileDependencies: true,
+  chainWebpack: config => {
+    config.module.rule('vue').use('vue-loader').tap(options => ({
+      ...options,
+      compilerOptions: {
+        // treat any tag that starts with tf- as custom elements
+        isCustomElement: tag => tag.startsWith('tf-'),
+      },
+    }));
+  },
   // proxy all webpack dev-server requests starting with /api
   // to our Spring Boot backend (localhost:8098) using http-proxy-middleware
   // see https://cli.vuejs.org/config/#devserver-proxy

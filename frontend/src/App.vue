@@ -1,8 +1,13 @@
 <template>
-  <!--    <nav>-->
-  <!--        <router-link to="/">Home</router-link>-->
-  <!--        |-->
-  <!--    </nav>-->
+  <div style="border-color: red; border-style: solid; border-width: 1px; color: white">
+    <!--    <tf-latex latex="S = \sum_{{n=1}}^{\infty} \frac{{1}}{{n^2}}"></tf-latex>-->
+
+    <tf-latex latex="\begin{equation}
+\int_a^b f(x) dx
+\end{equation}"></tf-latex>
+  </div>
+
+
   <router-view/>
 </template>
 
@@ -13,19 +18,6 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-}
-
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
 }
 </style>
 
@@ -45,6 +37,7 @@ export default {
   data() {
     return {};
   },
-
+  mounted() {
+  },
 };
 </script>

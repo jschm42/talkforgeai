@@ -7,5 +7,12 @@ import 'bootstrap-icons/font/bootstrap-icons.min.css';
 import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
 import 'bootstrap';
 import 'highlight.js/styles/atom-one-dark.css';
+import '@/custom/LaTeXComponent.js';
 
-createApp(App).use(router).use(useStore).mount('#app');
+const app = createApp(App);
+
+app.use(router);
+app.use(useStore);
+app.mount('#app');
+
+
