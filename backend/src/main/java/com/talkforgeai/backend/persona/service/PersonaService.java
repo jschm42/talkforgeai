@@ -1,8 +1,9 @@
 package com.talkforgeai.backend.persona.service;
 
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
-import com.talkforgeai.backend.persona.dto.PersonaResponse;
+import com.talkforgeai.backend.persona.dto.PersonaDto;
 import com.talkforgeai.backend.persona.repository.PersonaRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class PersonaService {
         this.personaMapper = personaMapper;
     }
 
-    public List<PersonaResponse> getAllPersona() {
+    public List<PersonaDto> getAllPersona() {
         return getPersonaResponse(personaRepository.findAll());
     }
 
@@ -32,8 +33,12 @@ public class PersonaService {
         return personaRepository.findByName(personaName);
     }
 
-    public List<PersonaResponse> getPersonaResponse(List<PersonaEntity> personaEntities) {
+    public List<PersonaDto> getPersonaResponse(List<PersonaEntity> personaEntities) {
         return personaEntities.stream().map(personaMapper::mapPersonaResponse).toList();
     }
 
+    @Transactional
+    public void createPersona(PersonaDto personaDto) {
+        personaRepository.save(personaMapper.mapPersonaDto(personaDto));
+    }
 }

@@ -5,6 +5,7 @@ import com.talkforgeai.backend.persona.domain.GlobalSystem;
 import com.talkforgeai.backend.persona.domain.RequestFunction;
 
 import java.util.List;
+import java.util.Map;
 
 public record PersonaImport(String version,
                             String name,
@@ -13,10 +14,7 @@ public record PersonaImport(String version,
                             List<RequestFunction> requestFunctions,
                             String system,
                             String imagePath,
-                            @JsonProperty("chatgpt")
-                            ChatGptConfig chatGptConfig,
-                            @JsonProperty("elevenlabs")
-                            ElevenLabsConfig elevenLabsConfig) {
+                            Map<String, String> properties) {
 
     public record ChatGptConfig(String model,
                                 String temperature,

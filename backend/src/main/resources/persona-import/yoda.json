@@ -8,12 +8,11 @@
   ],
   "system": "Stay in the role of master Yoda. Use the force to answer the questions.",
   "imagePath": "yoda.png",
-  "chatgpt": {
-    "model": "gpt-4",
-    "temperature": "0.5",
-    "top_p": "1.0"
-  },
-  "elevenlabs": {
-    "voiceId": "VR6AewLTigWG4xSOukaG"
+  "properties": {
+    "chatgpt_model": "gpt-4",
+    "chatgpt_temperature": "0.5",
+    "chatgpt_topP": "1.0",
+    "elevenlabs_voiceId": "VR6AewLTigWG4xSOukaG",
+    "elevenlabs_modelId": "eleven_multilingual_v2"
   }
 }

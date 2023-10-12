@@ -2,9 +2,6 @@ package com.talkforgeai.backend.persona.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
-import com.talkforgeai.backend.persona.domain.PropertyCategory;
-import com.talkforgeai.backend.persona.domain.PropertyEntity;
-import com.talkforgeai.backend.persona.domain.PropertyType;
 import com.talkforgeai.backend.persona.dto.PersonaImport;
 import com.talkforgeai.backend.persona.repository.PersonaRepository;
 import com.talkforgeai.backend.storage.FileStorageService;
@@ -24,9 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class PersonaImportService {
@@ -38,17 +33,6 @@ public class PersonaImportService {
     private final ResourcePatternResolver resourceResolver;
 
     private final PersonaRepository personaRepository;
-
-    private Map<PropertyCategory, Map<String, PropertyType>> propertyTypes = Map.of(
-            PropertyCategory.CHATGPT, Map.of(
-                    "model", PropertyType.STRING,
-                    "temperature", PropertyType.DOUBLE,
-                    "top_p", PropertyType.DOUBLE
-            ),
-            PropertyCategory.ELEVENLABS, Map.of(
-                    "voiceId", PropertyType.STRING
-            )
-    );
 
     public PersonaImportService(FileStorageService fileStorageService, PersonaRepository personaRepository, ResourcePatternResolver resourceResolver) {
         this.resourcePatternResolver = new PathMatchingResourcePatternResolver();
@@ -204,34 +188,8 @@ public class PersonaImportService {
         personaEntity.setSystem(persona.system());
         personaEntity.setRequestFunctions(persona.requestFunctions());
         personaEntity.setImagePath(persona.imagePath());
-
-        Map<String, PropertyEntity> properties = new HashMap<>();
-        properties.put("model", createPropertyEntity("model", persona.chatGptConfig().model(), PropertyCategory.CHATGPT));
-        properties.put("temperature", createPropertyEntity("temperature", persona.chatGptConfig().temperature(), PropertyCategory.CHATGPT));
-        properties.put("top_p", createPropertyEntity("top_p", persona.chatGptConfig().topP(), PropertyCategory.CHATGPT));
-        properties.put("voiceId", createPropertyEntity("voiceId", persona.elevenLabsConfig().voiceId(), PropertyCategory.ELEVENLABS));
-
-        personaEntity.setProperties(properties);
-
+        personaEntity.setProperties(persona.properties());
         return personaEntity;
     }
 
-    private PropertyEntity createPropertyEntity(String key, String value, PropertyCategory category) {
-        PropertyEntity propertyEntity = new PropertyEntity();
-        propertyEntity.setPropertyKey(key);
-        propertyEntity.setPropertyValue(value);
-        propertyEntity.setCategory(category);
-        propertyEntity.setType(getPropertyType(key, category));
-        return propertyEntity;
-    }
-
-    private PropertyType getPropertyType(String key, PropertyCategory category) {
-        Map<String, PropertyType> types = propertyTypes.get(category);
-
-        if (types.containsKey(key)) {
-            return types.get(key);
-        }
-
-        throw new IllegalArgumentException("Unknown key '" + key + "' with category '" + category + "'.");
-    }
 }

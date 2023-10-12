@@ -1,6 +1,6 @@
 package com.talkforgeai.backend.persona.controller;
 
-import com.talkforgeai.backend.persona.dto.PersonaResponse;
+import com.talkforgeai.backend.persona.dto.PersonaDto;
 import com.talkforgeai.backend.persona.service.PersonaService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import org.springframework.core.io.FileSystemResource;
@@ -9,10 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -30,7 +27,7 @@ public class PersonaController {
     }
 
     @GetMapping
-    public List<PersonaResponse> getAllPersona() {
+    public List<PersonaDto> getAllPersona() {
         return personaService.getAllPersona();
     }
 
@@ -47,6 +44,11 @@ public class PersonaController {
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @PostMapping
+    public void createPersona(@RequestBody PersonaDto personaDto) {
+        personaService.createPersona(personaDto);
     }
 
 }

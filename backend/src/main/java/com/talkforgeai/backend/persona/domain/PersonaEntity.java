@@ -39,13 +39,12 @@ public class PersonaEntity {
 
     @Column(length = 128)
     private String imagePath;
-    
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "persona_property_mapping",
-            joinColumns = {@JoinColumn(name = "persona_id", referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "property_id", referencedColumnName = "id")})
-    @MapKey(name = "propertyKey")
-    private Map<String, PropertyEntity> properties = new HashMap<>();
+
+    @ElementCollection
+    @MapKeyColumn(name = "property_key")
+    @Column(name = "property_value")
+    @CollectionTable(name = "persona_properties", joinColumns = @JoinColumn(name = "persona_id"))
+    private Map<String, String> properties = new HashMap<>();
 
     public List<RequestFunction> getRequestFunctions() {
         return requestFunctions;
@@ -103,14 +102,6 @@ public class PersonaEntity {
         this.imagePath = imagePath;
     }
 
-    public Map<String, PropertyEntity> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Map<String, PropertyEntity> properties) {
-        this.properties = properties;
-    }
-
 
     public Date getCreatedAt() {
         return createdAt;
@@ -126,5 +117,13 @@ public class PersonaEntity {
 
     public void setModifiedAt(Date modifiedAt) {
         this.modifiedAt = modifiedAt;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 }

@@ -40,6 +40,8 @@ public class ElevenLabsService {
             String message = objectMapper.writeValueAsString(apiRequest);
 
             Headers headers = new Headers.Builder()
+                    .add("accept", "audio/mpeg")
+                    .add("Content-Type", "application/json")
                     .add("xi-api-key", properties.apiKey())
                     .build();
 

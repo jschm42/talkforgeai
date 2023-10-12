@@ -1,6 +1,6 @@
 package com.talkforgeai.backend.session.dto;
 
-import com.talkforgeai.backend.persona.dto.PersonaResponse;
+import com.talkforgeai.backend.persona.dto.PersonaDto;
 import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
 
 import java.util.Date;
@@ -12,6 +12,6 @@ public record SessionResponse(UUID id,
                               String description,
                               Date createdAt,
                               List<OpenAIChatMessage> chatMessages,
-                              PersonaResponse persona) {
+                              PersonaDto persona) {
 
 }

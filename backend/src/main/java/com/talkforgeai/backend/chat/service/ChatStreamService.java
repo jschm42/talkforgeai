@@ -5,8 +5,6 @@ import com.talkforgeai.backend.chat.domain.ChatMessageType;
 import com.talkforgeai.backend.chat.dto.ChatCompletionRequest;
 import com.talkforgeai.backend.chat.repository.FunctionRepository;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
-import com.talkforgeai.backend.persona.domain.PropertyCategory;
-import com.talkforgeai.backend.persona.domain.PropertyEntity;
 import com.talkforgeai.backend.persona.domain.RequestFunction;
 import com.talkforgeai.backend.session.domain.ChatSessionEntity;
 import com.talkforgeai.backend.session.exception.SessionException;
@@ -23,7 +21,6 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -74,13 +71,14 @@ public class ChatStreamService {
     }
 
     private Flux<ServerSentEvent<OpenAIChatStreamResponse.StreamResponseChoice>> submit(UUID sessionId, List<OpenAIChatMessage> messages, PersonaEntity persona) {
-        Map<String, String> properties = mapToGptProperties(persona.getProperties());
 
         try {
             OpenAIChatRequest request = new OpenAIChatRequest();
             request.setMessages(messages);
 
-            if (properties.containsKey(PropertyKeys.CHATGPT_MAX_TOKENS)) {
+            Map<String, String> properties = persona.getProperties();
+
+            if (persona.getProperties().containsKey(PropertyKeys.CHATGPT_MAX_TOKENS)) {
                 request.setMaxTokens(Integer.valueOf(properties.get(PropertyKeys.CHATGPT_MAX_TOKENS)));
             }
 
@@ -133,15 +131,5 @@ public class ChatStreamService {
         webSocketService.sendMessage(
                 new WSChatStatusMessage(sessionId, "")
         );
-    }
-
-    private Map<String, String> mapToGptProperties(Map<String, PropertyEntity> personaProperties) {
-        Map<String, String> gptProperties = new HashMap<>();
-        personaProperties.forEach((key, value) -> {
-            if (value.getCategory() == PropertyCategory.CHATGPT) {
-                gptProperties.put(key, value.getPropertyValue());
-            }
-        });
-        return gptProperties;
     }
 }

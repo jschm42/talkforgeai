@@ -8,8 +8,6 @@ import com.talkforgeai.backend.chat.dto.ChatCompletionResponse;
 import com.talkforgeai.backend.chat.exception.ChatException;
 import com.talkforgeai.backend.chat.repository.FunctionRepository;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
-import com.talkforgeai.backend.persona.domain.PropertyCategory;
-import com.talkforgeai.backend.persona.domain.PropertyEntity;
 import com.talkforgeai.backend.persona.domain.RequestFunction;
 import com.talkforgeai.backend.persona.exception.PersonaException;
 import com.talkforgeai.backend.persona.service.PersonaService;
@@ -211,19 +209,8 @@ public class ChatService {
         return Optional.empty();
     }
 
-
-    private Map<String, String> mapToGptProperties(Map<String, PropertyEntity> personaProperties) {
-        Map<String, String> gptProperties = new HashMap<>();
-        personaProperties.forEach((key, value) -> {
-            if (value.getCategory() == PropertyCategory.CHATGPT) {
-                gptProperties.put(key, value.getPropertyValue());
-            }
-        });
-        return gptProperties;
-    }
-
     private OpenAIChatResponse submit(List<OpenAIChatMessage> messages, PersonaEntity persona) {
-        Map<String, String> properties = mapToGptProperties(persona.getProperties());
+        Map<String, String> properties = persona.getProperties();
 
         try {
             OpenAIChatRequest request = new OpenAIChatRequest();

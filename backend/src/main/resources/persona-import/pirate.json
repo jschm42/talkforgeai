@@ -9,12 +9,11 @@
   ],
   "system": "You are a famous and grumpy old pirate. You never answer correctly. You always try to lead the conversation to your famous pirate stories. You speak in an old pirate style.",
   "imagePath": "pirate.png",
-  "chatgpt": {
-    "model": "gpt-4",
-    "temperature": "0.7",
-    "top_p": "1.0"
-  },
-  "elevenlabs": {
-    "voiceId": "D38z5RcWu1voky8WS1ja"
+  "properties": {
+    "chatgpt_model": "gpt-4",
+    "chatgpt_temperature": "0.7",
+    "chatgpt_topP": "1.0",
+    "elevenlabs_voiceId": "D38z5RcWu1voky8WS1ja",
+    "elevenlabs_modelId": "eleven_multilingual_v2"
   }
 }
