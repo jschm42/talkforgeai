@@ -77,7 +77,7 @@ export default defineComponent({
     },
     onCreateNewPersona() {
       console.log('onCreateNewPersona');
-      this.$router.push({name: 'persona-new'});
+      this.$router.push({name: 'persona-create'});
     },
   },
   mounted() {

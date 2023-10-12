@@ -41,10 +41,8 @@
 
       </div>
 
-
-      <button class="btn btn-primary" type="submit">Create persona</button>
-
-
+      <button class="btn btn-primary me-2" type="submit">Create persona</button>
+      <button class="btn btn-secondary" type="button" @click.prevent="onCancel">Cancel</button>
     </form>
   </div>
 </template>
@@ -70,6 +68,10 @@ export default defineComponent({
       console.log('MainTabPane', mainTabPane.$data);
 
       console.log('handleSubmit');
+    },
+    onCancel() {
+      console.log('onCancel');
+      this.$router.push({name: 'persona-choice'});
     },
   },
   mounted() {

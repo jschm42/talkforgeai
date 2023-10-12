@@ -6,6 +6,7 @@ import PersonaEditorView from '@/views/PersonaEditorView.vue';
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
+    name: 'persona-choice',
     component: PersonaChoiceView,
   },
   {
@@ -15,8 +16,8 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
   },
   {
-    path: '/persona',
-    name: 'persona-new',
+    path: '/persona/create',
+    name: 'persona-create',
     component: PersonaEditorView,
     props: false,
   },
