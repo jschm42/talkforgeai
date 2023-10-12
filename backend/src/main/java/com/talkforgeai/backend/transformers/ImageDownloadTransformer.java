@@ -55,7 +55,7 @@ public class ImageDownloadTransformer implements Transformer {
                 String formattedContent = template.formatted(
                         NO_LB_MARKER_START,
                         localFilePath,
-                        prompt,
+                        escapeHtml(prompt),
                         NO_LB_MARKER_END
                 );
 

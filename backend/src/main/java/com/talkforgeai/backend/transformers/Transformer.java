@@ -7,4 +7,11 @@ public interface Transformer {
     String NO_LB_MARKER_END = "<!-- end no-lb -->";
 
     String process(String content, TransformerContext context);
+
+    default String escapeHtml(String input) {
+        return input.replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("'", "&apos;")
+                .replace("\"", "&quot;");
+    }
 }

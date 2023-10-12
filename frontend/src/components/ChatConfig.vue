@@ -46,9 +46,9 @@ export default {
   methods: {
     badgeColor(key) {
       switch (key) {
-        case 'model':
+        case 'chatgpt_model':
           return 'text-bg-primary';
-        case 'temperature':
+        case 'chatgpt_temperature':
           return 'text-bg-success';
         default:
           return 'text-bg-secondary';
