@@ -50,7 +50,6 @@ export default defineComponent({
     <!-- Image upload -->
     <img :src="getImageUrl(personaForm.imagePath)" alt="Avatar" class="image-pane"/>
     <input id="personaImage" ref="fileInput" class="form-control" type="file" @change="onFileSelected">
-    <button :disabled="!selectedFile" class="btn btn-primary" @click="uploadImage">Upload</button>
   </div>
 
   <div class="mb-3">
