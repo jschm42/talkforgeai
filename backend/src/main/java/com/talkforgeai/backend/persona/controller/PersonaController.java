@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/persona")
@@ -29,6 +30,11 @@ public class PersonaController {
     @GetMapping
     public List<PersonaDto> getAllPersona() {
         return personaService.getAllPersona();
+    }
+
+    @GetMapping("/{personaId}")
+    public PersonaDto getPersona(@PathVariable("personaId") UUID personaId) {
+        return personaService.getPersona(personaId);
     }
 
     @GetMapping("/image/{filename}")
@@ -47,8 +53,8 @@ public class PersonaController {
     }
 
     @PostMapping
-    public void createPersona(@RequestBody PersonaDto personaDto) {
-        personaService.createPersona(personaDto);
+    public void updatePersona(@RequestBody PersonaDto personaDto) {
+        personaService.updatePersona(personaDto);
     }
 
 }

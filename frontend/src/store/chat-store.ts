@@ -29,6 +29,7 @@ export const useChatStore = defineStore('chat', {
       currentStatusMessageType: '',
       sessions: [] as Array<Session>,
       selectedSessionId: '',
+      personaEditForm: {} as Persona,
     };
   },
   getters: {
@@ -43,6 +44,9 @@ export const useChatStore = defineStore('chat', {
     },
   },
   actions: {
+    updatePersonaEditForm(persona: Persona) {
+      this.personaEditForm = persona;
+    },
     newSession() {
       this.$patch({
         sessionId: '',
@@ -179,7 +183,7 @@ export const useChatStore = defineStore('chat', {
 
     },
     async readPersona() {
-      this.personaList = await personaService.readPersona();
+      this.personaList = await personaService.readAllPersona();
       this.selectedPersona = this.personaList[0];
     },
     toggleAutoSpeak() {
@@ -192,6 +196,15 @@ export const useChatStore = defineStore('chat', {
     removeStatus() {
       this.currentStatusMessage = '';
       this.currentStatusMessageType = '';
+    },
+    resetPersonaEditForm() {
+      this.personaEditForm = new Persona();
+    },
+    setPersonaEditForm(persona: Persona) {
+      this.personaEditForm = persona;
+    },
+    getPersonaEditForm(): Persona {
+      return this.personaEditForm;
     },
   },
 

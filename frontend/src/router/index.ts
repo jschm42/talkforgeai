@@ -19,8 +19,15 @@ const routes: Array<RouteRecordRaw> = [
     path: '/persona/create',
     name: 'persona-create',
     component: PersonaEditorView,
-    props: false,
   },
+
+  {
+    path: '/persona/edit/:personaId',
+    name: 'persona-edit',
+    component: PersonaEditorView,
+    props: true,
+  },
+
 ];
 
 const router = createRouter({

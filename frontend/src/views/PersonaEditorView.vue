@@ -49,35 +49,31 @@
 
 <script>
 import {defineComponent} from 'vue';
-import {useChatStore} from '@/store/chat-store';
 import PersonaTabMain from '@/components/persona/PersonaTabMain.vue';
 import PersonaService from '@/service/persona.service';
 import Persona from '@/store/to/persona';
+import {usePersonaFormStore} from '@/store/persona-form-store';
 
 const personaService = new PersonaService();
 
 export default defineComponent({
   components: {PersonaTabMain},
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
+    const store = usePersonaFormStore(); // Call useMyStore() inside the setup function
     return {store};
   },
-  data() {
-    return {};
-  },
-  computed: {},
+  props: ['personaId'],
   methods: {
     async handleSubmit() {
-      const mainTabPane = this.$refs.mainTabPane;
-      console.log('MainTabPane', mainTabPane.$data);
-
       console.log('handleSubmit');
 
+      const form = this.store.personaForm;
       const persona = new Persona();
+      persona.personaId = form.personaId;
       persona.imagePath = 'cat.png';
-      persona.name = mainTabPane.$data.personaName;
-      persona.description = mainTabPane.$data.personaDescription;
-      persona.system = mainTabPane.$data.personaSystem;
+      persona.name = form.name;
+      persona.description = form.description;
+      persona.system = form.system;
       persona.properties = {
         'chatgpt_model': 'gpt-4',
         'chatgpt_temperature': '0.7',
@@ -100,6 +96,14 @@ export default defineComponent({
     },
   },
   mounted() {
+    this.store.resetPersonaEditForm();
+    if (this.personaId) {
+      personaService.readPersona(this.personaId).then((persona) => {
+        console.log('Read persona', persona);
+
+        this.store.setPersonaEditForm(persona);
+      });
+    }
   },
 });
 </script>

@@ -9,26 +9,26 @@
 
       <div v-for="persona in personaList" :key="persona.personaId" class="col-md-3">
         <div class="card mb-3 persona-card"
-             style="max-width: 300px;" @click.prevent="onPersonaSelected(persona)">
+             style="max-width: 300px;">
           <div class="row g-0">
             <div class="col-md-4">
               <img v-if="isShowPersonaImage(persona)" :alt="persona.name" :src="persona.imageUrl"
-                   class="persona-icon"/>
+                   class="persona-icon" role="button" @click.prevent="onPersonaSelected(persona)"/>
               <i v-else class="fs-2 bi bi-robot robot-icon"></i>
             </div>
             <div class="col-md-6">
               <div class="card-body">
-                <h5 class="card-title">{{ persona.name }}</h5>
+                <h5 class="card-title" @click.prevent="onPersonaSelected(persona)">{{ persona.name }}</h5>
                 <!--                <p class="card-text"></p>-->
               </div>
             </div>
 
             <div class="col-2 d-inline-flex flex-row-reverse my-2 p-2">
-              <i class="bi bi-pencil" role="button"></i>
+              <i class="bi bi-pencil" role="button" @click.prevent="onEditPersona(persona.personaId)"></i>
             </div>
           </div>
 
-          <div class="row g-0 p-3">
+          <div class="row g-0 p-3" role="button" @click.prevent="onPersonaSelected(persona)">
             <small class="text-body-secondary">{{ persona.description }}</small>
           </div>
 
@@ -81,6 +81,11 @@ export default defineComponent({
       console.log('onCreateNewPersona');
       this.$router.push({name: 'persona-create'});
     },
+    onEditPersona(personaId) {
+      console.log('onEditPersona', personaId);
+
+      this.$router.push({name: 'persona-edit', params: {personaId}});
+    },
   },
   mounted() {
     this.store.readPersona().then(() => {
@@ -110,7 +115,7 @@ export default defineComponent({
 }
 
 .scrollable-persona-list {
-  height: 80vh;
+  height: 75vh;
   overflow-y: auto;
 }
 

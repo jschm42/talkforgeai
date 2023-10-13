@@ -4,6 +4,8 @@ import com.talkforgeai.backend.persona.domain.PersonaEntity;
 import com.talkforgeai.backend.persona.dto.PersonaDto;
 import com.talkforgeai.backend.persona.repository.PersonaRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,7 +14,7 @@ import java.util.UUID;
 
 @Service
 public class PersonaService {
-
+    public static final Logger LOGGER = LoggerFactory.getLogger(PersonaService.class);
     private final PersonaRepository personaRepository;
     private final PersonaMapper personaMapper;
 
@@ -23,6 +25,16 @@ public class PersonaService {
 
     public List<PersonaDto> getAllPersona() {
         return getPersonaResponse(personaRepository.findAll());
+    }
+
+    public PersonaDto getPersona(UUID personaId) {
+        Optional<PersonaEntity> personaById = this.getPersonaById(personaId);
+
+        if (personaById.isPresent()) {
+            return personaMapper.mapPersonaResponse(personaById.get());
+        }
+
+        throw new IllegalArgumentException("Persona with id " + personaId + " not found");
     }
 
     public Optional<PersonaEntity> getPersonaById(UUID personaId) {
@@ -38,7 +50,8 @@ public class PersonaService {
     }
 
     @Transactional
-    public void createPersona(PersonaDto personaDto) {
+    public void updatePersona(PersonaDto personaDto) {
+        LOGGER.info("Updating persona {}", personaDto);
         personaRepository.save(personaMapper.mapPersonaDto(personaDto));
     }
 }

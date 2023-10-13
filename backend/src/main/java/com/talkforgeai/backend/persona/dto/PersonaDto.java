@@ -17,4 +17,18 @@ public record PersonaDto(UUID personaId,
                          String imageUrl,
                          String imagePath,
                          Map<String, String> properties) {
+    @Override
+    public String toString() {
+        return "PersonaDto{" +
+                "personaId=" + personaId +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", system='" + system + '\'' +
+                ", globalSystems=" + globalSystems +
+                ", requestFunctions=" + requestFunctions +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", imagePath='" + imagePath + '\'' +
+                ", properties=" + properties +
+                '}';
+    }
 }
