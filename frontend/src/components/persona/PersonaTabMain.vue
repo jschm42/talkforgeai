@@ -8,7 +8,7 @@ export default defineComponent({
   name: 'PersonaTabMain',
   data() {
     return {
-      selectedFile: null,
+      // selectedFile: null,
     };
   },
   setup() {
@@ -21,15 +21,16 @@ export default defineComponent({
       return '/api/v1/persona/image/' + fileName;
     },
     async onFileSelected(event) {
-      this.selectedFile = event.target.files[0];
-      this.personaForm.imagePath = this.selectedFile.name;
-      console.log('Selected file:', this.selectedFile);
+      const selectedFile = event.target.files[0];
+      console.log('Selected file:', selectedFile);
 
-      await this.uploadImage();
+      await this.uploadImage(selectedFile);
+
+      this.personaForm.imagePath = selectedFile.name;
     },
-    async uploadImage() {
+    async uploadImage(file) {
       const formData = new FormData();
-      formData.append('file', this.selectedFile);
+      formData.append('file', file);
 
       try {
         await axios.post('/api/v1/persona/upload', formData, {
@@ -48,7 +49,13 @@ export default defineComponent({
 <template>
   <div class="mb-3">
     <!-- Image upload -->
-    <img :src="getImageUrl(personaForm.imagePath)" alt="Avatar" class="image-pane"/>
+    <div>
+      <div v-if="!personaForm.imagePath"
+           class="placeholder-image img-thumbnail d-flex justify-content-center align-items-center">
+        <i class="bi bi-person"></i>
+      </div>
+      <img v-else :src="getImageUrl(personaForm.imagePath)" alt="Avatar" class="img-thumbnail thumbnail-image"/>
+    </div>
     <input id="personaImage" ref="fileInput" class="form-control" type="file" @change="onFileSelected">
   </div>
 
@@ -71,8 +78,15 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.image-pane {
-  width: 10em;
-  height: 10em;
+.placeholder-image {
+  font-size: 7em;
+  width: 200px;
+  height: 200px;
 }
+
+.thumbnail-image {
+  width: 200px;
+  height: 200px;
+}
+
 </style>
