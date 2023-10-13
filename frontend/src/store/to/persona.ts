@@ -1,27 +1,28 @@
 class Persona {
-  personaId: string;
+  personaId = '';
 
   /**
    * Name of the profile
    */
-  name: string;
+  name = '';
 
   /**
    * Description of the profile
    */
-  description: string;
+  description = '';
 
-  imageUrl: string;
+  system = '';
 
-  properties: { [key: string]: string; };
+  globalSystems = [];
 
-  constructor(personaId: string, name: string, description: string, imageUrl: string) {
-    this.name = name;
-    this.description = description;
-    this.personaId = personaId;
-    this.imageUrl = imageUrl;
-    this.properties = {};
-  }
+  requestFunctions = [];
+
+  imagePath = '';
+
+  imageUrl = '';
+
+  properties = {};
+
 }
 
 export default Persona;

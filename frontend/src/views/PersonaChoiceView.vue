@@ -1,9 +1,11 @@
 <template>
   <div class="container p-3">
-    <div class="row my-3">
-      <h1>Talkforge AI</h1>
+    <div class="row header">
+      <div class="header">
+        <img class="logo" src="@/assets/logo.png" title="Talkforge AI">
+      </div>
     </div>
-    <div class="row">
+    <div class="row scrollable-persona-list">
 
       <div v-for="persona in personaList" :key="persona.personaId" class="col-md-3">
         <div class="card mb-3 persona-card"
@@ -106,4 +108,20 @@ export default defineComponent({
   border: 2px solid #007BFF; /* blue border */
   background: #2c3e50; /* grey-ish background */
 }
+
+.scrollable-persona-list {
+  height: 80vh;
+  overflow-y: auto;
+}
+
+.logo {
+  width: 10em;
+  height: 10em;
+  margin-left: 8px;
+}
+
+.header {
+  margin-bottom: 1em;
+}
+
 </style>

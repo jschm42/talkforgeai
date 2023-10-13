@@ -51,6 +51,10 @@
 import {defineComponent} from 'vue';
 import {useChatStore} from '@/store/chat-store';
 import PersonaTabMain from '@/components/persona/PersonaTabMain.vue';
+import PersonaService from '@/service/persona.service';
+import Persona from '@/store/to/persona';
+
+const personaService = new PersonaService();
 
 export default defineComponent({
   components: {PersonaTabMain},
@@ -63,11 +67,32 @@ export default defineComponent({
   },
   computed: {},
   methods: {
-    handleSubmit() {
+    async handleSubmit() {
       const mainTabPane = this.$refs.mainTabPane;
       console.log('MainTabPane', mainTabPane.$data);
 
       console.log('handleSubmit');
+
+      const persona = new Persona();
+      persona.imagePath = 'cat.png';
+      persona.name = mainTabPane.$data.personaName;
+      persona.description = mainTabPane.$data.personaDescription;
+      persona.system = mainTabPane.$data.personaSystem;
+      persona.properties = {
+        'chatgpt_model': 'gpt-4',
+        'chatgpt_temperature': '0.7',
+        'chatgpt_topP': '1.0',
+        'elevenlabs_voiceId': '21m00Tcm4TlvDq8ikWAM',
+        'elevenlabs_modelId': 'eleven_multilingual_v2',
+      };
+
+      try {
+        await personaService.writePersona(persona);
+
+        this.$router.push({name: 'persona-choice'});
+      } catch (error) {
+        console.error(error);
+      }
     },
     onCancel() {
       console.log('onCancel');

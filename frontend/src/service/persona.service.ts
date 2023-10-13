@@ -13,6 +13,14 @@ class PersonaService {
     return [];
   }
 
+  async writePersona(persona: Persona) {
+    try {
+      return await axios.post('/api/v1/persona', persona);
+    } catch (error) {
+      console.error('Error writing persona: ', error);
+    }
+  }
+
 }
 
 export default PersonaService;
