@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -57,4 +58,8 @@ public class PersonaController {
         personaService.updatePersona(personaDto);
     }
 
+    @PostMapping("/upload")
+    public String singleFileUpload(@RequestParam("file") MultipartFile file) {
+        return personaService.uploadImage(file);
+    }
 }

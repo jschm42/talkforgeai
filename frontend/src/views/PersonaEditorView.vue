@@ -70,7 +70,7 @@ export default defineComponent({
       const form = this.store.personaForm;
       const persona = new Persona();
       persona.personaId = form.personaId;
-      persona.imagePath = 'cat.png';
+      persona.imagePath = form.imagePath;
       persona.name = form.name;
       persona.description = form.description;
       persona.system = form.system;
