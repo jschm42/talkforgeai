@@ -24,16 +24,19 @@ export default defineComponent({
       const selectedFile = event.target.files[0];
       console.log('Selected file:', selectedFile);
 
-      await this.uploadImage(selectedFile);
+      const uploadedFileName = await this.uploadImage(selectedFile);
+      console.log('Uploaded file:', uploadedFileName.data);
 
-      this.personaForm.imagePath = selectedFile.name;
+      this.$refs.fileInput.textContent = uploadedFileName.data.filename;
+
+      this.personaForm.imagePath = uploadedFileName.data.filename;
     },
     async uploadImage(file) {
       const formData = new FormData();
       formData.append('file', file);
 
       try {
-        await axios.post('/api/v1/persona/upload', formData, {
+        return await axios.post('/api/v1/persona/upload', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -41,6 +44,12 @@ export default defineComponent({
       } catch (error) {
         console.log('Failed to upload image: ', error);
       }
+    },
+    triggerFileInput() {
+      this.$refs.fileInput.click();
+    },
+    getAltImageText() {
+      return this.personaForm.imagePath;
     },
   },
 });
@@ -51,12 +60,16 @@ export default defineComponent({
     <!-- Image upload -->
     <div>
       <div v-if="!personaForm.imagePath"
-           class="placeholder-image img-thumbnail d-flex justify-content-center align-items-center">
+           class="placeholder-image img-thumbnail d-flex justify-content-center align-items-center" role="button"
+           @click="triggerFileInput">
         <i class="bi bi-person"></i>
       </div>
-      <img v-else :src="getImageUrl(personaForm.imagePath)" alt="Avatar" class="img-thumbnail thumbnail-image"/>
+      <img v-else :alt="personaForm.imagePath" :src="getImageUrl(personaForm.imagePath)" :title="personaForm.imagePath"
+           class="img-thumbnail thumbnail-image"
+           role="button" @click="triggerFileInput"/>
     </div>
-    <input id="personaImage" ref="fileInput" class="form-control" type="file" @change="onFileSelected">
+    <input id="personaImage" ref="fileInput" class=" col-10 form-control" style="display: none" type="file"
+           @change="onFileSelected">
   </div>
 
   <div class="mb-3">

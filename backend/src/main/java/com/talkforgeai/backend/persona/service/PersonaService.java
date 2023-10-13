@@ -2,6 +2,7 @@ package com.talkforgeai.backend.persona.service;
 
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
 import com.talkforgeai.backend.persona.dto.PersonaDto;
+import com.talkforgeai.backend.persona.dto.PersonaImageUploadResponse;
 import com.talkforgeai.backend.persona.repository.PersonaRepository;
 import com.talkforgeai.backend.storage.FileStorageService;
 import jakarta.transaction.Transactional;
@@ -63,21 +64,24 @@ public class PersonaService {
         personaRepository.save(personaMapper.mapPersonaDto(personaDto));
     }
 
-    public String uploadImage(MultipartFile file) {
+    public PersonaImageUploadResponse uploadImage(MultipartFile file) {
         if (file.isEmpty()) {
-            return "Please select a file to upload";
+            throw new IllegalArgumentException("File is empty");
         }
 
         try {
             byte[] bytes = file.getBytes();
-            Path path = fileStorageService.getPersonaDirectory().resolve(file.getOriginalFilename());
+
+            String fileEnding = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+            String filename = UUID.randomUUID() + fileEnding;
+
+            Path path = fileStorageService.getPersonaDirectory().resolve(filename);
             Files.write(path, bytes);
 
-            return "You successfully uploaded '" + file.getOriginalFilename() + "'";
 
+            return new PersonaImageUploadResponse(filename);
         } catch (IOException e) {
-            e.printStackTrace();
-            return "Failed to upload file";
+            throw new IllegalArgumentException("Failed to upload file", e);
         }
     }
 }

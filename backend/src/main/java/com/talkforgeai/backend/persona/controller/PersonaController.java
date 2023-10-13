@@ -1,6 +1,7 @@
 package com.talkforgeai.backend.persona.controller;
 
 import com.talkforgeai.backend.persona.dto.PersonaDto;
+import com.talkforgeai.backend.persona.dto.PersonaImageUploadResponse;
 import com.talkforgeai.backend.persona.service.PersonaService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import org.springframework.core.io.FileSystemResource;
@@ -59,7 +60,7 @@ public class PersonaController {
     }
 
     @PostMapping("/upload")
-    public String singleFileUpload(@RequestParam("file") MultipartFile file) {
+    public PersonaImageUploadResponse singleFileUpload(@RequestParam("file") MultipartFile file) {
         return personaService.uploadImage(file);
     }
 }
