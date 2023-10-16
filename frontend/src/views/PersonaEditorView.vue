@@ -1,17 +1,22 @@
 <template>
-  <div class="container">
+  <div class="container col-lg-5 col-10">
     <h2>Persona Editor</h2>
     <form class="form-panel" @submit.prevent="handleSubmit">
 
       <ul id="personaTab" class="nav nav-tabs" role="tablist">
         <li class="nav-item">
           <button id="home-tab" aria-controls="home-tab-pane" aria-selected="true" class="nav-link active"
-                  data-bs-target="#main-tab-pane" data-bs-toggle="tab" role="tab" type="button">Home
+                  data-bs-target="#main-tab-pane" data-bs-toggle="tab" role="tab" type="button">Profile
           </button>
         </li>
         <li class="nav-item">
           <button id="model-tab" aria-controls="model-tab-pane" aria-selected="true" class="nav-link"
                   data-bs-target="#model-tab-pane" data-bs-toggle="tab" role="tab" type="button">Model
+          </button>
+        </li>
+        <li class="nav-item">
+          <button id="voice-tab" aria-controls="voice-tab-pane" aria-selected="true" class="nav-link"
+                  data-bs-target="#voice-tab-pane" data-bs-toggle="tab" role="tab" type="button">Voice
           </button>
         </li>
         <li class="nav-item">
@@ -25,18 +30,23 @@
 
         <div id="main-tab-pane" aria-labelledby="main-tab" class="tab-pane fade show active" role="tabpanel"
              tabindex="0">
-          <persona-tab-main ref="mainTabPane"></persona-tab-main>
+          <persona-tab-profile ref="mainTabPane"></persona-tab-profile>
 
         </div>
 
         <div id="model-tab-pane" aria-labelledby="model-tab" class="tab-pane fade" role="tabpanel"
              tabindex="0">
-          <h3>Model</h3>
+          <persona-tab-model ref="modelTabPane"></persona-tab-model>
+        </div>
+
+        <div id="voice-tab-pane" aria-labelledby="voice-tab" class="tab-pane fade" role="tabpanel"
+             tabindex="0">
+          <persona-tab-voice ref="voiceTabPane"></persona-tab-voice>
         </div>
 
         <div id="features-tab-pane" aria-labelledby="features-tab" class="tab-pane fade" role="tabpanel"
              tabindex="0">
-          <h3>Features</h3>
+          <persona-tab-features ref="featuresTabPane"></persona-tab-features>
         </div>
 
       </div>
@@ -49,15 +59,18 @@
 
 <script>
 import {defineComponent} from 'vue';
-import PersonaTabMain from '@/components/persona/PersonaTabMain.vue';
 import PersonaService from '@/service/persona.service';
 import Persona from '@/store/to/persona';
 import {usePersonaFormStore} from '@/store/persona-form-store';
+import PersonaTabModel from '@/components/persona/PersonaTabModel.vue';
+import PersonaTabProfile from '@/components/persona/PersonaTabProfile.vue';
+import PersonaTabVoice from '@/components/persona/PersonaTabVoice.vue';
+import PersonaTabFeatures from '@/components/persona/PersonaTabFeatures.vue';
 
 const personaService = new PersonaService();
 
 export default defineComponent({
-  components: {PersonaTabMain},
+  components: {PersonaTabFeatures, PersonaTabVoice, PersonaTabModel, PersonaTabProfile},
   setup() {
     const store = usePersonaFormStore(); // Call useMyStore() inside the setup function
     return {store};

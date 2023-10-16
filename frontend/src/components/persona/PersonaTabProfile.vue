@@ -5,7 +5,7 @@ import {usePersonaFormStore} from '@/store/persona-form-store';
 import axios from 'axios';
 
 export default defineComponent({
-  name: 'PersonaTabMain',
+  name: 'PersonaTabProfile',
   data() {
     return {
       // selectedFile: null,
@@ -57,7 +57,6 @@ export default defineComponent({
 
 <template>
   <div class="mb-3">
-    <!-- Image upload -->
     <div>
       <div v-if="!personaForm.imagePath"
            class="placeholder-image img-thumbnail d-flex justify-content-center align-items-center" role="button"
