@@ -1,6 +1,5 @@
 package com.talkforgeai.backend.chat.service;
 
-import com.talkforgeai.backend.chat.PropertyKeys;
 import com.talkforgeai.backend.chat.domain.ChatMessageEntity;
 import com.talkforgeai.backend.chat.domain.ChatMessageType;
 import com.talkforgeai.backend.chat.dto.ChatCompletionRequest;
@@ -10,6 +9,7 @@ import com.talkforgeai.backend.chat.repository.FunctionRepository;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
 import com.talkforgeai.backend.persona.domain.RequestFunction;
 import com.talkforgeai.backend.persona.exception.PersonaException;
+import com.talkforgeai.backend.persona.service.PersonaProperties;
 import com.talkforgeai.backend.persona.service.PersonaService;
 import com.talkforgeai.backend.session.domain.ChatSessionEntity;
 import com.talkforgeai.backend.session.dto.NewChatSessionRequest;
@@ -217,28 +217,28 @@ public class ChatService {
             request.setMessages(messages);
 
             // TODO Properties setzen
-            if (properties.containsKey(PropertyKeys.CHATGPT_MAX_TOKENS)) {
-                request.setMaxTokens(Integer.valueOf(properties.get(PropertyKeys.CHATGPT_MAX_TOKENS)));
+            if (properties.containsKey(PersonaProperties.CHATGPT_MAX_TOKENS)) {
+                request.setMaxTokens(Integer.valueOf(properties.get(PersonaProperties.CHATGPT_MAX_TOKENS)));
             }
 
-            if (properties.containsKey(PropertyKeys.CHATGPT_TOP_P)) {
-                request.setTopP(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TOP_P)));
+            if (properties.containsKey(PersonaProperties.CHATGPT_TOP_P)) {
+                request.setTopP(Double.valueOf(properties.get(PersonaProperties.CHATGPT_TOP_P)));
             }
 
-            if (properties.containsKey(PropertyKeys.CHATGPT_MODEL)) {
-                request.setModel(properties.get(PropertyKeys.CHATGPT_MODEL));
+            if (properties.containsKey(PersonaProperties.CHATGPT_MODEL)) {
+                request.setModel(properties.get(PersonaProperties.CHATGPT_MODEL));
             }
 
-            if (properties.containsKey(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)) {
-                request.setFrequencyPenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)));
+            if (properties.containsKey(PersonaProperties.CHATGPT_FREQUENCY_PENALTY)) {
+                request.setFrequencyPenalty(Double.valueOf(properties.get(PersonaProperties.CHATGPT_FREQUENCY_PENALTY)));
             }
 
-            if (properties.containsKey(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)) {
-                request.setPresencePenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_PRESENCE_PENALTY)));
+            if (properties.containsKey(PersonaProperties.CHATGPT_FREQUENCY_PENALTY)) {
+                request.setPresencePenalty(Double.valueOf(properties.get(PersonaProperties.CHATGPT_PRESENCE_PENALTY)));
             }
 
-            if (properties.containsKey(PropertyKeys.CHATGPT_TEMPERATURE)) {
-                request.setTemperature(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TEMPERATURE)));
+            if (properties.containsKey(PersonaProperties.CHATGPT_TEMPERATURE)) {
+                request.setTemperature(Double.valueOf(properties.get(PersonaProperties.CHATGPT_TEMPERATURE)));
             }
 
 

@@ -7,12 +7,7 @@ export default defineComponent({
   name: 'PersonaTabVoice',
   data() {
     return {
-      ttsModel: 'speechAPI',
       speechAPIVoices: [],
-      speechAPIVoiceSelected: '',
-      elevenlabsVoiceID: '',
-      elevenlabsSimilarityBoost: 0.5,
-      elevenlabsStability: 0.5,
     };
   },
   setup() {
@@ -21,21 +16,29 @@ export default defineComponent({
     return {personaForm};
   },
   methods: {
-    onSelectTTSModelChange(event) {
-      // Change ttsModel to the selected value
-      this.ttsModel = event.target.value;
+    populateVoiceList() {
+      if (typeof speechSynthesis === 'undefined') {
+        return;
+      }
+
+      const voices = speechSynthesis.getVoices();
+      console.log('Voices:', voices);
+      this.speechAPIVoices = voices;
+      this.personaForm.properties.speechAPI_voice = voices[0].name;
     },
+
   },
   mounted() {
-    document.addEventListener('DOMContentLoaded', () => {
-      if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = () => {
-          const voices = speechSynthesis.getVoices();
-          console.log('Voices:', voices);
-          this.speechAPIVoices = voices;
-        };
-      }
-    });
+    console.log('MOunted');
+
+    if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+      console.log('SpeechSynthesis supported');
+      speechSynthesis.onvoiceschanged = this.populateVoiceList;
+    }
+  },
+  unmounted() {
+    console.log('Unmounted');
+    speechSynthesis.onvoiceschanged = null;
   },
 });
 </script>
@@ -43,33 +46,29 @@ export default defineComponent({
 <template>
   <div class="mb-3 p-3">
     <label class="form-label my-2" for="selectTTSModel">Text-to-speech model</label>
-    <select id="selectTTSModel" aria-label="Text-to-speech model" class="form-select my-2"
-            @change="onSelectTTSModelChange">
-      <option selected value="speechAPI">Speech API</option>
+    <select id="selectTTSModel" v-model="personaForm.properties.voice_type" aria-label="Text-to-speech model"
+            class="form-select my-2">
+      <option value="">Speech API</option>
       <option value="elevenlabs">Elevenlabs</option>
     </select>
 
-    <div v-if="ttsModel === 'speechAPI'">
-      <label class="form-label my-2" for="selectSpeechAPIVoice">Voices</label>
-      <select id="selectSpeechAPIVoice" v-model="speechAPIVoiceSelected" aria-label="SpeechAPI Voice"
-              class="form-select my-2">
-        <option v-for="voice in speechAPIVoices" :key="voice.name" :value="voice.name">{{ voice.name }}</option>
-      </select>
-    </div>
-    <div v-else>
+
+    <div v-if="personaForm.properties.voice_type === 'elevenlabs'">
       <label class="form-label" for="elevenlabsVoiceID">Voice-ID</label>
-      <input id="elevenlabsVoiceID" v-model="elevenlabsVoiceID" class="form-control" maxlength="32" required
+      <input id="elevenlabsVoiceID" v-model="personaForm.properties.elevenlabs_voiceId" class="form-control"
+             maxlength="32" required
              type="text">
 
       <label class="form-label my-2" for="rangeELVoiceSimBoost">Similarity boost</label>
       <div class="container">
         <div class="row">
           <div class="col-10 p-0">
-            <input id="rangeELVoiceSimBoost" v-model="elevenlabsSimilarityBoost" class="form-range" max="1.0" min="0.0"
+            <input id="rangeELVoiceSimBoost" v-model="personaForm.properties.elevenlabs_similarityBoost"
+                   class="form-range" max="1.0" min="0.0"
                    step="0.1" type="range">
           </div>
           <div class="col-2">
-            <label>{{ elevenlabsSimilarityBoost }}</label>
+            <label>{{ personaForm.properties.elevenlabs_similarityBoost }}</label>
           </div>
         </div>
       </div>
@@ -78,16 +77,25 @@ export default defineComponent({
       <div class="container">
         <div class="row">
           <div class="col-10 p-0">
-            <input id="rangeELVoiceStability" v-model="elevenlabsStability" class="form-range" max="1.0" min="0.0"
+            <input id="rangeELVoiceStability" v-model="personaForm.properties.elevenlabs_stability" class="form-range"
+                   max="1.0" min="0.0"
                    step="0.1" type="range">
           </div>
           <div class="col-2">
-            <label>{{ elevenlabsStability }}</label>
+            <label>{{ personaForm.properties.elevenlabs_stability }}</label>
           </div>
         </div>
       </div>
-
     </div>
+
+    <div v-else>
+      <label class="form-label my-2" for="selectSpeechAPIVoice">Voices</label>
+      <select id="selectSpeechAPIVoice" v-model="personaForm.properties.speechAPI_voice" aria-label="SpeechAPI Voice"
+              class="form-select my-2">
+        <option v-for="voice in speechAPIVoices" :key="voice.name" :value="voice.name">{{ voice.name }}</option>
+      </select>
+    </div>
+
   </div>
 </template>
 

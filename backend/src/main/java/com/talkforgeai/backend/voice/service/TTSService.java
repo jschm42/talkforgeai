@@ -1,7 +1,7 @@
 package com.talkforgeai.backend.voice.service;
 
-import com.talkforgeai.backend.chat.PropertyKeys;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
+import com.talkforgeai.backend.persona.service.PersonaProperties;
 import com.talkforgeai.backend.persona.service.PersonaService;
 import com.talkforgeai.backend.voice.dto.TTSRequest;
 import com.talkforgeai.service.elevenlabs.ElevenLabsService;
@@ -25,8 +25,8 @@ public class TTSService {
 
         ElevenLabsRequest request = new ElevenLabsRequest(
                 TTSRequest.text(),
-                persona.getProperties().get(PropertyKeys.ELEVENLABS_VOICEID),
-                persona.getProperties().get(PropertyKeys.ELEVENLABS_MODELID),
+                persona.getProperties().get(PersonaProperties.ELEVENLABS_VOICEID),
+                persona.getProperties().get(PersonaProperties.ELEVENLABS_MODELID),
                 new ElevenLabsRequest.VoiceSettings()
         );
 

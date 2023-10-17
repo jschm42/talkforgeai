@@ -87,13 +87,7 @@ export default defineComponent({
       persona.name = form.name;
       persona.description = form.description;
       persona.system = form.system;
-      persona.properties = {
-        'chatgpt_model': 'gpt-4',
-        'chatgpt_temperature': '0.7',
-        'chatgpt_topP': '1.0',
-        'elevenlabs_voiceId': '21m00Tcm4TlvDq8ikWAM',
-        'elevenlabs_modelId': 'eleven_multilingual_v2',
-      };
+      persona.properties = form.properties;
 
       try {
         await personaService.writePersona(persona);
