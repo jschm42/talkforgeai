@@ -41,15 +41,16 @@ export default defineComponent({
 
 <template>
   <div class="mb-3 p-3">
-    <label class="form-label my-2" for="selectTTSModel">Text-to-speech model</label>
-    <select id="selectTTSModel" v-model="personaForm.properties.voice_type" aria-label="Text-to-speech model"
+    <label class="form-label my-2" for="selectTTSModel">Text-to-Speech</label>
+    <select id="selectTTSModel" v-model="personaForm.properties.tts_type" aria-label="Text-to-Speech"
             class="form-select my-2">
-      <option value="">Speech API</option>
+      <option value="">disabled</option>
+      <option value="speechAPI">Speech API</option>
       <option value="elevenlabs">Elevenlabs</option>
     </select>
 
 
-    <div v-if="personaForm.properties.voice_type === 'elevenlabs'">
+    <div v-if="personaForm.properties.tts_type === 'elevenlabs'">
       <label class="form-label" for="elevenlabsVoiceID">Voice-ID</label>
       <input id="elevenlabsVoiceID" v-model="personaForm.properties.elevenlabs_voiceId" class="form-control"
              maxlength="32" required
@@ -84,7 +85,7 @@ export default defineComponent({
       </div>
     </div>
 
-    <div v-else>
+    <div v-else-if="personaForm.properties.tts_type === 'speechAPI'">
       <label class="form-label my-2" for="selectSpeechAPIVoice">Voices</label>
       <select id="selectSpeechAPIVoice" v-model="personaForm.properties.speechAPI_voice" aria-label="SpeechAPI Voice"
               class="form-select my-2">

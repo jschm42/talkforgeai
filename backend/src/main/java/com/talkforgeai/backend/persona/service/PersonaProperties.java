@@ -1,7 +1,7 @@
 package com.talkforgeai.backend.persona.service;
 
 public enum PersonaProperties {
-    VOICE_TYPE("voice_type", ""),
+    TTS_TYPE("tts_type", ""),
 
     SPEECHAPI_VOICE("speechAPI_voice", ""),
 
