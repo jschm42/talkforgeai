@@ -1,7 +1,7 @@
 import {defineStore} from 'pinia';
 import Persona from '@/store/to/persona';
 
-export const usePersonaFormStore = defineStore('personaForm', {
+export const usePersonaFormStore = defineStore('personaFormStore', {
   state: () => {
     return {
       form: new Persona(),

@@ -15,20 +15,22 @@
 
 <script>
 import {useChatStore} from '@/store/chat-store';
+import {usePersonaFormStore} from '@/store/persona-form-store';
 
 export default {
   name: 'ChatContainer',
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
+    const personaStore = usePersonaFormStore();
 
     return {
       store,
+      personaStore,
     };
   },
   data() {
     return {};
   },
-  mounted() {
-  },
+  methods: {},
 };
 </script>

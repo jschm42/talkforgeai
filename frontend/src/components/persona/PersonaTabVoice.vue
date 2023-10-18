@@ -7,7 +7,7 @@ export default defineComponent({
   name: 'PersonaTabVoice',
   data() {
     return {
-      speechAPIVoices: [],
+      speechApiVoices: [],
     };
   },
   setup() {
@@ -15,29 +15,25 @@ export default defineComponent({
 
     return {personaForm};
   },
+  computed: {},
   methods: {
-    populateVoiceList() {
-      if (typeof speechSynthesis === 'undefined') {
-        return;
-      }
-
+    populateVoices() {
       const voices = speechSynthesis.getVoices();
-      console.log('Voices:', voices);
-      this.speechAPIVoices = voices;
-      this.personaForm.properties.speechAPI_voice = voices[0].name;
+      if (voices.length > 0) {
+        console.log('Voices already loaded');
+        this.speechApiVoices = voices;
+      } else {
+        console.log('Voices not loaded, waiting for onvoiceschanged');
+        speechSynthesis.onvoiceschanged = () => {
+          this.speechApiVoices = speechSynthesis.getVoices();
+        };
+      }
     },
-
   },
   mounted() {
-    console.log('MOunted');
-
-    if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
-      console.log('SpeechSynthesis supported');
-      speechSynthesis.onvoiceschanged = this.populateVoiceList;
-    }
+    this.populateVoices();
   },
   unmounted() {
-    console.log('Unmounted');
     speechSynthesis.onvoiceschanged = null;
   },
 });
@@ -92,7 +88,10 @@ export default defineComponent({
       <label class="form-label my-2" for="selectSpeechAPIVoice">Voices</label>
       <select id="selectSpeechAPIVoice" v-model="personaForm.properties.speechAPI_voice" aria-label="SpeechAPI Voice"
               class="form-select my-2">
-        <option v-for="voice in speechAPIVoices" :key="voice.name" :value="voice.name">{{ voice.name }}</option>
+        <option v-for="voice in speechApiVoices" :key="voice.name" :value="voice.name">{{
+            voice.name
+          }}
+        </option>
       </select>
     </div>
 
