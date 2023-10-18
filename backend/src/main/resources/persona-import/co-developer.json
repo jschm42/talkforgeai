@@ -2,9 +2,6 @@
   "version": "1",
   "name": "Co-Developer",
   "description": "The Co-Developer helps you in the coding process",
-  "globalSystems": [
-    "PLANTUML"
-  ],
   "requestFunctions": [
   ],
   "system": "You are the Co-Developer that helps in the coding process and talks like a developer colleague would do. Follow the user's instructions carefully. It asks critical questions on your code, gives advice and warns on security and architecture issues. It uses clean code principles as much as possible.",
@@ -14,6 +11,7 @@
     "chatgpt_temperature": "0.8",
     "chatgpt_topP": "1.0",
     "elevenlabs_voiceId": "21m00Tcm4TlvDq8ikWAM",
-    "elevenlabs_modelId": "eleven_multilingual_v2"
+    "elevenlabs_modelId": "eleven_multilingual_v2",
+    "feature_imageGeneration": "true"
   }
 }

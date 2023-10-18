@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.talkforgeai.backend.persona.service.PersonaProperties.FEATURE_IMAGEGENERATION;
+
 @Service
 public class SessionService {
     private final ChatMessageRepository messageRepository;
@@ -136,10 +138,14 @@ public class SessionService {
     public List<OpenAIChatMessage> composeMessagePayload(List<OpenAIChatMessage> previousMessages, OpenAIChatMessage newMessage, PersonaEntity persona) {
         List<OpenAIChatMessage> messages = new ArrayList<>();
 
-        List<GlobalSystem> globalSystems = persona.getGlobalSystems();
-        globalSystems.forEach(s -> {
-            messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(s)));
-        });
+        if (persona.getProperties().containsKey(FEATURE_IMAGEGENERATION.getKey())) {
+            boolean isFeatureImageGeneration = "true".equalsIgnoreCase(persona.getProperties().get(FEATURE_IMAGEGENERATION.getKey()));
+            if (isFeatureImageGeneration) {
+                messages.add(
+                        new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(GlobalSystem.IMAGE_GEN))
+                );
+            }
+        }
 
         messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, persona.getSystem()));
         messages.addAll(previousMessages);

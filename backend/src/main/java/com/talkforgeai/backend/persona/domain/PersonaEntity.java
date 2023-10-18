@@ -32,9 +32,6 @@ public class PersonaEntity {
     private String system;
 
     @Enumerated(EnumType.STRING)
-    private List<GlobalSystem> globalSystems = new ArrayList<>();
-
-    @Enumerated(EnumType.STRING)
     private List<RequestFunction> requestFunctions = new ArrayList<>();
 
     @Column(length = 128)
@@ -52,14 +49,6 @@ public class PersonaEntity {
 
     public void setRequestFunctions(List<RequestFunction> requestFunctions) {
         this.requestFunctions = requestFunctions;
-    }
-
-    public List<GlobalSystem> getGlobalSystems() {
-        return globalSystems;
-    }
-
-    public void setGlobalSystems(List<GlobalSystem> globalSystems) {
-        this.globalSystems = globalSystems;
     }
 
     public UUID getId() {

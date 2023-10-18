@@ -2,8 +2,6 @@
   "version": "1",
   "name": "Chat Bot",
   "description": "The friendly chat bot that will answer your questions",
-  "globalSystems": [
-  ],
   "requestFunctions": [
     "SEND_EMAIL"
   ],

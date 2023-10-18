@@ -1,6 +1,5 @@
 package com.talkforgeai.backend.persona.dto;
 
-import com.talkforgeai.backend.persona.domain.GlobalSystem;
 import com.talkforgeai.backend.persona.domain.RequestFunction;
 
 import java.util.List;
@@ -12,7 +11,6 @@ public record PersonaDto(UUID personaId,
                          String description,
                          String system,
 
-                         List<GlobalSystem> globalSystems,
                          List<RequestFunction> requestFunctions,
                          String imageUrl,
                          String imagePath,
@@ -24,7 +22,6 @@ public record PersonaDto(UUID personaId,
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", system='" + system + '\'' +
-                ", globalSystems=" + globalSystems +
                 ", requestFunctions=" + requestFunctions +
                 ", imageUrl='" + imageUrl + '\'' +
                 ", imagePath='" + imagePath + '\'' +

@@ -6,9 +6,7 @@ import {usePersonaFormStore} from '@/store/persona-form-store';
 export default defineComponent({
   name: 'PersonaTabFeatures',
   data() {
-    return {
-      imageGenerationEnabled: false,
-    };
+    return {};
   },
   setup() {
     const {personaForm} = storeToRefs(usePersonaFormStore());
@@ -24,7 +22,8 @@ export default defineComponent({
 <template>
   <div class="mb-3 p-3">
     <div class="form-check">
-      <input id="checkboxImageGeneration" v-model="imageGenerationEnabled" class="form-check-input" type="checkbox">
+      <input id="checkboxImageGeneration" v-model="personaForm.properties.feature_imageGeneration"
+             class="form-check-input" type="checkbox">
       <label class="form-check-label" for="checkboxImageGeneration">
         Image generation
       </label>

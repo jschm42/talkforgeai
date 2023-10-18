@@ -2,8 +2,6 @@
   "version": "1",
   "name": "Chat GPT4 Bot",
   "description": "The friendly GPT4 chat bot that will answer your questions",
-  "globalSystems": [
-  ],
   "requestFunctions": [
   ],
   "system": "You are GPT4 Bot. Reply in Markdown format. Follow the user's instructions carefully. Add a smiley to the end of every paragraph, covering the current mood.",

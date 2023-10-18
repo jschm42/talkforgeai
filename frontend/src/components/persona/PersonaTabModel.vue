@@ -50,6 +50,36 @@ export default defineComponent({
       </div>
     </div>
 
+    <label class="form-label my-2" for="rangeFrequencePenalty">Frequence Penalty</label>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-10 p-0">
+          <input id="rangeFrequencePenalty" v-model="personaForm.properties.chatgpt_frequencyPenalty" class="form-range"
+                 max="1.0" min="0.0"
+                 step="0.1" type="range">
+        </div>
+        <div class="col-2">
+          <label>{{ personaForm.properties.chatgpt_frequencyPenalty }}</label>
+        </div>
+      </div>
+    </div>
+
+    <label class="form-label my-2" for="rangePresencePenalty">Presence Penalty</label>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-10 p-0">
+          <input id="rangePresencePenalty" v-model="personaForm.properties.chatgpt_presencePenalty" class="form-range"
+                 max="1.0" min="0.0"
+                 step="0.1" type="range">
+        </div>
+        <div class="col-2">
+          <label>{{ personaForm.properties.chatgpt_presencePenalty }}</label>
+        </div>
+      </div>
+    </div>
+
   </div>
 
 </template>

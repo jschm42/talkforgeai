@@ -2,9 +2,6 @@
   "version": "1",
   "name": "Creative Bot",
   "description": "The creative chat bot that will generate content for you.",
-  "globalSystems": [
-    "IMAGE_GEN"
-  ],
   "requestFunctions": [
     "SEND_EMAIL"
   ],
@@ -15,6 +12,7 @@
     "chatgpt_temperature": "0.9",
     "chatgpt_topP": "1.0",
     "elevenlabs_voiceId": "21m00Tcm4TlvDq8ikWAM",
-    "elevenlabs_modelId": "eleven_multilingual_v2"
+    "elevenlabs_modelId": "eleven_multilingual_v2",
+    "feature_imageGeneration": "true"
   }
 }
