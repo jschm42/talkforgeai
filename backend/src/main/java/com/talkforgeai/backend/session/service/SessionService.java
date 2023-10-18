@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.talkforgeai.backend.persona.service.PersonaProperties.FEATURE_IMAGEGENERATION;
+import static com.talkforgeai.backend.persona.service.PersonaProperties.FEATURE_PLANTUML;
 
 @Service
 public class SessionService {
@@ -138,11 +139,24 @@ public class SessionService {
     public List<OpenAIChatMessage> composeMessagePayload(List<OpenAIChatMessage> previousMessages, OpenAIChatMessage newMessage, PersonaEntity persona) {
         List<OpenAIChatMessage> messages = new ArrayList<>();
 
+        if (!systemService.getContent(GlobalSystem.DEFAULT).isEmpty()) {
+            messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(GlobalSystem.DEFAULT)));
+        }
+
         if (persona.getProperties().containsKey(FEATURE_IMAGEGENERATION.getKey())) {
             boolean isFeatureImageGeneration = "true".equalsIgnoreCase(persona.getProperties().get(FEATURE_IMAGEGENERATION.getKey()));
             if (isFeatureImageGeneration) {
                 messages.add(
                         new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(GlobalSystem.IMAGE_GEN))
+                );
+            }
+        }
+
+        if (persona.getProperties().containsKey(FEATURE_PLANTUML.getKey())) {
+            boolean isFeaturePlantUML = "true".equalsIgnoreCase(persona.getProperties().get(FEATURE_PLANTUML.getKey()));
+            if (isFeaturePlantUML) {
+                messages.add(
+                        new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(GlobalSystem.PLANTUML))
                 );
             }
         }

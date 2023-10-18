@@ -15,7 +15,7 @@ public enum PersonaProperties {
     CHATGPT_TOP_P("chatgpt_topP", "1.0"),
     CHATGPT_FREQUENCY_PENALTY("chatgpt_frequencyPenalty", "0"),
     CHATGPT_PRESENCE_PENALTY("chatgpt_presencePenalty", "0"),
-
+    FEATURE_PLANTUML("feature_plantUMLGeneration", "false"),
     FEATURE_IMAGEGENERATION("feature_imageGeneration", "false");
 
     private final String key;

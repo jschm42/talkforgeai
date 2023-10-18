@@ -12,6 +12,7 @@
     "chatgpt_topP": "1.0",
     "elevenlabs_voiceId": "21m00Tcm4TlvDq8ikWAM",
     "elevenlabs_modelId": "eleven_multilingual_v2",
-    "feature_imageGeneration": "true"
+    "feature_imageGeneration": "true",
+    "feature_plantUMLGeneration": "true"
   }
 }

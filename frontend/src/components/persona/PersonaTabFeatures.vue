@@ -28,6 +28,13 @@ export default defineComponent({
         Image generation
       </label>
     </div>
+    <div class="form-check">
+      <input id="checkboxPlantUML" v-model="personaForm.properties.feature_plantUMLGeneration"
+             class="form-check-input" type="checkbox">
+      <label class="form-check-label" for="checkboxPlantUML">
+        PlantUML generation
+      </label>
+    </div>
 
   </div>
 </template>
