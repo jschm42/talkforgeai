@@ -11,7 +11,6 @@ public enum PersonaProperties {
     ELEVENLABS_STABILITY("elevenlabs_stability", "0"),
 
     CHATGPT_MODEL("chatgpt_model", "gpt-4"),
-    CHATGPT_MAX_TOKENS("chatgpt_maxTokens", "4096"),
     CHATGPT_TEMPERATURE("chatgpt_temperature", "0.7"),
     CHATGPT_TOP_P("chatgpt_topP", "1.0"),
     CHATGPT_FREQUENCY_PENALTY("chatgpt_frequencyPenalty", "0"),

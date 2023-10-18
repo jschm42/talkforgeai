@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
@@ -99,7 +100,7 @@ public class OpenAIChatService {
         LOGGER.info("Setting async timeout to {}", asyncTimeout);
         openAIRequest.setStream(true);
 
-        LOGGER.info("Chat Stream Request Body: {}", openAIRequest);
+        LOGGER.info("Chat Stream Request Body: {}", openAIRequest.toJSON());
 
         String uri = openAIProperties.chatUrl();
         HttpHeaders headers = new HttpHeaders();
@@ -112,6 +113,8 @@ public class OpenAIChatService {
             headers.add("Authorization", "Bearer " + openAIProperties.apiKey());
         }
 
+        LOGGER.info("Chat Stream Request Headers: {}", headers);
+
         return webClient.post()
                 .uri(uri)
                 .headers(httpHeaders -> {
@@ -121,6 +124,16 @@ public class OpenAIChatService {
                 .accept(org.springframework.http.MediaType.TEXT_EVENT_STREAM)
                 .bodyValue(openAIRequest)
                 .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        clientResponse -> {
+                            return clientResponse.bodyToMono(String.class)
+                                    .flatMap(errorBody -> {
+                                        // Here, you can parse the errorBody into a more detailed error message or object if needed
+                                        return Mono.error(new OpenAIException("Received error from OpenAI", errorBody));
+                                    });
+                        }
+                )
                 .bodyToFlux(String.class)
                 .mapNotNull(chunkJson -> {
                     if ("[DONE]".equals(chunkJson)) {
@@ -149,7 +162,11 @@ public class OpenAIChatService {
                     }
                 })
                 .doOnError(throwable -> {
-                    LOGGER.error("Error while streaming.", throwable);
+                    if (throwable instanceof OpenAIException oe) {
+                        LOGGER.error("Error from OpenAI: {}", oe.getErrorDetail(), oe);
+                    } else {
+                        LOGGER.error("Error while streaming.", throwable);
+                    }
                 })
                 .doOnComplete(() -> {
                     LOGGER.info("Stream completed.");

@@ -1,11 +1,13 @@
 import axios from 'axios';
+import Persona from '@/store/to/persona';
 
 class TtsService {
-  async speak(text: string, personaId: string) {
+
+  async speakElevenlabs(text: string, persona: Persona) {
     try {
       const result = await axios.post(
         `/api/v1/tts/stream`,
-        {text, personaId},
+        {text, personaId: persona.personaId},
         {
           timeout: 50000,
           headers: {
@@ -18,6 +20,10 @@ class TtsService {
       console.error('Error submitting prompt: ', error);
     }
     return null;
+  }
+
+  async speakSpeechAPI(text: string, persona: Persona) {
+
   }
 }
 

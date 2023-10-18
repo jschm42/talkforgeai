@@ -3,12 +3,12 @@
 import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
 import hljs from 'highlight.js';
-import ChatMessageAudioPlayer from '@/components/ChatMessageAudioPlayer.vue';
 import ChatMessage from '@/store/to/chat-message';
+import ChatMessageTextToSpeech from '@/components/ChatMessageTextToSpeech.vue';
 
 export default {
   name: 'ChatMessage',
-  components: {ChatMessageAudioPlayer},
+  components: {ChatMessageTextToSpeech},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
     return {store};
@@ -104,7 +104,8 @@ export default {
         </div>
       </div>
       <div class="col-md-1 text-end">
-        <chat-message-audio-player ref="chatMessageAudioPlayerRef" :message="this.message"></chat-message-audio-player>
+        <chat-message-text-to-speech ref="chatMessageAudioPlayerRef"
+                                     :message="this.message"></chat-message-text-to-speech>
       </div>
     </div>
     <footer>

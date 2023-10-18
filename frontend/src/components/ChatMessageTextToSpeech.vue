@@ -10,7 +10,7 @@ const ttsService = new TtsService();
 const htmlToTextService = new HtmlToTextService();
 
 export default defineComponent({
-  name: 'ChatMessageAudioPlayer',
+  name: 'ChatMessageTextToSpeech',
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
     return {store};

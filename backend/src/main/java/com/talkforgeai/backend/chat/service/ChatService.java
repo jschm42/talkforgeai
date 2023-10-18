@@ -216,11 +216,6 @@ public class ChatService {
             OpenAIChatRequest request = new OpenAIChatRequest();
             request.setMessages(messages);
 
-            // TODO Properties setzen
-            if (properties.containsKey(PersonaProperties.CHATGPT_MAX_TOKENS)) {
-                request.setMaxTokens(Integer.valueOf(properties.get(PersonaProperties.CHATGPT_MAX_TOKENS)));
-            }
-
             if (properties.containsKey(PersonaProperties.CHATGPT_TOP_P)) {
                 request.setTopP(Double.valueOf(properties.get(PersonaProperties.CHATGPT_TOP_P)));
             }

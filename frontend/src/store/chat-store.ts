@@ -73,6 +73,9 @@ export const useChatStore = defineStore('chat', {
       await this.loadIndex(persona.personaId);
     },
     async selectPersonaById(personaId: string): Promise<void> {
+      if (this.personaList.length === 0) {
+        this.personaList = await personaService.readAllPersona();
+      }
       const persona = this.personaList.find(p => p.personaId === personaId);
       console.log('selectedPersona', persona);
       if (persona) {
@@ -106,9 +109,26 @@ export const useChatStore = defineStore('chat', {
 
       console.log('Submitting prompt', this.sessionId, prompt);
 
-      await chatStreamService.streamSubmit(this.sessionId, prompt, chunkUpdateCallback);
-      await this.generateSessionTitle(this.sessionId);
-      await this.loadIndex(this.selectedPersona.personaId);
+      try {
+        await chatStreamService.streamSubmit(this.sessionId, prompt, chunkUpdateCallback);
+      } catch (e) {
+        console.error('Error while streaming prompt', e);
+        throw e;
+      }
+
+      try {
+        await this.generateSessionTitle(this.sessionId);
+      } catch (e) {
+        console.error('Error while generating session title', e);
+        throw e;
+      }
+
+      try {
+        await this.loadIndex(this.selectedPersona.personaId);
+      } catch (e) {
+        console.error('Error while loading index', e);
+        throw e;
+      }
     },
     async loadChatSession(sessionId: string) {
       const chatSession = await chatService.readSessionEntry(sessionId);

@@ -44,9 +44,8 @@ export default defineComponent({
   data() {
     return {};
   },
-  mounted() {
-    this.store.selectPersonaById(this.personaId).then(() => {
-    });
+  async mounted() {
+    await this.store.selectPersonaById(this.personaId);
   },
 });
 </script>
