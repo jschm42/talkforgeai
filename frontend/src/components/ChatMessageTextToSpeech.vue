@@ -46,7 +46,7 @@ export default defineComponent({
       console.log('Playing audio', this.store.selectedPersona);
       this.audioState = AudioState.Loading;
       try {
-        const audioBlob = await ttsService.speak(plainText, this.store.selectedPersona.personaId);
+        const audioBlob = await ttsService.speakElevenlabs(plainText, this.store.selectedPersona);
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.addEventListener('ended', () => {

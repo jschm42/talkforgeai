@@ -3,6 +3,38 @@ import Persona from '@/store/to/persona';
 
 class TtsService {
 
+  async getElevenlabsVoices() {
+    try {
+      const result = await axios.get(
+        `/api/v1/tts/voices`,
+        {
+          timeout: 5000,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      return result.data;
+    } catch (error) {
+      console.error('Error submitting prompt: ', error);
+    }
+  }
+
+  async getElevenlabsModels() {
+    try {
+      const result = await axios.get(
+        `/api/v1/tts/models`,
+        {
+          timeout: 5000,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      return result.data;
+    } catch (error) {
+      console.error('Error submitting prompt: ', error);
+    }
+  }
+
   async speakElevenlabs(text: string, persona: Persona) {
     try {
       const result = await axios.post(

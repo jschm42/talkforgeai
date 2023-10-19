@@ -2,6 +2,9 @@
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
+import TtsService from '@/service/tts.service';
+
+const ttsService = new TtsService();
 
 export default defineComponent({
   name: 'PersonaTabVoice',
@@ -31,6 +34,14 @@ export default defineComponent({
     },
   },
   mounted() {
+    ttsService.getElevenlabsVoices().then((voices) => {
+      console.log('Elevenlabs voices', voices);
+    });
+
+    ttsService.getElevenlabsModels().then((models) => {
+      console.log('Elevenlabs models', models);
+    });
+
     this.populateVoices();
   },
   unmounted() {
