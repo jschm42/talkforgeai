@@ -6,39 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ElevenLabsVoice {
-    @JsonProperty("voice_id")
-    private String voiceId;
-    private String name;
-    private String category;
+public record ElevenLabsVoice(@JsonProperty("voice_id") String voiceId, String name, String category,
+                              Labels labels) {
 
-    private String description;
-
-    public String getVoiceId() {
-        return voiceId;
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record Labels(String accent, String description, String age, String gender,
+                         @JsonProperty("use case") String useCase) {
     }
 
-    public void setVoiceId(String voiceId) {
-        this.voiceId = voiceId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getDescription() {
-        return description;
-    }
 }

@@ -11,6 +11,8 @@ export default defineComponent({
   data() {
     return {
       speechApiVoices: [],
+      elevenLabsVoices: [],
+      elevenLabsModels: [],
     };
   },
   setup() {
@@ -20,6 +22,19 @@ export default defineComponent({
   },
   computed: {},
   methods: {
+    onChangeElevenLabsVoice() {
+      console.log('onChangeElevenLabsVoice', this.personaForm.properties.elevenlabs_voiceId);
+      this.updateVoiceIdSelection();
+    },
+    updateVoiceIdSelection() {
+      // If voiceId matches a voice in the list, select it
+      const voice = this.elevenLabsVoices.find(
+        voice => voice.voice_id === this.personaForm.properties.elevenlabs_voiceId);
+      // If voice ist not found, set select element to show "Custom" and be disabled
+      if (!voice) {
+        this.personaForm.properties.elevenlabs_voiceId = '';
+      }
+    },
     populateVoices() {
       const voices = speechSynthesis.getVoices();
       if (voices.length > 0) {
@@ -33,15 +48,14 @@ export default defineComponent({
       }
     },
   },
-  mounted() {
-    ttsService.getElevenlabsVoices().then((voices) => {
-      console.log('Elevenlabs voices', voices);
-    });
+  async mounted() {
+    const elevenLabsVoices = await ttsService.getElevenlabsVoices();
+    this.elevenLabsVoices = elevenLabsVoices['voices'];
+    console.log('this.elevenLabsVoices', this.elevenLabsVoices);
+    this.updateVoiceIdSelection();
 
-    ttsService.getElevenlabsModels().then((models) => {
-      console.log('Elevenlabs models', models);
-    });
-
+    this.elevenLabsModels = await ttsService.getElevenlabsModels();
+    console.log('this.elevenLabsModels', this.elevenLabsModels);
     this.populateVoices();
   },
   unmounted() {
@@ -62,6 +76,28 @@ export default defineComponent({
 
 
     <div v-if="personaForm.properties.tts_type === 'elevenlabs'">
+      <label class="form-label my-2" for="selectElevenLabsModel">Model</label>
+      <select id="selectElevenLabsModel" v-model="personaForm.properties.elevenlabs_modelId"
+              aria-label="ElevenLabs Model"
+              class="form-select my-2" @change="onChangeElevenLabsVoice">
+        <option v-for="model in elevenLabsModels" :key="model.model_id" :value="model.name">{{
+            model.name
+          }}
+        </option>
+      </select>
+
+      <label class="form-label my-2" for="selectElevenLabsVoice">Voice</label>
+      <select id="selectElevenLabsVoice" ref="elevenLabsSelectedVoiceId"
+              v-model="personaForm.properties.elevenlabs_voiceId"
+              aria-label="ElebenLabs Voice"
+              class="form-select my-2">
+        <option v-for="voice in elevenLabsVoices" :key="voice.voice_id" :value="voice.voice_id">{{
+            voice.name
+          }} - {{ voice.labels.description }} {{ voice.labels.age }} {{ voice.labels.accent }} {{ voice.labels.gender }}
+
+        </option>
+      </select>
+
       <label class="form-label" for="elevenlabsVoiceID">Voice-ID</label>
       <input id="elevenlabsVoiceID" v-model="personaForm.properties.elevenlabs_voiceId" class="form-control"
              maxlength="32" required
