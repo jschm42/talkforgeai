@@ -1,10 +1,14 @@
 package com.talkforgeai.backend.persona.service;
 
+import com.talkforgeai.backend.persona.controller.GenerateImageResponse;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
 import com.talkforgeai.backend.persona.dto.PersonaDto;
 import com.talkforgeai.backend.persona.dto.PersonaImageUploadResponse;
 import com.talkforgeai.backend.persona.repository.PersonaRepository;
 import com.talkforgeai.backend.storage.FileStorageService;
+import com.talkforgeai.service.openai.OpenAIImageService;
+import com.talkforgeai.service.openai.dto.OpenAIImageRequest;
+import com.talkforgeai.service.openai.dto.OpenAIImageResponse;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,10 +33,13 @@ public class PersonaService {
 
     private final FileStorageService fileStorageService;
 
-    public PersonaService(PersonaRepository personaRepository, PersonaMapper personaMapper, FileStorageService fileStorageService) {
+    private final OpenAIImageService openAIImageService;
+
+    public PersonaService(PersonaRepository personaRepository, PersonaMapper personaMapper, FileStorageService fileStorageService, OpenAIImageService openAIImageService) {
         this.personaRepository = personaRepository;
         this.personaMapper = personaMapper;
         this.fileStorageService = fileStorageService;
+        this.openAIImageService = openAIImageService;
     }
 
     public List<PersonaDto> getAllPersona() {
@@ -83,5 +93,40 @@ public class PersonaService {
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to upload file", e);
         }
+    }
+
+    public GenerateImageResponse generateImage(String prompt) throws IOException {
+        OpenAIImageRequest request = new OpenAIImageRequest(prompt, 1, "256x256");
+        OpenAIImageResponse response = openAIImageService.submit(request);
+
+        return new GenerateImageResponse(downloadImage(response.data().get(0).url()));
+    }
+
+    private String downloadImage(String imageUrl) throws IOException {
+        String fileName = UUID.randomUUID() + "_image.png";
+        Path subDirectoryPath = fileStorageService.getPersonaDirectory();
+        Path localFilePath = subDirectoryPath.resolve(fileName);
+
+        // Ensure the directory exists and is writable
+        if (!Files.exists(subDirectoryPath)) {
+            Files.createDirectories(subDirectoryPath);
+        }
+        if (!Files.isWritable(subDirectoryPath)) {
+            throw new IOException("Directory is not writable: " + subDirectoryPath);
+        }
+
+        LOGGER.info("Downloading image {}...", imageUrl);
+
+        try {
+            URI uri = URI.create(imageUrl);
+            try (InputStream in = uri.toURL().openStream()) {
+                Files.copy(in, localFilePath, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (Exception ex) {
+            LOGGER.error("Failed to download image: {}", imageUrl);
+            throw ex;
+        }
+
+        return fileName;
     }
 }

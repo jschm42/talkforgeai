@@ -37,7 +37,12 @@ public class MessageProcessor {
 
         String processedContent = message.content();
 
-        TransformerContext context = new TransformerContext(sessionId, fileStorageService.getDataDirectory());
+        TransformerContext context = new TransformerContext(
+                sessionId,
+                fileStorageService.getPersonaDirectory(),
+                fileStorageService.getPersonaImportDirectory(),
+                fileStorageService.getChatDirectory()
+        );
 
         for (Transformer t : transformers) {
             logger.info("Transforming with " + t.getClass().getName() + "...");

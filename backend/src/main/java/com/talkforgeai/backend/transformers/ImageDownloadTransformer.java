@@ -49,7 +49,7 @@ public class ImageDownloadTransformer implements Transformer {
                 String localFilePath = downloadImage(
                         imageResult.data().get(0).url(),
                         context.sessionId(),
-                        context.dataDirectory()
+                        context.chatDirectory()
                 );
 
                 String formattedContent = template.formatted(
@@ -68,9 +68,9 @@ public class ImageDownloadTransformer implements Transformer {
         return content;
     }
 
-    private String downloadImage(String imageUrl, UUID sessionId, Path dataDirectory) throws IOException {
+    private String downloadImage(String imageUrl, UUID sessionId, Path chatDirectory) throws IOException {
         String fileName = UUID.randomUUID() + "_image.png";
-        Path subDirectoryPath = dataDirectory.resolve("chat").resolve(sessionId.toString());
+        Path subDirectoryPath = chatDirectory.resolve(sessionId.toString());
         Path localFilePath = subDirectoryPath.resolve(fileName);
 
         // Ensure the directory exists and is writable

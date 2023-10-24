@@ -3,6 +3,9 @@ import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
 import axios from 'axios';
+import PersonaService from '@/service/persona.service';
+
+const personaService = new PersonaService();
 
 export default defineComponent({
   name: 'PersonaTabProfile',
@@ -51,6 +54,11 @@ export default defineComponent({
     getAltImageText() {
       return this.personaForm.imagePath;
     },
+    async onGenerateImage() {
+      const imageResponse = await personaService.generatePersonaImage('A dog wearing sunglasses.');
+      console.log('Image response: ', imageResponse);
+      this.personaForm.imagePath = imageResponse.data.fileName;
+    },
   },
 });
 </script>
@@ -69,6 +77,7 @@ export default defineComponent({
     </div>
     <input id="personaImage" ref="fileInput" class=" col-10 form-control" style="display: none" type="file"
            @change="onFileSelected">
+    <button @click.prevent="onGenerateImage">Generate</button>
   </div>
 
   <div class="mb-3">

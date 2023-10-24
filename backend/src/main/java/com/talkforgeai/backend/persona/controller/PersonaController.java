@@ -54,6 +54,11 @@ public class PersonaController {
         }
     }
 
+    @PostMapping("/image/generate")
+    public GenerateImageResponse generateImage(@RequestBody GenerateImageRequest generateImageRequest) throws IOException {
+        return personaService.generateImage(generateImageRequest.prompt());
+    }
+
     @PostMapping
     public void updatePersona(@RequestBody PersonaDto personaDto) {
         personaService.updatePersona(personaDto);

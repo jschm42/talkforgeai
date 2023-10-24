@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 
 @Service
 public class FileStorageService {
+
     public static final String TALK_FORGE_DIR = ".talkforgeai";
     public static final Logger LOGGER = LoggerFactory.getLogger(FileStorageService.class);
 
@@ -48,6 +49,10 @@ public class FileStorageService {
 
     public Path getPersonaDirectory() {
         return getDataDirectory().resolve("persona");
+    }
+
+    public Path getChatDirectory() {
+        return getDataDirectory().resolve("chat");
     }
 
     public void createDataDirectories() {

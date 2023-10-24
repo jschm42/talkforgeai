@@ -31,6 +31,14 @@ class PersonaService {
     }
   }
 
+  async generatePersonaImage(prompt: string) {
+    try {
+      return await axios.post(`/api/v1/persona/image/generate`, {prompt});
+    } catch (error) {
+      console.error('Error generating persona image: ', error);
+    }
+  }
+
 }
 
 export default PersonaService;
