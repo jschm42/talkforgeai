@@ -11,7 +11,9 @@ export default defineComponent({
   name: 'PersonaTabProfile',
   data() {
     return {
-      // selectedFile: null,
+      imageGenerationPrompt: '',
+      isGenerationRunning: false,
+      showModal: false,
     };
   },
   setup() {
@@ -55,9 +57,15 @@ export default defineComponent({
       return this.personaForm.imagePath;
     },
     async onGenerateImage() {
-      const imageResponse = await personaService.generatePersonaImage('A dog wearing sunglasses.');
+      this.isGenerationRunning = true;
+      const imageResponse = await personaService.generatePersonaImage(this.imageGenerationPrompt);
       console.log('Image response: ', imageResponse);
       this.personaForm.imagePath = imageResponse.data.fileName;
+      this.showModal = false;
+      this.isGenerationRunning = false;
+    },
+    onShowGenerationModal() {
+      this.showModal = true;
     },
   },
 });
@@ -65,19 +73,28 @@ export default defineComponent({
 
 <template>
   <div class="mb-3">
-    <div>
-      <div v-if="!personaForm.imagePath"
-           class="placeholder-image img-thumbnail d-flex justify-content-center align-items-center" role="button"
-           @click="triggerFileInput">
-        <i class="bi bi-person"></i>
+    <div class="row">
+      <div class="col-4">
+        <div v-if="!personaForm.imagePath"
+             class="placeholder-image img-thumbnail d-flex justify-content-center align-items-center" role="button"
+             @click="triggerFileInput">
+          <i class="bi bi-person"></i>
+        </div>
+        <img v-else :alt="personaForm.imagePath" :src="getImageUrl(personaForm.imagePath)"
+             :title="personaForm.imagePath"
+             class="img-thumbnail thumbnail-image"
+             role="button" @click="triggerFileInput"/>
+        <input id="personaImage" ref="fileInput" class=" col-10 form-control" style="display: none" type="file"
+               @change="onFileSelected">
       </div>
-      <img v-else :alt="personaForm.imagePath" :src="getImageUrl(personaForm.imagePath)" :title="personaForm.imagePath"
-           class="img-thumbnail thumbnail-image"
-           role="button" @click="triggerFileInput"/>
     </div>
-    <input id="personaImage" ref="fileInput" class=" col-10 form-control" style="display: none" type="file"
-           @change="onFileSelected">
-    <button @click.prevent="onGenerateImage">Generate</button>
+    <div class="row">
+      <div class="col-5">
+        <button class="btn btn-primary my-2" type="button" @click.prevent="onShowGenerationModal">
+          <i class="bi bi-magic mx-2"></i>Generate...
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="mb-3">
@@ -96,6 +113,46 @@ export default defineComponent({
     <textarea id="personaSystem" v-model="personaForm.system" class="form-control" maxlength="16384"
               rows="10"></textarea>
   </div>
+
+  <!-- The Modal -->
+  <div v-if="showModal" class="modal" role="dialog" tabindex="-1">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Generate persona image</h5>
+          <button :disabled="isGenerationRunning" aria-label="Close" class="close" data-dismiss="modal" type="button"
+                  @click="showModal = false">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label" for="imageGenPrompt">Image generation prompt</label>
+            <textarea id="imageGenPrompt" v-model="imageGenerationPrompt"
+
+                      :disabled="isGenerationRunning" class="form-control" maxlength="2048"
+                      required
+                      rows="4"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button :disabled="isGenerationRunning" class="btn btn-secondary" data-dismiss="modal"
+                  type="button"
+                  @click="showModal = false">Close
+          </button>
+          <button :disabled="isGenerationRunning" class="btn btn-primary" type="button"
+                  @click.prevent="onGenerateImage">
+            <span v-if="isGenerationRunning" aria-hidden="true" class="spinner-border spinner-border-sm mx-2"
+                  role="status"></span>
+            <span v-if="isGenerationRunning">Generating...</span>
+            <span v-else>Generate</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 </template>
 
 <style scoped>
@@ -108,6 +165,18 @@ export default defineComponent({
 .thumbnail-image {
   width: 200px;
   height: 200px;
+}
+
+.modal {
+  display: block;
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1050;
+  overflow: auto;
 }
 
 </style>
