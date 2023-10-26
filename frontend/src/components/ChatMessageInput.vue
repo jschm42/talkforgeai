@@ -1,5 +1,8 @@
 <template>
   <div class="input-group">
+    <div class="input-group-text">
+      <whisper-component @onReceiveText="onReceiveWhisperText"></whisper-component>
+    </div>
     <textarea ref="promptInputArea" v-model="prompt" :disabled="isInputLocked" class="form-control shadow"
               placeholder="Enter prompt..."
               rows="5"
@@ -14,9 +17,11 @@
 <script>
 
 import {useChatStore} from '@/store/chat-store';
+import WhisperComponent from '@/components/WhisperComponent.vue';
 
 export default {
   name: 'ChatMessageInput',
+  components: {WhisperComponent},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
 
@@ -48,6 +53,11 @@ export default {
       console.log('Sending submitResultReceived');
       this.$emit('submitResultReceived');
       this.prompt = '';
+    },
+
+    onReceiveWhisperText(text) {
+      console.log('onReceiveWhisperText: ', text);
+      this.prompt = text;
     },
   },
 };
