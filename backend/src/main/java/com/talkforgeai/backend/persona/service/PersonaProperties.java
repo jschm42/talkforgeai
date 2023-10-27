@@ -17,7 +17,8 @@ public enum PersonaProperties {
     CHATGPT_PRESENCE_PENALTY("chatgpt_presencePenalty", "0"),
     FEATURE_PLANTUML("feature_plantUMLGeneration", "false"),
     FEATURE_IMAGEGENERATION("feature_imageGeneration", "false"),
-    FEATURE_AUTOSPEAKDEFAULT("feature_autoSpeakDefault", "false");
+    FEATURE_AUTOSPEAKDEFAULT("feature_autoSpeakDefault", "false"),
+    FEATURE_TITLEGENERATION("feature_titleGeneration", "true");
     private final String key;
     private final String defaultValue;
 

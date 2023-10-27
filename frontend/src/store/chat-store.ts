@@ -124,11 +124,15 @@ export const useChatStore = defineStore('chat', {
         throw e;
       }
 
-      try {
-        await this.generateSessionTitle(this.sessionId);
-      } catch (e) {
-        console.error('Error while generating session title', e);
-        throw e;
+      if (this.isSessionTitleGenerationEnabled()) {
+        try {
+          await this.generateSessionTitle(this.sessionId);
+        } catch (e) {
+          console.error('Error while generating session title', e);
+          throw e;
+        }
+      } else {
+        console.log('Session title generation is disabled. Skipping.');
       }
 
       try {
@@ -153,6 +157,9 @@ export const useChatStore = defineStore('chat', {
     },
     async updateSessionTitle(sessionId: string, newTitle: string) {
       await chatService.updateSessionTitle(sessionId, newTitle);
+    },
+    isSessionTitleGenerationEnabled() {
+      return this.selectedPersona.properties[PersonaProperties.FEATURE_TITLEGENERATION] === 'true';
     },
     hasEmptySessionTitle(sessionId: string) {
       const currentSession = this.sessions.find(s => s.id === sessionId);

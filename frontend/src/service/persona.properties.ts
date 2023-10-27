@@ -13,6 +13,7 @@ const PersonaProperties = {
   FEATURE_PLANTUML: 'feature_plantUMLGeneration',
   FEATURE_IMAGEGENERATION: 'feature_imageGeneration',
   FEATURE_AUTOSPEAKDEFAULT: 'feature_autoSpeakDefault',
+  FEATURE_TITLEGENERATION: 'feature_titleGeneration',
 };
 
 const TTSType = {
