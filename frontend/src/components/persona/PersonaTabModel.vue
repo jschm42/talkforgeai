@@ -2,9 +2,25 @@
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
+import PersonaProperties from '@/service/persona.properties';
 
 export default defineComponent({
   name: 'PersonaTabModel',
+  data() {
+    return {
+      chatGptModels: [
+        'gpt-4',
+        'gpt-4-32k',
+        'gpt-3.5-turbo',
+        'gpt-3.5-turbo-16k',
+      ],
+    };
+  },
+  computed: {
+    PersonaProperties() {
+      return PersonaProperties;
+    },
+  },
   setup() {
     const {personaForm} = storeToRefs(usePersonaFormStore());
 
@@ -16,10 +32,15 @@ export default defineComponent({
 
 <template>
   <div class="mb-3 p-3">
-    <select id="selectChatModel" v-model="personaForm.properties.chatgpt_model" aria-label="Chat Model"
+    <select id="selectChatModel" v-model="personaForm.properties[PersonaProperties.CHATGPT_MODEL]"
+            aria-label="Chat Model"
             class="form-select my-2">
-      <option value="gpt-4">GPT 4</option>
-      <option value="gpt-3.5-turbo">GPT 3.5 Turbo</option>
+      <!--      <option value="gpt-4">GPT 4</option>-->
+      <!--      <option value="gpt-3.5-turbo">GPT 3.5 Turbo</option>-->
+
+      <option v-for="model in chatGptModels" :key="model" :value="model">{{ model }}
+      </option>
+
     </select>
 
     <label class="form-label my-2" for="rangeTemperature">Temperature</label>
@@ -27,11 +48,12 @@ export default defineComponent({
     <div class="container">
       <div class="row">
         <div class="col-10 p-0">
-          <input id="rangeTemperature" v-model="personaForm.properties.chatgpt_temperature" class="form-range" max="1.0"
+          <input id="rangeTemperature" v-model="personaForm.properties[PersonaProperties.CHATGPT_TEMPERATURE]"
+                 class="form-range" max="1.0"
                  min="0.0" step="0.1" type="range">
         </div>
         <div class="col-2">
-          <label>{{ personaForm.properties.chatgpt_temperature }}</label>
+          <label>{{ personaForm.properties[PersonaProperties.CHATGPT_TEMPERATURE] }}</label>
         </div>
       </div>
     </div>
@@ -41,11 +63,12 @@ export default defineComponent({
     <div class="container">
       <div class="row">
         <div class="col-10 p-0">
-          <input id="rangeTopP" v-model="personaForm.properties.chatgpt_topP" class="form-range" max="1.0" min="0.0"
+          <input id="rangeTopP" v-model="personaForm.properties[PersonaProperties.CHATGPT_TOP_P]" class="form-range"
+                 max="1.0" min="0.0"
                  step="0.1" type="range">
         </div>
         <div class="col-2">
-          <label>{{ personaForm.properties.chatgpt_topP }}</label>
+          <label>{{ personaForm.properties[PersonaProperties.CHATGPT_TOP_P] }}</label>
         </div>
       </div>
     </div>
@@ -55,12 +78,13 @@ export default defineComponent({
     <div class="container">
       <div class="row">
         <div class="col-10 p-0">
-          <input id="rangeFrequencePenalty" v-model="personaForm.properties.chatgpt_frequencyPenalty" class="form-range"
+          <input id="rangeFrequencePenalty"
+                 v-model="personaForm.properties[PersonaProperties.CHATGPT_FREQUENCY_PENALTY]" class="form-range"
                  max="1.0" min="0.0"
                  step="0.1" type="range">
         </div>
         <div class="col-2">
-          <label>{{ personaForm.properties.chatgpt_frequencyPenalty }}</label>
+          <label>{{ personaForm.properties[PersonaProperties.CHATGPT_FREQUENCY_PENALTY] }}</label>
         </div>
       </div>
     </div>
@@ -70,12 +94,13 @@ export default defineComponent({
     <div class="container">
       <div class="row">
         <div class="col-10 p-0">
-          <input id="rangePresencePenalty" v-model="personaForm.properties.chatgpt_presencePenalty" class="form-range"
+          <input id="rangePresencePenalty" v-model="personaForm.properties[PersonaProperties.CHATGPT_PRESENCE_PENALTY]"
+                 class="form-range"
                  max="1.0" min="0.0"
                  step="0.1" type="range">
         </div>
         <div class="col-2">
-          <label>{{ personaForm.properties.chatgpt_presencePenalty }}</label>
+          <label>{{ personaForm.properties[PersonaProperties.CHATGPT_PRESENCE_PENALTY] }}</label>
         </div>
       </div>
     </div>

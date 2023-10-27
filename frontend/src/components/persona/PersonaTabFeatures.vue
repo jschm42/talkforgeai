@@ -2,9 +2,15 @@
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
+import PersonaProperties from '@/service/persona.properties';
 
 export default defineComponent({
   name: 'PersonaTabFeatures',
+  computed: {
+    PersonaProperties() {
+      return PersonaProperties;
+    },
+  },
   data() {
     return {};
   },
@@ -22,14 +28,14 @@ export default defineComponent({
 <template>
   <div class="mb-3 p-3">
     <div class="form-check">
-      <input id="checkboxImageGeneration" v-model="personaForm.properties.feature_imageGeneration"
+      <input id="checkboxImageGeneration" v-model="personaForm.properties[PersonaProperties.FEATURE_IMAGEGENERATION]"
              class="form-check-input" type="checkbox">
       <label class="form-check-label" for="checkboxImageGeneration">
         Image generation
       </label>
     </div>
     <div class="form-check">
-      <input id="checkboxPlantUML" v-model="personaForm.properties.feature_plantUMLGeneration"
+      <input id="checkboxPlantUML" v-model="personaForm.properties[PersonaProperties.FEATURE_PLANTUML]"
              class="form-check-input" type="checkbox">
       <label class="form-check-label" for="checkboxPlantUML">
         PlantUML generation

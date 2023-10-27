@@ -5,6 +5,7 @@ import {useChatStore} from '@/store/chat-store';
 import ChatMessage from '@/store/to/chat-message';
 import Role from '@/store/to/role';
 import HtmlToTextService from '@/service/html-to-text.service';
+import PersonaProperties, {TTSType} from '@/service/persona.properties';
 
 const ttsService = new TtsService();
 const htmlToTextService = new HtmlToTextService();
@@ -44,7 +45,18 @@ export default defineComponent({
       console.log('PLAIN TEXT', plainText);
 
       console.log('Playing audio', this.store.selectedPersona);
+
+      const isSpeechAPI = this.store.selectedPersona.properties[PersonaProperties.TTS_TYPE] === TTSType.SPEECHAPI;
+
       this.audioState = AudioState.Loading;
+
+      if (isSpeechAPI) {
+        await this.speakSpeechApi(plainText);
+      } else {
+        await this.speakElevenlabs(plainText);
+      }
+    },
+    async speakElevenlabs(plainText) {
       try {
         const audioBlob = await ttsService.speakElevenlabs(plainText, this.store.selectedPersona);
         const audioUrl = URL.createObjectURL(audioBlob);
@@ -60,6 +72,9 @@ export default defineComponent({
         console.error('Error loading audio stream.', error);
         this.audioState = AudioState.Stopped;
       }
+    },
+    async speakSpeechApi(plainText) {
+      await ttsService.speakSpeechAPI(plainText, this.store.selectedPersona);
     },
   },
 });

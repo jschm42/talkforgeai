@@ -51,7 +51,7 @@
 
       </div>
 
-      <button class="btn btn-primary me-2" type="submit">Create persona</button>
+      <button class="btn btn-primary me-2" type="submit">Save</button>
       <button class="btn btn-secondary" type="button" @click.prevent="onCancel">Cancel</button>
     </form>
   </div>

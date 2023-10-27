@@ -17,7 +17,9 @@
             <div class="col-md-8">
               <div class="card-body">
                 <h5 class="card-title">{{ persona.name }}</h5>
+                <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>
                 <p class="card-text"><small class="text-body-secondary">{{ persona.description }}</small></p>
+                <p class="card-text">Card footer</p>
               </div>
             </div>
           </div>

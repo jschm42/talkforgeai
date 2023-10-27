@@ -3,6 +3,7 @@ import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
 import TtsService from '@/service/tts.service';
+import PersonaProperties from '@/service/persona.properties';
 
 const ttsService = new TtsService();
 
@@ -20,7 +21,11 @@ export default defineComponent({
 
     return {personaForm};
   },
-  computed: {},
+  computed: {
+    PersonaProperties() {
+      return PersonaProperties;
+    },
+  },
   methods: {
     onChangeElevenLabsVoice() {
       console.log('onChangeElevenLabsVoice', this.personaForm.properties.elevenlabs_voiceId);
@@ -29,7 +34,7 @@ export default defineComponent({
     updateVoiceIdSelection() {
       // If voiceId matches a voice in the list, select it
       const voice = this.elevenLabsVoices.find(
-        voice => voice.voice_id === this.personaForm.properties.elevenlabs_voiceId);
+        voice => voice.voice_id === this.personaForm.properties[PersonaProperties.ELEVENLABS_VOICEID]);
       // If voice ist not found, set select element to show "Custom" and be disabled
       if (!voice) {
         this.personaForm.properties.elevenlabs_voiceId = '';
@@ -67,7 +72,7 @@ export default defineComponent({
 <template>
   <div class="mb-3 p-3">
     <label class="form-label my-2" for="selectTTSModel">Text-to-Speech</label>
-    <select id="selectTTSModel" v-model="personaForm.properties.tts_type" aria-label="Text-to-Speech"
+    <select id="selectTTSModel" v-model="personaForm.properties[PersonaProperties.TTS_TYPE]" aria-label="Text-to-Speech"
             class="form-select my-2">
       <option value="">disabled</option>
       <option value="speechAPI">Speech API</option>
@@ -75,12 +80,12 @@ export default defineComponent({
     </select>
 
 
-    <div v-if="personaForm.properties.tts_type === 'elevenlabs'">
+    <div v-if="personaForm.properties[PersonaProperties.TTS_TYPE] === 'elevenlabs'">
       <label class="form-label my-2" for="selectElevenLabsModel">Model</label>
-      <select id="selectElevenLabsModel" v-model="personaForm.properties.elevenlabs_modelId"
+      <select id="selectElevenLabsModel" v-model="personaForm.properties[PersonaProperties.ELEVENLABS_MODELID]"
               aria-label="ElevenLabs Model"
               class="form-select my-2" @change="onChangeElevenLabsVoice">
-        <option v-for="model in elevenLabsModels" :key="model.model_id" :value="model.name">{{
+        <option v-for="model in elevenLabsModels" :key="model.model_id" :value="model.model_id">{{
             model.name
           }}
         </option>
@@ -88,7 +93,7 @@ export default defineComponent({
 
       <label class="form-label my-2" for="selectElevenLabsVoice">Voice</label>
       <select id="selectElevenLabsVoice" ref="elevenLabsSelectedVoiceId"
-              v-model="personaForm.properties.elevenlabs_voiceId"
+              v-model="personaForm.properties[PersonaProperties.ELEVENLABS_VOICEID]"
               aria-label="ElebenLabs Voice"
               class="form-select my-2">
         <option v-for="voice in elevenLabsVoices" :key="voice.voice_id" :value="voice.voice_id">{{
@@ -99,7 +104,8 @@ export default defineComponent({
       </select>
 
       <label class="form-label" for="elevenlabsVoiceID">Voice-ID</label>
-      <input id="elevenlabsVoiceID" v-model="personaForm.properties.elevenlabs_voiceId" class="form-control"
+      <input id="elevenlabsVoiceID" v-model="personaForm.properties[PersonaProperties.ELEVENLABS_VOICEID]"
+             class="form-control"
              maxlength="32" required
              type="text">
 
@@ -107,12 +113,13 @@ export default defineComponent({
       <div class="container">
         <div class="row">
           <div class="col-10 p-0">
-            <input id="rangeELVoiceSimBoost" v-model="personaForm.properties.elevenlabs_similarityBoost"
+            <input id="rangeELVoiceSimBoost"
+                   v-model="personaForm.properties[PersonaProperties.ELEVENLABS_SIMILARITYBOOST]"
                    class="form-range" max="1.0" min="0.0"
                    step="0.1" type="range">
           </div>
           <div class="col-2">
-            <label>{{ personaForm.properties.elevenlabs_similarityBoost }}</label>
+            <label>{{ personaForm.properties[PersonaProperties.ELEVENLABS_SIMILARITYBOOST] }}</label>
           </div>
         </div>
       </div>
@@ -121,12 +128,13 @@ export default defineComponent({
       <div class="container">
         <div class="row">
           <div class="col-10 p-0">
-            <input id="rangeELVoiceStability" v-model="personaForm.properties.elevenlabs_stability" class="form-range"
+            <input id="rangeELVoiceStability" v-model="personaForm.properties[PersonaProperties.ELEVENLABS_STABILITY]"
+                   class="form-range"
                    max="1.0" min="0.0"
                    step="0.1" type="range">
           </div>
           <div class="col-2">
-            <label>{{ personaForm.properties.elevenlabs_stability }}</label>
+            <label>{{ personaForm.properties[PersonaProperties.ELEVENLABS_STABILITY] }}</label>
           </div>
         </div>
       </div>
@@ -134,7 +142,8 @@ export default defineComponent({
 
     <div v-else-if="personaForm.properties.tts_type === 'speechAPI'">
       <label class="form-label my-2" for="selectSpeechAPIVoice">Voices</label>
-      <select id="selectSpeechAPIVoice" v-model="personaForm.properties.speechAPI_voice" aria-label="SpeechAPI Voice"
+      <select id="selectSpeechAPIVoice" v-model="personaForm.properties[PersonaProperties.SPEECHAPI_VOICE]"
+              aria-label="SpeechAPI Voice"
               class="form-select my-2">
         <option v-for="voice in speechApiVoices" :key="voice.name" :value="voice.name">{{
             voice.name

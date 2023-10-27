@@ -31,8 +31,8 @@ export default {
   },
   methods: {
     async handleKeydown(event) {
-      event.preventDefault(); // Prevent default behavior
       if (event.ctrlKey && event.key === 'r') {
+        event.preventDefault(); // Prevent default behavior
         if (this.isRecording) {
           await this.stopRecording();
         } else {

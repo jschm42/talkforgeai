@@ -19,7 +19,6 @@
             <div class="col-md-6">
               <div class="card-body">
                 <h5 class="card-title" @click.prevent="onPersonaSelected(persona)">{{ persona.name }}</h5>
-                <!--                <p class="card-text"></p>-->
               </div>
             </div>
 
@@ -31,6 +30,8 @@
           <div class="row g-0 p-3" role="button" @click.prevent="onPersonaSelected(persona)">
             <small class="text-body-secondary">{{ persona.description }}</small>
           </div>
+
+          <persona-compact-info :persona="persona"></persona-compact-info>
 
         </div>
 
@@ -53,9 +54,10 @@
 <script>
 import {defineComponent} from 'vue';
 import {useChatStore} from '@/store/chat-store';
+import PersonaCompactInfo from '@/components/PersonaCompactInfo.vue';
 
 export default defineComponent({
-  components: {},
+  components: {PersonaCompactInfo},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
     return {store};

@@ -129,7 +129,6 @@ export default defineComponent({
           <div class="mb-3">
             <label class="form-label" for="imageGenPrompt">Image generation prompt</label>
             <textarea id="imageGenPrompt" v-model="imageGenerationPrompt"
-
                       :disabled="isGenerationRunning" class="form-control" maxlength="2048"
                       required
                       rows="4"></textarea>
