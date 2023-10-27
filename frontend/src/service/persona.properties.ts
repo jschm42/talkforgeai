@@ -12,11 +12,13 @@ const PersonaProperties = {
   CHATGPT_PRESENCE_PENALTY: 'chatgpt_presencePenalty',
   FEATURE_PLANTUML: 'feature_plantUMLGeneration',
   FEATURE_IMAGEGENERATION: 'feature_imageGeneration',
+  FEATURE_AUTOSPEAKDEFAULT: 'feature_autoSpeakDefault',
 };
 
 const TTSType = {
   ELEVENLABS: 'elevenlabs',
   SPEECHAPI: 'speechAPI',
+  DISABLED: '',
 };
 
 export default PersonaProperties;

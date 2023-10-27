@@ -3,9 +3,9 @@
 
     <div class="row">
       <div class="col-12">
-        <div class="form-check form-switch d-flex">
-          <input id="flexCheckDefault" class="form-check-input" role="switch" type="checkbox"
-                 @change="toggleAutoSpeak">
+        <div class="form-check form-switch d-flex switch-panel">
+          <input id="flexCheckDefault" v-model="localIsAutoSpeak"
+                 class="form-check-input" role="switch" type="checkbox">
           <label class="form-check-label mx-2" for="flexCheckDefault">
             Auto speak
           </label>
@@ -22,17 +22,22 @@
 <script>
 import {useChatStore} from '@/store/chat-store';
 import ChatMessageInput from '@/components/ChatMessageInput.vue';
+import {ref, watch} from 'vue';
 
 export default {
   name: 'ChatControl',
   components: {ChatMessageInput},
   data() {
-    return {};
+    return {
+      isAutoSpeak: Boolean,
+    };
+  },
+  getters: {
+    isAutoSpeak() {
+      return this.store.chat.autoSpeak;
+    },
   },
   methods: {
-    toggleAutoSpeak() {
-      this.store.toggleAutoSpeak();
-    },
     submitResultReceived() {
       this.$emit('submitResultReceived');
     },
@@ -42,10 +47,20 @@ export default {
   },
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
-    return {store};
+    const localIsAutoSpeak = ref(store.chat.autoSpeak);
+
+    watch(() => store.chat.autoSpeak, (newValue) => {
+      localIsAutoSpeak.value = newValue;
+    });
+
+    return {store, localIsAutoSpeak};
   },
 };
 </script>
 
 <style scoped>
+.switch-panel {
+  color: white;
+  margin-bottom: 5px;
+}
 </style>

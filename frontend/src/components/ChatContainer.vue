@@ -32,14 +32,29 @@ export default {
     return {};
   },
   components: {ChatControl, ChatMessage},
+  mounted() {
+    this.populateVoices();
+  },
   methods: {
     async submitResultReceived() {
       console.log('Submit Result Received');
 
-      if (this.store.chat.autoSpeak) {
-        console.log('Auto speaking last Chat-Message.');
+      if (this.store.chat.autoSpeak && this.store.isTTSEnabled) {
         const lastChatMessage = this.$refs.chatMessageRef.slice(-1)[0];
+        console.log('Auto speaking last Chat-Message:');
         await lastChatMessage.playAudio();
+      }
+    },
+    populateVoices() {
+      const voices = speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        console.log('Voices already loaded');
+        this.speechApiVoices = voices;
+      } else {
+        console.log('Voices not loaded, waiting for onvoiceschanged');
+        speechSynthesis.onvoiceschanged = () => {
+          console.log('Voices loaded.');
+        };
       }
     },
     chunkUpdateReceived() {

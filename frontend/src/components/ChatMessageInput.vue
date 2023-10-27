@@ -35,12 +35,12 @@ export default {
     };
   },
   methods: {
-    submit() {
+    async submit() {
       this.isInputLocked = true;
 
       this.store.currentStatusMessage = 'Thinking...';
       try {
-        this.store.streamPrompt(this.prompt, () => {
+        await this.store.streamPrompt(this.prompt, () => {
           this.$emit('chunkUpdateReceived');
         });
       } catch (error) {

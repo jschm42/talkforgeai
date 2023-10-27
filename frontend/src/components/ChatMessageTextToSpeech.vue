@@ -33,6 +33,9 @@ export default defineComponent({
     this.stopAudio();
   },
   methods: {
+    isDisabled() {
+      return this.getTTSType === TTSType.DISABLED;
+    },
     stopAudio() {
       console.log('Audio stopped');
 
@@ -94,13 +97,14 @@ const AudioState = {
 </script>
 
 <template>
-  <i v-if="audioState === 'stopped'" class="bi bi-play-circle message-icon play-icon" role="button"
-     @click="playAudio"></i>
+  <i v-if="audioState === 'stopped'" :hidden="isDisabled" class="bi bi-play-circle message-icon play-icon"
+     role="button" @click="playAudio"></i>
 
-  <i v-if="audioState === 'playing'" class="bi bi-stop-circle message-icon play-icon" role="button"
-     @click="stopAudio"></i>
+  <i v-if="audioState === 'playing'" :hidden="isDisabled" class="bi bi-stop-circle message-icon play-icon"
+     role="button" @click="stopAudio"></i>
 
-  <div v-if="audioState === 'loading'" class="spinner-border spinner-border-sm loading-icon" role="status">
+  <div v-if="audioState === 'loading'" :hidden="isDisabled" class="spinner-border spinner-border-sm loading-icon"
+       role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
 </template>

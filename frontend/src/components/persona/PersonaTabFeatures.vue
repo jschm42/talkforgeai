@@ -41,7 +41,13 @@ export default defineComponent({
         PlantUML generation
       </label>
     </div>
-
+    <div class="form-check">
+      <input id="checkBoxAutoSpeakDefault" v-model="personaForm.properties[PersonaProperties.FEATURE_AUTOSPEAKDEFAULT]"
+             class="form-check-input" type="checkbox">
+      <label class="form-check-label" for="checkBoxAutoSpeakDefault">
+        Auto Speak is turned on by default
+      </label>
+    </div>
   </div>
 </template>
 

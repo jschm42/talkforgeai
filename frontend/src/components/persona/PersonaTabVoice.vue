@@ -3,7 +3,7 @@ import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
 import TtsService from '@/service/tts.service';
-import PersonaProperties from '@/service/persona.properties';
+import PersonaProperties, {TTSType} from '@/service/persona.properties';
 
 const ttsService = new TtsService();
 
@@ -22,6 +22,9 @@ export default defineComponent({
     return {personaForm};
   },
   computed: {
+    TTSType() {
+      return TTSType;
+    },
     PersonaProperties() {
       return PersonaProperties;
     },
@@ -140,7 +143,7 @@ export default defineComponent({
       </div>
     </div>
 
-    <div v-else-if="personaForm.properties.tts_type === 'speechAPI'">
+    <div v-else-if="personaForm.properties[PersonaProperties.TTS_TYPE] === TTSType.SPEECHAPI">
       <label class="form-label my-2" for="selectSpeechAPIVoice">Voices</label>
       <select id="selectSpeechAPIVoice" v-model="personaForm.properties[PersonaProperties.SPEECHAPI_VOICE]"
               aria-label="SpeechAPI Voice"

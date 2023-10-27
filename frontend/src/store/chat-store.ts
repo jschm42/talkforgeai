@@ -7,6 +7,7 @@ import PersonaService from '@/service/persona.service';
 import Role from '@/store/to/role';
 import ChatStreamService from '@/service/chat-stream.service';
 import HighlightingService from '@/service/highlighting.service';
+import PersonaProperties, {TTSType} from '@/service/persona.properties';
 
 const chatService = new ChatService();
 const chatStreamService = new ChatStreamService();
@@ -32,6 +33,12 @@ export const useChatStore = defineStore('chat', {
     };
   },
   getters: {
+    isTTSEnabled(): boolean {
+      if (this.selectedPersona && this.selectedPersona.properties) {
+        return this.selectedPersona.properties[PersonaProperties.TTS_TYPE] !== TTSType.DISABLED;
+      }
+      return false;
+    },
     autoSpeak(): boolean {
       return this.chat.autoSpeak;
     },
@@ -70,6 +77,7 @@ export const useChatStore = defineStore('chat', {
     async selectPersona(persona: Persona): Promise<void> {
       this.resetChat();
       this.selectedPersona = persona;
+      this.chat.autoSpeak = persona.properties[PersonaProperties.FEATURE_AUTOSPEAKDEFAULT] === 'true';
       await this.loadIndex(persona.personaId);
     },
     async selectPersonaById(personaId: string): Promise<void> {
