@@ -22,8 +22,8 @@
               </div>
             </div>
 
-            <div class="col-2 d-inline-flex flex-row-reverse my-2 p-2">
-              <i class="bi bi-pencil" role="button" @click.prevent="onEditPersona(persona.personaId)"></i>
+            <div class="col-2 d-inline-flex flex-row-reverse my-1 p-2">
+              <i class="bi bi-pencil edit-button" role="button" @click.prevent="onEditPersona(persona.personaId)"></i>
             </div>
           </div>
 
@@ -129,6 +129,10 @@ export default defineComponent({
 
 .header {
   margin-bottom: 1em;
+}
+
+.edit-button {
+  font-size: 1.3em;
 }
 
 </style>
