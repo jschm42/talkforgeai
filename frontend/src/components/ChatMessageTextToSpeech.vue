@@ -28,14 +28,14 @@ export default defineComponent({
     getTTSType() {
       return this.store.selectedPersona.properties[PersonaProperties.TTS_TYPE];
     },
+    isDisabled() {
+      return this.store.selectedPersona.properties[PersonaProperties.TTS_TYPE] === TTSType.DISABLED;
+    },
   },
   beforeUnmount() {
     this.stopAudio();
   },
   methods: {
-    isDisabled() {
-      return this.getTTSType === TTSType.DISABLED;
-    },
     stopAudio() {
       console.log('Audio stopped');
 
