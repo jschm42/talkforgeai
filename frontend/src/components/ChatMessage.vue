@@ -104,7 +104,7 @@ export default {
         </div>
       </div>
       <div class="col-md-1 text-end">
-        <chat-message-text-to-speech ref="chatMessageAudioPlayerRef"
+        <chat-message-text-to-speech v-if="isAssistant" ref="chatMessageAudioPlayerRef"
                                      :message="this.message"></chat-message-text-to-speech>
       </div>
     </div>

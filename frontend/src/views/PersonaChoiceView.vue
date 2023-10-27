@@ -54,7 +54,7 @@
 <script>
 import {defineComponent} from 'vue';
 import {useChatStore} from '@/store/chat-store';
-import PersonaCompactInfo from '@/components/PersonaCompactInfo.vue';
+import PersonaCompactInfo from '@/components/persona/PersonaCompactInfo.vue';
 
 export default defineComponent({
   components: {PersonaCompactInfo},
@@ -107,8 +107,8 @@ export default defineComponent({
 }
 
 .persona-icon {
-  width: 64px;
-  height: 64px;
+  width: 6em;
+  height: 6em;
 }
 
 .active {

@@ -1,16 +1,13 @@
 <template>
   <div class="container">
     <div class="row text-start">
-      <div class="col-2 align-items-start">
-        <i class="bi bi-arrow-90deg-left back-button" role="button" @click="onClickBack"></i>
-      </div>
-      <div class="col-2">
+      <div class="col-3">
         <img v-if="isShowPersonaImage(selectedPersona)" :alt="selectedPersona.name" :src="selectedPersona.imageUrl"
              class="persona-icon"/>
         <i v-else class="fs-2 bi bi-robot robot-icon"></i>
       </div>
 
-      <div class="col-8">
+      <div class="col-9">
         <div class="row persona-name mx-1">
           {{ personaName }}
         </div>
@@ -19,6 +16,9 @@
         </div>
       </div>
     </div>
+    <div class="row">
+      <persona-compact-info :persona="store.selectedPersona" :show-properties="true"></persona-compact-info>
+    </div>
   </div>
 
 </template>
@@ -26,9 +26,11 @@
 <script>
 
 import {useChatStore} from '@/store/chat-store';
+import PersonaCompactInfo from '@/components/persona/PersonaCompactInfo.vue';
 
 export default {
   name: 'ChatHeader',
+  components: {PersonaCompactInfo},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
 
@@ -61,9 +63,7 @@ export default {
     onPersonaSelected(persona) {
       this.store.selectedPersona = persona;
     },
-    onClickBack() {
-      this.$router.push('/');
-    },
+
   },
 };
 </script>
@@ -92,7 +92,7 @@ export default {
 }
 
 .persona-icon {
-  width: 4rem;
-  height: 4rem;
+  width: 7rem;
+  height: 7rem
 }
 </style>

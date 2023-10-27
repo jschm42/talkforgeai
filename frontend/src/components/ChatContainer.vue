@@ -1,6 +1,5 @@
 <template>
   <div class="d-flex flex-column full-height">
-    <PersonaCompactInfo :persona="store.selectedPersona" :show-properties="true"></PersonaCompactInfo>
 
     <div ref="entries" class="flex-grow-1 vertical-scrollbar no-horizontal-scrollbar">
       <ChatMessage v-for="(message, index) in store.messages" ref="chatMessageRef" v-bind:key="index"
@@ -19,7 +18,6 @@
 import ChatControl from './ChatControl.vue';
 import ChatMessage from './ChatMessage.vue';
 import {useChatStore} from '@/store/chat-store';
-import PersonaCompactInfo from '@/components/PersonaCompactInfo.vue';
 
 export default {
   name: 'ChatContainer',
@@ -33,7 +31,7 @@ export default {
   data() {
     return {};
   },
-  components: {PersonaCompactInfo, ChatControl, ChatMessage},
+  components: {ChatControl, ChatMessage},
   methods: {
     async submitResultReceived() {
       console.log('Submit Result Received');
@@ -46,40 +44,9 @@ export default {
     },
     chunkUpdateReceived() {
       // Scroll to bottom
-      console.log('Scrolling to bottom!!!!');
       this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
     },
   },
-  updated() {
-    console.log('Chat-Component updated');
-  },
-  mounted() {
-    // const wsService = new WebSocketService();
-
-    // wsService.statusUpdateHandler = (data) => {
-    //   this.store.updateStatus(data.sessionId, data.status);
-    // };
-
-    // wsService.functionCallHandler = (data) => {
-    //   this.store.messages = [...this.store.messages, data.message];
-    //   this.store.sendFunctionConfirm(data.sessionId);
-    // };
-
-    // const wsClient = wsService.createClient();
-    // wsClient.activate();
-    //
-    // document.addEventListener('visibilitychange', function() {
-    //   if (document.hidden) {
-    //     console.log('Tab is not active');
-    //     wsClient.deactivate();
-    //   } else {
-    //     console.log('Tab is active');
-    //     wsClient.activate();
-    //   }
-    // });
-
-  },
-
 };
 </script>
 

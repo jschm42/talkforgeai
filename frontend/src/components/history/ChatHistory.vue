@@ -1,7 +1,14 @@
 <template>
   <div class="p-3 full-height vertical-scrollbar shadow">
 
-    <button class="col-12 my-2" @click="onNewSession">New Chat</button>
+    <div class="row align-items-center">
+      <div class="col-1">
+        <i class="bi bi-box-arrow-left exit-button" role="button" @click.prevent="onClickBack"></i>
+      </div>
+      <div class="col-11">
+        <button class="col-12" @click.prevent="onNewSession">New Chat</button>
+      </div>
+    </div>
 
     <div class="list-group list-group-flush border-bottom">
 
@@ -49,6 +56,9 @@ export default {
     onNewSession() {
       this.store.newSession();
     },
+    onClickBack() {
+      this.$router.push('/');
+    },
   },
   changed() {
     console.log('History-Component changed');
@@ -57,5 +67,8 @@ export default {
 </script>
 
 <style scoped>
-
+.exit-button {
+  font-size: 2em;
+  color: white;
+}
 </style>
