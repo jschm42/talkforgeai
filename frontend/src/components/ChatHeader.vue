@@ -76,13 +76,13 @@ export default {
 .persona-name {
   font-size: 1.5rem;
   font-weight: 500;
-  color: #6c757d;
+  color: white;
 }
 
 .persona-description {
   font-size: 0.9em;
   font-style: italic;
-  color: #6c757d;
+  color: #cccccc;
   overflow: hidden;
 }
 

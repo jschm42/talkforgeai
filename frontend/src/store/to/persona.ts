@@ -21,7 +21,7 @@ class Persona {
 
   imageUrl = '';
 
-  properties = {};
+  properties = {} as any;
 
 }
 

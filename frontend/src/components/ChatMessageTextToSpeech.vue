@@ -1,5 +1,5 @@
 <script>
-import {defineComponent, toRaw} from 'vue';
+import {defineComponent} from 'vue';
 import TtsService from '@/service/tts.service';
 import {useChatStore} from '@/store/chat-store';
 import ChatMessage from '@/store/to/chat-message';
@@ -24,33 +24,34 @@ export default defineComponent({
   props: {
     message: ChatMessage,
   },
-  methods: {
-    pauseAudio() {
-      console.log('Audio paused');
-      this.audioState = AudioState.Paused;
+  computed: {
+    getTTSType() {
+      return this.store.selectedPersona.properties[PersonaProperties.TTS_TYPE];
     },
+  },
+  beforeUnmount() {
+    this.stopAudio();
+  },
+  methods: {
     stopAudio() {
       console.log('Audio stopped');
+
+      if (this.getTTSType === TTSType.SPEECHAPI) {
+        window.speechSynthesis.cancel();
+      }
+
       this.audioState = AudioState.Stopped;
     },
     async playAudio() {
-      console.log('ROLE', toRaw(this.message));
       if (this.message.role !== Role.ASSISTANT) {
         console.log('Not a speakable message.');
         return;
       }
 
-      console.log('HTML TEXT', this.message.content);
       const plainText = htmlToTextService.removeHtml(this.message.content);
-      console.log('PLAIN TEXT', plainText);
-
-      console.log('Playing audio', this.store.selectedPersona);
-
-      const isSpeechAPI = this.store.selectedPersona.properties[PersonaProperties.TTS_TYPE] === TTSType.SPEECHAPI;
-
       this.audioState = AudioState.Loading;
 
-      if (isSpeechAPI) {
+      if (this.getTTSType === TTSType.SPEECHAPI) {
         await this.speakSpeechApi(plainText);
       } else {
         await this.speakElevenlabs(plainText);
@@ -74,7 +75,11 @@ export default defineComponent({
       }
     },
     async speakSpeechApi(plainText) {
+      console.log('Speaking using SpeechAPI...');
+      this.audioState = AudioState.Playing;
       await ttsService.speakSpeechAPI(plainText, this.store.selectedPersona);
+      console.log('Stopped...');
+      this.audioState = AudioState.Stopped;
     },
   },
 });
@@ -82,7 +87,6 @@ export default defineComponent({
 const AudioState = {
   Loading: 'loading',
   Playing: 'playing',
-  Paused: 'paused',
   Stopped: 'stopped',
 };
 
@@ -93,11 +97,8 @@ const AudioState = {
   <i v-if="audioState === 'stopped'" class="bi bi-play-circle message-icon play-icon" role="button"
      @click="playAudio"></i>
 
-  <i v-if="audioState === 'paused'" class="bi bi-play-circle message-icon play-icon" role="button"
-     @click="playAudio"></i>
-
-  <i v-if="audioState === 'playing'" class="bi bi-pause-circle message-icon play-icon" role="button"
-     @click="pauseAudio"></i>
+  <i v-if="audioState === 'playing'" class="bi bi-stop-circle message-icon play-icon" role="button"
+     @click="stopAudio"></i>
 
   <div v-if="audioState === 'loading'" class="spinner-border spinner-border-sm loading-icon" role="status">
     <span class="visually-hidden">Loading...</span>
