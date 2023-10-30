@@ -1,3 +1,19 @@
+<!--
+  - Copyright (c) 2023 Jean Schmitz.
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
 <script>
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
@@ -89,7 +105,7 @@ export default defineComponent({
               aria-label="ElevenLabs Model"
               class="form-select my-2" @change="onChangeElevenLabsVoice">
         <option v-for="model in elevenLabsModels" :key="model.model_id" :value="model.model_id">{{
-            model.name
+          model.name
           }}
         </option>
       </select>
@@ -100,7 +116,7 @@ export default defineComponent({
               aria-label="ElebenLabs Voice"
               class="form-select my-2">
         <option v-for="voice in elevenLabsVoices" :key="voice.voice_id" :value="voice.voice_id">{{
-            voice.name
+          voice.name
           }} - {{ voice.labels.description }} {{ voice.labels.age }} {{ voice.labels.accent }} {{ voice.labels.gender }}
 
         </option>
@@ -149,7 +165,7 @@ export default defineComponent({
               aria-label="SpeechAPI Voice"
               class="form-select my-2">
         <option v-for="voice in speechApiVoices" :key="voice.name" :value="voice.name">{{
-            voice.name
+          voice.name
           }}
         </option>
       </select>
