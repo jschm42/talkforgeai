@@ -68,9 +68,17 @@
       </div>
 
       <button class="btn btn-primary me-2" type="submit">Save</button>
+      <button class="btn btn-secondary me-2" @click.prevent="onDelete">Delete</button>
       <button class="btn btn-secondary" type="button" @click.prevent="onCancel">Cancel</button>
     </form>
   </div>
+
+  <QuestionModal
+    :isOpen="showModal"
+    message="Are you sure you want to delete this persona?"
+    title="Delete Persona"
+    @answer="handleDeleteQuestionAnswer"
+  />
 </template>
 
 <script>
@@ -82,14 +90,20 @@ import PersonaTabModel from '@/components/persona/PersonaTabModel.vue';
 import PersonaTabProfile from '@/components/persona/PersonaTabProfile.vue';
 import PersonaTabVoice from '@/components/persona/PersonaTabVoice.vue';
 import PersonaTabFeatures from '@/components/persona/PersonaTabFeatures.vue';
+import QuestionModal from '@/components/QuestionModal.vue';
 
 const personaService = new PersonaService();
 
 export default defineComponent({
-  components: {PersonaTabFeatures, PersonaTabVoice, PersonaTabModel, PersonaTabProfile},
+  components: {PersonaTabFeatures, PersonaTabVoice, PersonaTabModel, PersonaTabProfile, QuestionModal},
   setup() {
     const store = usePersonaFormStore(); // Call useMyStore() inside the setup function
     return {store};
+  },
+  data() {
+    return {
+      showModal: false,
+    };
   },
   props: ['personaId'],
   methods: {
@@ -114,8 +128,18 @@ export default defineComponent({
       }
     },
     onCancel() {
-      console.log('onCancel');
       this.$router.push({name: 'persona-choice'});
+    },
+    onDelete() {
+      this.showModal = true;
+    },
+    handleDeleteQuestionAnswer(answer) {
+      this.showModal = false;
+      if (answer) {
+        personaService.deletePersona(this.store.personaForm.personaId).then(() => {
+          this.$router.push({name: 'persona-choice'});
+        });
+      }
     },
   },
   mounted() {

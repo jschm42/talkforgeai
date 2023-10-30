@@ -145,4 +145,10 @@ public class PersonaService {
 
         return fileName;
     }
+
+    @Transactional
+    public void deletePersona(UUID personaId) {
+        LOGGER.info("Deleting persona {}", personaId);
+        personaRepository.deleteById(personaId);
+    }
 }

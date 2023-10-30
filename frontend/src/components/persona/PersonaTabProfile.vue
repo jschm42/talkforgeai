@@ -122,12 +122,12 @@ export default defineComponent({
     <label class="form-label" for="personaDescription">Description</label>
     <textarea id="personaDescription" v-model="personaForm.description" class="form-control"
               maxlength="256"
-              rows="4"></textarea>
+              rows="3"></textarea>
   </div>
   <div class="mb-3">
     <label class="form-label" for="personaSystem">System</label>
     <textarea id="personaSystem" v-model="personaForm.system" class="form-control" maxlength="16384"
-              rows="10"></textarea>
+              rows="7"></textarea>
   </div>
 
   <!-- The Modal -->

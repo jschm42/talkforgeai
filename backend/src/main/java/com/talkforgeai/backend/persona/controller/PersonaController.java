@@ -50,6 +50,11 @@ public class PersonaController {
         return personaService.getAllPersona();
     }
 
+    @DeleteMapping("/{personaId}")
+    public void deletePersona(@PathVariable("personaId") UUID personaId) {
+        personaService.deletePersona(personaId);
+    }
+
     @GetMapping("/{personaId}")
     public PersonaDto getPersona(@PathVariable("personaId") UUID personaId) {
         return personaService.getPersona(personaId);

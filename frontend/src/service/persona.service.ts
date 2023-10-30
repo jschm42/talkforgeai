@@ -55,6 +55,14 @@ class PersonaService {
     }
   }
 
+  async deletePersona(personaId: string) {
+    try {
+      return await axios.delete('/api/v1/persona/' + personaId);
+    } catch (error) {
+      console.error('Error deleting persona: ', error);
+    }
+  }
+
 }
 
 export default PersonaService;
