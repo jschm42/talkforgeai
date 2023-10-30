@@ -31,7 +31,7 @@ export default {
       };
     },
     isAssistant() {
-      return this.message.role === Role.ASSISTANT;
+      return this.message.role === Role.ASSISTANT && !!this.store.selectedPersona.imagePath;
     },
     isUser() {
       return this.message.role === Role.USER && !this.message.name;
@@ -96,7 +96,7 @@ export default {
         <img v-else-if="isAssistant" :src="personaImage" alt="Assistant" class="persona-icon">
         <i v-else-if="isFunctionCall" class="fs-1 bi bi-gear"></i>
         <i v-else-if="isFunctionResponse" class="fs-1 bi bi-arrow-return-left"></i>
-        <i v-else class="fs-1 bi bi-robot"></i>
+        <i v-else class="fs-1 bi bi-robot robot-icon"></i>
       </div>
       <div class="col-md-10">
         <div class="card-body">
@@ -109,8 +109,7 @@ export default {
       </div>
     </div>
     <footer>
-      <strong class="mx-1">{{ getMessageStatus() }}</strong>
-      <div v-if="getMessageStatusType() === 'running'" class="spinner-border spinner-border-sm" role="status">
+      <div v-if="getMessageStatusType() === 'running'" role="status">
         <span class="sr-only">{{ getMessageStatus() }}</span>
       </div>
       <i v-else-if="getMessageStatusType() === 'error'" class="bi bi-exclamation-lg bg-danger"></i>
@@ -151,6 +150,10 @@ export default {
 
 footer {
   font-style: italic;
+}
+
+.robot-icon {
+  color: darksalmon;
 }
 
 </style>

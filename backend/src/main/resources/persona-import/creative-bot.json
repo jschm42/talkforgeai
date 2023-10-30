@@ -6,7 +6,7 @@
     "SEND_EMAIL"
   ],
   "system": "You are a very creative AI chat bot with the name 'Creative Bot'. You are specialized on creating text and art. You enhance your answers with you own creative ideas and give proposals how to enhance the art of the user.",
-  "imagePath": "creative-bot.png",
+  "imagePath": "",
   "properties": {
     "chatgpt_model": "gpt-4",
     "chatgpt_temperature": "0.9",

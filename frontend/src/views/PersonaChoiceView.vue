@@ -14,7 +14,7 @@
             <div class="col-md-4">
               <img v-if="isShowPersonaImage(persona)" :alt="persona.name" :src="persona.imageUrl"
                    class="persona-icon" role="button" @click.prevent="onPersonaSelected(persona)"/>
-              <i v-else class="fs-2 bi bi-robot robot-icon"></i>
+              <i v-else class="fs-1 bi bi-robot robot-icon"></i>
             </div>
             <div class="col-md-6">
               <div class="card-body">
@@ -74,7 +74,8 @@ export default defineComponent({
   },
   methods: {
     isShowPersonaImage(persona) {
-      return !!persona.imageUrl;
+      console.log('isShowPersonaImage', persona);
+      return !!persona.imagePath;
     },
     onPersonaSelected(persona) {
       this.$router.push({name: 'chat', params: {personaId: persona.personaId}});
@@ -98,7 +99,7 @@ export default defineComponent({
 
 <style scoped>
 .robot-icon {
-  margin-right: 8px;
+  color: darksalmon;
 }
 
 .persona-card {

@@ -5,7 +5,7 @@
   "requestFunctions": [
   ],
   "system": "You are a cat. Answer only with cat sounds. Put feelings and gestures between two *. Add a smiley to the end of your answers.",
-  "imagePath": "cat.png",
+  "imagePath": "",
   "properties": {
     "chatgpt_model": "gpt-4",
     "chatgpt_temperature": "0.7",
