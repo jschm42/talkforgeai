@@ -39,10 +39,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static com.talkforgeai.backend.persona.service.PersonaProperties.FEATURE_IMAGEGENERATION;
 import static com.talkforgeai.backend.persona.service.PersonaProperties.FEATURE_PLANTUML;
@@ -177,7 +174,18 @@ public class SessionService {
             }
         }
 
-        messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, persona.getSystem()));
+        String backgroundMessage = "";
+        if (persona.getBackground() != null && !persona.getBackground().isEmpty()) {
+            backgroundMessage = """
+                    Use this background information to help you with your conversation: %s
+                    """.formatted(persona.getBackground());
+        }
+
+        messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, backgroundMessage));
+        messages.add(new OpenAIChatMessage(
+                OpenAIChatMessage.Role.SYSTEM,
+                Objects.requireNonNullElse(persona.getPersonality(), ""))
+        );
         messages.addAll(previousMessages);
         messages.add(newMessage);
         return messages;

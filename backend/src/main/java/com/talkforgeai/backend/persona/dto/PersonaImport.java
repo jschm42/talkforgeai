@@ -27,7 +27,8 @@ public record PersonaImport(String version,
                             String description,
                             List<GlobalSystem> globalSystems,
                             List<RequestFunction> requestFunctions,
-                            String system,
+                            String background,
+                            String personality,
                             String imagePath,
                             Map<String, String> properties) {
 }

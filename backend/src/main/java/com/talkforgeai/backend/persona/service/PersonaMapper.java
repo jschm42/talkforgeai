@@ -34,7 +34,8 @@ public class PersonaMapper {
                 personaEntity.getId(),
                 personaEntity.getName(),
                 personaEntity.getDescription(),
-                personaEntity.getSystem(),
+                personaEntity.getBackground(),
+                personaEntity.getPersonality(),
                 personaEntity.getRequestFunctions(),
                 "/api/v1/persona/image/" + personaEntity.getImagePath(),
                 personaEntity.getImagePath(),
@@ -61,7 +62,8 @@ public class PersonaMapper {
         entity.setId(personaDto.personaId());
         entity.setName(personaDto.name());
         entity.setDescription(personaDto.description());
-        entity.setSystem(personaDto.system());
+        entity.setBackground(personaDto.background());
+        entity.setPersonality(personaDto.personality());
         entity.setRequestFunctions(personaDto.requestFunctions());
         entity.setImagePath(personaDto.imagePath());
         entity.setProperties(mapProperties(personaDto.properties()));

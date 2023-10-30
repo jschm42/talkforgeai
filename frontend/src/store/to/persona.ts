@@ -27,7 +27,9 @@ class Persona {
    */
   description = '';
 
-  system = '';
+  background = '';
+  
+  personality = '';
 
   globalSystems = [];
 

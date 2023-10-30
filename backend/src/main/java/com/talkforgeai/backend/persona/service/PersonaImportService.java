@@ -200,7 +200,8 @@ public class PersonaImportService {
         PersonaEntity personaEntity = new PersonaEntity();
         personaEntity.setName(persona.name());
         personaEntity.setDescription(persona.description());
-        personaEntity.setSystem(persona.system());
+        personaEntity.setBackground(persona.background());
+        personaEntity.setPersonality(persona.personality());
         personaEntity.setRequestFunctions(persona.requestFunctions());
         personaEntity.setImagePath(persona.imagePath());
         personaEntity.setProperties(persona.properties());

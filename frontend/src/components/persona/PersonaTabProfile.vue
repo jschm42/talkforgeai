@@ -119,15 +119,21 @@ export default defineComponent({
            type="text">
   </div>
   <div class="mb-3">
-    <label class="form-label" for="personaDescription">Description</label>
+    <label class="form-label" for="personaDescription">Description (will not be used in generation requests)</label>
     <textarea id="personaDescription" v-model="personaForm.description" class="form-control"
               maxlength="256"
-              rows="3"></textarea>
+              rows="2"></textarea>
   </div>
   <div class="mb-3">
-    <label class="form-label" for="personaSystem">System</label>
-    <textarea id="personaSystem" v-model="personaForm.system" class="form-control" maxlength="16384"
-              rows="7"></textarea>
+    <label class="form-label" for="personaBackground">What would you like the persona to remember?</label>
+    <textarea id="personaBackground" v-model="personaForm.background" class="form-control" maxlength="16384"
+              rows="5"></textarea>
+  </div>
+  <div class="mb-3">
+    <label class="form-label" for="personaPersonality">Describe the personality of the persona. How would you like it to
+      respond?</label>
+    <textarea id="personaPersonality" v-model="personaForm.personality" class="form-control" maxlength="16384"
+              rows="5"></textarea>
   </div>
 
   <!-- The Modal -->

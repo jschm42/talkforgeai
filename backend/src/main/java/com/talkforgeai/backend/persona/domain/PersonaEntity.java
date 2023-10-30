@@ -45,7 +45,11 @@ public class PersonaEntity {
 
     @Lob
     @Column(columnDefinition = "CLOB")
-    private String system;
+    private String background;
+
+    @Lob
+    @Column(columnDefinition = "CLOB")
+    private String personality;
 
     @Enumerated(EnumType.STRING)
     private List<RequestFunction> requestFunctions = new ArrayList<>();
@@ -91,14 +95,6 @@ public class PersonaEntity {
         this.description = description;
     }
 
-    public String getSystem() {
-        return system;
-    }
-
-    public void setSystem(String system) {
-        this.system = system;
-    }
-
     public String getImagePath() {
         return imagePath;
     }
@@ -130,5 +126,21 @@ public class PersonaEntity {
 
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
+    }
+
+    public String getBackground() {
+        return background;
+    }
+
+    public void setBackground(String background) {
+        this.background = background;
+    }
+
+    public String getPersonality() {
+        return personality;
+    }
+
+    public void setPersonality(String personality) {
+        this.personality = personality;
     }
 }
