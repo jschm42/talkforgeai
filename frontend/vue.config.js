@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const talkforgeaiServerPort = process.env.TALKFORGEAI_SERVER_PORT || 8090;
+
 const {defineConfig} = require('@vue/cli-service');
 module.exports = defineConfig({
   runtimeCompiler: true,
@@ -33,7 +35,7 @@ module.exports = defineConfig({
   devServer: {
     proxy: {
       '^/api': {
-        target: 'http://localhost:8090', // this configuration needs to correspond to the Spring Boot backends' application.properties server.port
+        target: 'http://localhost:' + talkforgeaiServerPort, // this configuration needs to correspond to the Spring Boot backends' application.properties server.port
         changeOrigin: true,
         ws: true, // websockets
         compress: false, // deactivates compression, which is enabled by default. Needed for SSE.

@@ -1,5 +1,3 @@
-# We will use OpenJDK 20
-#FROM ghcr.io/graalvm/jdk-community:20.0.1
 FROM amazoncorretto:20-alpine-jdk
 
 # 8090 is the port number the application will use
@@ -16,4 +14,4 @@ VOLUME /data
 COPY ./app/target/app-*.jar /usr/local/lib/talkforgeai.jar
 
 # startup command
-CMD java -DTALKFORGE_DATADIR=/data -jar /usr/local/lib/talkforgeai.jar --spring.config.additional-location=/usr/local/talkforgeai/talkforgeai.properties
+CMD java -DTALKFORGEAI_DATADIR=/data -jar /usr/local/lib/talkforgeai.jar --spring.config.additional-location=/usr/local/talkforgeai/talkforgeai.properties
