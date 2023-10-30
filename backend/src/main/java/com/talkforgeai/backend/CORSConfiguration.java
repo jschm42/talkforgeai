@@ -34,7 +34,10 @@ public class CORSConfiguration {
             @Override
             public void addCorsMappings(@NotNull CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:" + serverPort)
+                        .allowedOrigins(
+                                "http://localhost:" + serverPort,
+                                "http://localhost:8080"
+                        )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS");
             }
         };
