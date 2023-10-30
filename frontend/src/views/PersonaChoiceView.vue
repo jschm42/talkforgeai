@@ -139,7 +139,6 @@ export default defineComponent({
 }
 
 .logo {
-  width: 10em;
   height: 10em;
   margin-left: 8px;
 }
