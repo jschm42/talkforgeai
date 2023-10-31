@@ -33,7 +33,7 @@ public class FileStorageService {
     public static final String TALK_FORGE_DIR = ".talkforgeai";
     public static final Logger LOGGER = LoggerFactory.getLogger(FileStorageService.class);
 
-    @Value("${TALKFORGE_DATADIR:}")
+    @Value("${TALKFORGEAI_DATADIR:}")
     private String configDataDirectory;
 
     private Path dataDirectory;
