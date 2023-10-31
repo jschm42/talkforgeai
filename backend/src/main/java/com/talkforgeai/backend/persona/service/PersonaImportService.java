@@ -38,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -196,24 +197,31 @@ public class PersonaImportService {
     @NotNull
     private PersonaEntity getPersonaEntity(InputStream inputStream) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        PersonaImport persona = mapper.readValue(inputStream, PersonaImport.class);
+        PersonaImport personaImport = mapper.readValue(inputStream, PersonaImport.class);
 
         PersonaEntity personaEntity = new PersonaEntity();
-        personaEntity.setName(persona.name());
-        personaEntity.setDescription(persona.description());
-        personaEntity.setBackground(persona.background());
-        personaEntity.setPersonality(persona.personality());
-        personaEntity.setRequestFunctions(persona.requestFunctions());
-        personaEntity.setImagePath(persona.imagePath());
+        personaEntity.setName(personaImport.name());
+        personaEntity.setDescription(personaImport.description());
+        personaEntity.setBackground(personaImport.background());
+        personaEntity.setPersonality(personaImport.personality());
+        personaEntity.setRequestFunctions(personaImport.requestFunctions());
+        personaEntity.setImagePath(personaImport.imagePath());
 
         // Map persona.properties() to Map<String, PersonaPropertyValue>
-        persona.properties().keySet().forEach(key -> {
+        Arrays.stream(PersonaProperties.values()).forEach(p -> {
             PersonaPropertyValue personaPropertyValue = new PersonaPropertyValue();
-            personaPropertyValue.setPropertyValue(persona.properties().get(key));
-            personaEntity.getProperties().put(key, personaPropertyValue);
+
+            String value;
+            if (personaImport.properties().containsKey(p.getKey())) {
+                value = personaImport.properties().get(p.getKey());
+            } else {
+                value = p.getDefaultValue();
+            }
+
+            personaPropertyValue.setPropertyValue(value);
+            personaEntity.getProperties().put(p.getKey(), personaPropertyValue);
         });
 
-        //personaEntity.setProperties(persona.properties());
         return personaEntity;
     }
 

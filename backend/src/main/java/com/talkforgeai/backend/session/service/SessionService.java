@@ -159,7 +159,7 @@ public class SessionService {
 
         if (persona.getProperties().containsKey(FEATURE_IMAGEGENERATION.getKey())) {
             PersonaPropertyValue personaValue = persona.getProperties().get(FEATURE_IMAGEGENERATION.getKey());
-            boolean isFeatureImageGeneration = "true".equalsIgnoreCase(personaValue.getPropertyValue());
+            boolean isFeatureImageGeneration = personaValue != null && "true".equalsIgnoreCase(personaValue.getPropertyValue());
             if (isFeatureImageGeneration) {
                 messages.add(
                         new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(GlobalSystem.IMAGE_GEN))
@@ -169,7 +169,7 @@ public class SessionService {
 
         if (persona.getProperties().containsKey(FEATURE_PLANTUML.getKey())) {
             PersonaPropertyValue personaValue = persona.getProperties().get(FEATURE_PLANTUML.getKey());
-            boolean isFeaturePlantUML = "true".equalsIgnoreCase(personaValue.getPropertyValue());
+            boolean isFeaturePlantUML = personaValue != null && "true".equalsIgnoreCase(personaValue.getPropertyValue());
             if (isFeaturePlantUML) {
                 messages.add(
                         new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(GlobalSystem.PLANTUML))
@@ -234,7 +234,8 @@ public class SessionService {
         OpenAIChatResponse response = openAIChatService.submit(titleRequest);
         String generatedTitle = response.choices().get(0).message().content();
 
-        session.setTitle(generatedTitle);
+        String parsedTitle = generatedTitle.replaceAll("\"", "");
+        session.setTitle(parsedTitle);
         sessionRepository.save(session);
 
         return new GenerateSessionTitleResponse(generatedTitle);
@@ -244,6 +245,8 @@ public class SessionService {
     private OpenAIChatRequest getTitleRequest(GenerateSessionTitleRequest request) {
         OpenAIChatRequest titleRequest = new OpenAIChatRequest();
         titleRequest.setModel("gpt-3.5-turbo");
+        titleRequest.setMaxTokens(20);
+        titleRequest.setTemperature(0.5);
 
         String content = """
                 Generate a title in less than 6 words for the following message: %s

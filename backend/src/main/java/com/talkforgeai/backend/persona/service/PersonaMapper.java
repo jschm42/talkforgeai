@@ -52,7 +52,7 @@ public class PersonaMapper {
             if (propertyValue != null) {
                 mappedProperties.put(
                         property.getKey(),
-                        requireNonNullElse(propertyValue.getPropertyValue(), property.getDefaultValue())
+                        requireNonNullElse(propertyValue.getPropertyValue(), property.getKey())
                 );
             }
         });
