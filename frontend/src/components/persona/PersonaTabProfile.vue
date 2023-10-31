@@ -125,13 +125,13 @@ export default defineComponent({
               rows="2"></textarea>
   </div>
   <div class="mb-3">
-    <label class="form-label" for="personaBackground">What would you like the persona to remember?</label>
+    <label class="form-label" for="personaBackground">What would you like the persona to recall?</label>
     <textarea id="personaBackground" v-model="personaForm.background" class="form-control" maxlength="16384"
               rows="5"></textarea>
   </div>
   <div class="mb-3">
-    <label class="form-label" for="personaPersonality">Describe the personality of the persona. How would you like it to
-      respond?</label>
+    <label class="form-label" for="personaPersonality">Describe the persona's character traits. How would you prefer it
+      to respond?</label>
     <textarea id="personaPersonality" v-model="personaForm.personality" class="form-control" maxlength="16384"
               rows="5"></textarea>
   </div>
