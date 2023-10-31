@@ -16,7 +16,7 @@
 
 create table chat_message
 (
-    id                      blob         not null primary key,
+    id                      BLOB         not null primary key,
     content                 CLOB,
     created_at              timestamp,
     function_call_arguments CLOB,
@@ -25,38 +25,38 @@ create table chat_message
     modified_at             timestamp,
     role                    varchar(255) not null,
     type                    varchar(255) not null,
-    chat_session_id         blob         not null,
+    chat_session_id         BLOB         not null,
     check (role in ('SYSTEM', 'USER', 'ASSISTANT', 'FUNCTION')),
     check (type in ('UNPROCESSED', 'PROCESSED', 'FUNCTION_CALL'))
 );
 
 create table chat_session
 (
-    id          blob         not null primary key,
+    id          BLOB         not null primary key,
     created_at  timestamp,
     description varchar(256) not null,
     modified_at timestamp,
     title       varchar(256) not null,
-    persona_id  blob
+    persona_id  BLOB
 );
 
 create table persona
 (
-    id                blob         not null primary key,
+    id                BLOB         not null primary key,
     created_at        timestamp,
     description       varchar(256) not null,
     image_path        varchar(128),
     modified_at       timestamp,
     name              varchar(32)  not null unique,
-    request_functions blob,
+    request_functions BLOB,
     background        CLOB,
     personality       CLOB
 );
 
 create table persona_properties
 (
-    persona_id     blob         not null,
-    property_value varchar(255),
-    property_key   varchar(255) not null,
+    persona_id     BLOB        not null,
+    property_key   varchar(50) not null,
+    property_value CLOB,
     primary key (persona_id, property_key)
 );

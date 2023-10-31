@@ -23,6 +23,7 @@ import com.talkforgeai.backend.chat.dto.ChatCompletionResponse;
 import com.talkforgeai.backend.chat.exception.ChatException;
 import com.talkforgeai.backend.chat.repository.FunctionRepository;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
+import com.talkforgeai.backend.persona.domain.PersonaPropertyValue;
 import com.talkforgeai.backend.persona.domain.RequestFunction;
 import com.talkforgeai.backend.persona.exception.PersonaException;
 import com.talkforgeai.backend.persona.service.PersonaProperties;
@@ -226,32 +227,36 @@ public class ChatService {
     }
 
     private OpenAIChatResponse submit(List<OpenAIChatMessage> messages, PersonaEntity persona) {
-        Map<String, String> properties = persona.getProperties();
+        Map<String, PersonaPropertyValue> properties = persona.getProperties();
 
         try {
             OpenAIChatRequest request = new OpenAIChatRequest();
             request.setMessages(messages);
 
-            if (properties.containsKey(PersonaProperties.CHATGPT_TOP_P)) {
-                request.setTopP(Double.valueOf(properties.get(PersonaProperties.CHATGPT_TOP_P)));
+            if (properties.containsKey(PersonaProperties.CHATGPT_TOP_P.getKey())) {
+                PersonaPropertyValue property = properties.get(PersonaProperties.CHATGPT_TOP_P.getKey());
+                request.setTopP(Double.valueOf(property.getPropertyValue()));
             }
 
-            if (properties.containsKey(PersonaProperties.CHATGPT_MODEL)) {
-                request.setModel(properties.get(PersonaProperties.CHATGPT_MODEL));
+            if (properties.containsKey(PersonaProperties.CHATGPT_MODEL.getKey())) {
+                PersonaPropertyValue property = properties.get(PersonaProperties.CHATGPT_MODEL.getKey());
+                request.setModel(property.getPropertyValue());
             }
 
-            if (properties.containsKey(PersonaProperties.CHATGPT_FREQUENCY_PENALTY)) {
-                request.setFrequencyPenalty(Double.valueOf(properties.get(PersonaProperties.CHATGPT_FREQUENCY_PENALTY)));
+            if (properties.containsKey(PersonaProperties.CHATGPT_PRESENCE_PENALTY.getKey())) {
+                PersonaPropertyValue property = properties.get(PersonaProperties.CHATGPT_PRESENCE_PENALTY.getKey());
+                request.setFrequencyPenalty(Double.valueOf(property.getPropertyValue()));
             }
 
-            if (properties.containsKey(PersonaProperties.CHATGPT_FREQUENCY_PENALTY)) {
-                request.setPresencePenalty(Double.valueOf(properties.get(PersonaProperties.CHATGPT_PRESENCE_PENALTY)));
+            if (properties.containsKey(PersonaProperties.CHATGPT_FREQUENCY_PENALTY.getKey())) {
+                PersonaPropertyValue property = properties.get(PersonaProperties.CHATGPT_FREQUENCY_PENALTY.getKey());
+                request.setPresencePenalty(Double.valueOf(property.getPropertyValue()));
             }
 
-            if (properties.containsKey(PersonaProperties.CHATGPT_TEMPERATURE)) {
-                request.setTemperature(Double.valueOf(properties.get(PersonaProperties.CHATGPT_TEMPERATURE)));
+            if (properties.containsKey(PersonaProperties.CHATGPT_TEMPERATURE.getKey())) {
+                PersonaPropertyValue property = properties.get(PersonaProperties.CHATGPT_TEMPERATURE.getKey());
+                request.setTemperature(Double.valueOf(property.getPropertyValue()));
             }
-
 
             List<RequestFunction> requestFunctions = persona.getRequestFunctions();
             if (!requestFunctions.isEmpty()) {

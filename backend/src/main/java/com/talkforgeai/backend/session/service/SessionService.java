@@ -22,6 +22,7 @@ import com.talkforgeai.backend.chat.repository.ChatMessageRepository;
 import com.talkforgeai.backend.chat.service.SystemService;
 import com.talkforgeai.backend.persona.domain.GlobalSystem;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
+import com.talkforgeai.backend.persona.domain.PersonaPropertyValue;
 import com.talkforgeai.backend.session.domain.ChatSessionEntity;
 import com.talkforgeai.backend.session.dto.GenerateSessionTitleRequest;
 import com.talkforgeai.backend.session.dto.GenerateSessionTitleResponse;
@@ -157,7 +158,8 @@ public class SessionService {
         }
 
         if (persona.getProperties().containsKey(FEATURE_IMAGEGENERATION.getKey())) {
-            boolean isFeatureImageGeneration = "true".equalsIgnoreCase(persona.getProperties().get(FEATURE_IMAGEGENERATION.getKey()));
+            PersonaPropertyValue personaValue = persona.getProperties().get(FEATURE_IMAGEGENERATION.getKey());
+            boolean isFeatureImageGeneration = "true".equalsIgnoreCase(personaValue.getPropertyValue());
             if (isFeatureImageGeneration) {
                 messages.add(
                         new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(GlobalSystem.IMAGE_GEN))
@@ -166,7 +168,8 @@ public class SessionService {
         }
 
         if (persona.getProperties().containsKey(FEATURE_PLANTUML.getKey())) {
-            boolean isFeaturePlantUML = "true".equalsIgnoreCase(persona.getProperties().get(FEATURE_PLANTUML.getKey()));
+            PersonaPropertyValue personaValue = persona.getProperties().get(FEATURE_PLANTUML.getKey());
+            boolean isFeaturePlantUML = "true".equalsIgnoreCase(personaValue.getPropertyValue());
             if (isFeaturePlantUML) {
                 messages.add(
                         new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(GlobalSystem.PLANTUML))

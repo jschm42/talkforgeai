@@ -18,6 +18,7 @@ package com.talkforgeai.backend.persona.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
+import com.talkforgeai.backend.persona.domain.PersonaPropertyValue;
 import com.talkforgeai.backend.persona.dto.PersonaImport;
 import com.talkforgeai.backend.persona.repository.PersonaRepository;
 import com.talkforgeai.backend.storage.FileStorageService;
@@ -204,7 +205,15 @@ public class PersonaImportService {
         personaEntity.setPersonality(persona.personality());
         personaEntity.setRequestFunctions(persona.requestFunctions());
         personaEntity.setImagePath(persona.imagePath());
-        personaEntity.setProperties(persona.properties());
+
+        // Map persona.properties() to Map<String, PersonaPropertyValue>
+        persona.properties().keySet().forEach(key -> {
+            PersonaPropertyValue personaPropertyValue = new PersonaPropertyValue();
+            personaPropertyValue.setPropertyValue(persona.properties().get(key));
+            personaEntity.getProperties().put(key, personaPropertyValue);
+        });
+
+        //personaEntity.setProperties(persona.properties());
         return personaEntity;
     }
 

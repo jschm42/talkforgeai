@@ -21,6 +21,7 @@ import com.talkforgeai.backend.chat.dto.ChatCompletionRequest;
 import com.talkforgeai.backend.chat.repository.FunctionRepository;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
 import com.talkforgeai.backend.persona.domain.RequestFunction;
+import com.talkforgeai.backend.persona.service.PersonaMapper;
 import com.talkforgeai.backend.persona.service.PersonaProperties;
 import com.talkforgeai.backend.session.domain.ChatSessionEntity;
 import com.talkforgeai.backend.session.exception.SessionException;
@@ -50,15 +51,18 @@ public class ChatStreamService {
     private final WebSocketService webSocketService;
     private final FunctionRepository functionRepository;
 
+    private final PersonaMapper personaMapper;
+
 
     public ChatStreamService(OpenAIChatService openAIChatService,
                              SessionService sessionService,
                              WebSocketService webSocketService,
-                             FunctionRepository functionRepository) {
+                             FunctionRepository functionRepository, PersonaMapper personaMapper) {
         this.openAIChatService = openAIChatService;
         this.sessionService = sessionService;
         this.webSocketService = webSocketService;
         this.functionRepository = functionRepository;
+        this.personaMapper = personaMapper;
     }
 
     public Flux<ServerSentEvent<OpenAIChatStreamResponse.StreamResponseChoice>> submit(ChatCompletionRequest request) {
@@ -92,7 +96,7 @@ public class ChatStreamService {
             OpenAIChatRequest request = new OpenAIChatRequest();
             request.setMessages(messages);
 
-            Map<String, String> properties = persona.getProperties();
+            Map<String, String> properties = personaMapper.mapEntityProperties(persona.getProperties());
 
             if (properties.containsKey(PersonaProperties.CHATGPT_TOP_P.getKey())) {
                 request.setTopP(Double.valueOf(properties.get(PersonaProperties.CHATGPT_TOP_P.getKey())));

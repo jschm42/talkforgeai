@@ -17,6 +17,7 @@
 package com.talkforgeai.backend.voice.service;
 
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
+import com.talkforgeai.backend.persona.service.PersonaMapper;
 import com.talkforgeai.backend.persona.service.PersonaProperties;
 import com.talkforgeai.backend.persona.service.PersonaService;
 import com.talkforgeai.backend.voice.dto.TTSRequest;
@@ -27,26 +28,32 @@ import com.talkforgeai.service.elevenlabs.dto.ElevenLabsVoicesResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TTSService {
 
     private final PersonaService personaService;
+
+    private final PersonaMapper personaMapper;
     private final ElevenLabsService elevenLabsService;
 
-    public TTSService(ElevenLabsService elevenLabsService, PersonaService personaService) {
+    public TTSService(ElevenLabsService elevenLabsService, PersonaService personaService, PersonaMapper personaMapper) {
         this.personaService = personaService;
         this.elevenLabsService = elevenLabsService;
+        this.personaMapper = personaMapper;
     }
 
     public byte[] streamElevenLabsVoice(TTSRequest TTSRequest) {
         PersonaEntity persona = personaService.getPersonaById(TTSRequest.personaId())
                 .orElseThrow(() -> new RuntimeException("Persona not found:  " + TTSRequest.personaId()));
 
+        Map<String, String> personaProperties = personaMapper.mapEntityProperties(persona.getProperties());
+
         ElevenLabsRequest request = new ElevenLabsRequest(
                 TTSRequest.text(),
-                persona.getProperties().get(PersonaProperties.ELEVENLABS_VOICEID.getKey()),
-                persona.getProperties().get(PersonaProperties.ELEVENLABS_MODELID.getKey()),
+                personaProperties.get(PersonaProperties.ELEVENLABS_VOICEID.getKey()),
+                personaProperties.get(PersonaProperties.ELEVENLABS_MODELID.getKey()),
                 new ElevenLabsRequest.VoiceSettings()
         );
 

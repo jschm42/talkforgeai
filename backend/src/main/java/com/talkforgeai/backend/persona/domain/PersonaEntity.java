@@ -59,9 +59,9 @@ public class PersonaEntity {
 
     @ElementCollection
     @MapKeyColumn(name = "property_key")
-    @Column(name = "property_value")
     @CollectionTable(name = "persona_properties", joinColumns = @JoinColumn(name = "persona_id"))
-    private Map<String, String> properties = new HashMap<>();
+    @Column(name = "property_value")
+    private Map<String, PersonaPropertyValue> properties = new HashMap<>();
 
     public List<RequestFunction> getRequestFunctions() {
         return requestFunctions;
@@ -120,14 +120,6 @@ public class PersonaEntity {
         this.modifiedAt = modifiedAt;
     }
 
-    public Map<String, String> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
-    }
-
     public String getBackground() {
         return background;
     }
@@ -142,5 +134,13 @@ public class PersonaEntity {
 
     public void setPersonality(String personality) {
         this.personality = personality;
+    }
+
+    public Map<String, PersonaPropertyValue> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, PersonaPropertyValue> properties) {
+        this.properties = properties;
     }
 }

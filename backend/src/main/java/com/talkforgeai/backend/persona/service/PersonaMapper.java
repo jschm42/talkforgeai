@@ -17,6 +17,7 @@
 package com.talkforgeai.backend.persona.service;
 
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
+import com.talkforgeai.backend.persona.domain.PersonaPropertyValue;
 import com.talkforgeai.backend.persona.dto.PersonaDto;
 import org.springframework.stereotype.Component;
 
@@ -39,22 +40,39 @@ public class PersonaMapper {
                 personaEntity.getRequestFunctions(),
                 "/api/v1/persona/image/" + personaEntity.getImagePath(),
                 personaEntity.getImagePath(),
-                mapProperties(personaEntity.getProperties())
+                mapEntityProperties(personaEntity.getProperties())
         );
     }
 
-    Map<String, String> mapProperties(Map<String, String> properties) {
+    public Map<String, String> mapEntityProperties(Map<String, PersonaPropertyValue> properties) {
         Map<String, String> mappedProperties = new HashMap<>();
 
         Arrays.stream(values()).forEach(property -> {
-            mappedProperties.put(
-                    property.getKey(),
-                    requireNonNullElse(properties.get(property.getKey()), property.getDefaultValue())
-            );
+            PersonaPropertyValue propertyValue = properties.get(property.getKey());
+            if (propertyValue != null) {
+                mappedProperties.put(
+                        property.getKey(),
+                        requireNonNullElse(propertyValue.getPropertyValue(), property.getDefaultValue())
+                );
+            }
         });
 
         return mappedProperties;
     }
+
+    public Map<String, PersonaPropertyValue> mapProperties(Map<String, String> properties) {
+        Map<String, PersonaPropertyValue> mappedProperties = new HashMap<>();
+
+        Arrays.stream(values()).forEach(property -> {
+            String propertyValue = properties.get(property.getKey());
+            PersonaPropertyValue personaPropertyValue = new PersonaPropertyValue();
+            personaPropertyValue.setPropertyValue(propertyValue);
+            mappedProperties.put(property.getKey(), personaPropertyValue);
+        });
+
+        return mappedProperties;
+    }
+
 
     PersonaEntity mapPersonaDto(PersonaDto personaDto) {
         PersonaEntity entity = new PersonaEntity();
@@ -66,6 +84,8 @@ public class PersonaMapper {
         entity.setPersonality(personaDto.personality());
         entity.setRequestFunctions(personaDto.requestFunctions());
         entity.setImagePath(personaDto.imagePath());
+        // Map properties
+
         entity.setProperties(mapProperties(personaDto.properties()));
         return entity;
     }
