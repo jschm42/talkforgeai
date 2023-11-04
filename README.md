@@ -20,7 +20,6 @@ TalkforgeAI is an AI-powered chat software that facilitates the creation of pers
 - Graphical enhancement of generated LaTeX code.
 - Custom instruction definitions.
 - Code highlighting for generated source code.
-- Spring-Boot microservice for easy integration into an existing microservice architecture.
 - Docker container support for simplified deployment.
 
 ## Upcoming Features
