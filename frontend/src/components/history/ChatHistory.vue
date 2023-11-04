@@ -1,7 +1,30 @@
+<!--
+  - Copyright (c) 2023 Jean Schmitz.
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
 <template>
   <div class="p-3 full-height vertical-scrollbar shadow">
 
-    <button class="col-12 my-2" @click="onNewSession">New Chat</button>
+    <div class="row align-items-center">
+      <div class="col-1">
+        <i class="bi bi-box-arrow-left exit-button" role="button" @click.prevent="onClickBack"></i>
+      </div>
+      <div class="col-11">
+        <button class="col-12" @click.prevent="onNewSession">New Chat</button>
+      </div>
+    </div>
 
     <div class="list-group list-group-flush border-bottom">
 
@@ -49,6 +72,9 @@ export default {
     onNewSession() {
       this.store.newSession();
     },
+    onClickBack() {
+      this.$router.push('/');
+    },
   },
   changed() {
     console.log('History-Component changed');
@@ -57,5 +83,8 @@ export default {
 </script>
 
 <style scoped>
-
+.exit-button {
+  font-size: 2em;
+  color: white;
+}
 </style>

@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 Jean Schmitz.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import {defineStore} from 'pinia';
 import Session from '@/store/to/session';
 import ChatMessage from '@/store/to/chat-message';
@@ -7,6 +23,7 @@ import PersonaService from '@/service/persona.service';
 import Role from '@/store/to/role';
 import ChatStreamService from '@/service/chat-stream.service';
 import HighlightingService from '@/service/highlighting.service';
+import PersonaProperties, {TTSType} from '@/service/persona.properties';
 
 const chatService = new ChatService();
 const chatStreamService = new ChatStreamService();
@@ -21,15 +38,23 @@ export const useChatStore = defineStore('chat', {
       selectedPersona: {} as Persona,
       personaList: [] as Array<Persona>,
       chat: {
+        locked: false,
         configHeaderEnabled: true,
         autoSpeak: false,
       },
       currentStatusMessage: '',
+      currentStatusMessageType: '',
       sessions: [] as Array<Session>,
       selectedSessionId: '',
     };
   },
   getters: {
+    isTTSEnabled(): boolean {
+      if (this.selectedPersona && this.selectedPersona.properties) {
+        return this.selectedPersona.properties[PersonaProperties.TTS_TYPE] !== TTSType.DISABLED;
+      }
+      return false;
+    },
     autoSpeak(): boolean {
       return this.chat.autoSpeak;
     },
@@ -52,28 +77,44 @@ export const useChatStore = defineStore('chat', {
         selectedSessionId: '',
       });
     },
-    disableConfigHeader() {
-      console.log('disableConfigHeader');
-      this.chat.configHeaderEnabled = false;
-    },
     resetChat() {
-      this.messages = [];
-      this.currentStatusMessage = '';
-      this.selectedSessionId = '';
-      this.sessions = [];
-      this.chat.autoSpeak = false;
-      this.chat.configHeaderEnabled = true;
+      this.$patch({
+        sessionId: '',
+        messages: [],
+        currentStatusMessage: '',
+        selectedSessionId: '',
+        sessions: [],
+        chat: {
+          autoSpeak: false,
+          configHeaderEnabled: true,
+        },
+      });
     },
-    async selectPersona(persona: Persona) {
-      this.selectedPersona = persona;
+    async selectPersona(persona: Persona): Promise<void> {
       this.resetChat();
+      this.selectedPersona = persona;
+      this.chat.autoSpeak = persona.properties[PersonaProperties.FEATURE_AUTOSPEAKDEFAULT] === 'true';
       await this.loadIndex(persona.personaId);
     },
-    async loadIndex(personaId: string) {
+    async selectPersonaById(personaId: string): Promise<void> {
+      if (this.personaList.length === 0) {
+        this.personaList = await personaService.readAllPersona();
+      }
+      const persona = this.personaList.find(p => p.personaId === personaId);
+      console.log('selectedPersona', persona);
+      if (persona) {
+        await this.selectPersona(persona);
+      }
+    },
+    async loadIndex(personaId: string): Promise<void> {
       this.sessions = await chatService.readSessionEntries(personaId);
     },
-    async getLastResult() {
-      return await chatService.getLastResult(this.sessionId);
+    encodePrompt(prompt: string): string {
+      return prompt.replace(/&/g, '&amp;').
+        replace(/</g, '&lt;').
+        replace(/>/g, '&gt;').
+        replace(/"/g, '&quot;').
+        replace(/\n/g, '<br/>');
     },
     async streamPrompt(prompt: string, chunkUpdateCallback: () => void) {
       this.chat.configHeaderEnabled = false;
@@ -84,13 +125,38 @@ export const useChatStore = defineStore('chat', {
 
       this.selectedSessionId = this.sessionId;
 
-      this.messages.push(new ChatMessage(Role.USER, prompt));
+      // Encode html in prompt
+      const encodedPrompt = this.encodePrompt(prompt);
+
+      this.messages.push(new ChatMessage(Role.USER, encodedPrompt));
+      chunkUpdateCallback();
 
       console.log('Submitting prompt', this.sessionId, prompt);
 
-      await chatStreamService.streamSubmit(this.sessionId, prompt, chunkUpdateCallback);
+      try {
+        await chatStreamService.streamSubmit(this.sessionId, prompt, chunkUpdateCallback);
+      } catch (e) {
+        console.error('Error while streaming prompt', e);
+        throw e;
+      }
 
-      await this.generateSessionTitle(this.sessionId);
+      if (this.isSessionTitleGenerationEnabled()) {
+        try {
+          await this.generateSessionTitle(this.sessionId);
+        } catch (e) {
+          console.error('Error while generating session title', e);
+          throw e;
+        }
+      } else {
+        console.log('Session title generation is disabled. Skipping.');
+      }
+
+      try {
+        await this.loadIndex(this.selectedPersona.personaId);
+      } catch (e) {
+        console.error('Error while loading index', e);
+        throw e;
+      }
     },
     async loadChatSession(sessionId: string) {
       const chatSession = await chatService.readSessionEntry(sessionId);
@@ -108,6 +174,17 @@ export const useChatStore = defineStore('chat', {
     async updateSessionTitle(sessionId: string, newTitle: string) {
       await chatService.updateSessionTitle(sessionId, newTitle);
     },
+    isSessionTitleGenerationEnabled() {
+      return this.selectedPersona.properties[PersonaProperties.FEATURE_TITLEGENERATION] === 'true';
+    },
+    hasEmptySessionTitle(sessionId: string) {
+      const currentSession = this.sessions.find(s => s.id === sessionId);
+      console.log('currentSession', currentSession);
+      if (currentSession) {
+        return currentSession.title === '' || currentSession.title === undefined || currentSession.title === '<empty>';
+      }
+      return true;
+    },
     async generateSessionTitle(sessionId: string) {
       const userMessage = this.messages.find(m => m.role === Role.USER);
       const userMessageContent = userMessage ? userMessage.content : '';
@@ -115,13 +192,24 @@ export const useChatStore = defineStore('chat', {
       const assistantMessage = this.messages.find(m => m.role === Role.ASSISTANT);
       const assistantMessageContent = assistantMessage ? assistantMessage.content : '';
 
-      const response = await chatService.generateSessionTitle(sessionId, userMessageContent, assistantMessageContent);
-      console.log('Generated title response', response);
-      if (response) {
-        const currentSession = this.sessions.find(s => s.id === this.selectedSessionId);
-        if (currentSession) {
-          currentSession.title = response.generatedTitle;
+      if (this.hasEmptySessionTitle(sessionId)) {
+        this.updateStatus('Generating title...', 'running');
+
+        try {
+          const response = await chatService.generateSessionTitle(sessionId, userMessageContent,
+            assistantMessageContent);
+          console.log('Generated title response', response);
+          if (response) {
+            const currentSession = this.sessions.find(s => s.id === this.selectedSessionId);
+            if (currentSession) {
+              currentSession.title = response.generatedTitle;
+            }
+          }
+        } finally {
+          this.updateStatus('');
         }
+      } else {
+        console.log('Session title already set. Skipping generation.');
       }
     },
     async deleteChatSession(sessionId: string) {
@@ -142,16 +230,19 @@ export const useChatStore = defineStore('chat', {
 
     },
     async readPersona() {
-      this.personaList = await personaService.readPersona();
+      this.personaList = await personaService.readAllPersona();
       this.selectedPersona = this.personaList[0];
     },
     toggleAutoSpeak() {
       this.chat.autoSpeak = !this.chat.autoSpeak;
     },
-    updateStatus(sessionId: string, message: string) {
-      if (sessionId === this.sessionId) {
-        this.currentStatusMessage = message;
-      }
+    updateStatus(message: string, type = '') {
+      this.currentStatusMessage = message;
+      this.currentStatusMessageType = type;
+    },
+    removeStatus() {
+      this.currentStatusMessage = '';
+      this.currentStatusMessageType = '';
     },
   },
 

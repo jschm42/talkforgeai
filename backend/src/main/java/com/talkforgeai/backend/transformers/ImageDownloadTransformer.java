@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 Jean Schmitz.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.talkforgeai.backend.transformers;
 
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
@@ -20,17 +36,17 @@ import java.util.regex.Pattern;
 
 @Component
 public class ImageDownloadTransformer implements Transformer {
+    public static final Logger LOGGER = LoggerFactory.getLogger(ImageDownloadTransformer.class);
     private static final Pattern UrlRegEx = Pattern.compile("<image-prompt>[\\n]?([\\s\\S]*?)[\\n]?</image-prompt>", Pattern.MULTILINE);
     private final OpenAIImageService service;
-    Logger logger = LoggerFactory.getLogger(ImageDownloadTransformer.class);
     String template = """
+            %s
             <div class="card shadow">
               <div class="card-body">
-                <!--<h5 class="card-title">Card title</h5>-->
-                <!--<h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>-->
                 <img src='%s' title='%s'>
               </div>
             </div>
+            %s
             """;
 
     public ImageDownloadTransformer(OpenAIImageService service) {
@@ -49,11 +65,17 @@ public class ImageDownloadTransformer implements Transformer {
                 String localFilePath = downloadImage(
                         imageResult.data().get(0).url(),
                         context.sessionId(),
-                        context.dataDirectory()
+                        context.chatDirectory()
                 );
 
-                // Perform your Mustache template replacement here
-                content = content.replace(fullTag, template.formatted(localFilePath, prompt));
+                String formattedContent = template.formatted(
+                        NO_LB_MARKER_START,
+                        localFilePath,
+                        escapeHtml(prompt),
+                        NO_LB_MARKER_END
+                );
+
+                content = content.replace(fullTag, formattedContent);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -62,9 +84,9 @@ public class ImageDownloadTransformer implements Transformer {
         return content;
     }
 
-    private String downloadImage(String imageUrl, UUID sessionId, Path dataDirectory) throws IOException {
-        String fileName = UUID.randomUUID() + ".png";
-        Path subDirectoryPath = dataDirectory.resolve("chat").resolve(sessionId.toString());
+    private String downloadImage(String imageUrl, UUID sessionId, Path chatDirectory) throws IOException {
+        String fileName = UUID.randomUUID() + "_image.png";
+        Path subDirectoryPath = chatDirectory.resolve(sessionId.toString());
         Path localFilePath = subDirectoryPath.resolve(fileName);
 
         // Ensure the directory exists and is writable
@@ -75,11 +97,7 @@ public class ImageDownloadTransformer implements Transformer {
             throw new IOException("Directory is not writable: " + subDirectoryPath);
         }
 
-        //RestTemplate restTemplate = new RestTemplate();
-
-        logger.info("Downloading image {}...", imageUrl);
-        //ResponseEntity<byte[]> response = restTemplate.getForEntity(imageUrl, byte[].class);
-        //Files.write(localFilePath, Objects.requireNonNull(response.getBody()));
+        LOGGER.info("Downloading image {}...", imageUrl);
 
         try {
             URI uri = URI.create(imageUrl);
@@ -87,7 +105,8 @@ public class ImageDownloadTransformer implements Transformer {
                 Files.copy(in, localFilePath, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error("Failed to download image: {}", imageUrl);
+            throw ex;
         }
 
         return "/api/v1/session/" + sessionId + "/" + fileName;

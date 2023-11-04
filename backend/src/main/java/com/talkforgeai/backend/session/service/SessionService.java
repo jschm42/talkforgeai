@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 Jean Schmitz.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.talkforgeai.backend.session.service;
 
 import com.talkforgeai.backend.chat.domain.ChatMessageEntity;
@@ -6,6 +22,7 @@ import com.talkforgeai.backend.chat.repository.ChatMessageRepository;
 import com.talkforgeai.backend.chat.service.SystemService;
 import com.talkforgeai.backend.persona.domain.GlobalSystem;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
+import com.talkforgeai.backend.persona.domain.PersonaPropertyValue;
 import com.talkforgeai.backend.session.domain.ChatSessionEntity;
 import com.talkforgeai.backend.session.dto.GenerateSessionTitleRequest;
 import com.talkforgeai.backend.session.dto.GenerateSessionTitleResponse;
@@ -23,10 +40,10 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+
+import static com.talkforgeai.backend.persona.service.PersonaProperties.FEATURE_IMAGEGENERATION;
+import static com.talkforgeai.backend.persona.service.PersonaProperties.FEATURE_PLANTUML;
 
 @Service
 public class SessionService {
@@ -136,12 +153,42 @@ public class SessionService {
     public List<OpenAIChatMessage> composeMessagePayload(List<OpenAIChatMessage> previousMessages, OpenAIChatMessage newMessage, PersonaEntity persona) {
         List<OpenAIChatMessage> messages = new ArrayList<>();
 
-        List<GlobalSystem> globalSystems = persona.getGlobalSystems();
-        globalSystems.forEach(s -> {
-            messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(s)));
-        });
+        if (!systemService.getContent(GlobalSystem.DEFAULT).isEmpty()) {
+            messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(GlobalSystem.DEFAULT)));
+        }
 
-        messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, persona.getSystem()));
+        if (persona.getProperties().containsKey(FEATURE_IMAGEGENERATION.getKey())) {
+            PersonaPropertyValue personaValue = persona.getProperties().get(FEATURE_IMAGEGENERATION.getKey());
+            boolean isFeatureImageGeneration = personaValue != null && "true".equalsIgnoreCase(personaValue.getPropertyValue());
+            if (isFeatureImageGeneration) {
+                messages.add(
+                        new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(GlobalSystem.IMAGE_GEN))
+                );
+            }
+        }
+
+        if (persona.getProperties().containsKey(FEATURE_PLANTUML.getKey())) {
+            PersonaPropertyValue personaValue = persona.getProperties().get(FEATURE_PLANTUML.getKey());
+            boolean isFeaturePlantUML = personaValue != null && "true".equalsIgnoreCase(personaValue.getPropertyValue());
+            if (isFeaturePlantUML) {
+                messages.add(
+                        new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, systemService.getContent(GlobalSystem.PLANTUML))
+                );
+            }
+        }
+
+        String backgroundMessage = "";
+        if (persona.getBackground() != null && !persona.getBackground().isEmpty()) {
+            backgroundMessage = """
+                    Use this background information to help you with your conversation: %s
+                    """.formatted(persona.getBackground());
+        }
+
+        messages.add(new OpenAIChatMessage(OpenAIChatMessage.Role.SYSTEM, backgroundMessage));
+        messages.add(new OpenAIChatMessage(
+                OpenAIChatMessage.Role.SYSTEM,
+                Objects.requireNonNullElse(persona.getPersonality(), ""))
+        );
         messages.addAll(previousMessages);
         messages.add(newMessage);
         return messages;
@@ -187,7 +234,8 @@ public class SessionService {
         OpenAIChatResponse response = openAIChatService.submit(titleRequest);
         String generatedTitle = response.choices().get(0).message().content();
 
-        session.setTitle(generatedTitle);
+        String parsedTitle = generatedTitle.replaceAll("\"", "");
+        session.setTitle(parsedTitle);
         sessionRepository.save(session);
 
         return new GenerateSessionTitleResponse(generatedTitle);
@@ -197,6 +245,8 @@ public class SessionService {
     private OpenAIChatRequest getTitleRequest(GenerateSessionTitleRequest request) {
         OpenAIChatRequest titleRequest = new OpenAIChatRequest();
         titleRequest.setModel("gpt-3.5-turbo");
+        titleRequest.setMaxTokens(20);
+        titleRequest.setTemperature(0.5);
 
         String content = """
                 Generate a title in less than 6 words for the following message: %s

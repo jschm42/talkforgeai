@@ -1,13 +1,28 @@
+/*
+ * Copyright (c) 2023 Jean Schmitz.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.talkforgeai.backend.chat.service;
 
-import com.talkforgeai.backend.chat.PropertyKeys;
 import com.talkforgeai.backend.chat.domain.ChatMessageType;
 import com.talkforgeai.backend.chat.dto.ChatCompletionRequest;
 import com.talkforgeai.backend.chat.repository.FunctionRepository;
 import com.talkforgeai.backend.persona.domain.PersonaEntity;
-import com.talkforgeai.backend.persona.domain.PropertyCategory;
-import com.talkforgeai.backend.persona.domain.PropertyEntity;
 import com.talkforgeai.backend.persona.domain.RequestFunction;
+import com.talkforgeai.backend.persona.service.PersonaMapper;
+import com.talkforgeai.backend.persona.service.PersonaProperties;
 import com.talkforgeai.backend.session.domain.ChatSessionEntity;
 import com.talkforgeai.backend.session.exception.SessionException;
 import com.talkforgeai.backend.session.service.SessionService;
@@ -16,12 +31,13 @@ import com.talkforgeai.backend.websocket.service.WebSocketService;
 import com.talkforgeai.service.openai.OpenAIChatService;
 import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
 import com.talkforgeai.service.openai.dto.OpenAIChatRequest;
+import com.talkforgeai.service.openai.dto.OpenAIChatStreamResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import reactor.core.publisher.Flux;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -35,18 +51,21 @@ public class ChatStreamService {
     private final WebSocketService webSocketService;
     private final FunctionRepository functionRepository;
 
+    private final PersonaMapper personaMapper;
+
 
     public ChatStreamService(OpenAIChatService openAIChatService,
                              SessionService sessionService,
                              WebSocketService webSocketService,
-                             FunctionRepository functionRepository) {
+                             FunctionRepository functionRepository, PersonaMapper personaMapper) {
         this.openAIChatService = openAIChatService;
         this.sessionService = sessionService;
         this.webSocketService = webSocketService;
         this.functionRepository = functionRepository;
+        this.personaMapper = personaMapper;
     }
 
-    public SseEmitter submit(ChatCompletionRequest request) {
+    public Flux<ServerSentEvent<OpenAIChatStreamResponse.StreamResponseChoice>> submit(ChatCompletionRequest request) {
         ChatSessionEntity session = sessionService.getById(request.sessionId())
                 .orElseThrow(() -> new SessionException("Session not found: " + request.sessionId()));
 
@@ -71,49 +90,49 @@ public class ChatStreamService {
 //        return new SubmitResult(session, isFirstSubmitInSession, newUserMessage, processedNewUserMessage, response);
     }
 
-    private SseEmitter submit(UUID sessionId, List<OpenAIChatMessage> messages, PersonaEntity persona) {
-        Map<String, String> properties = mapToGptProperties(persona.getProperties());
+    private Flux<ServerSentEvent<OpenAIChatStreamResponse.StreamResponseChoice>> submit(UUID sessionId, List<OpenAIChatMessage> messages, PersonaEntity persona) {
 
         try {
             OpenAIChatRequest request = new OpenAIChatRequest();
             request.setMessages(messages);
 
-            if (properties.containsKey(PropertyKeys.CHATGPT_MAX_TOKENS)) {
-                request.setMaxTokens(Integer.valueOf(properties.get(PropertyKeys.CHATGPT_MAX_TOKENS)));
+            Map<String, String> properties = personaMapper.mapEntityProperties(persona.getProperties());
+
+            if (properties.containsKey(PersonaProperties.CHATGPT_TOP_P.getKey())) {
+                request.setTopP(Double.valueOf(properties.get(PersonaProperties.CHATGPT_TOP_P.getKey())));
             }
 
-            if (properties.containsKey(PropertyKeys.CHATGPT_TOP_P)) {
-                request.setTopP(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TOP_P)));
+            if (properties.containsKey(PersonaProperties.CHATGPT_MODEL.getKey())) {
+                request.setModel(properties.get(PersonaProperties.CHATGPT_MODEL.getKey()));
             }
 
-            if (properties.containsKey(PropertyKeys.CHATGPT_MODEL)) {
-                request.setModel(properties.get(PropertyKeys.CHATGPT_MODEL));
+            if (properties.containsKey(PersonaProperties.CHATGPT_FREQUENCY_PENALTY.getKey())) {
+                request.setFrequencyPenalty(Double.valueOf(properties.get(PersonaProperties.CHATGPT_FREQUENCY_PENALTY.getKey())));
             }
 
-            if (properties.containsKey(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)) {
-                request.setFrequencyPenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)));
+            if (properties.containsKey(PersonaProperties.CHATGPT_FREQUENCY_PENALTY.getKey())) {
+                request.setPresencePenalty(Double.valueOf(properties.get(PersonaProperties.CHATGPT_PRESENCE_PENALTY.getKey())));
             }
 
-            if (properties.containsKey(PropertyKeys.CHATGPT_FREQUENCY_PENALTY)) {
-                request.setPresencePenalty(Double.valueOf(properties.get(PropertyKeys.CHATGPT_PRESENCE_PENALTY)));
+            if (properties.containsKey(PersonaProperties.CHATGPT_TEMPERATURE.getKey())) {
+                request.setTemperature(Double.valueOf(properties.get(PersonaProperties.CHATGPT_TEMPERATURE.getKey())));
             }
-
-            if (properties.containsKey(PropertyKeys.CHATGPT_TEMPERATURE)) {
-                request.setTemperature(Double.valueOf(properties.get(PropertyKeys.CHATGPT_TEMPERATURE)));
-            }
-
 
             List<RequestFunction> requestFunctions = persona.getRequestFunctions();
             if (!requestFunctions.isEmpty()) {
                 request.setFunctions(functionRepository.getByRequestFunctions(requestFunctions));
             }
 
-            SseEmitter emitter = new SseEmitter();
-            openAIChatService.stream(request, emitter, message -> {
-                handleResultMessage(sessionId, message);
-            });
+            StringBuilder finalContent = new StringBuilder();
 
-            return emitter;
+            return openAIChatService.stream(request, message -> {
+            }).doOnNext(response -> {
+                finalContent.append(response.data().delta().content());
+            }).doOnComplete(() -> {
+                handleResultMessage(sessionId, new OpenAIChatMessage(
+                        OpenAIChatMessage.Role.ASSISTANT,
+                        finalContent.toString()));
+            });
         } catch (Exception e) {
             LOGGER.error("Error while submitting chat request.", e);
         }
@@ -127,15 +146,5 @@ public class ChatStreamService {
         webSocketService.sendMessage(
                 new WSChatStatusMessage(sessionId, "")
         );
-    }
-
-    private Map<String, String> mapToGptProperties(Map<String, PropertyEntity> personaProperties) {
-        Map<String, String> gptProperties = new HashMap<>();
-        personaProperties.forEach((key, value) -> {
-            if (value.getCategory() == PropertyCategory.CHATGPT) {
-                gptProperties.put(key, value.getPropertyValue());
-            }
-        });
-        return gptProperties;
     }
 }

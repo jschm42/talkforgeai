@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 Jean Schmitz.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.talkforgeai.backend.persona.domain;
 
 import jakarta.persistence.*;
@@ -29,23 +45,23 @@ public class PersonaEntity {
 
     @Lob
     @Column(columnDefinition = "CLOB")
-    private String system;
+    private String background;
 
-    @Enumerated(EnumType.STRING)
-    private List<GlobalSystem> globalSystems = new ArrayList<>();
+    @Lob
+    @Column(columnDefinition = "CLOB")
+    private String personality;
 
     @Enumerated(EnumType.STRING)
     private List<RequestFunction> requestFunctions = new ArrayList<>();
 
     @Column(length = 128)
     private String imagePath;
-    
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "persona_property_mapping",
-            joinColumns = {@JoinColumn(name = "persona_id", referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "property_id", referencedColumnName = "id")})
-    @MapKey(name = "propertyKey")
-    private Map<String, PropertyEntity> properties = new HashMap<>();
+
+    @ElementCollection
+    @MapKeyColumn(name = "property_key")
+    @CollectionTable(name = "persona_properties", joinColumns = @JoinColumn(name = "persona_id"))
+    @Column(name = "property_value")
+    private Map<String, PersonaPropertyValue> properties = new HashMap<>();
 
     public List<RequestFunction> getRequestFunctions() {
         return requestFunctions;
@@ -53,14 +69,6 @@ public class PersonaEntity {
 
     public void setRequestFunctions(List<RequestFunction> requestFunctions) {
         this.requestFunctions = requestFunctions;
-    }
-
-    public List<GlobalSystem> getGlobalSystems() {
-        return globalSystems;
-    }
-
-    public void setGlobalSystems(List<GlobalSystem> globalSystems) {
-        this.globalSystems = globalSystems;
     }
 
     public UUID getId() {
@@ -87,28 +95,12 @@ public class PersonaEntity {
         this.description = description;
     }
 
-    public String getSystem() {
-        return system;
-    }
-
-    public void setSystem(String system) {
-        this.system = system;
-    }
-
     public String getImagePath() {
         return imagePath;
     }
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
-    }
-
-    public Map<String, PropertyEntity> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Map<String, PropertyEntity> properties) {
-        this.properties = properties;
     }
 
 
@@ -126,5 +118,29 @@ public class PersonaEntity {
 
     public void setModifiedAt(Date modifiedAt) {
         this.modifiedAt = modifiedAt;
+    }
+
+    public String getBackground() {
+        return background;
+    }
+
+    public void setBackground(String background) {
+        this.background = background;
+    }
+
+    public String getPersonality() {
+        return personality;
+    }
+
+    public void setPersonality(String personality) {
+        this.personality = personality;
+    }
+
+    public Map<String, PersonaPropertyValue> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, PersonaPropertyValue> properties) {
+        this.properties = properties;
     }
 }

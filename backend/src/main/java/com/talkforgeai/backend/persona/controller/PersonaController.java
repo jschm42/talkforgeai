@@ -1,6 +1,23 @@
+/*
+ * Copyright (c) 2023 Jean Schmitz.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.talkforgeai.backend.persona.controller;
 
-import com.talkforgeai.backend.persona.dto.PersonaResponse;
+import com.talkforgeai.backend.persona.dto.PersonaDto;
+import com.talkforgeai.backend.persona.dto.PersonaImageUploadResponse;
 import com.talkforgeai.backend.persona.service.PersonaService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import org.springframework.core.io.FileSystemResource;
@@ -9,14 +26,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/persona")
@@ -30,8 +46,18 @@ public class PersonaController {
     }
 
     @GetMapping
-    public List<PersonaResponse> getAllPersona() {
+    public List<PersonaDto> getAllPersona() {
         return personaService.getAllPersona();
+    }
+
+    @DeleteMapping("/{personaId}")
+    public void deletePersona(@PathVariable("personaId") UUID personaId) {
+        personaService.deletePersona(personaId);
+    }
+
+    @GetMapping("/{personaId}")
+    public PersonaDto getPersona(@PathVariable("personaId") UUID personaId) {
+        return personaService.getPersona(personaId);
     }
 
     @GetMapping("/image/{filename}")
@@ -49,4 +75,18 @@ public class PersonaController {
         }
     }
 
+    @PostMapping("/image/generate")
+    public GenerateImageResponse generateImage(@RequestBody GenerateImageRequest generateImageRequest) throws IOException {
+        return personaService.generateImage(generateImageRequest.prompt());
+    }
+
+    @PostMapping
+    public void updatePersona(@RequestBody PersonaDto personaDto) {
+        personaService.updatePersona(personaDto);
+    }
+
+    @PostMapping("/upload")
+    public PersonaImageUploadResponse singleFileUpload(@RequestParam("file") MultipartFile file) {
+        return personaService.uploadImage(file);
+    }
 }

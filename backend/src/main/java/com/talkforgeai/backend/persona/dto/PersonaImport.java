@@ -1,31 +1,34 @@
+/*
+ * Copyright (c) 2023 Jean Schmitz.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.talkforgeai.backend.persona.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.talkforgeai.backend.persona.domain.GlobalSystem;
 import com.talkforgeai.backend.persona.domain.RequestFunction;
 
 import java.util.List;
+import java.util.Map;
 
 public record PersonaImport(String version,
                             String name,
                             String description,
                             List<GlobalSystem> globalSystems,
                             List<RequestFunction> requestFunctions,
-                            String system,
+                            String background,
+                            String personality,
                             String imagePath,
-                            @JsonProperty("chatgpt")
-                            ChatGptConfig chatGptConfig,
-                            @JsonProperty("elevenlabs")
-                            ElevenLabsConfig elevenLabsConfig) {
-
-    public record ChatGptConfig(String model,
-                                String temperature,
-                                @JsonProperty("top_p")
-                                String topP) {
-
-    }
-
-    public record ElevenLabsConfig(String voiceId) {
-
-    }
+                            Map<String, String> properties) {
 }
