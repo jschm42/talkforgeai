@@ -34,11 +34,7 @@ TalkforgeAI is an AI-powered chat software that facilitates the creation of pers
 ## Installation
 
 ### Building the Project
-- Ensure Java 19 or higher is installed on your system.
-- Execute the following Maven command to build the project:
-
-  mvn clean install
-
+- Ensure Java 19 or higher is installed on your system and the JAVA_HOME environment variable ist set correctly.
 
 ### Starting the Server
 - To run from a JAR file, use the following command with the appropriate API keys and data directory specified:
@@ -47,7 +43,7 @@ TalkforgeAI is an AI-powered chat software that facilitates the creation of pers
 
 - Alternatively, use a properties file for configuration:
 
-      java -jar ./talkforgeai-0.1.0.jar --additional-properties=./talkforgeai.properties
+      java -jar ./talkforgeai-0.1.0.jar --spring.config.additional-location=./talkforgeai.properties
 
 Example properties file:
 
