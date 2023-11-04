@@ -47,14 +47,19 @@ public class CodeBlockTransformerTest {
                 "\n" +
                 "<smiley>";
 
-        String expected = "Here's an example of how to use the \"Arrays.sort()\" method:\n" +
-                "\n" +
-                "<pre><code class=\"language-java\">" +
-                "int[] numbers = { 5, 3, 9, 1, 7 };\n" +
-                "Arrays.sort(numbers);\n" +
-                "</code></pre>\n" +
-                "\n" +
-                "<smiley>";
+        String expected = """
+                Here's an example of how to use the "Arrays.sort()" method:
+                                
+                <!-- start no-lb -->
+                <pre>
+                  <code class="language-java">int[] numbers = { 5, 3, 9, 1, 7 };
+                Arrays.sort(numbers);
+                </code>
+                </pre>
+                <!-- end no-lb -->
+                                
+                                
+                <smiley>""";
 
         CodeBlockTransformer transformer = new CodeBlockTransformer();
 
@@ -75,14 +80,19 @@ public class CodeBlockTransformerTest {
                 "\n" +
                 "<smiley>";
 
-        String expected = "Here's an example of how to use the \"Arrays.sort()\" method:\n" +
-                "\n" +
-                "<pre><code >" +
-                "int[] numbers = { 5, 3, 9, 1, 7 };\n" +
-                "Arrays.sort(numbers);\n" +
-                "</code></pre>\n" +
-                "\n" +
-                "<smiley>";
+        String expected = """
+                Here's an example of how to use the "Arrays.sort()" method:
+                                
+                <!-- start no-lb -->
+                <pre>
+                  <code >int[] numbers = { 5, 3, 9, 1, 7 };
+                Arrays.sort(numbers);
+                </code>
+                </pre>
+                <!-- end no-lb -->
+                                
+                                
+                <smiley>""";
 
         CodeBlockTransformer transformer = new CodeBlockTransformer();
 
