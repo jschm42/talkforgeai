@@ -27,13 +27,6 @@
 
     <artifactId>app</artifactId>
 
-    <properties>
-        <maven.compiler.source>20</maven.compiler.source>
-        <maven.compiler.target>20</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jar.finalName>talkforgeai</jar.finalName>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.talkforgeai</groupId>
@@ -53,7 +46,7 @@
     </dependencies>
 
     <build>
-        <finalName>talkforgeai</finalName>
+        <finalName>talkforgeai-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -124,9 +117,6 @@
 
         <profile>
             <id>docker</id>
-            <properties>
-                <jar.finalName>talkforgeai-server</jar.finalName>
-            </properties>
         </profile>
 
     </profiles>

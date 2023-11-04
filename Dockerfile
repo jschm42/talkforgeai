@@ -1,4 +1,4 @@
-FROM amazoncorretto:20-alpine-jdk
+FROM amazoncorretto:19-alpine-jdk
 
 # 8090 is the port number the application will use
 EXPOSE 8090
@@ -11,7 +11,7 @@ RUN apk add --no-cache graphviz ttf-dejavu fontconfig freetype
 VOLUME /data
 
 # copy jar
-COPY ./app/target/app-*.jar /usr/local/lib/talkforgeai.jar
+COPY ./app/target/talkforgeai-*.jar /usr/local/lib/talkforgeai.jar
 
 # startup command
 CMD java -DTALKFORGEAI_DATADIR=/data -jar /usr/local/lib/talkforgeai.jar --spring.config.additional-location=/usr/local/talkforgeai/talkforgeai.properties
