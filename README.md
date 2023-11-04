@@ -9,6 +9,8 @@ TalkforgeAI is an AI-powered chat software that facilitates the creation of pers
 
 ## Features
 
+- Create individual chatbot profiles with custom personalities
+- Generate a profile picture for your chatbot right inside the app
 - Image generation through DALL-E 2 directly in chat, compatible with both GPT-3.5 and GPT-4 models.
 - Access to all relevant GPT models:
     - gpt-4
@@ -27,6 +29,8 @@ TalkforgeAI is an AI-powered chat software that facilitates the creation of pers
 - Multi-user support with access control for the features of each Persona, allowing for the assignment and sharing of Personas among users.
 - Image interpretation, initially supported by Huggingface models.
 - Reading and evaluating web links.
+- Upload of files to be interpreted by the AI (PDF, TXT, etc.)
+- Support for DALL-E 3 (as soon as API will be available)
 - Memory feature to store critical information in the database and retrieve it as needed, allowing for the persistence of information beyond the maximum token limit.
 - Function support for tasks such as sending emails, querying calendar data, etc.
 
