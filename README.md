@@ -59,12 +59,12 @@ the AI's responses can be delivered through browser-based or Elevenlabs text-to-
 
       java -jar ./talkforgeai-0.1.0.jar --spring.config.additional-location=./talkforgeai.properties
 
-Example properties file:
-
-    server.port=8090
-    openai.api-key=[your OpenAI API Key]
-    elevenlabs.api-key=[you Elevenlabs API-Key]
-    talkforgeai.datadir=[your TalkforgeAI data directory]
+- Available properties:
+    - server.port: Port to run the server on. Default is 8090.
+    - openai.api-key: OpenAI API key
+    - elevenlabs.api-key: Elevenlabs API key
+    - talkforgeai.datadir: Directory to store data in
+    - logging.level.com.talkforgeai: Log level for TalkforgeAI. Default is INFO.
 
 ### Using Docker
 
