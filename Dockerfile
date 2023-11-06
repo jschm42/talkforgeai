@@ -7,6 +7,10 @@ EXPOSE 8090
 # freetype is required for the font rendering in PlantUML
 RUN apk add --no-cache graphviz ttf-dejavu fontconfig freetype
 
+# Create empty properties file
+RUN mkdir -p /usr/local/talkforgeai
+RUN touch /usr/local/talkforgeai/talkforgeai.properties
+
 # Set up a volume for the data directory
 VOLUME /data
 
