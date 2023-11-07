@@ -20,7 +20,7 @@
       <div class="col-3">
         <img v-if="isShowPersonaImage(selectedPersona)" :alt="selectedPersona.name" :src="selectedPersona.imageUrl"
              class="persona-icon"/>
-        <i v-else class="fs-1 bi bi-robot robot-icon"></i>
+        <i v-else class="fs-1 bi bi-robot text-gradient-silver"></i>
       </div>
 
       <div class="col-9">
@@ -85,10 +85,6 @@ export default {
 </script>
 
 <style scoped>
-.robot-icon {
-  margin-right: 8px;
-  color: darksalmon;
-}
 
 .persona-name {
   font-size: 1.5rem;

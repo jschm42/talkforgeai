@@ -26,6 +26,16 @@
   text-align: center;
   color: #2c3e50;
 }
+
+.text-gradient-silver {
+  background-image: linear-gradient(to top, #555555 0%, #ffffff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+  -webkit-text-fill-color: transparent; /* For Safari compatibility */
+}
+
 </style>
 
 

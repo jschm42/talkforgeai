@@ -108,11 +108,11 @@ export default {
   <div :class="messageClass" class="card m-1 p-1 shadow">
     <div class="row">
       <div class="col-md-1">
-        <i v-if="isUser" class="fs-1 bi bi-person"></i>
+        <i v-if="isUser" class="fs-1 bi bi-person text-gradient-silver"></i>
         <img v-else-if="isAssistant" :src="personaImage" alt="Assistant" class="persona-icon">
         <i v-else-if="isFunctionCall" class="fs-1 bi bi-gear"></i>
         <i v-else-if="isFunctionResponse" class="fs-1 bi bi-arrow-return-left"></i>
-        <i v-else class="fs-1 bi bi-robot robot-icon"></i>
+        <i v-else class="fs-1 bi bi-robot text-gradient-silver"></i>
       </div>
       <div class="col-md-10">
         <div class="card-body">
@@ -166,10 +166,6 @@ export default {
 
 footer {
   font-style: italic;
-}
-
-.robot-icon {
-  color: darksalmon;
 }
 
 </style>
