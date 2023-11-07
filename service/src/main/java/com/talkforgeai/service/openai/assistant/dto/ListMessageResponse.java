@@ -16,32 +16,41 @@
 
 package com.talkforgeai.service.openai.assistant.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public record ListMessageResponse(
         String object,
         List<Message> data,
+        @JsonProperty("first_id")
         String firstId,
+        @JsonProperty("last_id")
         String lastId,
+        @JsonProperty("has_more")
         boolean hasMore) {
     public record Message(
             String id,
             String object,
-            long createdAt,
+            @JsonProperty("created_at")
+            Date createdAt,
+            @JsonProperty("thread_id")
             String threadId,
-            String role,
+            MessageRole role,
             List<ContentItem> content,
+            @JsonProperty("file_ids")
             List<String> fileIds,
-            Optional<String> assistantId,
-            Optional<String> runId,
+            @JsonProperty("assistant_id")
+            String assistantId,
+            @JsonProperty("run_id")
+            String runId,
             Map<String, Object> metadata
     ) {
-        @JsonIgnoreProperties(ignoreUnknown = true)
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         public record ContentItem(
                 String type,
                 TextContent text,

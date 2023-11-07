@@ -59,10 +59,10 @@ public class OpenAIAssistantService {
         return executeRequest(request, ListAssistantResponse.class);
     }
 
-    public RunConversationResponse runConversation(String threadId, RunConversationRequest runConversationRequest) {
+    public Run runConversation(String threadId, RunConversationRequest runConversationRequest) {
         String body = objectToJsonString(runConversationRequest);
         Request request = createPostRequest(body, "/threads/" + threadId + "/runs");
-        return executeRequest(request, RunConversationResponse.class);
+        return executeRequest(request, Run.class);
     }
 
     public CreateThreadResponse createThread() {
@@ -70,24 +70,22 @@ public class OpenAIAssistantService {
         return executeRequest(request, CreateThreadResponse.class);
     }
 
-    public RunConversationResponse postMessage(String threadId, PostMessageRequest postMessageRequest) {
+    public PostMessageResponse postMessage(String threadId, PostMessageRequest postMessageRequest) {
         String body = objectToJsonString(postMessageRequest);
         Request request = createPostRequest(body, "/threads/" + threadId + "/messages");
-        return executeRequest(request, RunConversationResponse.class);
+        return executeRequest(request, PostMessageResponse.class);
     }
 
-    public RetrieveRunResponse retrieveRun(String threadId, String runId) {
+    public Run retrieveRun(String threadId, String runId) {
         Request request = createGetRequest("/threads/" + threadId + "/runs/" + runId);
-        return executeRequest(request, RetrieveRunResponse.class);
+        return executeRequest(request, Run.class);
     }
 
     public ListMessageResponse listMessages(String threadId, ListMessagesRequest listMessagesRequest) {
         String params = """
                 limit=%s
                 &order=%s
-                &after=%s
-                &before=%s
-                """.formatted(listMessagesRequest.limit(), listMessagesRequest.order(), listMessagesRequest.after(), listMessagesRequest.before());
+                """.formatted(listMessagesRequest.limit(), listMessagesRequest.order());
 
         Request request = createGetRequest("/threads/" + threadId + "/messages?" + params);
         return executeRequest(request, ListMessageResponse.class);

@@ -16,15 +16,22 @@
 
 package com.talkforgeai.service.openai.assistant.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
-import java.util.Map;
+public enum MessageRole {
+    SYSTEM("system"),
+    USER("user"),
+    ASSISTANT("assistant"),
+    FUNCTION("function");
 
-public record CreateThreadResponse(
-        String id,
-        String object,
-        @JsonProperty("created_at")
-        long createdAt,
-        Map<String, Object> metadata
-) {
+    private final String value;
+
+    private MessageRole(String value) {
+        this.value = value;
+    }
+
+    @JsonValue
+    public String value() {
+        return this.value;
+    }
 }

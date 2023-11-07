@@ -16,6 +16,9 @@
 
 package com.talkforgeai.service.openai.assistant.dto;
 
-public record ListMessagesRequest(int limit, String order, String after, String before) {
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record ListMessagesRequest(int limit, String order) {
 
 }
