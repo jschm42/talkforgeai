@@ -14,21 +14,8 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai;
+package com.talkforgeai.service.openai.assistant.dto;
 
-public class OpenAIException extends RuntimeException {
-    private String errorDetail = "";
+public record ListMessagesRequest(int limit, String order, String after, String before) {
 
-    public OpenAIException(String message, String errorDetail) {
-        super(message);
-        this.errorDetail = errorDetail;
-    }
-
-    public OpenAIException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public String getErrorDetail() {
-        return errorDetail;
-    }
 }
