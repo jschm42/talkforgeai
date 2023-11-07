@@ -24,6 +24,8 @@ import java.util.List;
 public record OpenAIImageResponse(Date created, List<ImageData> data) {
 
     public record ImageData(String url,
+                            @JsonProperty("revised_prompt")
+                            String revisedPrompt,
                             @JsonProperty("b64_json") String b64Json) {
     }
 }

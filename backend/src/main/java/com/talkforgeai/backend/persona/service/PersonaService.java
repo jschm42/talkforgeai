@@ -112,7 +112,7 @@ public class PersonaService {
     }
 
     public GenerateImageResponse generateImage(String prompt) throws IOException {
-        OpenAIImageRequest request = new OpenAIImageRequest(prompt, 1, "256x256");
+        OpenAIImageRequest request = new OpenAIImageRequest(prompt, 1, "1024x1024");
         OpenAIImageResponse response = openAIImageService.submit(request);
 
         return new GenerateImageResponse(downloadImage(response.data().get(0).url()));
