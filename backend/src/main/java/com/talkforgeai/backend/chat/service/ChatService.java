@@ -171,9 +171,9 @@ public class ChatService {
         );
 
         OpenAIChatMessage processedResponseMessage = responseMessage;
-        if (responseMessage.content() != null) {
-            processedResponseMessage = messageProcessor.transform(responseMessage, submitResult.session().getId());
-        }
+//        if (responseMessage.content() != null) {
+//            processedResponseMessage = messageProcessor.transform(responseMessage, submitResult.session().getId());
+//        }
 
         processedMessagesToSave.add(submitResult.processedNewUserMessage());
         processedMessagesToSave.add(processedResponseMessage);
@@ -278,7 +278,8 @@ public class ChatService {
         if (!messages.isEmpty()) {
             lastMessage = messages.get(messages.size() - 1);
             OpenAIChatMessage openAIChatMessage = sessionService.mapToOpenAIMessage(lastMessage);
-            OpenAIChatMessage transformed = messageProcessor.transform(openAIChatMessage, sessionId);
+            OpenAIChatMessage transformed = new OpenAIChatMessage(OpenAIChatMessage.Role.ASSISTANT, "");
+//            OpenAIChatMessage transformed = messageProcessor.transform(openAIChatMessage, sessionId);
 
             sessionService.saveMessage(sessionId, transformed, ChatMessageType.PROCESSED);
             return Optional.of(transformed);

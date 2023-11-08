@@ -27,7 +27,7 @@ class Content {
 }
 
 class TextContent {
-  value = '';
+  value: string | null | undefined;
   annotations: [] | null = null;
 }
 
@@ -43,5 +43,10 @@ class ThreadMessage {
   metadata: any;
 }
 
+class ParsedThreadMessage {
+  parsed_content: string | null = null;
+  message: ThreadMessage | null = null;
+}
+
 export default Thread;
-export {ThreadMessage, Content, TextContent};
+export {ThreadMessage, Content, TextContent, ParsedThreadMessage};

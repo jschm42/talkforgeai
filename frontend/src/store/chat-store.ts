@@ -98,9 +98,15 @@ export const useChatStore = defineStore('chat', {
           const threadMessage = await assistantService.retrieveLastAssistentMessage(this.threadId);
           console.log('Received result', threadMessage);
           if (threadMessage) {
+            const parsedThreadMessage = await assistantService.postprocessMessage(this.threadId, threadMessage.id);
+
+            if (threadMessage.content && threadMessage.content.length > 0 && threadMessage.content[0].text) {
+              threadMessage.content[0].text.value = parsedThreadMessage.parsed_content;
+            }
             this.threadMessages.push(threadMessage);
             this.threads = await assistantService.retrieveThreads();
             console.log('Threads', this.threads);
+
           }
         }
       }, 2000);

@@ -22,14 +22,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
-import java.util.UUID;
 
 public class CodeBlockTransformerTest {
     TransformerContext context;
 
     @BeforeEach
     public void before() {
-        context = new TransformerContext(UUID.randomUUID(),
+        context = new TransformerContext(
+                "thread_Ddf483dKe",
+                "message_283Eeu3",
                 Path.of("/temp/persona"),
                 Path.of("/temp/persona/import"),
                 Path.of("/temp/chat")

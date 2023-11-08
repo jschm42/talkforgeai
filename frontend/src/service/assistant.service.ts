@@ -16,7 +16,7 @@
 
 import axios from 'axios';
 import Run from '@/store/to/run';
-import Thread, {ThreadMessage} from '@/store/to/thread';
+import Thread, {ParsedThreadMessage, ThreadMessage} from '@/store/to/thread';
 
 class AssistantService {
 
@@ -114,6 +114,14 @@ class AssistantService {
       },
     );
 
+    return result.data;
+  }
+
+  async postprocessMessage(threadId: string, messageId: string): Promise<ParsedThreadMessage> {
+    const result = await axios.post(
+      `/api/v1/threads/${threadId}/messages/${messageId}/postprocess`,
+      {},
+    );
     return result.data;
   }
 }

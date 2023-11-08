@@ -16,8 +16,9 @@
 
 package com.talkforgeai.backend.assistant.controller;
 
-import com.talkforgeai.backend.assistant.AssistantService;
+import com.talkforgeai.backend.assistant.dto.ParsedMessageDto;
 import com.talkforgeai.backend.assistant.dto.ThreadDto;
+import com.talkforgeai.backend.assistant.service.AssistantService;
 import com.talkforgeai.service.openai.assistant.dto.*;
 import jakarta.websocket.server.PathParam;
 import org.slf4j.Logger;
@@ -77,4 +78,8 @@ public class AssistantController {
         return assistantService.retrieveRun(threadId, runId);
     }
 
+    @PostMapping("/threads/{threadId}/messages/{messageId}/postprocess")
+    public ParsedMessageDto postProcessMessage(@PathVariable("threadId") String threadId, @PathVariable("messageId") String messageId) {
+        return assistantService.postProcessMessage(threadId, messageId);
+    }
 }

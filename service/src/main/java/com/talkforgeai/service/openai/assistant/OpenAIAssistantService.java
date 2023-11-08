@@ -105,6 +105,11 @@ public class OpenAIAssistantService {
         return executeRequest(request, ListMessageResponse.class);
     }
 
+    public Message retrieveMessage(String threadId, String messageId) {
+        Request request = createGetRequest("/threads/" + threadId + "/messages/" + messageId);
+        return executeRequest(request, Message.class);
+    }
+
     private Headers.Builder createDefaultHeaderBuilder() {
         Headers.Builder headersBuilder = new Headers.Builder();
         headersBuilder.add("Authorization", "Bearer " + openAIProperties.apiKey());

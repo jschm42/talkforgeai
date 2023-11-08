@@ -14,30 +14,40 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.assistant;
+package com.talkforgeai.backend.assistant.service;
 
+import com.talkforgeai.backend.assistant.domain.MessageEntity;
 import com.talkforgeai.backend.assistant.domain.ThreadEntity;
+import com.talkforgeai.backend.assistant.dto.ParsedMessageDto;
 import com.talkforgeai.backend.assistant.dto.ThreadDto;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
+import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
+import com.talkforgeai.backend.transformers.MessageProcessor;
 import com.talkforgeai.service.openai.assistant.OpenAIAssistantService;
 import com.talkforgeai.service.openai.assistant.dto.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AssistantService {
 
     private final OpenAIAssistantService assistantService;
     private final AssistantRepository assistantRepository;
+    private final MessageRepository messageRepository;
     private final ThreadRepository threadRepository;
 
-    public AssistantService(OpenAIAssistantService assistantService, AssistantRepository assistantRepository, ThreadRepository threadRepository) {
+    private final MessageProcessor messageProcessor;
+
+    public AssistantService(OpenAIAssistantService assistantService, AssistantRepository assistantRepository, MessageRepository messageRepository, ThreadRepository threadRepository, MessageProcessor messageProcessor) {
         this.assistantService = assistantService;
         this.assistantRepository = assistantRepository;
+        this.messageRepository = messageRepository;
         this.threadRepository = threadRepository;
+        this.messageProcessor = messageProcessor;
     }
 
     public Assistant retrieveAssistant(String assistantId) {
@@ -87,4 +97,29 @@ public class AssistantService {
         return new ThreadDto(threadEntity.getId(), threadEntity.getTitle(), threadEntity.getCreatedAt());
     }
 
+    @Transactional
+    public ParsedMessageDto postProcessMessage(String threadId, String messageId) {
+        Message message = this.assistantService.retrieveMessage(threadId, messageId);
+        Optional<MessageEntity> messageEntity = messageRepository.findById(messageId);
+
+        MessageEntity newMessageEntity = null;
+        if (messageEntity.isPresent()) {
+            newMessageEntity = messageEntity.get();
+        } else {
+            newMessageEntity = new MessageEntity();
+            newMessageEntity.setId(message.id());
+            newMessageEntity.setParsedContent("");
+        }
+
+        String transformed = messageProcessor.transform(message.content().get(0).text().value(), threadId, messageId);
+        newMessageEntity.setParsedContent(transformed);
+
+        messageRepository.save(newMessageEntity);
+
+        ParsedMessageDto parsedMessageDto = new ParsedMessageDto();
+        parsedMessageDto.setMessage(message);
+        parsedMessageDto.setParsedContent(transformed);
+
+        return parsedMessageDto;
+    }
 }
