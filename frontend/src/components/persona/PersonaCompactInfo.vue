@@ -30,7 +30,7 @@
 
 import {useChatStore} from '@/store/chat-store';
 import PersonaProperties, {TTSType} from '@/service/persona.properties';
-import Persona from '@/store/to/persona';
+import Assistant from '@/store/to/assistant';
 
 export default {
   name: 'PersonaCompactInfo',
@@ -45,8 +45,8 @@ export default {
     };
   },
   props: {
-    persona: {
-      type: Persona,
+    assistant: {
+      type: Assistant,
       required: true,
     },
     showProperties: {
@@ -66,32 +66,32 @@ export default {
     properties() {
       let result = [];
 
-      if (this.persona.properties[PersonaProperties.CHATGPT_MODEL]) {
-        result.push({
-          key: PersonaProperties.CHATGPT_MODEL,
-          value: this.persona.properties[PersonaProperties.CHATGPT_MODEL],
-        });
-      }
+      // if (this.assistant.properties[PersonaProperties.CHATGPT_MODEL]) {
+      //   result.push({
+      //     key: PersonaProperties.CHATGPT_MODEL,
+      //     value: this.persona.properties[PersonaProperties.CHATGPT_MODEL],
+      //   });
+      // }
+      //
+      // if (this.persona.properties[PersonaProperties.TTS_TYPE] === TTSType.ELEVENLABS) {
+      //   result.push({
+      //     key: TTSType.ELEVENLABS,
+      //     value: this.persona.properties[PersonaProperties.ELEVENLABS_MODELID],
+      //   });
+      // } else if (this.persona.properties[PersonaProperties.TTS_TYPE] === TTSType.SPEECHAPI) {
+      //   result.push({
+      //     key: TTSType.SPEECHAPI,
+      //     value: this.persona.properties[PersonaProperties.SPEECHAPI_VOICE],
+      //   });
+      // }
 
-      if (this.persona.properties[PersonaProperties.TTS_TYPE] === TTSType.ELEVENLABS) {
-        result.push({
-          key: TTSType.ELEVENLABS,
-          value: this.persona.properties[PersonaProperties.ELEVENLABS_MODELID],
-        });
-      } else if (this.persona.properties[PersonaProperties.TTS_TYPE] === TTSType.SPEECHAPI) {
-        result.push({
-          key: TTSType.SPEECHAPI,
-          value: this.persona.properties[PersonaProperties.SPEECHAPI_VOICE],
-        });
-      }
-
-      if (this.persona.properties) {
-        Object.keys(this.persona.properties).filter((key) => {
-          return this.allowedKeys.indexOf(key) !== -1;
-        }).forEach((key) => {
-          result.push({key: key, value: this.persona.properties[key]});
-        });
-      }
+      // if (this.persona.properties) {
+      //   Object.keys(this.persona.properties).filter((key) => {
+      //     return this.allowedKeys.indexOf(key) !== -1;
+      //   }).forEach((key) => {
+      //     result.push({key: key, value: this.persona.properties[key]});
+      //   });
+      // }
 
       return result;
     },

@@ -18,9 +18,8 @@
 
 import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
-import hljs from 'highlight.js';
-import ChatMessage from '@/store/to/chat-message';
 import ChatMessageTextToSpeech from '@/components/ChatMessageTextToSpeech.vue';
+import {ThreadMessage} from '@/store/to/thread';
 
 export default {
   name: 'ChatMessage',
@@ -33,7 +32,7 @@ export default {
     return {};
   },
   props: {
-    message: ChatMessage,
+    message: ThreadMessage,
     messageIndex: Number,
   },
   computed: {
@@ -50,16 +49,16 @@ export default {
       return this.message.role === Role.ASSISTANT && !!this.store.selectedPersona.imagePath;
     },
     isUser() {
-      return this.message.role === Role.USER && !this.message.name;
+      return this.message.role === Role.USER;
     },
-    isFunctionCall() {
-      return this.message.function_call;
-    },
-    isFunctionResponse() {
-      return this.message.name && this.message.content;
-    },
+    // isFunctionCall() {
+    //   return this.message.function_call;
+    // },
+    // isFunctionResponse() {
+    //   return this.message.name && this.message.content;
+    // },
     isSpeakable() {
-      return !this.isFunctionCall;
+      return true;
     },
     avatarImageClass() {
       return {
@@ -79,14 +78,14 @@ export default {
       await this.$refs.chatMessageAudioPlayerRef.playAudio();
     },
     getContent() {
-      if (this.message.function_call) {
-        const func = this.message.function_call;
-        const argumentsHighlighted = hljs.highlight(func.arguments, {language: 'json'}).value;
+      // if (this.message.function_call) {
+      //   const func = this.message.function_call;
+      //   const argumentsHighlighted = hljs.highlight(func.arguments, {language: 'json'}).value;
+      //
+      //   return `<strong>${func.name}(<p>${argumentsHighlighted}</p>)</strong>`;
+      // }
 
-        return `<strong>${func.name}(<p>${argumentsHighlighted}</p>)</strong>`;
-      }
-
-      return this.message.content;
+      return this.message.content[0].text.value;
     },
     getMessageStatus() {
       if (this.messageIndex === this.store.maxMessageIndex) {
@@ -110,8 +109,8 @@ export default {
       <div class="col-md-1">
         <i v-if="isUser" class="fs-1 bi bi-person"></i>
         <img v-else-if="isAssistant" :src="personaImage" alt="Assistant" class="persona-icon">
-        <i v-else-if="isFunctionCall" class="fs-1 bi bi-gear"></i>
-        <i v-else-if="isFunctionResponse" class="fs-1 bi bi-arrow-return-left"></i>
+        <!--        <i v-else-if="isFunctionCall" class="fs-1 bi bi-gear"></i>-->
+        <!--        <i v-else-if="isFunctionResponse" class="fs-1 bi bi-arrow-return-left"></i>-->
         <i v-else class="fs-1 bi bi-robot robot-icon"></i>
       </div>
       <div class="col-md-10">

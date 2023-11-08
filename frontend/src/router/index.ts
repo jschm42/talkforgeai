@@ -26,7 +26,7 @@ const routes: Array<RouteRecordRaw> = [
     component: PersonaChoiceView,
   },
   {
-    path: '/chat/:personaId',
+    path: '/chat/:assistantId',
     name: 'chat',
     component: ChatView,
     props: true,

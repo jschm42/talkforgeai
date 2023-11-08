@@ -18,7 +18,8 @@
   <div class="container">
     <div class="row text-start">
       <div class="col-3">
-        <img v-if="isShowPersonaImage(selectedPersona)" :alt="selectedPersona.name" :src="selectedPersona.imageUrl"
+        <img v-if="isShowAssistantImage(selectedAssistant)" :alt="selectedAssistant.name"
+             :src="selectedAssistant.imageUrl"
              class="persona-icon"/>
         <i v-else class="fs-1 bi bi-robot robot-icon"></i>
       </div>
@@ -33,7 +34,7 @@
       </div>
     </div>
     <div class="row">
-      <persona-compact-info :persona="store.selectedPersona" :show-properties="true"></persona-compact-info>
+      <persona-compact-info :assistant="store.selectedAssistant" :show-properties="true"></persona-compact-info>
     </div>
   </div>
 
@@ -57,10 +58,10 @@ export default {
   },
   computed: {
     personaName() {
-      return `${this.store.selectedPersona.name}`;
+      return `${this.store.selectedAssistant.name}`;
     },
     personaDescription() {
-      return `${this.store.selectedPersona.description}`;
+      return `${this.store.selectedAssistant.description}`;
     },
     isDisabled() {
       return !this.store.chat.configHeaderEnabled;
@@ -68,18 +69,14 @@ export default {
     personaList() {
       return this.store.personaList;
     },
-    selectedPersona() {
-      return this.store.selectedPersona;
+    selectedAssistant() {
+      return this.store.selectedAssistant;
     },
   },
   methods: {
-    isShowPersonaImage(persona) {
-      return !!persona.imagePath;
+    isShowAssistantImage(assistant) {
+      return !!assistant.imagePath;
     },
-    onPersonaSelected(persona) {
-      this.store.selectedPersona = persona;
-    },
-
   },
 };
 </script>

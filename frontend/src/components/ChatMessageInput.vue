@@ -56,9 +56,8 @@ export default {
 
       this.store.currentStatusMessage = 'Thinking...';
       try {
-        await this.store.streamPrompt(this.prompt, () => {
-          this.$emit('chunkUpdateReceived');
-        });
+        await this.store.submitUserMessage(this.prompt);
+        this.$emit('chunkUpdateReceived');
       } catch (error) {
         console.error(error);
         this.store.updateStatus('Error: ' + error, 'error');

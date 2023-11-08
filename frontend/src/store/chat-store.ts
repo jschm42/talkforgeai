@@ -24,11 +24,15 @@ import Role from '@/store/to/role';
 import ChatStreamService from '@/service/chat-stream.service';
 import HighlightingService from '@/service/highlighting.service';
 import PersonaProperties, {TTSType} from '@/service/persona.properties';
+import AssistantService from '@/service/assistant.service';
+import Thread, {ThreadMessage} from '@/store/to/thread';
+import Assistant from '@/store/to/assistant';
 
 const chatService = new ChatService();
 const chatStreamService = new ChatStreamService();
 const personaService = new PersonaService();
 const highlightingService = new HighlightingService();
+const assistantService = new AssistantService();
 
 export const useChatStore = defineStore('chat', {
   state: () => {
@@ -46,6 +50,13 @@ export const useChatStore = defineStore('chat', {
       currentStatusMessageType: '',
       sessions: [] as Array<Session>,
       selectedSessionId: '',
+
+      // Assistant API
+      threadMessages: [] as Array<ThreadMessage>,
+      threadId: '',
+      threads: [] as Array<Thread>,
+      selectedAssistant: {} as Assistant,
+      assistantList: [] as Array<Assistant>,
     };
   },
   getters: {
@@ -66,6 +77,37 @@ export const useChatStore = defineStore('chat', {
     },
   },
   actions: {
+    async selectAssistant(assistantId: string) {
+      this.selectedAssistant = await assistantService.retrieveAssistant(assistantId);
+      const thread = await assistantService.createThread();
+      this.threadId = thread.id;
+    },
+    async submitUserMessage(message: string) {
+      const submitedMessage = await assistantService.submitUserMessage(this.threadId, message);
+      this.threadMessages.push(submitedMessage);
+
+      const run = await assistantService.runConversation(this.threadId, this.selectedAssistant.id);
+
+      const pollingInterval = setInterval(async () => {
+        console.log('Polling for run status');
+        const runT = await assistantService.retrieveRun(this.threadId, run.id);
+        if (runT.status === 'completed') {
+          console.log('Run completed');
+          clearInterval(pollingInterval);
+
+          const threadMessage = await assistantService.retrieveLastAssistentMessage(this.threadId);
+          console.log('Received result', threadMessage);
+          if (threadMessage) {
+            this.threadMessages.push(threadMessage);
+          }
+        }
+      }, 2000);
+
+    },
+    async runConversation() {
+      await assistantService.runConversation(this.threadId, this.selectedAssistant.id);
+    },
+    // Old code
     newSession() {
       this.$patch({
         sessionId: '',
