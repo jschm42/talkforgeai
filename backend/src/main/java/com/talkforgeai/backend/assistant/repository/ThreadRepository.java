@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.assistant.dto;
+package com.talkforgeai.backend.assistant.repository;
 
-public record ThreadCreateResponse(String id) {
+import com.talkforgeai.backend.assistant.domain.ThreadEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ThreadRepository extends JpaRepository<ThreadEntity, String> {
 }

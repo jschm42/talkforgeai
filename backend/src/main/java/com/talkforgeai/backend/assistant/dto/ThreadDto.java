@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai.assistant.dto;
+package com.talkforgeai.backend.assistant.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
-import java.util.Map;
 
-public record CreateThreadResponse(
-        String id,
-        String object,
-        @JsonProperty("created_at")
-        Date createdAt,
-        Map<String, Object> metadata
-) {
+public record ThreadDto(String id, String title, @JsonProperty("created_at") Date createdAt) {
 }

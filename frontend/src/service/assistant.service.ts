@@ -16,7 +16,7 @@
 
 import axios from 'axios';
 import Run from '@/store/to/run';
-import {ThreadMessage} from '@/store/to/thread';
+import Thread, {ThreadMessage} from '@/store/to/thread';
 
 class AssistantService {
 
@@ -106,6 +106,16 @@ class AssistantService {
     }
   }
 
+  async retrieveThreads(): Promise<Array<Thread>> {
+    const result = await axios.get(
+      `/api/v1/threads`,
+      {
+        params: {},
+      },
+    );
+
+    return result.data;
+  }
 }
 
 export default AssistantService;

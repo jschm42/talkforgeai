@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
+create table assistant
+(
+    id varchar(50) not null primary key
+);
+
+create table thread
+(
+    id         varchar(50) not null primary key,
+    created_at timestamp,
+    title      varchar(50)
+);
+
+create table message
+(
+    id             varchar(50) not null primary key,
+    parsed_content CLOB
+);
+
 create table chat_message
 (
     id                      BLOB         not null primary key,

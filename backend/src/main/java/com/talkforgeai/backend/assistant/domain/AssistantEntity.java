@@ -14,18 +14,28 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai.assistant.dto;
+package com.talkforgeai.backend.assistant.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
-import java.util.Date;
-import java.util.Map;
+@Entity
+@Table(name = "assistant")
+public class AssistantEntity {
 
-public record CreateThreadResponse(
-        String id,
-        String object,
-        @JsonProperty("created_at")
-        Date createdAt,
-        Map<String, Object> metadata
-) {
+    @Id
+    @Column(name = "id", length = 50)
+    private String id;
+
+    // Standard getters and setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }
+

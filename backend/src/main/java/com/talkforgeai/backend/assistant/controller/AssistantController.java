@@ -17,12 +17,14 @@
 package com.talkforgeai.backend.assistant.controller;
 
 import com.talkforgeai.backend.assistant.AssistantService;
-import com.talkforgeai.backend.assistant.dto.ThreadCreateResponse;
+import com.talkforgeai.backend.assistant.dto.ThreadDto;
 import com.talkforgeai.service.openai.assistant.dto.*;
 import jakarta.websocket.server.PathParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -40,13 +42,18 @@ public class AssistantController {
         return assistantService.retrieveAssistant(assistantId);
     }
 
+    @GetMapping("/threads")
+    public List<ThreadDto> listThreads() {
+        return assistantService.retrieveThreads();
+    }
+
     @GetMapping("/assistants")
     public ListAssistantResponse listAssistants(@PathParam("limit") Integer limit, @PathParam("order") String order) {
         return assistantService.listAssistants(new ListRequest(limit, order));
     }
 
     @PostMapping("/threads")
-    public ThreadCreateResponse createThread() {
+    public ThreadDto createThread() {
         return assistantService.createThread();
     }
 

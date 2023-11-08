@@ -42,7 +42,7 @@ export default {
     messageClass() {
       return {
         'role-user': this.message.role === Role.USER,
-        'role-assistant': this.message.role === Role.ASSISTANT,
+        'role-assistantEntity': this.message.role === Role.ASSISTANT,
       };
     },
     isAssistant() {
@@ -120,7 +120,7 @@ export default {
       </div>
       <div class="col-md-1 text-end">
         <chat-message-text-to-speech v-if="isAssistant" ref="chatMessageAudioPlayerRef"
-                                     :message="this.message"></chat-message-text-to-speech>
+                                     :message="message"></chat-message-text-to-speech>
       </div>
     </div>
     <footer>
@@ -138,7 +138,7 @@ export default {
   background-color: #2c3e50;
 }
 
-.role-assistant {
+.role-assistantEntity {
 //background-color: #000000;
 }
 

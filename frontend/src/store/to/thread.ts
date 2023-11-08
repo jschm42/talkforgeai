@@ -16,7 +16,8 @@
 
 class Thread {
   id = '';
-  createdAt: Date | undefined;
+  title = '';
+  created_at: Date | null = null;
   metadata: any;
 }
 

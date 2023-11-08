@@ -16,18 +16,28 @@
 
 package com.talkforgeai.backend.assistant;
 
-import com.talkforgeai.backend.assistant.dto.ThreadCreateResponse;
+import com.talkforgeai.backend.assistant.domain.ThreadEntity;
+import com.talkforgeai.backend.assistant.dto.ThreadDto;
+import com.talkforgeai.backend.assistant.repository.AssistantRepository;
+import com.talkforgeai.backend.assistant.repository.ThreadRepository;
 import com.talkforgeai.service.openai.assistant.OpenAIAssistantService;
 import com.talkforgeai.service.openai.assistant.dto.*;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class AssistantService {
 
     private final OpenAIAssistantService assistantService;
+    private final AssistantRepository assistantRepository;
+    private final ThreadRepository threadRepository;
 
-    public AssistantService(OpenAIAssistantService assistantService) {
+    public AssistantService(OpenAIAssistantService assistantService, AssistantRepository assistantRepository, ThreadRepository threadRepository) {
         this.assistantService = assistantService;
+        this.assistantRepository = assistantRepository;
+        this.threadRepository = threadRepository;
     }
 
     public Assistant retrieveAssistant(String assistantId) {
@@ -38,9 +48,23 @@ public class AssistantService {
         return this.assistantService.listAssistants(listAssistantsRequest);
     }
 
-    public ThreadCreateResponse createThread() {
+    @Transactional
+    public ThreadDto createThread() {
         CreateThreadResponse thread = this.assistantService.createThread();
-        return new ThreadCreateResponse(thread.id());
+
+        ThreadEntity threadEntity = new ThreadEntity();
+        threadEntity.setId(thread.id());
+        threadEntity.setTitle("<no title>");
+        threadEntity.setCreatedAt(thread.createdAt());
+        threadRepository.save(threadEntity);
+
+        return mapToDto(threadEntity);
+    }
+
+    public List<ThreadDto> retrieveThreads() {
+        return this.threadRepository.findAll().stream()
+                .map(this::mapToDto)
+                .toList();
     }
 
     public Message postMessage(String threadId, PostMessageRequest postMessageRequest) {
@@ -58,4 +82,9 @@ public class AssistantService {
     public Run retrieveRun(String threadId, String runId) {
         return this.assistantService.retrieveRun(threadId, runId);
     }
+
+    private ThreadDto mapToDto(ThreadEntity threadEntity) {
+        return new ThreadDto(threadEntity.getId(), threadEntity.getTitle(), threadEntity.getCreatedAt());
+    }
+
 }

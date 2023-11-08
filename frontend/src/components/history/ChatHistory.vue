@@ -57,8 +57,7 @@ export default {
   },
   computed: {
     allSessionEntries() {
-      console.log('SESSION ENTRIES', this.store.sessions);
-      return this.store.sessions;
+      return this.store.threads;
     },
   },
   methods: {

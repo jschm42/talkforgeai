@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai.assistant.dto;
+package com.talkforgeai.backend.assistant.repository;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.talkforgeai.backend.assistant.domain.MessageEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.Date;
-import java.util.Map;
-
-public record CreateThreadResponse(
-        String id,
-        String object,
-        @JsonProperty("created_at")
-        Date createdAt,
-        Map<String, Object> metadata
-) {
+@Repository
+public interface MessageRepository extends JpaRepository<MessageEntity, String> {
 }

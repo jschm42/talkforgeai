@@ -99,6 +99,8 @@ export const useChatStore = defineStore('chat', {
           console.log('Received result', threadMessage);
           if (threadMessage) {
             this.threadMessages.push(threadMessage);
+            this.threads = await assistantService.retrieveThreads();
+            console.log('Threads', this.threads);
           }
         }
       }, 2000);

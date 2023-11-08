@@ -42,17 +42,17 @@
 </template>
 
 <script>
-import ChatSession from '@/store/to/chat-session';
 import {useChatStore} from '@/store/chat-store';
 import {format} from 'date-fns';
 import ChatService from '@/service/chat.service';
+import Thread from '@/store/to/thread';
 
 const chatService = new ChatService();
 
 export default {
   name: 'ChatHistoryEntry',
   props: {
-    entry: ChatSession,
+    entry: Thread,
   },
   data() {
     return {
@@ -68,15 +68,15 @@ export default {
   },
   computed: {
     getTitle() {
-      return `${this.entry.id} - ${this.entry.description}`;
+      return `${this.entry.id} - ${this.entry.title}`;
     },
     isSelected() {
-      return this.entry.id === this.store.selectedSessionId;
+      return this.entry.id === this.store.threadId;
     },
   },
   methods: {
     getEntryClass() {
-      if (this.entry.id === this.store.selectedSessionId) {
+      if (this.entry.id === this.store.threadId) {
         return 'bg-primary';
       }
       return '';
@@ -98,10 +98,10 @@ export default {
       if (this.isEditMode) {
         this.oldTitle = this.title;
         this.isEditMode = false;
-        await this.store.updateSessionTitle(this.store.sessionId, this.title);
+        await this.store.updateSessionTitle(this.store.threadId, this.title);
       } else if (this.isDeleteMode) {
         this.isDeleteMode = false;
-        await this.store.deleteChatSession(this.store.sessionId);
+        await this.store.deleteChatSession(this.store.threadId);
       }
     },
     onClickCancel() {
