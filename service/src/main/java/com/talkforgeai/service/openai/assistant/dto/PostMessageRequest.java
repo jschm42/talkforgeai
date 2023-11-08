@@ -16,5 +16,5 @@
 
 package com.talkforgeai.service.openai.assistant.dto;
 
-public record PostMessageRequest(MessageRole role, String content) {
+public record PostMessageRequest(Role role, String content) {
 }

@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class OpenAIAssistantService {
@@ -47,16 +49,33 @@ public class OpenAIAssistantService {
         return executeRequest(request, CreateAssistantResponse.class);
     }
 
-    public ListAssistantResponse listAssistants(ListAssistantsRequest listAssistantsRequest) {
-        String params = """
-                limit=%s
-                &order=%s
-                &after=%s
-                &before=%s
-                """.formatted(listAssistantsRequest.limit(), listAssistantsRequest.order(), listAssistantsRequest.after(), listAssistantsRequest.before());
+    public Assistant retrieveAssistant(String assistantId) {
+        Request request = createGetRequest("/assistants/" + assistantId);
+        return executeRequest(request, Assistant.class);
+    }
 
-        Request request = createGetRequest("/assistants?" + params);
+    public ListAssistantResponse listAssistants(ListRequest listAssistantsRequest) {
+        Request request = createGetRequest("/assistants?" + createListUrlParams(listAssistantsRequest));
         return executeRequest(request, ListAssistantResponse.class);
+    }
+
+    private String createListUrlParams(ListRequest listRequest) {
+        List<String> params = new ArrayList<>();
+
+        if (listRequest.limit() != null) {
+            params.add("limit=" + listRequest.limit());
+        }
+        if (listRequest.order() != null) {
+            params.add("order=" + listRequest.order());
+        }
+        if (listRequest.before() != null) {
+            params.add("before=" + listRequest.before());
+        }
+        if (listRequest.after() != null) {
+            params.add("after=" + listRequest.after());
+        }
+
+        return String.join("&", params);
     }
 
     public Run runConversation(String threadId, RunConversationRequest runConversationRequest) {
@@ -70,10 +89,10 @@ public class OpenAIAssistantService {
         return executeRequest(request, CreateThreadResponse.class);
     }
 
-    public PostMessageResponse postMessage(String threadId, PostMessageRequest postMessageRequest) {
+    public Message postMessage(String threadId, PostMessageRequest postMessageRequest) {
         String body = objectToJsonString(postMessageRequest);
         Request request = createPostRequest(body, "/threads/" + threadId + "/messages");
-        return executeRequest(request, PostMessageResponse.class);
+        return executeRequest(request, Message.class);
     }
 
     public Run retrieveRun(String threadId, String runId) {
@@ -81,13 +100,8 @@ public class OpenAIAssistantService {
         return executeRequest(request, Run.class);
     }
 
-    public ListMessageResponse listMessages(String threadId, ListMessagesRequest listMessagesRequest) {
-        String params = """
-                limit=%s
-                &order=%s
-                """.formatted(listMessagesRequest.limit(), listMessagesRequest.order());
-
-        Request request = createGetRequest("/threads/" + threadId + "/messages?" + params);
+    public ListMessageResponse listMessages(String threadId, ListRequest listMessagesRequest) {
+        Request request = createGetRequest("/threads/" + threadId + "/messages?" + createListUrlParams(listMessagesRequest));
         return executeRequest(request, ListMessageResponse.class);
     }
 

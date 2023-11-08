@@ -30,12 +30,20 @@ public class AssistantService {
         this.assistantService = assistantService;
     }
 
+    public Assistant retrieveAssistant(String assistantId) {
+        return this.assistantService.retrieveAssistant(assistantId);
+    }
+
+    public ListAssistantResponse listAssistants(ListRequest listAssistantsRequest) {
+        return this.assistantService.listAssistants(listAssistantsRequest);
+    }
+
     public ThreadCreateResponse createThread() {
         CreateThreadResponse thread = this.assistantService.createThread();
         return new ThreadCreateResponse(thread.id());
     }
 
-    public PostMessageResponse postMessage(String threadId, PostMessageRequest postMessageRequest) {
+    public Message postMessage(String threadId, PostMessageRequest postMessageRequest) {
         return this.assistantService.postMessage(threadId, postMessageRequest);
     }
 
@@ -43,7 +51,7 @@ public class AssistantService {
         return this.assistantService.runConversation(threadId, runConversationRequest);
     }
 
-    public ListMessageResponse listMessages(String threadId, ListMessagesRequest listMessagesRequest) {
+    public ListMessageResponse listMessages(String threadId, ListRequest listMessagesRequest) {
         return this.assistantService.listMessages(threadId, listMessagesRequest);
     }
 

@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/assistant")
+@RequestMapping("/api/v1")
 public class AssistantController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AssistantController.class);
 
@@ -35,19 +35,29 @@ public class AssistantController {
         this.assistantService = assistantService;
     }
 
+    @GetMapping("/assistants/{assistantId}")
+    public Assistant retrieveAssistant(@PathVariable("assistantId") String assistantId) {
+        return assistantService.retrieveAssistant(assistantId);
+    }
+
+    @GetMapping("/assistants")
+    public ListAssistantResponse listAssistants(@PathParam("limit") Integer limit, @PathParam("order") String order) {
+        return assistantService.listAssistants(new ListRequest(limit, order));
+    }
+
     @PostMapping("/threads")
     public ThreadCreateResponse createThread() {
         return assistantService.createThread();
     }
 
     @PostMapping("/threads/{threadId}/messages")
-    public PostMessageResponse postMessage(@PathVariable("threadId") String threadId, @RequestBody PostMessageRequest postMessageRequest) {
+    public Message postMessage(@PathVariable("threadId") String threadId, @RequestBody PostMessageRequest postMessageRequest) {
         return assistantService.postMessage(threadId, postMessageRequest);
     }
 
     @GetMapping("/threads/{threadId}/messages")
-    public ListMessageResponse listMessages(@PathVariable("threadId") String threadId, @PathParam("limit") int limit, @PathParam("order") String order) {
-        return assistantService.listMessages(threadId, new ListMessagesRequest(limit, order));
+    public ListMessageResponse listMessages(@PathVariable("threadId") String threadId, @PathParam("limit") Integer limit, @PathParam("order") String order) {
+        return assistantService.listMessages(threadId, new ListRequest(limit, order));
     }
 
     @PostMapping("/threads/{threadId}/runs")

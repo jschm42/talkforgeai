@@ -16,22 +16,5 @@
 
 package com.talkforgeai.service.openai.assistant.dto;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
-public enum MessageRole {
-    SYSTEM("system"),
-    USER("user"),
-    ASSISTANT("assistant"),
-    FUNCTION("function");
-
-    private final String value;
-
-    private MessageRole(String value) {
-        this.value = value;
-    }
-
-    @JsonValue
-    public String value() {
-        return this.value;
-    }
+public record Tool(String type) {
 }

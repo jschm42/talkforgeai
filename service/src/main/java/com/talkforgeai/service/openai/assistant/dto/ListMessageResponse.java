@@ -16,12 +16,9 @@
 
 package com.talkforgeai.service.openai.assistant.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public record ListMessageResponse(
         String object,
@@ -32,46 +29,5 @@ public record ListMessageResponse(
         String lastId,
         @JsonProperty("has_more")
         boolean hasMore) {
-    public record Message(
-            String id,
-            String object,
-            @JsonProperty("created_at")
-            Date createdAt,
-            @JsonProperty("thread_id")
-            String threadId,
-            MessageRole role,
-            List<ContentItem> content,
-            @JsonProperty("file_ids")
-            List<String> fileIds,
-            @JsonProperty("assistant_id")
-            String assistantId,
-            @JsonProperty("run_id")
-            String runId,
-            Map<String, Object> metadata
-    ) {
 
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        public record ContentItem(
-                String type,
-                TextContent text,
-                @JsonProperty("image_file")
-                ImageContent imageFile
-        ) {
-            public record TextContent(
-                    String value,
-                    List<Annotation> annotations
-            ) {
-                public record Annotation(
-                        // Define the annotation structure here
-                ) {
-                }
-            }
-
-            public record ImageContent(
-                    @JsonProperty("file_id")
-                    String fileId
-            ) {
-            }
-        }
-    }
 }

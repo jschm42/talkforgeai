@@ -29,8 +29,4 @@ public record CreateAssistantResponse(String id,
                                       List<Tool> tools,
                                       List<String> fileIds,
                                       Map<String, Object> metadata) {
-    public record Tool(
-            String type
-    ) {
-    }
 }

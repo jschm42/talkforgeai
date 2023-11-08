@@ -21,33 +21,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
 
-public record PostMessageResponse(
+public record Assistant(
         String id,
         String object,
         @JsonProperty("created_at")
-        long createdAt,
-        @JsonProperty("thread_id")
-        String threadId,
-        MessageRole role,
-        List<ContentRecord> content,
+        String createdAt,
+        String name,
+        String description,
+        String model,
+        String instructions,
+        List<Tool> tools,
         @JsonProperty("file_ids")
         List<String> fileIds,
-        @JsonProperty("assistant_id")
-        String assistantId,
-        @JsonProperty("run_id")
-        String runId,
-        Map<String, Object> metadata) {
+        Map<String, Object> metadata
+) {
 
-    public record ContentRecord(
-            String type,
-            TextRecord text
-    ) {
-
-        public record TextRecord(
-                String value,
-                List<Object> annotations
-        ) {
-        }
-    }
 }
-

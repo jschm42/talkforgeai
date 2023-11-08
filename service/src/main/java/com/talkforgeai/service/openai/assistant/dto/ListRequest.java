@@ -16,6 +16,8 @@
 
 package com.talkforgeai.service.openai.assistant.dto;
 
-public record ListAssistantsRequest(String limit, String order, String after, String before) {
-
+public record ListRequest(Integer limit, String order, String after, String before) {
+    public ListRequest(Integer limit, String order) {
+        this(limit, order, null, null);
+    }
 }

@@ -24,8 +24,4 @@ public record CreateAssistantRequest(
         List<Tool> tools,
         String model
 ) {
-    public record Tool(
-            String type
-    ) {
-    }
 }
