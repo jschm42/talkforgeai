@@ -101,7 +101,13 @@ export const useChatStore = defineStore('chat', {
             const parsedThreadMessage = await assistantService.postprocessMessage(this.threadId, threadMessage.id);
 
             if (threadMessage.content && threadMessage.content.length > 0 && threadMessage.content[0].text) {
-              threadMessage.content[0].text.value = parsedThreadMessage.parsed_content;
+              let content = parsedThreadMessage.parsed_content;
+
+              if (content) {
+                content = highlightingService.replaceCodeContent(content);
+              }
+              
+              threadMessage.content[0].text.value = content;
             }
             this.threadMessages.push(threadMessage);
             this.threads = await assistantService.retrieveThreads();
@@ -115,7 +121,7 @@ export const useChatStore = defineStore('chat', {
     async runConversation() {
       await assistantService.runConversation(this.threadId, this.selectedAssistant.id);
     },
-    // Old code
+    // ************** Old code *****************
     newSession() {
       this.$patch({
         sessionId: '',
