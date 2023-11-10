@@ -104,11 +104,7 @@ public class AssistantService {
 
         messageList.data().forEach(message -> {
             Optional<MessageEntity> messageEntity = messageRepository.findById(message.id());
-            if (messageEntity.isPresent()) {
-                parsedMessages.put(message.id(), messageEntity.get().getParsedContent());
-            } else {
-                parsedMessages.put(message.id(), message.content().get(0).text().value());
-            }
+            messageEntity.ifPresent(entity -> parsedMessages.put(message.id(), entity.getParsedContent()));
         });
 
         return new MessageListParsedDto(messageList, parsedMessages);

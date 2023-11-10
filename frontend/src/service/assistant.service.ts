@@ -81,9 +81,10 @@ class AssistantService {
         },
       );
       const response = result.data;
+      console.log('Response: ', response);
 
-      if (response.data && response.data.length > 0) {
-        return response.data[0];
+      if (response.message_list && response.message_list.data && response.message_list.data.length > 0) {
+        return response.message_list.data[0];
       }
     } catch (error) {
       throw new Error('Error retrieving messages: ' + error);

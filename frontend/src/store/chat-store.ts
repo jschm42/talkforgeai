@@ -25,7 +25,7 @@ import ChatStreamService from '@/service/chat-stream.service';
 import HighlightingService from '@/service/highlighting.service';
 import PersonaProperties, {TTSType} from '@/service/persona.properties';
 import AssistantService from '@/service/assistant.service';
-import Thread, {ParsedThreadMessage, ThreadMessage} from '@/store/to/thread';
+import Thread, {ThreadMessage} from '@/store/to/thread';
 import Assistant from '@/store/to/assistant';
 
 const chatService = new ChatService();
@@ -53,7 +53,7 @@ export const useChatStore = defineStore('chat', {
 
       // Assistant API
       threadMessages: [] as Array<ThreadMessage>,
-      parsedMessages: [] as Array<ParsedThreadMessage>,
+      parsedMessages: {} as any,
       threadId: '',
       threads: [] as Array<Thread>,
       selectedAssistant: {} as Assistant,
@@ -80,8 +80,6 @@ export const useChatStore = defineStore('chat', {
   actions: {
     async selectAssistant(assistantId: string) {
       this.selectedAssistant = await assistantService.retrieveAssistant(assistantId);
-      const thread = await assistantService.createThread();
-      this.threadId = thread.id;
     },
     async retrieveThreads() {
       this.threads = await assistantService.retrieveThreads();
@@ -90,9 +88,29 @@ export const useChatStore = defineStore('chat', {
       const parsedMessageList = await assistantService.retrieveMessages(threadId);
 
       this.threadMessages = parsedMessageList.message_list?.data || [];
-      this.parsedMessages = parsedMessageList.parsed_messages || [];
+      this.parsedMessages = parsedMessageList.parsed_messages || {};
+
+      this.threadMessages.forEach((message) => {
+        // Update content with parsed content
+        if (message.content && message.content.length > 0 && message.content[0].text) {
+          if (this.parsedMessages[message.id]) {
+            let content = this.parsedMessages[message.id];
+
+            if (content) {
+              content = highlightingService.replaceCodeContent(content);
+            }
+
+            message.content[0].text.value = content;
+          }
+        }
+      });
     },
     async submitUserMessage(message: string) {
+      if (!this.threadId) {
+        const thread = await assistantService.createThread();
+        this.threadId = thread.id;
+      }
+
       const submitedMessage = await assistantService.submitUserMessage(this.threadId, message);
       this.threadMessages.push(submitedMessage);
 
@@ -103,44 +121,49 @@ export const useChatStore = defineStore('chat', {
         const runT = await assistantService.retrieveRun(this.threadId, run.id);
         if (runT.status === 'completed') {
           console.log('Run completed');
+          await this.handleResult();
           clearInterval(pollingInterval);
-
-          const threadMessage = await assistantService.retrieveLastAssistentMessage(this.threadId);
-          console.log('Received result', threadMessage);
-          if (threadMessage) {
-            const parsedThreadMessage = await assistantService.postprocessMessage(this.threadId, threadMessage.id);
-
-            if (threadMessage.content && threadMessage.content.length > 0 && threadMessage.content[0].text) {
-              let content = parsedThreadMessage.parsed_content;
-
-              if (content) {
-                content = highlightingService.replaceCodeContent(content);
-              }
-
-              threadMessage.content[0].text.value = content;
-            }
-            this.threadMessages.push(threadMessage);
-            this.threads = await assistantService.retrieveThreads();
-            console.log('Threads', this.threads);
-
-          }
         }
-      }, 2000);
+      }, 3000);
 
+    },
+    async handleResult() {
+      console.log('Handling result', this.threadId);
+      const threadMessage = await assistantService.retrieveLastAssistentMessage(this.threadId);
+      console.log('Received result', threadMessage);
+      if (threadMessage) {
+        const parsedThreadMessage = await assistantService.postprocessMessage(this.threadId, threadMessage.id);
+
+        if (threadMessage.content && threadMessage.content.length > 0 && threadMessage.content[0].text) {
+          let content = parsedThreadMessage.parsed_content;
+
+          if (content) {
+            content = highlightingService.replaceCodeContent(content);
+          }
+
+          threadMessage.content[0].text.value = content;
+        }
+        this.threadMessages.push(threadMessage);
+        this.threads = await assistantService.retrieveThreads();
+        console.log('Threads', this.threads);
+
+      }
     },
     async runConversation() {
       await assistantService.runConversation(this.threadId, this.selectedAssistant.id);
     },
     // ************** Old code *****************
-    newSession() {
+    async newSession() {
+      const thread = await assistantService.createThread();
+
       this.$patch({
-        sessionId: '',
-        messages: [],
+        threadMessages: [],
+        parsedMessages: {},
         chat: {
           configHeaderEnabled: true,
         },
         currentStatusMessage: '',
-        selectedSessionId: '',
+        threadId: thread.id,
       });
     },
     resetChat() {
