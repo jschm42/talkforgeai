@@ -16,9 +16,7 @@
 
 package com.talkforgeai.backend.assistant.controller;
 
-import com.talkforgeai.backend.assistant.dto.MessageListParsedDto;
-import com.talkforgeai.backend.assistant.dto.ParsedMessageDto;
-import com.talkforgeai.backend.assistant.dto.ThreadDto;
+import com.talkforgeai.backend.assistant.dto.*;
 import com.talkforgeai.backend.assistant.service.AssistantService;
 import com.talkforgeai.service.openai.assistant.dto.*;
 import jakarta.websocket.server.PathParam;
@@ -101,6 +99,12 @@ public class AssistantController {
         } catch (IOException ioException) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
 
+
+    @PostMapping("/threads/{threadId}/title/generate")
+    @ResponseBody
+    public ThreadTitleDto generateThreadTitle(@PathVariable("threadId") String threadId, @RequestBody ThreadTitleRequestDto request) {
+        return assistantService.generateThreadTitle(threadId, request);
     }
 }

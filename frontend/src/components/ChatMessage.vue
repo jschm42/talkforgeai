@@ -115,7 +115,10 @@ export default {
       </div>
       <div class="col-md-10">
         <div class="card-body">
-          <div class="card-text text-start" v-html="getContent()"></div>
+          <div v-if="getMessageStatusType() === 'running'" class="spinner-grow text-primary" role="status">
+          </div>
+          <i v-else-if="getMessageStatusType() === 'error'" class="bi bi-exclamation-lg bg-danger"></i>
+          <div v-else class="card-text text-start" v-html="getContent()"></div>
         </div>
       </div>
       <div class="col-md-1 text-end">
@@ -124,10 +127,7 @@ export default {
       </div>
     </div>
     <footer>
-      <div v-if="getMessageStatusType() === 'running'" role="status">
-        <span class="sr-only">{{ getMessageStatus() }}</span>
-      </div>
-      <i v-else-if="getMessageStatusType() === 'error'" class="bi bi-exclamation-lg bg-danger"></i>
+
     </footer>
   </div>
 

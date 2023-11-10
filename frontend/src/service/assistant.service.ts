@@ -108,6 +108,20 @@ class AssistantService {
     }
   }
 
+  async generateThreadTitle(threadId: string, userMessageContent: string, assistantMessageContent: string) {
+    console.log('Generating title for thread:', threadId);
+    try {
+      const result = await axios.post(`/api/v1/threads/${threadId}/title/generate`,
+        {
+          userMessageContent,
+          assistantMessageContent,
+        });
+      return result.data;
+    } catch (error) {
+      throw new Error('Error while generating title for thread: ' + error);
+    }
+  }
+
   async retrieveThreads(): Promise<Array<Thread>> {
     const result = await axios.get(
       `/api/v1/threads`,

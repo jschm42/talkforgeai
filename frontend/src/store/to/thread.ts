@@ -41,6 +41,12 @@ class ThreadMessage {
   role: 'user' | 'assistant' | undefined;
   content: Array<Content> | null = null;
   metadata: any;
+
+  constructor(id: string, role: 'user' | 'assistant', content: string) {
+    this.id = id;
+    this.role = role;
+    this.content = [{type: 'text', text: {value: content, annotations: []}}];
+  }
 }
 
 class ThreadMessageList {

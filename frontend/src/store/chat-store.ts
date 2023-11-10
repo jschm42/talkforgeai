@@ -46,12 +46,13 @@ export const useChatStore = defineStore('chat', {
         configHeaderEnabled: true,
         autoSpeak: false,
       },
-      currentStatusMessage: '',
-      currentStatusMessageType: '',
+
       sessions: [] as Array<Session>,
       selectedSessionId: '',
 
       // Assistant API
+      currentStatusMessage: '',
+      currentStatusMessageType: '',
       threadMessages: [] as Array<ThreadMessage>,
       parsedMessages: {} as any,
       threadId: '',
@@ -70,11 +71,11 @@ export const useChatStore = defineStore('chat', {
     autoSpeak(): boolean {
       return this.chat.autoSpeak;
     },
-    isEmptySession(): boolean {
-      return this.messages.length == 0;
+    isEmptyThread(): boolean {
+      return this.threadMessages.length == 0;
     },
     maxMessageIndex(): number {
-      return this.messages.length - 1;
+      return this.threadMessages.length - 1;
     },
   },
   actions: {
@@ -113,6 +114,9 @@ export const useChatStore = defineStore('chat', {
 
       const submitedMessage = await assistantService.submitUserMessage(this.threadId, message);
       this.threadMessages.push(submitedMessage);
+      this.threadMessages.push(new ThreadMessage('', 'assistant', ''));
+
+      this.updateStatus('Thinking...', 'running');
 
       const run = await assistantService.runConversation(this.threadId, this.selectedAssistant.id);
 
@@ -121,11 +125,22 @@ export const useChatStore = defineStore('chat', {
         const runT = await assistantService.retrieveRun(this.threadId, run.id);
         if (runT.status === 'completed') {
           console.log('Run completed');
-          await this.handleResult();
-          clearInterval(pollingInterval);
+          try {
+            await this.handleResult();
+          } catch (e) {
+            console.error('Error while handling result', e);
+          } finally {
+            clearInterval(pollingInterval);
+          }
         }
-      }, 3000);
+      }, 2000);
 
+    },
+    getThreadMessageTextContent(threadMessage: ThreadMessage) {
+      if (threadMessage.content && threadMessage.content.length > 0 && threadMessage.content[0].text) {
+        return threadMessage.content[0].text.value || '';
+      }
+      return '';
     },
     async handleResult() {
       console.log('Handling result', this.threadId);
@@ -135,22 +150,35 @@ export const useChatStore = defineStore('chat', {
         const parsedThreadMessage = await assistantService.postprocessMessage(this.threadId, threadMessage.id);
 
         if (threadMessage.content && threadMessage.content.length > 0 && threadMessage.content[0].text) {
-          let content = parsedThreadMessage.parsed_content;
+          const content = parsedThreadMessage.parsed_content;
 
           if (content) {
-            content = highlightingService.replaceCodeContent(content);
-          }
+            const highlightedContent = highlightingService.replaceCodeContent(content);
+            threadMessage.content[0].text.value = highlightedContent;
 
-          threadMessage.content[0].text.value = content;
+            // Get text content of last user message
+            const lastUserMessage = this.threadMessages[this.threadMessages.length - 2];
+            const lastUserMessageContent = this.getThreadMessageTextContent(lastUserMessage);
+
+            await this.generateThreadTitle(this.threadId, lastUserMessageContent, content);
+          }
         }
-        this.threadMessages.push(threadMessage);
+
+        this.threadMessages[this.threadMessages.length - 1] = threadMessage;
+
         this.threads = await assistantService.retrieveThreads();
         console.log('Threads', this.threads);
 
+        this.updateStatus('', '');
       }
     },
     async runConversation() {
       await assistantService.runConversation(this.threadId, this.selectedAssistant.id);
+    },
+    async generateThreadTitle(threadId: string, userMessage: string, assistantMessage: string) {
+      const response = await assistantService.generateThreadTitle(threadId, userMessage, assistantMessage);
+      console.log('Generated title response', response);
+      await this.retrieveThreads();
     },
     // ************** Old code *****************
     async newSession() {
@@ -230,12 +258,14 @@ export const useChatStore = defineStore('chat', {
       }
 
       if (this.isSessionTitleGenerationEnabled()) {
-        try {
-          await this.generateSessionTitle(this.sessionId);
-        } catch (e) {
-          console.error('Error while generating session title', e);
-          throw e;
-        }
+        /**
+         try {
+         await this.generateSessionTitle(this.sessionId);
+         } catch (e) {
+         console.error('Error while generating session title', e);
+         throw e;
+         }
+         **/
       } else {
         console.log('Session title generation is disabled. Skipping.');
       }
@@ -274,33 +304,7 @@ export const useChatStore = defineStore('chat', {
       }
       return true;
     },
-    async generateSessionTitle(sessionId: string) {
-      const userMessage = this.messages.find(m => m.role === Role.USER);
-      const userMessageContent = userMessage ? userMessage.content : '';
 
-      const assistantMessage = this.messages.find(m => m.role === Role.ASSISTANT);
-      const assistantMessageContent = assistantMessage ? assistantMessage.content : '';
-
-      if (this.hasEmptySessionTitle(sessionId)) {
-        this.updateStatus('Generating title...', 'running');
-
-        try {
-          const response = await chatService.generateSessionTitle(sessionId, userMessageContent,
-            assistantMessageContent);
-          console.log('Generated title response', response);
-          if (response) {
-            const currentSession = this.sessions.find(s => s.id === this.selectedSessionId);
-            if (currentSession) {
-              currentSession.title = response.generatedTitle;
-            }
-          }
-        } finally {
-          this.updateStatus('');
-        }
-      } else {
-        console.log('Session title already set. Skipping generation.');
-      }
-    },
     async deleteChatSession(sessionId: string) {
       await chatService.deleteSession(this.sessionId);
       this.selectedSessionId = '';

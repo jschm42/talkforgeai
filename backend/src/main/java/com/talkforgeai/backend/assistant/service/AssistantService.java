@@ -18,20 +18,25 @@ package com.talkforgeai.backend.assistant.service;
 
 import com.talkforgeai.backend.assistant.domain.MessageEntity;
 import com.talkforgeai.backend.assistant.domain.ThreadEntity;
-import com.talkforgeai.backend.assistant.dto.MessageListParsedDto;
-import com.talkforgeai.backend.assistant.dto.ParsedMessageDto;
-import com.talkforgeai.backend.assistant.dto.ThreadDto;
+import com.talkforgeai.backend.assistant.dto.*;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
+import com.talkforgeai.backend.session.exception.SessionException;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
+import com.talkforgeai.service.openai.OpenAIChatService;
 import com.talkforgeai.service.openai.assistant.OpenAIAssistantService;
 import com.talkforgeai.service.openai.assistant.dto.Thread;
 import com.talkforgeai.service.openai.assistant.dto.*;
+import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
+import com.talkforgeai.service.openai.dto.OpenAIChatRequest;
+import com.talkforgeai.service.openai.dto.OpenAIChatResponse;
 import jakarta.transaction.Transactional;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
@@ -46,6 +51,8 @@ import java.util.Optional;
 public class AssistantService {
 
     private final OpenAIAssistantService openAIAssistantService;
+
+    private final OpenAIChatService openAIChatService;
     private final AssistantRepository assistantRepository;
     private final MessageRepository messageRepository;
     private final ThreadRepository threadRepository;
@@ -54,8 +61,9 @@ public class AssistantService {
 
     private final MessageProcessor messageProcessor;
 
-    public AssistantService(OpenAIAssistantService openAIAssistantService, AssistantRepository assistantRepository, MessageRepository messageRepository, ThreadRepository threadRepository, FileStorageService fileStorageService, MessageProcessor messageProcessor) {
+    public AssistantService(OpenAIAssistantService openAIAssistantService, OpenAIChatService openAIChatService, AssistantRepository assistantRepository, MessageRepository messageRepository, ThreadRepository threadRepository, FileStorageService fileStorageService, MessageProcessor messageProcessor) {
         this.openAIAssistantService = openAIAssistantService;
+        this.openAIChatService = openAIChatService;
         this.assistantRepository = assistantRepository;
         this.messageRepository = messageRepository;
         this.threadRepository = threadRepository;
@@ -85,7 +93,7 @@ public class AssistantService {
     }
 
     public List<ThreadDto> retrieveThreads() {
-        return this.threadRepository.findAll().stream()
+        return this.threadRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream()
                 .map(this::mapToDto)
                 .toList();
     }
@@ -148,5 +156,36 @@ public class AssistantService {
         Path imgFilePath = fileStorageService.getThreadDirectory().resolve(threadId).resolve(filename);
         Resource resource = new FileSystemResource(imgFilePath);
         return StreamUtils.copyToByteArray(resource.getInputStream());
+    }
+
+    public ThreadTitleDto generateThreadTitle(String threadId, ThreadTitleRequestDto request) {
+        ThreadEntity threadEntity = threadRepository.findById(threadId).orElseThrow(() -> new SessionException("Thread not found"));
+
+        OpenAIChatRequest titleRequest = getTitleRequest(request);
+
+        OpenAIChatResponse response = openAIChatService.submit(titleRequest);
+        String generatedTitle = response.choices().get(0).message().content();
+
+        String parsedTitle = generatedTitle.replaceAll("\"", "");
+        threadEntity.setTitle(parsedTitle);
+        threadRepository.save(threadEntity);
+
+        return new ThreadTitleDto(generatedTitle);
+    }
+
+    @NotNull
+    private OpenAIChatRequest getTitleRequest(ThreadTitleRequestDto request) {
+        OpenAIChatRequest titleRequest = new OpenAIChatRequest();
+        titleRequest.setModel("gpt-3.5-turbo");
+        titleRequest.setMaxTokens(20);
+        titleRequest.setTemperature(0.5);
+
+        String content = """
+                Generate a title in less than 6 words for the following message: %s
+                """.formatted(request.userMessageContent());
+
+        OpenAIChatMessage titleMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, content);
+        titleRequest.setMessages(List.of(titleMessage));
+        return titleRequest;
     }
 }
