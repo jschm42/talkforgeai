@@ -16,17 +16,18 @@
 
 package com.talkforgeai.service.openai.assistant.dto;
 
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record CreateAssistantResponse(String id,
-                                      String object,
-                                      long createdAt,
-                                      String name,
-                                      String description,
-                                      String model,
-                                      String instructions,
-                                      List<Tool> tools,
-                                      List<String> fileIds,
-                                      Map<String, Object> metadata) {
+import java.util.List;
+
+public record MessageList(
+        String object,
+        List<Message> data,
+        @JsonProperty("first_id")
+        String firstId,
+        @JsonProperty("last_id")
+        String lastId,
+        @JsonProperty("has_more")
+        boolean hasMore) {
+
 }

@@ -54,9 +54,8 @@ public class MessageProcessor {
         TransformerContext context = new TransformerContext(
                 threadId,
                 messageId,
-                fileStorageService.getPersonaDirectory(),
-                fileStorageService.getPersonaImportDirectory(),
-                fileStorageService.getChatDirectory()
+                fileStorageService.getAssistantsDirectory(),
+                fileStorageService.getThreadDirectory()
         );
 
         for (Transformer t : transformers) {

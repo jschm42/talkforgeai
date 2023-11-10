@@ -59,7 +59,7 @@ public class PlantUMLTransformer implements Transformer {
             String code = "@startuml\n" + matcher.group(2);
 
             String fileName = UUID.randomUUID() + "_plantuml.png";
-            Path subDirectoryPath = context.chatDirectory().resolve(context.messageId());
+            Path subDirectoryPath = context.threadDirectory().resolve(context.messageId());
             Path localFilePath = subDirectoryPath.resolve(fileName);
 
             // Ensure the directory exists and is writable

@@ -61,11 +61,11 @@ export default {
     },
   },
   methods: {
-    async onEntrySelected(sessionId) {
-      if (this.store.selectedSessionId !== sessionId) {
-        console.log('Loading chat session', sessionId);
-        this.store.selectedSessionId = sessionId;
-        await this.store.loadChatSession(sessionId);
+    async onEntrySelected(threadId) {
+      if (this.store.threadId !== threadId) {
+        console.log('Loading thread', threadId);
+        this.store.threadId = threadId;
+        await this.store.retrieveMessages(threadId);
       }
     },
     onNewSession() {

@@ -16,6 +16,7 @@
 
 package com.talkforgeai.backend.assistant.controller;
 
+import com.talkforgeai.backend.assistant.dto.MessageListParsedDto;
 import com.talkforgeai.backend.assistant.dto.ParsedMessageDto;
 import com.talkforgeai.backend.assistant.dto.ThreadDto;
 import com.talkforgeai.backend.assistant.service.AssistantService;
@@ -23,8 +24,12 @@ import com.talkforgeai.service.openai.assistant.dto.*;
 import jakarta.websocket.server.PathParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -49,7 +54,7 @@ public class AssistantController {
     }
 
     @GetMapping("/assistants")
-    public ListAssistantResponse listAssistants(@PathParam("limit") Integer limit, @PathParam("order") String order) {
+    public AssistantList listAssistants(@PathParam("limit") Integer limit, @PathParam("order") String order) {
         return assistantService.listAssistants(new ListRequest(limit, order));
     }
 
@@ -64,7 +69,7 @@ public class AssistantController {
     }
 
     @GetMapping("/threads/{threadId}/messages")
-    public ListMessageResponse listMessages(@PathVariable("threadId") String threadId, @PathParam("limit") Integer limit, @PathParam("order") String order) {
+    public MessageListParsedDto listMessages(@PathVariable("threadId") String threadId, @PathParam("limit") Integer limit, @PathParam("order") String order) {
         return assistantService.listMessages(threadId, new ListRequest(limit, order));
     }
 
@@ -81,5 +86,21 @@ public class AssistantController {
     @PostMapping("/threads/{threadId}/messages/{messageId}/postprocess")
     public ParsedMessageDto postProcessMessage(@PathVariable("threadId") String threadId, @PathVariable("messageId") String messageId) {
         return assistantService.postProcessMessage(threadId, messageId);
+    }
+
+
+    @GetMapping("/threads/{threadId}/{filename}")
+    public ResponseEntity<byte[]> getImage(@PathVariable String threadId, @PathVariable String filename) {
+
+        try {
+            byte[] imageBytes = assistantService.getImage(threadId, filename);
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(imageBytes);
+        } catch (IOException ioException) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
     }
 }

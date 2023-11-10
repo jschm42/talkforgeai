@@ -43,10 +43,23 @@ class ThreadMessage {
   metadata: any;
 }
 
+class ThreadMessageList {
+  object: string | null = null;
+  data: Array<ThreadMessage> | null = null;
+  first_id: string | null = null;
+  last_id: string | null = null;
+  next_id: string | null = null;
+}
+
+class TreadMessageListParsed {
+  message_list: ThreadMessageList | null = null;
+  parsed_messages: Array<ParsedThreadMessage> | null = null;
+}
+
 class ParsedThreadMessage {
   parsed_content: string | null = null;
   message: ThreadMessage | null = null;
 }
 
 export default Thread;
-export {ThreadMessage, Content, TextContent, ParsedThreadMessage};
+export {ThreadMessage, Content, TextContent, ParsedThreadMessage, ThreadMessageList, TreadMessageListParsed};

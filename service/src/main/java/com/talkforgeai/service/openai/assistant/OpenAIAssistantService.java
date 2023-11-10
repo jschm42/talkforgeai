@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkforgeai.service.openai.OpenAIChatService;
 import com.talkforgeai.service.openai.OpenAIException;
+import com.talkforgeai.service.openai.assistant.dto.Thread;
 import com.talkforgeai.service.openai.assistant.dto.*;
 import com.talkforgeai.service.properties.OpenAIProperties;
 import okhttp3.*;
@@ -43,10 +44,10 @@ public class OpenAIAssistantService {
         this.client = client;
     }
 
-    public CreateAssistantResponse createAssistant(CreateAssistantRequest createAssistantRequest) {
+    public Assistant createAssistant(CreateAssistantRequest createAssistantRequest) {
         String body = objectToJsonString(createAssistantRequest);
         Request request = createPostRequest(body, "/assistants");
-        return executeRequest(request, CreateAssistantResponse.class);
+        return executeRequest(request, Assistant.class);
     }
 
     public Assistant retrieveAssistant(String assistantId) {
@@ -54,9 +55,9 @@ public class OpenAIAssistantService {
         return executeRequest(request, Assistant.class);
     }
 
-    public ListAssistantResponse listAssistants(ListRequest listAssistantsRequest) {
+    public AssistantList listAssistants(ListRequest listAssistantsRequest) {
         Request request = createGetRequest("/assistants?" + createListUrlParams(listAssistantsRequest));
-        return executeRequest(request, ListAssistantResponse.class);
+        return executeRequest(request, AssistantList.class);
     }
 
     private String createListUrlParams(ListRequest listRequest) {
@@ -84,9 +85,9 @@ public class OpenAIAssistantService {
         return executeRequest(request, Run.class);
     }
 
-    public CreateThreadResponse createThread() {
+    public Thread createThread() {
         Request request = createPostRequest("", "/threads");
-        return executeRequest(request, CreateThreadResponse.class);
+        return executeRequest(request, Thread.class);
     }
 
     public Message postMessage(String threadId, PostMessageRequest postMessageRequest) {
@@ -100,9 +101,9 @@ public class OpenAIAssistantService {
         return executeRequest(request, Run.class);
     }
 
-    public ListMessageResponse listMessages(String threadId, ListRequest listMessagesRequest) {
+    public MessageList listMessages(String threadId, ListRequest listMessagesRequest) {
         Request request = createGetRequest("/threads/" + threadId + "/messages?" + createListUrlParams(listMessagesRequest));
-        return executeRequest(request, ListMessageResponse.class);
+        return executeRequest(request, MessageList.class);
     }
 
     public Message retrieveMessage(String threadId, String messageId) {

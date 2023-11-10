@@ -25,7 +25,7 @@ import ChatStreamService from '@/service/chat-stream.service';
 import HighlightingService from '@/service/highlighting.service';
 import PersonaProperties, {TTSType} from '@/service/persona.properties';
 import AssistantService from '@/service/assistant.service';
-import Thread, {ThreadMessage} from '@/store/to/thread';
+import Thread, {ParsedThreadMessage, ThreadMessage} from '@/store/to/thread';
 import Assistant from '@/store/to/assistant';
 
 const chatService = new ChatService();
@@ -53,6 +53,7 @@ export const useChatStore = defineStore('chat', {
 
       // Assistant API
       threadMessages: [] as Array<ThreadMessage>,
+      parsedMessages: [] as Array<ParsedThreadMessage>,
       threadId: '',
       threads: [] as Array<Thread>,
       selectedAssistant: {} as Assistant,
@@ -82,6 +83,15 @@ export const useChatStore = defineStore('chat', {
       const thread = await assistantService.createThread();
       this.threadId = thread.id;
     },
+    async retrieveThreads() {
+      this.threads = await assistantService.retrieveThreads();
+    },
+    async retrieveMessages(threadId: string) {
+      const parsedMessageList = await assistantService.retrieveMessages(threadId);
+
+      this.threadMessages = parsedMessageList.message_list?.data || [];
+      this.parsedMessages = parsedMessageList.parsed_messages || [];
+    },
     async submitUserMessage(message: string) {
       const submitedMessage = await assistantService.submitUserMessage(this.threadId, message);
       this.threadMessages.push(submitedMessage);
@@ -106,7 +116,7 @@ export const useChatStore = defineStore('chat', {
               if (content) {
                 content = highlightingService.replaceCodeContent(content);
               }
-              
+
               threadMessage.content[0].text.value = content;
             }
             this.threadMessages.push(threadMessage);

@@ -101,7 +101,7 @@ public class PersonaService {
             String fileEnding = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
             String filename = UUID.randomUUID() + fileEnding;
 
-            Path path = fileStorageService.getPersonaDirectory().resolve(filename);
+            Path path = fileStorageService.getAssistantsDirectory().resolve(filename);
             Files.write(path, bytes);
 
 
@@ -120,7 +120,7 @@ public class PersonaService {
 
     private String downloadImage(String imageUrl) throws IOException {
         String fileName = UUID.randomUUID() + "_image.png";
-        Path subDirectoryPath = fileStorageService.getPersonaDirectory();
+        Path subDirectoryPath = fileStorageService.getAssistantsDirectory();
         Path localFilePath = subDirectoryPath.resolve(fileName);
 
         // Ensure the directory exists and is writable

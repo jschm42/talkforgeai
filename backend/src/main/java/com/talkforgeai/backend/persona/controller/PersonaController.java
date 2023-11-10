@@ -63,7 +63,7 @@ public class PersonaController {
     @GetMapping("/image/{filename}")
     public ResponseEntity<byte[]> getImage(@PathVariable String filename) {
         try {
-            Path imgFilePath = fileStorageService.getPersonaDirectory().resolve(filename);
+            Path imgFilePath = fileStorageService.getAssistantsDirectory().resolve(filename);
             Resource resource = new FileSystemResource(imgFilePath);
             byte[] imageBytes = StreamUtils.copyToByteArray(resource.getInputStream());
 

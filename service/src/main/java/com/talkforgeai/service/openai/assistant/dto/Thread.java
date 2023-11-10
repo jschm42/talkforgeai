@@ -18,16 +18,14 @@ package com.talkforgeai.service.openai.assistant.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.List;
+import java.util.Date;
+import java.util.Map;
 
-public record ListMessageResponse(
+public record Thread(
+        String id,
         String object,
-        List<Message> data,
-        @JsonProperty("first_id")
-        String firstId,
-        @JsonProperty("last_id")
-        String lastId,
-        @JsonProperty("has_more")
-        boolean hasMore) {
-
+        @JsonProperty("created_at")
+        Date createdAt,
+        Map<String, Object> metadata
+) {
 }

@@ -31,9 +31,8 @@ public class CodeBlockTransformerTest {
         context = new TransformerContext(
                 "thread_Ddf483dKe",
                 "message_283Eeu3",
-                Path.of("/temp/persona"),
-                Path.of("/temp/persona/import"),
-                Path.of("/temp/chat")
+                Path.of("/temp/assistants"),
+                Path.of("/temp/threads")
         );
     }
 

@@ -16,7 +16,7 @@
 
 import axios from 'axios';
 import Run from '@/store/to/run';
-import Thread, {ParsedThreadMessage, ThreadMessage} from '@/store/to/thread';
+import Thread, {ParsedThreadMessage, ThreadMessage, TreadMessageListParsed} from '@/store/to/thread';
 
 class AssistantService {
 
@@ -90,7 +90,7 @@ class AssistantService {
     }
   }
 
-  async retrieveMessages(threadId: string): Promise<Array<ThreadMessage>> {
+  async retrieveMessages(threadId: string): Promise<TreadMessageListParsed> {
     try {
       const result = await axios.get(
         `/api/v1/threads/${threadId}/messages`,
@@ -100,7 +100,8 @@ class AssistantService {
           },
         },
       );
-      return result.data.data;
+
+      return result.data;
     } catch (error) {
       throw new Error('Error retrieving messages: ' + error);
     }

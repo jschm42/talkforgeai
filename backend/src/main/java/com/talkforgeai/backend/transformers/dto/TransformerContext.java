@@ -21,6 +21,5 @@ import java.nio.file.Path;
 public record TransformerContext(String threadId,
                                  String messageId,
                                  Path personaDirectory,
-                                 Path personaImportDirectory,
-                                 Path chatDirectory) {
+                                 Path threadDirectory) {
 }

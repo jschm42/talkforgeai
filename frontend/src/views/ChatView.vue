@@ -62,6 +62,7 @@ export default defineComponent({
   },
   async mounted() {
     await this.store.selectAssistant(this.assistantId);
+    await this.store.retrieveThreads();
   },
 });
 </script>

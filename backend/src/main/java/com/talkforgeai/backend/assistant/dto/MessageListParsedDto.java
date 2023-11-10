@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai.assistant.dto;
+package com.talkforgeai.backend.assistant.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.talkforgeai.service.openai.assistant.dto.MessageList;
 
-import java.util.List;
+import java.util.Map;
 
-public record ListAssistantResponse(String object,
-                                    List<Assistant> data,
-                                    @JsonProperty("first_id")
-                                    String firstId,
-                                    @JsonProperty("last_id")
-                                    String lastId,
-                                    @JsonProperty("has_more")
-                                    Boolean hasMore) {
+public record MessageListParsedDto(@JsonProperty("message_list") MessageList messageList,
+                                   @JsonProperty("parsed_messages") Map<String, String> parsedMessages) {
 }

@@ -22,7 +22,6 @@ import com.talkforgeai.backend.persona.domain.PersonaPropertyValue;
 import com.talkforgeai.backend.persona.dto.PersonaImport;
 import com.talkforgeai.backend.persona.repository.PersonaRepository;
 import com.talkforgeai.backend.storage.FileStorageService;
-import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -57,35 +55,6 @@ public class PersonaImportService {
         this.fileStorageService = fileStorageService;
         this.personaRepository = personaRepository;
         this.resourceResolver = resourceResolver;
-    }
-
-    @Transactional
-    public void importPersona() {
-        ObjectMapper mapper = new ObjectMapper();
-        List<PersonaEntity> personas = new ArrayList<>();
-
-        try {
-            LOGGER.info("Importing persona files.");
-
-            Path personaImportDirectory = fileStorageService.getPersonaImportDirectory();
-
-            // Read persona json files from import folder
-            importPersonaFromImportDirectory(personaImportDirectory, mapper, personas);
-
-            // Read persona json files from classpath:persona-import/
-            importPersonaFromResource(mapper, personas);
-
-            savePersona(personas);
-
-        } catch (IOException e) {
-            LOGGER.error("Error during import of persona.", e);
-        }
-
-        LOGGER.info("Copying images from import directory.");
-        copyPersonaImagesFromImportDirectory();
-        copyPersonaImagesFromResources();
-
-        LOGGER.info("Import done.");
     }
 
     private void savePersona(List<PersonaEntity> personas) {
@@ -151,22 +120,9 @@ public class PersonaImportService {
         }
     }
 
-    private void copyPersonaImagesFromImportDirectory() {
-        Path personaImportDirectory = fileStorageService.getPersonaImportDirectory();
-
-        // Copy images from the personaImportDirectory
-        try (var stream = Files.walk(personaImportDirectory)) {
-            stream.filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".png") || path.toString().endsWith(".jpg"))
-                    .forEach(this::copyImage);
-        } catch (IOException e) {
-            LOGGER.error("Failed to access persona import directory.", e);
-        }
-    }
-
     private void copyImage(Path imagePath) {
         try {
-            Path targetPath = fileStorageService.getPersonaDirectory().resolve(imagePath.getFileName());
+            Path targetPath = fileStorageService.getAssistantsDirectory().resolve(imagePath.getFileName());
 
             if (!Files.exists(targetPath)) {
                 LOGGER.info("Copying image {}", imagePath);
@@ -181,7 +137,7 @@ public class PersonaImportService {
 
     private void copyImage(InputStream imageStream, String imageName) {
         try {
-            Path targetPath = fileStorageService.getPersonaDirectory().resolve(imageName);
+            Path targetPath = fileStorageService.getAssistantsDirectory().resolve(imageName);
 
             if (!Files.exists(targetPath)) {
                 LOGGER.info("Copying image {}", imageName);

@@ -65,7 +65,7 @@ public class ImageDownloadTransformer implements Transformer {
                 String localFilePath = downloadImage(
                         imageResult.data().get(0).url(),
                         context.messageId(),
-                        context.chatDirectory()
+                        context.threadDirectory()
                 );
 
                 String formattedContent = template.formatted(
