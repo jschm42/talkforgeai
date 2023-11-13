@@ -19,6 +19,14 @@ create table assistant
     id varchar(50) not null primary key
 );
 
+create table assistant_properties
+(
+    assistant_id   varchar(50) not null,
+    property_key   varchar(50) not null,
+    property_value CLOB,
+    primary key (assistant_id, property_key)
+);
+
 create table thread
 (
     id         varchar(50) not null primary key,

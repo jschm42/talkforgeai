@@ -16,10 +16,10 @@
 
 package com.talkforgeai.backend.assistant.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Table(name = "assistant")
@@ -29,6 +29,12 @@ public class AssistantEntity {
     @Column(name = "id", length = 50)
     private String id;
 
+    @ElementCollection
+    @MapKeyColumn(name = "property_key")
+    @CollectionTable(name = "assistant_properties", joinColumns = @JoinColumn(name = "assistant_id"))
+    @Column(name = "property_value")
+    private Map<String, AssistantPropertyValue> properties = new HashMap<>();
+
     // Standard getters and setters
     public String getId() {
         return id;
@@ -36,6 +42,14 @@ public class AssistantEntity {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Map<String, AssistantPropertyValue> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, AssistantPropertyValue> properties) {
+        this.properties = properties;
     }
 }
 

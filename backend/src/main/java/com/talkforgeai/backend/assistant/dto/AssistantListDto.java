@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai.assistant.dto;
+package com.talkforgeai.backend.assistant.dto;
 
-public record ListRequest(Integer limit, String order, String after, String before) {
-    public ListRequest() {
-        this(null, "asc", null, null);
-    }
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.talkforgeai.service.openai.assistant.dto.AssistantList;
 
-    public ListRequest(Integer limit, String order) {
-        this(limit, order, null, null);
-    }
+import java.util.Map;
+
+public record AssistantListDto(@JsonProperty("assistant_list") AssistantList messageList,
+                               @JsonProperty("assistant_properties") Map<String, Map<String, String>> assistantProperties) {
 }

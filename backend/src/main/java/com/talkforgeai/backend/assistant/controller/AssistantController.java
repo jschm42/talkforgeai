@@ -52,8 +52,13 @@ public class AssistantController {
     }
 
     @GetMapping("/assistants")
-    public AssistantList listAssistants(@PathParam("limit") Integer limit, @PathParam("order") String order) {
+    public AssistantListDto listAssistants(@PathParam("limit") Integer limit, @PathParam("order") String order) {
         return assistantService.listAssistants(new ListRequest(limit, order));
+    }
+
+    @PostMapping("/assistants/sync")
+    public void syncAssistants() {
+        assistantService.syncAssistants();
     }
 
     @PostMapping("/threads")

@@ -16,6 +16,8 @@
 
 package com.talkforgeai.backend.assistant.service;
 
+import com.talkforgeai.backend.assistant.domain.AssistantEntity;
+import com.talkforgeai.backend.assistant.domain.AssistantPropertyValue;
 import com.talkforgeai.backend.assistant.domain.MessageEntity;
 import com.talkforgeai.backend.assistant.domain.ThreadEntity;
 import com.talkforgeai.backend.assistant.dto.*;
@@ -34,6 +36,8 @@ import com.talkforgeai.service.openai.dto.OpenAIChatRequest;
 import com.talkforgeai.service.openai.dto.OpenAIChatResponse;
 import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
@@ -42,13 +46,14 @@ import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+
+import static com.talkforgeai.backend.persona.service.PersonaProperties.values;
+import static java.util.Objects.requireNonNullElse;
 
 @Service
 public class AssistantService {
+    public static final Logger LOGGER = LoggerFactory.getLogger(AssistantService.class);
 
     private final OpenAIAssistantService openAIAssistantService;
 
@@ -75,8 +80,51 @@ public class AssistantService {
         return this.openAIAssistantService.retrieveAssistant(assistantId);
     }
 
-    public AssistantList listAssistants(ListRequest listAssistantsRequest) {
-        return this.openAIAssistantService.listAssistants(listAssistantsRequest);
+    public AssistantListDto listAssistants(ListRequest listAssistantsRequest) {
+        AssistantList assistantList = this.openAIAssistantService.listAssistants(listAssistantsRequest);
+
+        Map<String, Map<String, String>> assistantProperties = new HashMap<>();
+        AssistantListDto assistantListDto = new AssistantListDto(assistantList, assistantProperties);
+
+        assistantList.data().forEach(assistant -> {
+            Optional<AssistantEntity> assistantEntity = assistantRepository.findById(assistant.id());
+            assistantEntity.ifPresent(entity -> {
+                assistantProperties.put(assistant.id(), mapAssistantProperties(entity.getProperties()));
+            });
+        });
+
+        return assistantListDto;
+    }
+
+    @Transactional
+    public void syncAssistants() {
+        AssistantList assistantList = this.openAIAssistantService.listAssistants(new ListRequest());
+        List<AssistantEntity> assistantEntities = assistantRepository.findAll();
+
+        assistantList.data().forEach(assistant -> {
+            LOGGER.info("Syncing assistant: {}", assistant.id());
+
+            Optional<AssistantEntity> assistantEntity = assistantEntities.stream()
+                    .filter(entity -> entity.getId().equals(assistant.id()))
+                    .findFirst();
+
+            if (assistantEntity.isEmpty()) {
+                LOGGER.info("New assistant detected. Creating entity: {}", assistant.id());
+
+                AssistantEntity entity = new AssistantEntity();
+                entity.setId(assistant.id());
+
+                // Map persona.properties() to Map<String, PersonaPropertyValue>
+                Arrays.stream(AssistantProperties.values()).forEach(p -> {
+                    AssistantPropertyValue propertyValue = new AssistantPropertyValue();
+                    String value = p.getDefaultValue();
+                    propertyValue.setPropertyValue(value);
+                    entity.getProperties().put(p.getKey(), propertyValue);
+                });
+
+                assistantRepository.save(entity);
+            }
+        });
     }
 
     @Transactional
@@ -188,4 +236,34 @@ public class AssistantService {
         titleRequest.setMessages(List.of(titleMessage));
         return titleRequest;
     }
+
+    public Map<String, String> mapAssistantProperties(Map<String, AssistantPropertyValue> properties) {
+        Map<String, String> mappedProperties = new HashMap<>();
+
+        Arrays.stream(values()).forEach(property -> {
+            AssistantPropertyValue propertyValue = properties.get(property.getKey());
+            if (propertyValue != null) {
+                mappedProperties.put(
+                        property.getKey(),
+                        requireNonNullElse(propertyValue.getPropertyValue(), property.getKey())
+                );
+            }
+        });
+
+        return mappedProperties;
+    }
+
+    public Map<String, AssistantPropertyValue> mapProperties(Map<String, String> properties) {
+        Map<String, AssistantPropertyValue> mappedProperties = new HashMap<>();
+
+        Arrays.stream(values()).forEach(property -> {
+            String propertyValue = properties.get(property.getKey());
+            AssistantPropertyValue assistantPropertyValue = new AssistantPropertyValue();
+            assistantPropertyValue.setPropertyValue(propertyValue);
+            mappedProperties.put(property.getKey(), assistantPropertyValue);
+        });
+
+        return mappedProperties;
+    }
+
 }

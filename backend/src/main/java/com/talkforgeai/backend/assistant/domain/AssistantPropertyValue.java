@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai.assistant.dto;
+package com.talkforgeai.backend.assistant.domain;
 
-public record ListRequest(Integer limit, String order, String after, String before) {
-    public ListRequest() {
-        this(null, "asc", null, null);
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Lob;
+
+@Embeddable
+public class AssistantPropertyValue {
+    @Lob
+    private String propertyValue;
+
+    public String getPropertyValue() {
+        return propertyValue;
     }
 
-    public ListRequest(Integer limit, String order) {
-        this(limit, order, null, null);
+    public void setPropertyValue(String value) {
+        this.propertyValue = value;
     }
 }
