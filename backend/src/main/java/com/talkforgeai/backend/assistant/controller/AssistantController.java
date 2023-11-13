@@ -42,12 +42,12 @@ public class AssistantController {
     }
 
     @GetMapping("/assistants/{assistantId}")
-    public Assistant retrieveAssistant(@PathVariable("assistantId") String assistantId) {
+    public AssistantDto retrieveAssistant(@PathVariable("assistantId") String assistantId) {
         return assistantService.retrieveAssistant(assistantId);
     }
 
     @GetMapping("/assistants")
-    public AssistantListDto listAssistants(@PathParam("limit") Integer limit, @PathParam("order") String order) {
+    public List<AssistantDto> listAssistants(@PathParam("limit") Integer limit, @PathParam("order") String order) {
         return assistantService.listAssistants(new ListRequest(limit, order));
     }
 

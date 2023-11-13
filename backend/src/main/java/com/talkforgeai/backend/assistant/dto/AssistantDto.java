@@ -17,10 +17,23 @@
 package com.talkforgeai.backend.assistant.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.talkforgeai.service.openai.assistant.dto.AssistantList;
+import com.talkforgeai.service.openai.assistant.dto.Tool;
 
+import java.util.List;
 import java.util.Map;
 
-public record AssistantListDto(@JsonProperty("list") AssistantList messageList,
-                               @JsonProperty("properties") Map<String, Map<String, String>> assistantProperties) {
+public record AssistantDto(
+        String id,
+        String object,
+        @JsonProperty("created_at")
+        String createdAt,
+        String name,
+        String description,
+        String model,
+        String instructions,
+        List<Tool> tools,
+        @JsonProperty("file_ids")
+        List<String> fileIds,
+        Map<String, Object> metadata,
+        Map<String, String> properties) {
 }

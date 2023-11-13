@@ -48,9 +48,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
-import static com.talkforgeai.backend.persona.service.PersonaProperties.values;
-import static java.util.Objects.requireNonNullElse;
-
 @Service
 public class AssistantService {
     public static final Logger LOGGER = LoggerFactory.getLogger(AssistantService.class);
@@ -66,7 +63,9 @@ public class AssistantService {
 
     private final MessageProcessor messageProcessor;
 
-    public AssistantService(OpenAIAssistantService openAIAssistantService, OpenAIChatService openAIChatService, AssistantRepository assistantRepository, MessageRepository messageRepository, ThreadRepository threadRepository, FileStorageService fileStorageService, MessageProcessor messageProcessor) {
+    private final AssistantMapper assistantMapper;
+
+    public AssistantService(OpenAIAssistantService openAIAssistantService, OpenAIChatService openAIChatService, AssistantRepository assistantRepository, MessageRepository messageRepository, ThreadRepository threadRepository, FileStorageService fileStorageService, MessageProcessor messageProcessor, AssistantMapper assistantMapper) {
         this.openAIAssistantService = openAIAssistantService;
         this.openAIChatService = openAIChatService;
         this.assistantRepository = assistantRepository;
@@ -74,26 +73,45 @@ public class AssistantService {
         this.threadRepository = threadRepository;
         this.fileStorageService = fileStorageService;
         this.messageProcessor = messageProcessor;
+        this.assistantMapper = assistantMapper;
     }
 
-    public Assistant retrieveAssistant(String assistantId) {
-        return this.openAIAssistantService.retrieveAssistant(assistantId);
+    public AssistantDto retrieveAssistant(String assistantId) {
+        Assistant assistant = this.openAIAssistantService.retrieveAssistant(assistantId);
+
+        if (assistant != null) {
+            Optional<AssistantEntity> assistantEntity = assistantRepository.findById(assistant.id());
+
+            if (assistantEntity.isPresent()) {
+                return assistantMapper.mapAssistantDto(
+                        assistant,
+                        assistantMapper.mapAssistantProperties(assistantEntity.get().getProperties())
+                );
+            }
+        }
+
+        return null;
     }
 
-    public AssistantListDto listAssistants(ListRequest listAssistantsRequest) {
+    public List<AssistantDto> listAssistants(ListRequest listAssistantsRequest) {
         AssistantList assistantList = this.openAIAssistantService.listAssistants(listAssistantsRequest);
 
-        Map<String, Map<String, String>> assistantProperties = new HashMap<>();
-        AssistantListDto assistantListDto = new AssistantListDto(assistantList, assistantProperties);
+        List<AssistantDto> assistantDtoList = new ArrayList<>();
+
 
         assistantList.data().forEach(assistant -> {
             Optional<AssistantEntity> assistantEntity = assistantRepository.findById(assistant.id());
+
             assistantEntity.ifPresent(entity -> {
-                assistantProperties.put(assistant.id(), mapAssistantProperties(entity.getProperties()));
+                assistantDtoList.add(assistantMapper.mapAssistantDto(
+                                assistant,
+                                assistantMapper.mapAssistantProperties(entity.getProperties())
+                        )
+                );
             });
         });
 
-        return assistantListDto;
+        return assistantDtoList;
     }
 
     @Transactional
@@ -238,34 +256,6 @@ public class AssistantService {
         return titleRequest;
     }
 
-    public Map<String, String> mapAssistantProperties(Map<String, AssistantPropertyValue> properties) {
-        Map<String, String> mappedProperties = new HashMap<>();
-
-        Arrays.stream(values()).forEach(property -> {
-            AssistantPropertyValue propertyValue = properties.get(property.getKey());
-            if (propertyValue != null) {
-                mappedProperties.put(
-                        property.getKey(),
-                        requireNonNullElse(propertyValue.getPropertyValue(), property.getKey())
-                );
-            }
-        });
-
-        return mappedProperties;
-    }
-
-    public Map<String, AssistantPropertyValue> mapProperties(Map<String, String> properties) {
-        Map<String, AssistantPropertyValue> mappedProperties = new HashMap<>();
-
-        Arrays.stream(values()).forEach(property -> {
-            String propertyValue = properties.get(property.getKey());
-            AssistantPropertyValue assistantPropertyValue = new AssistantPropertyValue();
-            assistantPropertyValue.setPropertyValue(propertyValue);
-            mappedProperties.put(property.getKey(), assistantPropertyValue);
-        });
-
-        return mappedProperties;
-    }
 
     public ThreadDto retrieveThread(String threadId) {
         return threadRepository.findById(threadId)

@@ -33,9 +33,9 @@ export default defineComponent({
     };
   },
   setup() {
-    const {personaForm} = storeToRefs(usePersonaFormStore());
+    const {assistantForm} = storeToRefs(usePersonaFormStore());
 
-    return {personaForm};
+    return {assistantForm};
   },
   methods: {
     getImageUrl(fileName) {
@@ -91,13 +91,13 @@ export default defineComponent({
   <div class="mb-3">
     <div class="row">
       <div class="col-4">
-        <div v-if="!personaForm.imagePath"
+        <div v-if="!assistantForm.imagePath"
              class="placeholder-image img-thumbnail d-flex justify-content-center align-items-center" role="button"
              @click="triggerFileInput">
           <i class="bi bi-person"></i>
         </div>
-        <img v-else :alt="personaForm.imagePath" :src="getImageUrl(personaForm.imagePath)"
-             :title="personaForm.imagePath"
+        <img v-else :alt="assistantForm.imagePath" :src="getImageUrl(assistantForm.imagePath)"
+             :title="assistantForm.imagePath"
              class="img-thumbnail thumbnail-image"
              role="button" @click="triggerFileInput"/>
         <input id="personaImage" ref="fileInput" class=" col-10 form-control" style="display: none" type="file"
@@ -115,24 +115,24 @@ export default defineComponent({
 
   <div class="mb-3">
     <label class="form-label" for="personaName">Name</label>
-    <input id="personaName" v-model="personaForm.name" class="form-control" maxlength="32" required
+    <input id="personaName" v-model="assistantForm.name" class="form-control" maxlength="32" required
            type="text">
   </div>
   <div class="mb-3">
     <label class="form-label" for="personaDescription">Description (will not be used in generation requests)</label>
-    <textarea id="personaDescription" v-model="personaForm.description" class="form-control"
+    <textarea id="personaDescription" v-model="assistantForm.description" class="form-control"
               maxlength="256"
               rows="2"></textarea>
   </div>
   <div class="mb-3">
     <label class="form-label" for="personaBackground">What would you like the persona to recall?</label>
-    <textarea id="personaBackground" v-model="personaForm.background" class="form-control" maxlength="16384"
+    <textarea id="personaBackground" v-model="assistantForm.background" class="form-control" maxlength="16384"
               rows="5"></textarea>
   </div>
   <div class="mb-3">
     <label class="form-label" for="personaPersonality">Describe the persona's character traits. How would you prefer it
       to respond?</label>
-    <textarea id="personaPersonality" v-model="personaForm.personality" class="form-control" maxlength="16384"
+    <textarea id="personaPersonality" v-model="assistantForm.personality" class="form-control" maxlength="16384"
               rows="5"></textarea>
   </div>
 

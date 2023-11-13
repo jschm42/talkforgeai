@@ -16,7 +16,7 @@
 
 <template>
   <div class="container col-lg-5 col-10">
-    <h2>Persona Editor</h2>
+    <h2>Assistant Editor</h2>
     <form class="form-panel" @submit.prevent="handleSubmit">
 
       <ul id="personaTab" class="nav nav-tabs" role="tablist">
@@ -91,8 +91,10 @@ import PersonaTabVoice from '@/components/persona/PersonaTabVoice.vue';
 import PersonaTabFeatures from '@/components/persona/PersonaTabFeatures.vue';
 import QuestionModal from '@/components/QuestionModal.vue';
 import Assistant from '@/store/to/assistant';
+import AssistantService from '@/service/assistant.service';
 
 const personaService = new PersonaService();
+const assistantService = new AssistantService();
 
 export default defineComponent({
   components: {PersonaTabFeatures, PersonaTabVoice, PersonaTabModel, PersonaTabProfile, QuestionModal},
@@ -110,7 +112,7 @@ export default defineComponent({
     async handleSubmit() {
       console.log('handleSubmit');
 
-      const form = this.store.form;
+      const form = this.store.assistantForm;
       const assistant = new Assistant();
       assistant.id = form.id;
       //assistant.imagePath = form.imagePath;
@@ -142,14 +144,11 @@ export default defineComponent({
       }
     },
   },
-  mounted() {
+  async mounted() {
     this.store.resetPersonaEditForm();
-    if (this.personaId) {
-      personaService.readPersona(this.personaId).then((persona) => {
-        console.log('Read persona', persona);
-
-        this.store.setPersonaEditForm(persona);
-      });
+    if (this.assistantId) {
+      const assistant = await assistantService.retrieveAssistant(this.assistantId);
+      this.store.setPersonaEditForm(assistant);
     }
   },
 });

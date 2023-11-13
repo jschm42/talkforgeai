@@ -17,6 +17,7 @@
 import axios from 'axios';
 import Run from '@/store/to/run';
 import Thread, {ParsedThreadMessage, ThreadMessage, TreadMessageListParsed} from '@/store/to/thread';
+import Assistant from '@/store/to/assistant';
 
 class AssistantService {
 
@@ -30,7 +31,7 @@ class AssistantService {
     }
   }
 
-  async retrieveAssistants() {
+  async retrieveAssistants(): Promise<Array<Assistant>> {
     console.log('Retrieving assistants');
     try {
       const result = await axios.get('/api/v1/assistants');
@@ -40,7 +41,7 @@ class AssistantService {
     }
   }
 
-  async retrieveAssistant(assistantId: string) {
+  async retrieveAssistant(assistantId: string): Promise<Assistant> {
     console.log('Retrieving assistant with id:', assistantId);
     try {
       const result = await axios.get(`/api/v1/assistants/${assistantId}`);
@@ -50,7 +51,7 @@ class AssistantService {
     }
   }
 
-  async modifyAssistant(assistantId: string, assistant: any) {
+  async modifyAssistant(assistantId: string, assistant: Assistant) {
     console.log('Modify assistant with id:', assistantId);
     try {
       const result = await axios.post(`/api/v1/assistants/${assistantId}`);

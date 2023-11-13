@@ -20,20 +20,21 @@ import Assistant from '@/store/to/assistant';
 export const usePersonaFormStore = defineStore('personaFormStore', {
   state: () => {
     return {
-      form: new Assistant(),
+      assistantForm: new Assistant(),
     };
   },
   getters: {
     personaForm(): Assistant {
-      return this.form;
+      return this.assistantForm;
     },
   },
   actions: {
     resetPersonaEditForm() {
       this.$reset();
     },
-    setPersonaEditForm(persona: Assistant) {
-      this.form = {...persona};
+    setPersonaEditForm(assistant: Assistant) {
+      console.log('setPersonaEditForm', assistant);
+      this.assistantForm = assistant;
     },
   },
 

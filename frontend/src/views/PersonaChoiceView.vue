@@ -43,7 +43,7 @@
             </div>
           </div>
 
-          <div class="row g-0 p-3" role="button" @click.prevent="onPersonaSelected(assistant)">
+          <div class="row g-0 p-3" role="button" @click.prevent="onPersonaSelected(assistant.id)">
             <small class="text-body-secondary">{{ assistant.description }}</small>
           </div>
 
@@ -85,10 +85,7 @@ export default defineComponent({
   },
   computed: {
     assistantList() {
-      if (this.store.assistantList.list == null) {
-        return [];
-      }
-      return this.store.assistantList.list.data;
+      return this.store.assistantList;
     },
   },
   methods: {
@@ -96,6 +93,7 @@ export default defineComponent({
       return !!assistant.imagePath;
     },
     onPersonaSelected(assistantId) {
+      console.log('PersonaChoiceView.onPersonaSelected: ' + assistantId, this.store.assistantList);
       this.$router.push({name: 'chat', params: {assistantId}});
     },
     onCreateNewPersona() {

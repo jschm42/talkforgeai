@@ -19,12 +19,7 @@ class Assistant {
   name = '';
   description = '';
   model = '';
-}
-
-class AssistantList {
-  list: Assistant[] = [];
   properties = {};
 }
 
 export default Assistant;
-export {AssistantList};

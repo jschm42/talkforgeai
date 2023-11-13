@@ -26,7 +26,7 @@ import HighlightingService from '@/service/highlighting.service';
 import PersonaProperties, {TTSType} from '@/service/persona.properties';
 import AssistantService from '@/service/assistant.service';
 import Thread, {ThreadMessage} from '@/store/to/thread';
-import Assistant, {AssistantList} from '@/store/to/assistant';
+import Assistant from '@/store/to/assistant';
 
 const chatService = new ChatService();
 const chatStreamService = new ChatStreamService();
@@ -58,7 +58,7 @@ export const useChatStore = defineStore('chat', {
       threadId: '',
       threads: [] as Array<Thread>,
       selectedAssistant: {} as Assistant,
-      assistantList: AssistantList,
+      assistantList: [] as Array<Assistant>,
     };
   },
   getters: {
