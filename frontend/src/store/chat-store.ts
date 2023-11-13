@@ -190,6 +190,9 @@ export const useChatStore = defineStore('chat', {
       console.log('Generated title response', response);
       await this.retrieveThreads();
     },
+    getAssistantImageUrl(imageUrl: string) {
+      return assistantService.getAssistantImageUrl(imageUrl);
+    },
     // ************** Old code *****************
     async newSession() {
       const thread = await assistantService.createThread();

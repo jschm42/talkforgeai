@@ -18,16 +18,23 @@ package com.talkforgeai.backend.assistant.controller;
 
 import com.talkforgeai.backend.assistant.dto.*;
 import com.talkforgeai.backend.assistant.service.AssistantService;
+import com.talkforgeai.backend.persona.controller.GenerateImageRequest;
+import com.talkforgeai.backend.persona.controller.GenerateImageResponse;
+import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.service.openai.assistant.dto.*;
 import jakarta.websocket.server.PathParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -37,8 +44,11 @@ public class AssistantController {
 
     private final AssistantService assistantService;
 
-    public AssistantController(AssistantService assistantService) {
+    private final FileStorageService fileStorageService;
+
+    public AssistantController(AssistantService assistantService, FileStorageService fileStorageService) {
         this.assistantService = assistantService;
+        this.fileStorageService = fileStorageService;
     }
 
     @GetMapping("/assistants/{assistantId}")
@@ -59,6 +69,27 @@ public class AssistantController {
     @PostMapping("/assistants/{assistantId}")
     public void modifyAssistant(@PathVariable("assistantId") String assistantId, @RequestBody AssistantDto modifiedAssistant) {
         assistantService.modifyAssistant(assistantId, modifiedAssistant);
+    }
+
+    @GetMapping("/assistants/images/{imageFile}")
+    public ResponseEntity<byte[]> getImage(@PathVariable String imageFile) {
+        try {
+            Path imgFilePath = fileStorageService.getAssistantsDirectory().resolve(imageFile);
+            Resource resource = new FileSystemResource(imgFilePath);
+            byte[] imageBytes = StreamUtils.copyToByteArray(resource.getInputStream());
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(imageBytes);
+        } catch (IOException e) {
+            LOGGER.error("Error loading image file: {}.", imageFile, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/assistants/images/generate")
+    public GenerateImageResponse generateImage(@RequestBody GenerateImageRequest generateImageRequest) throws IOException {
+        return assistantService.generateImage(generateImageRequest.prompt());
     }
 
     @GetMapping("/threads")

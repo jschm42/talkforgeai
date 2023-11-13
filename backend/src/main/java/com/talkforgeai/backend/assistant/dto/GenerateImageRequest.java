@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-class Assistant {
-  id = '';
-  name = '';
-  description = '';
-  model = '';
-  image_path = '';
-  properties = {};
-}
+package com.talkforgeai.backend.assistant.dto;
 
-export default Assistant;
+public record GenerateImageRequest(String prompt) {
+}

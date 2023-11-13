@@ -41,5 +41,7 @@ public record AssistantDto(
         @JsonProperty("file_ids")
         List<String> fileIds,
         Map<String, Object> metadata,
+        @JsonProperty("image_path")
+        String imagePath,
         Map<String, String> properties) {
 }

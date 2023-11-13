@@ -114,7 +114,7 @@ export default defineComponent({
 
       const form = this.store.assistantForm;
       const assistant = new Assistant();
-      //assistant.imagePath = form.imagePath;
+      assistant.image_path = form.image_path;
       assistant.id = undefined;
       assistant.instructions = form.instructions;
       assistant.name = form.name;

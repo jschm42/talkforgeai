@@ -25,16 +25,16 @@ import com.talkforgeai.backend.assistant.exceptions.AssistentException;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
+import com.talkforgeai.backend.persona.controller.GenerateImageResponse;
 import com.talkforgeai.backend.session.exception.SessionException;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
 import com.talkforgeai.service.openai.OpenAIChatService;
+import com.talkforgeai.service.openai.OpenAIImageService;
 import com.talkforgeai.service.openai.assistant.OpenAIAssistantService;
 import com.talkforgeai.service.openai.assistant.dto.Thread;
 import com.talkforgeai.service.openai.assistant.dto.*;
-import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
-import com.talkforgeai.service.openai.dto.OpenAIChatRequest;
-import com.talkforgeai.service.openai.dto.OpenAIChatResponse;
+import com.talkforgeai.service.openai.dto.*;
 import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -46,7 +46,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 @Service
@@ -56,6 +60,7 @@ public class AssistantService {
     private final OpenAIAssistantService openAIAssistantService;
 
     private final OpenAIChatService openAIChatService;
+    private final OpenAIImageService openAIImageService;
     private final AssistantRepository assistantRepository;
     private final MessageRepository messageRepository;
     private final ThreadRepository threadRepository;
@@ -66,9 +71,10 @@ public class AssistantService {
 
     private final AssistantMapper assistantMapper;
 
-    public AssistantService(OpenAIAssistantService openAIAssistantService, OpenAIChatService openAIChatService, AssistantRepository assistantRepository, MessageRepository messageRepository, ThreadRepository threadRepository, FileStorageService fileStorageService, MessageProcessor messageProcessor, AssistantMapper assistantMapper) {
+    public AssistantService(OpenAIAssistantService openAIAssistantService, OpenAIChatService openAIChatService, OpenAIImageService openAIImageService, AssistantRepository assistantRepository, MessageRepository messageRepository, ThreadRepository threadRepository, FileStorageService fileStorageService, MessageProcessor messageProcessor, AssistantMapper assistantMapper) {
         this.openAIAssistantService = openAIAssistantService;
         this.openAIChatService = openAIChatService;
+        this.openAIImageService = openAIImageService;
         this.assistantRepository = assistantRepository;
         this.messageRepository = messageRepository;
         this.threadRepository = threadRepository;
@@ -84,10 +90,7 @@ public class AssistantService {
             Optional<AssistantEntity> assistantEntity = assistantRepository.findById(assistant.id());
 
             if (assistantEntity.isPresent()) {
-                return assistantMapper.mapAssistantDto(
-                        assistant,
-                        assistantMapper.mapAssistantProperties(assistantEntity.get().getProperties())
-                );
+                return assistantMapper.mapAssistantDto(assistant, assistantEntity.get());
             }
         }
 
@@ -104,11 +107,13 @@ public class AssistantService {
             Optional<AssistantEntity> assistantEntity = assistantRepository.findById(assistant.id());
 
             assistantEntity.ifPresent(entity -> {
-                assistantDtoList.add(assistantMapper.mapAssistantDto(
-                                assistant,
-                                assistantMapper.mapAssistantProperties(entity.getProperties())
-                        )
+                AssistantDto assistantDto = assistantMapper.mapAssistantDto(
+                        assistant,
+                        entity
                 );
+
+                assistantDtoList.add(assistantDto);
+
             });
         });
 
@@ -275,6 +280,7 @@ public class AssistantService {
         AssistantEntity assistantEntity = assistantRepository.findById(assistantId)
                 .orElseThrow(() -> new AssistentException("Assistant entity not found"));
 
+        assistantEntity.setImagePath(modifiedAssistant.imagePath());
         assistantEntity.setProperties(assistantMapper.mapProperties(modifiedAssistant.properties()));
 
         Assistant openAIModifiedAssistant = assistantMapper.mapAssistant(modifiedAssistant);
@@ -282,4 +288,41 @@ public class AssistantService {
         assistantRepository.save(assistantEntity);
         openAIAssistantService.modifyAssistant(assistantId, openAIModifiedAssistant);
     }
+
+    public GenerateImageResponse generateImage(String prompt) throws IOException {
+        OpenAIImageRequest request = new OpenAIImageRequest(prompt, 1, "1024x1024");
+        OpenAIImageResponse response = openAIImageService.submit(request);
+
+        return new GenerateImageResponse(downloadImage(response.data().get(0).url()));
+    }
+
+    private String downloadImage(String imageUrl) throws IOException {
+        String fileName = UUID.randomUUID() + "_image.png";
+        Path subDirectoryPath = fileStorageService.getAssistantsDirectory();
+        Path localFilePath = subDirectoryPath.resolve(fileName);
+
+        // Ensure the directory exists and is writable
+        if (!Files.exists(subDirectoryPath)) {
+            Files.createDirectories(subDirectoryPath);
+        }
+        if (!Files.isWritable(subDirectoryPath)) {
+            throw new IOException("Directory is not writable: " + subDirectoryPath);
+        }
+
+        LOGGER.info("Downloading image {}...", imageUrl);
+
+        try {
+            URI uri = URI.create(imageUrl);
+            try (InputStream in = uri.toURL().openStream()) {
+                Files.copy(in, localFilePath, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (Exception ex) {
+            LOGGER.error("Failed to download image: {}", imageUrl);
+            throw ex;
+        }
+
+        return fileName;
+    }
+
+
 }

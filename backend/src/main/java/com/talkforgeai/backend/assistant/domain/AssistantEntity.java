@@ -29,6 +29,9 @@ public class AssistantEntity {
     @Column(name = "id", length = 50)
     private String id;
 
+    @Column(name = "image_path", length = 100)
+    private String imagePath;
+
     @ElementCollection
     @MapKeyColumn(name = "property_key")
     @CollectionTable(name = "assistant_properties", joinColumns = @JoinColumn(name = "assistant_id"))
@@ -50,6 +53,14 @@ public class AssistantEntity {
 
     public void setProperties(Map<String, AssistantPropertyValue> properties) {
         this.properties = properties;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 }
 

@@ -17,8 +17,10 @@
 package com.talkforgeai.backend.assistant.service;
 
 
+import com.talkforgeai.backend.assistant.domain.AssistantEntity;
 import com.talkforgeai.backend.assistant.domain.AssistantPropertyValue;
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
+import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.service.openai.assistant.dto.Assistant;
 import org.springframework.stereotype.Component;
 
@@ -31,8 +33,13 @@ import static java.util.Objects.requireNonNullElse;
 
 @Component
 public class AssistantMapper {
+    private final FileStorageService fileStorageService;
 
-    AssistantDto mapAssistantDto(Assistant assistant, Map<String, String> properties) {
+    public AssistantMapper(FileStorageService fileStorageService) {
+        this.fileStorageService = fileStorageService;
+    }
+
+    AssistantDto mapAssistantDto(Assistant assistant, AssistantEntity assistantEntity) {
         return new AssistantDto(
                 assistant.id(),
                 assistant.object(),
@@ -44,7 +51,8 @@ public class AssistantMapper {
                 assistant.tools(),
                 assistant.fileIds(),
                 assistant.metadata(),
-                properties
+                assistantEntity.getImagePath(),
+                mapAssistantProperties(assistantEntity.getProperties())
         );
     }
 

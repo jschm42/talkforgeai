@@ -61,6 +61,18 @@ class AssistantService {
     }
   }
 
+  getAssistantImageUrl(imageFile: string) {
+    return `/api/v1/assistants/images/${imageFile}`;
+  }
+
+  async generateAssistantImage(prompt: string) {
+    try {
+      return await axios.post(`/api/v1/assistants/images/generate`, {prompt});
+    } catch (error) {
+      console.error('Error generating persona image: ', error);
+    }
+  }
+
   async createThread() {
     try {
       const result = await axios.post(`/api/v1/threads`);

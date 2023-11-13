@@ -16,7 +16,8 @@
 
 create table assistant
 (
-    id varchar(50) not null primary key
+    id         varchar(50) not null primary key,
+    image_path varchar(100)
 );
 
 create table assistant_properties

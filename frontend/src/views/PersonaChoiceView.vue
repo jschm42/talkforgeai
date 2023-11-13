@@ -28,7 +28,7 @@
              style="max-width: 300px;">
           <div class="row g-0">
             <div class="col-md-4">
-              <img v-if="isShowAssistantImage(assistant)" :alt="assistant.name" :src="assistant.imageUrl"
+              <img v-if="isShowAssistantImage(assistant)" :alt="assistant.name" :src="imageSrc(assistant.image_path)"
                    class="persona-icon" role="button" @click.prevent="onPersonaSelected(assistant.id)"/>
               <i v-else class="fs-1 bi bi-robot robot-icon"></i>
             </div>
@@ -89,8 +89,11 @@ export default defineComponent({
     },
   },
   methods: {
+    imageSrc(imagePath) {
+      return this.store.getAssistantImageUrl(imagePath);
+    },
     isShowAssistantImage(assistant) {
-      return !!assistant.imagePath;
+      return !!assistant.image_path;
     },
     onPersonaSelected(assistantId) {
       console.log('PersonaChoiceView.onPersonaSelected: ' + assistantId, this.store.assistantList);
