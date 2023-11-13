@@ -21,6 +21,6 @@ import com.talkforgeai.service.openai.assistant.dto.AssistantList;
 
 import java.util.Map;
 
-public record AssistantListDto(@JsonProperty("assistant_list") AssistantList messageList,
-                               @JsonProperty("assistant_properties") Map<String, Map<String, String>> assistantProperties) {
+public record AssistantListDto(@JsonProperty("list") AssistantList messageList,
+                               @JsonProperty("properties") Map<String, Map<String, String>> assistantProperties) {
 }

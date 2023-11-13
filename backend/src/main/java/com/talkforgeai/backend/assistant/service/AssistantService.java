@@ -206,6 +206,7 @@ public class AssistantService {
         return StreamUtils.copyToByteArray(resource.getInputStream());
     }
 
+    @Transactional
     public ThreadTitleDto generateThreadTitle(String threadId, ThreadTitleRequestDto request) {
         ThreadEntity threadEntity = threadRepository.findById(threadId).orElseThrow(() -> new SessionException("Thread not found"));
 
@@ -266,4 +267,9 @@ public class AssistantService {
         return mappedProperties;
     }
 
+    public ThreadDto retrieveThread(String threadId) {
+        return threadRepository.findById(threadId)
+                .map(this::mapToDto)
+                .orElseThrow(() -> new SessionException("Thread not found"));
+    }
 }

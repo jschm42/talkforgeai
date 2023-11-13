@@ -23,31 +23,31 @@
     </div>
     <div class="row scrollable-persona-list">
 
-      <div v-for="persona in personaList" :key="persona.personaId" class="col-md-3">
+      <div v-for="assistant in assistantList" :key="assistant.id" class="col-md-3">
         <div class="card mb-3 persona-card"
              style="max-width: 300px;">
           <div class="row g-0">
             <div class="col-md-4">
-              <img v-if="isShowPersonaImage(persona)" :alt="persona.name" :src="persona.imageUrl"
-                   class="persona-icon" role="button" @click.prevent="onPersonaSelected(persona)"/>
+              <img v-if="isShowAssistantImage(assistant)" :alt="assistant.name" :src="assistant.imageUrl"
+                   class="persona-icon" role="button" @click.prevent="onPersonaSelected(assistant)"/>
               <i v-else class="fs-1 bi bi-robot robot-icon"></i>
             </div>
             <div class="col-md-6">
               <div class="card-body">
-                <h5 class="card-title" @click.prevent="onPersonaSelected(persona)">{{ persona.name }}</h5>
+                <h5 class="card-title" @click.prevent="onPersonaSelected(assistant)">{{ assistant.name }}</h5>
               </div>
             </div>
 
             <div class="col-2 d-inline-flex flex-row-reverse my-1 p-2">
-              <i class="bi bi-pencil edit-button" role="button" @click.prevent="onEditPersona(persona.personaId)"></i>
+              <i class="bi bi-pencil edit-button" role="button" @click.prevent="onEditPersona(assistant.id)"></i>
             </div>
           </div>
 
-          <div class="row g-0 p-3" role="button" @click.prevent="onPersonaSelected(persona)">
-            <small class="text-body-secondary">{{ persona.description }}</small>
+          <div class="row g-0 p-3" role="button" @click.prevent="onPersonaSelected(assistant)">
+            <small class="text-body-secondary">{{ assistant.description }}</small>
           </div>
 
-          <persona-compact-info :persona="persona"></persona-compact-info>
+          <persona-compact-info :persona="assistant"></persona-compact-info>
 
         </div>
 
@@ -84,17 +84,19 @@ export default defineComponent({
     };
   },
   computed: {
-    personaList() {
-      return this.store.personaList;
+    assistantList() {
+      if (this.store.assistantList.list == null) {
+        return [];
+      }
+      return this.store.assistantList.list.data;
     },
   },
   methods: {
-    isShowPersonaImage(persona) {
-      console.log('isShowPersonaImage', persona);
-      return !!persona.imagePath;
+    isShowAssistantImage(assistant) {
+      return !!assistant.imagePath;
     },
-    onPersonaSelected(persona) {
-      this.$router.push({name: 'chat', params: {personaId: persona.personaId}});
+    onPersonaSelected(assistant) {
+      this.$router.push({name: 'chat', params: {assistantId: assistant.id}});
     },
     onCreateNewPersona() {
       console.log('onCreateNewPersona');
@@ -106,9 +108,8 @@ export default defineComponent({
       this.$router.push({name: 'persona-edit', params: {personaId}});
     },
   },
-  mounted() {
-    this.store.readPersona().then(() => {
-    });
+  async mounted() {
+    await this.store.syncAssistants();
   },
 });
 </script>

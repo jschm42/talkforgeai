@@ -20,6 +20,26 @@ import Thread, {ParsedThreadMessage, ThreadMessage, TreadMessageListParsed} from
 
 class AssistantService {
 
+  async syncAssistants() {
+    console.log('Syncing assistants');
+    try {
+      const result = await axios.post('/api/v1/assistants/sync');
+      return result.data;
+    } catch (error) {
+      throw new Error('Error syncing assistants: ' + error);
+    }
+  }
+
+  async retrieveAssistants() {
+    console.log('Retrieving assistants');
+    try {
+      const result = await axios.get('/api/v1/assistants');
+      return result.data;
+    } catch (error) {
+      throw new Error('Error reading assistants data: ' + error);
+    }
+  }
+
   async retrieveAssistant(assistantId: string) {
     console.log('Retrieving assistant with id:', assistantId);
     try {
@@ -110,6 +130,14 @@ class AssistantService {
 
   async generateThreadTitle(threadId: string, userMessageContent: string, assistantMessageContent: string) {
     console.log('Generating title for thread:', threadId);
+
+    const thread = await this.retrieveThread(threadId);
+
+    if (thread.title && thread.title !== '<no title>' && thread.title !== '') {
+      console.log('Thread already has a title:', thread.title);
+      return thread.title;
+    }
+
     try {
       const result = await axios.post(`/api/v1/threads/${threadId}/title/generate`,
         {
@@ -137,6 +165,13 @@ class AssistantService {
     const result = await axios.post(
       `/api/v1/threads/${threadId}/messages/${messageId}/postprocess`,
       {},
+    );
+    return result.data;
+  }
+
+  private async retrieveThread(threadId: string) {
+    const result = await axios.get(
+      `/api/v1/threads/${threadId}`,
     );
     return result.data;
   }

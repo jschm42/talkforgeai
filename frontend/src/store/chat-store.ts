@@ -26,7 +26,7 @@ import HighlightingService from '@/service/highlighting.service';
 import PersonaProperties, {TTSType} from '@/service/persona.properties';
 import AssistantService from '@/service/assistant.service';
 import Thread, {ThreadMessage} from '@/store/to/thread';
-import Assistant from '@/store/to/assistant';
+import Assistant, {AssistantList} from '@/store/to/assistant';
 
 const chatService = new ChatService();
 const chatStreamService = new ChatStreamService();
@@ -58,7 +58,7 @@ export const useChatStore = defineStore('chat', {
       threadId: '',
       threads: [] as Array<Thread>,
       selectedAssistant: {} as Assistant,
-      assistantList: [] as Array<Assistant>,
+      assistantList: AssistantList,
     };
   },
   getters: {
@@ -79,6 +79,14 @@ export const useChatStore = defineStore('chat', {
     },
   },
   actions: {
+    async syncAssistants() {
+      await assistantService.syncAssistants();
+      await this.retrieveAssistants();
+    },
+    async retrieveAssistants() {
+      this.assistantList = await assistantService.retrieveAssistants();
+      console.log('Assistant list', this.assistantList);
+    },
     async selectAssistant(assistantId: string) {
       this.selectedAssistant = await assistantService.retrieveAssistant(assistantId);
     },
@@ -178,12 +186,9 @@ export const useChatStore = defineStore('chat', {
     },
     async generateThreadTitle(threadId: string, userMessage: string, assistantMessage: string) {
       // Find selected thread
-      const thread = this.threads.find(t => t.id === threadId);
-      if (thread && (thread.title === '<no title>' || thread.title === '' || thread.title === undefined)) {
-        const response = await assistantService.generateThreadTitle(threadId, userMessage, assistantMessage);
-        console.log('Generated title response', response);
-        await this.retrieveThreads();
-      }
+      const response = await assistantService.generateThreadTitle(threadId, userMessage, assistantMessage);
+      console.log('Generated title response', response);
+      await this.retrieveThreads();
     },
     // ************** Old code *****************
     async newSession() {

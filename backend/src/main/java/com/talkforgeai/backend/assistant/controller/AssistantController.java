@@ -46,11 +46,6 @@ public class AssistantController {
         return assistantService.retrieveAssistant(assistantId);
     }
 
-    @GetMapping("/threads")
-    public List<ThreadDto> listThreads() {
-        return assistantService.retrieveThreads();
-    }
-
     @GetMapping("/assistants")
     public AssistantListDto listAssistants(@PathParam("limit") Integer limit, @PathParam("order") String order) {
         return assistantService.listAssistants(new ListRequest(limit, order));
@@ -61,9 +56,19 @@ public class AssistantController {
         assistantService.syncAssistants();
     }
 
+    @GetMapping("/threads")
+    public List<ThreadDto> listThreads() {
+        return assistantService.retrieveThreads();
+    }
+
     @PostMapping("/threads")
     public ThreadDto createThread() {
         return assistantService.createThread();
+    }
+
+    @GetMapping("/threads/{threadId}")
+    public ThreadDto retrieveThread(@PathVariable("threadId") String threadId) {
+        return assistantService.retrieveThread(threadId);
     }
 
     @PostMapping("/threads/{threadId}/messages")
