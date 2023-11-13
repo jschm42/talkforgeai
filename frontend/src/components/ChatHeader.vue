@@ -19,7 +19,7 @@
     <div class="row text-start">
       <div class="col-3">
         <img v-if="isShowAssistantImage(selectedAssistant)" :alt="selectedAssistant.name"
-             :src="selectedAssistant.imageUrl"
+             :src="imageSrc(selectedAssistant.image_path)"
              class="persona-icon"/>
         <i v-else class="fs-1 bi bi-robot robot-icon"></i>
       </div>
@@ -74,8 +74,11 @@ export default {
     },
   },
   methods: {
+    imageSrc(imagePath) {
+      return this.store.getAssistantImageUrl(imagePath);
+    },
     isShowAssistantImage(assistant) {
-      return !!assistant.imagePath;
+      return !!assistant.image_path;
     },
   },
 };

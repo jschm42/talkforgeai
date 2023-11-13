@@ -127,6 +127,7 @@ public class AssistantService {
         AssistantList assistantList = this.openAIAssistantService.listAssistants(new ListRequest());
         List<AssistantEntity> assistantEntities = assistantRepository.findAll();
 
+        // Create
         assistantList.data().forEach(assistant -> {
             LOGGER.info("Syncing assistant: {}", assistant.id());
 
@@ -149,6 +150,18 @@ public class AssistantService {
                 });
 
                 assistantRepository.save(entity);
+            }
+        });
+
+        // Delete
+        assistantEntities.forEach(entity -> {
+            Optional<Assistant> assistant = assistantList.data().stream()
+                    .filter(a -> a.id().equals(entity.getId()))
+                    .findFirst();
+
+            if (assistant.isEmpty()) {
+                LOGGER.info("Assistant not found. Deleting entity: {}", entity.getId());
+                assistantRepository.delete(entity);
             }
         });
     }

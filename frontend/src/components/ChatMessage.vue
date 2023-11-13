@@ -37,7 +37,7 @@ export default {
   },
   computed: {
     personaImage() {
-      return this.store.selectedAssistant.imageUrl;
+      return this.store.getAssistantImageUrl(this.store.selectedAssistant.image_path);
     },
     messageClass() {
       return {
@@ -45,8 +45,11 @@ export default {
         'role-assistantEntity': this.message.role === Role.ASSISTANT,
       };
     },
+    hasProfileImage() {
+      return this.store.selectedAssistant.image_path;
+    },
     isAssistant() {
-      return this.message.role === Role.ASSISTANT && !!this.store.selectedAssistant.imagePath;
+      return this.message.role === Role.ASSISTANT;
     },
     isUser() {
       return this.message.role === Role.USER;
@@ -108,7 +111,7 @@ export default {
     <div class="row">
       <div class="col-md-1">
         <i v-if="isUser" class="fs-1 bi bi-person"></i>
-        <img v-else-if="isAssistant" :src="personaImage" alt="Assistant" class="persona-icon">
+        <img v-else-if="isAssistant && hasProfileImage" :src="personaImage" alt="Assistant" class="persona-icon">
         <!--        <i v-else-if="isFunctionCall" class="fs-1 bi bi-gear"></i>-->
         <!--        <i v-else-if="isFunctionResponse" class="fs-1 bi bi-arrow-return-left"></i>-->
         <i v-else class="fs-1 bi bi-robot robot-icon"></i>

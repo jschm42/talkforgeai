@@ -18,10 +18,10 @@
 import {defineComponent} from 'vue';
 import TtsService from '@/service/tts.service';
 import {useChatStore} from '@/store/chat-store';
-import ChatMessage from '@/store/to/chat-message';
 import Role from '@/store/to/role';
 import HtmlToTextService from '@/service/html-to-text.service';
 import AssistantProperties, {TTSType} from '@/service/assistantProperties';
+import {ThreadMessage} from '@/store/to/thread';
 
 const ttsService = new TtsService();
 const htmlToTextService = new HtmlToTextService();
@@ -38,14 +38,14 @@ export default defineComponent({
     };
   },
   props: {
-    message: ChatMessage,
+    message: ThreadMessage,
   },
   computed: {
     getTTSType() {
-      return this.store.selectedPersona.properties[AssistantProperties.TTS_TYPE];
+      return this.store.selectedAssistant.properties[AssistantProperties.TTS_TYPE];
     },
     isDisabled() {
-      return this.store.selectedPersona.properties[AssistantProperties.TTS_TYPE] === TTSType.DISABLED;
+      return this.store.selectedAssistant.properties[AssistantProperties.TTS_TYPE] === TTSType.DISABLED;
     },
   },
   beforeUnmount() {
@@ -78,7 +78,7 @@ export default defineComponent({
     },
     async speakElevenlabs(plainText) {
       try {
-        const audioBlob = await ttsService.speakElevenlabs(plainText, this.store.selectedPersona);
+        const audioBlob = await ttsService.speakElevenlabs(plainText, this.store.selectedAssistant);
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.addEventListener('ended', () => {
@@ -96,7 +96,7 @@ export default defineComponent({
     async speakSpeechApi(plainText) {
       console.log('Speaking using SpeechAPI...');
       this.audioState = AudioState.Playing;
-      await ttsService.speakSpeechAPI(plainText, this.store.selectedPersona);
+      await ttsService.speakSpeechAPI(plainText, this.store.selectedAssistant);
       console.log('Stopped...');
       this.audioState = AudioState.Stopped;
     },
