@@ -114,17 +114,21 @@ export default defineComponent({
 
       const form = this.store.assistantForm;
       const assistant = new Assistant();
-      assistant.id = form.id;
       //assistant.imagePath = form.imagePath;
+      assistant.id = undefined;
+      assistant.instructions = form.instructions;
       assistant.name = form.name;
-      assistant.description = form.description;
-      //assistant.system = form.system;
-      //assistant.properties = form.properties;
+      assistant.description = form.description || '';
+      assistant.model = form.model;
+      assistant.tools = [];
+      assistant.file_ids = [];
+      assistant.metadata = {};
+      assistant.properties = form.properties;
 
       try {
-        await personaService.writePersona(assistant);
+        await assistantService.modifyAssistant(this.assistantId, assistant);
 
-        this.$router.push({name: 'assistant-choice'});
+        this.$router.push({name: 'persona-choice'});
       } catch (error) {
         console.error(error);
       }

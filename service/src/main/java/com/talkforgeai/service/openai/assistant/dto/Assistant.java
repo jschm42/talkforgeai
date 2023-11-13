@@ -16,14 +16,21 @@
 
 package com.talkforgeai.service.openai.assistant.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 import java.util.Map;
 
+
 public record Assistant(
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         String id,
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         String object,
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         @JsonProperty("created_at")
         String createdAt,
         String name,

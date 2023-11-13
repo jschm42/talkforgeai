@@ -21,6 +21,7 @@ import com.talkforgeai.backend.assistant.domain.AssistantPropertyValue;
 import com.talkforgeai.backend.assistant.domain.MessageEntity;
 import com.talkforgeai.backend.assistant.domain.ThreadEntity;
 import com.talkforgeai.backend.assistant.dto.*;
+import com.talkforgeai.backend.assistant.exceptions.AssistentException;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
@@ -261,5 +262,24 @@ public class AssistantService {
         return threadRepository.findById(threadId)
                 .map(this::mapToDto)
                 .orElseThrow(() -> new SessionException("Thread not found"));
+    }
+
+    @Transactional
+    public void modifyAssistant(String assistantId, AssistantDto modifiedAssistant) {
+        Assistant assistant = openAIAssistantService.retrieveAssistant(assistantId);
+
+        if (assistant == null) {
+            throw new AssistentException("Assistant not found");
+        }
+
+        AssistantEntity assistantEntity = assistantRepository.findById(assistantId)
+                .orElseThrow(() -> new AssistentException("Assistant entity not found"));
+
+        assistantEntity.setProperties(assistantMapper.mapProperties(modifiedAssistant.properties()));
+
+        Assistant openAIModifiedAssistant = assistantMapper.mapAssistant(modifiedAssistant);
+
+        assistantRepository.save(assistantEntity);
+        openAIAssistantService.modifyAssistant(assistantId, openAIModifiedAssistant);
     }
 }

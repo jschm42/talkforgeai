@@ -159,4 +159,9 @@ public class OpenAIAssistantService {
                 .build();
     }
 
+    public Assistant modifyAssistant(String assistantId, Assistant openAIModifiedAssistant) {
+        String body = objectToJsonString(openAIModifiedAssistant);
+        Request request = createPostRequest(body, "/assistants/" + assistantId);
+        return executeRequest(request, Assistant.class);
+    }
 }

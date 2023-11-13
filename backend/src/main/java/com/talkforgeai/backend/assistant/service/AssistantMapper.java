@@ -48,6 +48,21 @@ public class AssistantMapper {
         );
     }
 
+    Assistant mapAssistant(AssistantDto dto) {
+        return new Assistant(
+                dto.id(),
+                dto.object(),
+                dto.createdAt(),
+                dto.name(),
+                dto.description(),
+                dto.model(),
+                dto.instructions(),
+                dto.tools(),
+                dto.fileIds(),
+                dto.metadata()
+        );
+    }
+
     public Map<String, String> mapAssistantProperties(Map<String, AssistantPropertyValue> properties) {
         Map<String, String> mappedProperties = new HashMap<>();
 

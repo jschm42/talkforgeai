@@ -54,7 +54,7 @@ class AssistantService {
   async modifyAssistant(assistantId: string, assistant: Assistant) {
     console.log('Modify assistant with id:', assistantId);
     try {
-      const result = await axios.post(`/api/v1/assistants/${assistantId}`);
+      const result = await axios.post(`/api/v1/assistants/${assistantId}`, assistant);
       return result.data;
     } catch (error) {
       throw new Error('Error syncing assistants: ' + error);

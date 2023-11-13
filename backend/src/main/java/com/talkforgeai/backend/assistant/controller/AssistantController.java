@@ -56,6 +56,11 @@ public class AssistantController {
         assistantService.syncAssistants();
     }
 
+    @PostMapping("/assistants/{assistantId}")
+    public void modifyAssistant(@PathVariable("assistantId") String assistantId, @RequestBody AssistantDto modifiedAssistant) {
+        assistantService.modifyAssistant(assistantId, modifiedAssistant);
+    }
+
     @GetMapping("/threads")
     public List<ThreadDto> listThreads() {
         return assistantService.retrieveThreads();
