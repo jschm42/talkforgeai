@@ -67,7 +67,7 @@ export default defineComponent({
         return;
       }
 
-      const plainText = htmlToTextService.removeHtml(this.message.content);
+      const plainText = htmlToTextService.removeHtml(this.message.content[0].text.value);
       this.audioState = AudioState.Loading;
 
       if (this.getTTSType === TTSType.SPEECHAPI) {
