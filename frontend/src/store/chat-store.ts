@@ -23,7 +23,7 @@ import PersonaService from '@/service/persona.service';
 import Role from '@/store/to/role';
 import ChatStreamService from '@/service/chat-stream.service';
 import HighlightingService from '@/service/highlighting.service';
-import PersonaProperties, {TTSType} from '@/service/persona.properties';
+import AssistantProperties, {TTSType} from '@/service/assistantProperties';
 import AssistantService from '@/service/assistant.service';
 import Thread, {ThreadMessage} from '@/store/to/thread';
 import Assistant from '@/store/to/assistant';
@@ -64,7 +64,7 @@ export const useChatStore = defineStore('chat', {
   getters: {
     isTTSEnabled(): boolean {
       if (this.selectedPersona && this.selectedPersona.properties) {
-        return this.selectedPersona.properties[PersonaProperties.TTS_TYPE] !== TTSType.DISABLED;
+        return this.selectedPersona.properties[AssistantProperties.TTS_TYPE] !== TTSType.DISABLED;
       }
       return false;
     },
@@ -223,7 +223,7 @@ export const useChatStore = defineStore('chat', {
     async selectPersona(persona: Persona): Promise<void> {
       this.resetChat();
       this.selectedPersona = persona;
-      this.chat.autoSpeak = persona.properties[PersonaProperties.FEATURE_AUTOSPEAKDEFAULT] === 'true';
+      this.chat.autoSpeak = persona.properties[AssistantProperties.FEATURE_AUTOSPEAKDEFAULT] === 'true';
       await this.loadIndex(persona.personaId);
     },
     async selectPersonaById(personaId: string): Promise<void> {
@@ -307,7 +307,7 @@ export const useChatStore = defineStore('chat', {
       await chatService.updateSessionTitle(sessionId, newTitle);
     },
     isSessionTitleGenerationEnabled() {
-      return this.selectedPersona.properties[PersonaProperties.FEATURE_TITLEGENERATION] === 'true';
+      return this.selectedPersona.properties[AssistantProperties.FEATURE_TITLEGENERATION] === 'true';
     },
     hasEmptySessionTitle(sessionId: string) {
       const currentSession = this.sessions.find(s => s.id === sessionId);

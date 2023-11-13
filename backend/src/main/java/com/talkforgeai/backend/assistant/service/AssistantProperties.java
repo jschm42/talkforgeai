@@ -26,7 +26,6 @@ public enum AssistantProperties {
     ELEVENLABS_SIMILARITYBOOST("elevenlabs_similarityBoost", "0"),
     ELEVENLABS_STABILITY("elevenlabs_stability", "0"),
 
-    CHATGPT_MODEL("chatgpt_model", "gpt-4"),
     CHATGPT_TEMPERATURE("chatgpt_temperature", "0.7"),
     CHATGPT_TOP_P("chatgpt_topP", "1.0"),
     CHATGPT_FREQUENCY_PENALTY("chatgpt_frequencyPenalty", "0"),

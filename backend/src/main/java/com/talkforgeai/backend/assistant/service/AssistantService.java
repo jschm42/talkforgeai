@@ -26,6 +26,7 @@ import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
 import com.talkforgeai.backend.persona.controller.GenerateImageResponse;
+import com.talkforgeai.backend.persona.dto.PersonaImageUploadResponse;
 import com.talkforgeai.backend.session.exception.SessionException;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
@@ -44,6 +45,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -325,4 +327,38 @@ public class AssistantService {
     }
 
 
+    public PersonaImageUploadResponse uploadImage(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+
+        try {
+            byte[] bytes = file.getBytes();
+
+            String fileEnding = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+            String filename = UUID.randomUUID() + fileEnding;
+
+            Path path = fileStorageService.getAssistantsDirectory().resolve(filename);
+            Files.write(path, bytes);
+
+
+            return new PersonaImageUploadResponse(filename);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to upload file", e);
+        }
+    }
+
+    public AssistantDto createAssistant(AssistantDto modifiedAssistant) {
+        Assistant openAIModifiedAssistant = assistantMapper.mapAssistant(modifiedAssistant);
+        Assistant newAssistant = openAIAssistantService.createAssistant(openAIModifiedAssistant);
+
+        AssistantEntity assistantEntity = new AssistantEntity();
+        assistantEntity.setId(newAssistant.id());
+        assistantEntity.setImagePath(modifiedAssistant.imagePath());
+        assistantEntity.setProperties(assistantMapper.mapProperties(modifiedAssistant.properties()));
+
+        assistantRepository.save(assistantEntity);
+
+        return assistantMapper.mapAssistantDto(newAssistant, assistantEntity);
+    }
 }

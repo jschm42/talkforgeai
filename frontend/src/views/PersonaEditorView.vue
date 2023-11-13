@@ -123,10 +123,14 @@ export default defineComponent({
       assistant.tools = [];
       assistant.file_ids = [];
       assistant.metadata = {};
-      assistant.properties = form.properties;
+      assistant.properties = {...form.properties};
 
       try {
-        await assistantService.modifyAssistant(this.assistantId, assistant);
+        if (this.assistantId) {
+          await assistantService.modifyAssistant(this.assistantId, assistant);
+        } else {
+          await assistantService.createAssistant(assistant);
+        }
 
         this.$router.push({name: 'persona-choice'});
       } catch (error) {

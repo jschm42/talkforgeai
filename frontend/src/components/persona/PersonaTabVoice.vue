@@ -19,7 +19,7 @@ import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
 import TtsService from '@/service/tts.service';
-import PersonaProperties, {TTSType} from '@/service/persona.properties';
+import AssistantProperties, {TTSType} from '@/service/assistantProperties';
 
 const ttsService = new TtsService();
 
@@ -42,7 +42,7 @@ export default defineComponent({
       return TTSType;
     },
     PersonaProperties() {
-      return PersonaProperties;
+      return AssistantProperties;
     },
   },
   methods: {
@@ -53,7 +53,7 @@ export default defineComponent({
     updateVoiceIdSelection() {
       // If voiceId matches a voice in the list, select it
       const voice = this.elevenLabsVoices.find(
-        voice => voice.voice_id === this.assistantForm.properties[PersonaProperties.ELEVENLABS_VOICEID]);
+        voice => voice.voice_id === this.assistantForm.properties[AssistantProperties.ELEVENLABS_VOICEID]);
       // If voice ist not found, set select element to show "Custom" and be disabled
       if (!voice) {
         this.assistantForm.properties.elevenlabs_voiceId = '';

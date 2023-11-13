@@ -18,22 +18,22 @@
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
-import PersonaProperties from '@/service/persona.properties';
+import AssistantProperties from '@/service/assistantProperties';
 
 export default defineComponent({
   name: 'PersonaTabFeatures',
   computed: {
     PersonaProperties() {
-      return PersonaProperties;
+      return AssistantProperties;
     },
   },
   data() {
     return {};
   },
   setup() {
-    const {personaForm} = storeToRefs(usePersonaFormStore());
+    const {assistantForm} = storeToRefs(usePersonaFormStore());
 
-    return {personaForm};
+    return {assistantForm};
   },
   methods: {},
   mounted() {
@@ -44,28 +44,29 @@ export default defineComponent({
 <template>
   <div class="mb-3 p-3">
     <div class="form-check">
-      <input id="checkboxTitleGeneration" v-model="personaForm.properties[PersonaProperties.FEATURE_TITLEGENERATION]"
+      <input id="checkboxTitleGeneration" v-model="assistantForm.properties[PersonaProperties.FEATURE_TITLEGENERATION]"
              class="form-check-input" type="checkbox">
       <label class="form-check-label" for="checkboxTitleGeneration">
         Title generation
       </label>
     </div>
     <div class="form-check">
-      <input id="checkboxImageGeneration" v-model="personaForm.properties[PersonaProperties.FEATURE_IMAGEGENERATION]"
+      <input id="checkboxImageGeneration" v-model="assistantForm.properties[PersonaProperties.FEATURE_IMAGEGENERATION]"
              class="form-check-input" type="checkbox">
       <label class="form-check-label" for="checkboxImageGeneration">
         Image generation
       </label>
     </div>
     <div class="form-check">
-      <input id="checkboxPlantUML" v-model="personaForm.properties[PersonaProperties.FEATURE_PLANTUML]"
+      <input id="checkboxPlantUML" v-model="assistantForm.properties[PersonaProperties.FEATURE_PLANTUML]"
              class="form-check-input" type="checkbox">
       <label class="form-check-label" for="checkboxPlantUML">
         PlantUML generation
       </label>
     </div>
     <div class="form-check">
-      <input id="checkBoxAutoSpeakDefault" v-model="personaForm.properties[PersonaProperties.FEATURE_AUTOSPEAKDEFAULT]"
+      <input id="checkBoxAutoSpeakDefault"
+             v-model="assistantForm.properties[PersonaProperties.FEATURE_AUTOSPEAKDEFAULT]"
              class="form-check-input" type="checkbox">
       <label class="form-check-label" for="checkBoxAutoSpeakDefault">
         Auto Speak is turned on by default

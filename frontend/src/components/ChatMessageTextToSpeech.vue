@@ -21,7 +21,7 @@ import {useChatStore} from '@/store/chat-store';
 import ChatMessage from '@/store/to/chat-message';
 import Role from '@/store/to/role';
 import HtmlToTextService from '@/service/html-to-text.service';
-import PersonaProperties, {TTSType} from '@/service/persona.properties';
+import AssistantProperties, {TTSType} from '@/service/assistantProperties';
 
 const ttsService = new TtsService();
 const htmlToTextService = new HtmlToTextService();
@@ -42,10 +42,10 @@ export default defineComponent({
   },
   computed: {
     getTTSType() {
-      return this.store.selectedPersona.properties[PersonaProperties.TTS_TYPE];
+      return this.store.selectedPersona.properties[AssistantProperties.TTS_TYPE];
     },
     isDisabled() {
-      return this.store.selectedPersona.properties[PersonaProperties.TTS_TYPE] === TTSType.DISABLED;
+      return this.store.selectedPersona.properties[AssistantProperties.TTS_TYPE] === TTSType.DISABLED;
     },
   },
   beforeUnmount() {

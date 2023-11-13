@@ -29,7 +29,7 @@
 <script>
 
 import {useChatStore} from '@/store/chat-store';
-import PersonaProperties, {TTSType} from '@/service/persona.properties';
+import AssistantProperties, {TTSType} from '@/service/assistantProperties';
 import Assistant from '@/store/to/assistant';
 
 export default {
@@ -57,8 +57,8 @@ export default {
   mounted() {
     if (this.showProperties) {
       this.allowedKeys.push(
-        PersonaProperties.CHATGPT_TEMPERATURE,
-        PersonaProperties.CHATGPT_TOP_P,
+        AssistantProperties.CHATGPT_TEMPERATURE,
+        AssistantProperties.CHATGPT_TOP_P,
       );
     }
   },
@@ -99,14 +99,14 @@ export default {
   methods: {
     badgeColor(key) {
       switch (key) {
-        case PersonaProperties.CHATGPT_MODEL:
+        case AssistantProperties.CHATGPT_MODEL:
           return 'text-bg-primary';
         case TTSType.ELEVENLABS:
         case TTSType.SPEECHAPI:
           return 'text-bg-info';
-        case PersonaProperties.CHATGPT_TEMPERATURE:
+        case AssistantProperties.CHATGPT_TEMPERATURE:
           return 'text-bg-success';
-        case PersonaProperties.ELEVENLABS_MODELID:
+        case AssistantProperties.ELEVENLABS_MODELID:
           return 'text-bg-warning';
         default:
           return 'text-bg-secondary';
@@ -114,12 +114,12 @@ export default {
     },
     badgeLabel(item) {
       switch (item.key) {
-        case PersonaProperties.CHATGPT_MODEL:
-        case PersonaProperties.ELEVENLABS_MODELID:
+        case AssistantProperties.CHATGPT_MODEL:
+        case AssistantProperties.ELEVENLABS_MODELID:
           return item.value;
-        case PersonaProperties.CHATGPT_TEMPERATURE:
+        case AssistantProperties.CHATGPT_TEMPERATURE:
           return 'Temp: ' + item.value;
-        case PersonaProperties.CHATGPT_TOP_P:
+        case AssistantProperties.CHATGPT_TOP_P:
           return 'TopP: ' + item.value;
         case TTSType.SPEECHAPI:
           return 'SpeechAPI';

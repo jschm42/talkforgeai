@@ -57,7 +57,17 @@ class AssistantService {
       const result = await axios.post(`/api/v1/assistants/${assistantId}`, assistant);
       return result.data;
     } catch (error) {
-      throw new Error('Error syncing assistants: ' + error);
+      throw new Error('Error modifying assistant: ' + error);
+    }
+  }
+
+  async createAssistant(assistant: Assistant) {
+    console.log('Create assistant.');
+    try {
+      const result = await axios.post(`/api/v1/assistants`, assistant);
+      return result.data;
+    } catch (error) {
+      throw new Error('Error creating assistants: ' + error);
     }
   }
 

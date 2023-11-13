@@ -44,7 +44,7 @@ public class OpenAIAssistantService {
         this.client = client;
     }
 
-    public Assistant createAssistant(CreateAssistantRequest createAssistantRequest) {
+    public Assistant createAssistant(Assistant createAssistantRequest) {
         String body = objectToJsonString(createAssistantRequest);
         Request request = createPostRequest(body, "/assistants");
         return executeRequest(request, Assistant.class);

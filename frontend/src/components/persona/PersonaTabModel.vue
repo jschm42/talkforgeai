@@ -18,7 +18,7 @@
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
-import PersonaProperties from '@/service/persona.properties';
+import AssistantProperties from '@/service/assistantProperties';
 
 export default defineComponent({
   name: 'PersonaTabModel',
@@ -33,14 +33,14 @@ export default defineComponent({
     };
   },
   computed: {
-    PersonaProperties() {
-      return PersonaProperties;
+    assistantProperties() {
+      return AssistantProperties;
     },
   },
   setup() {
-    const {personaForm} = storeToRefs(usePersonaFormStore());
+    const {assistantForm} = storeToRefs(usePersonaFormStore());
 
-    return {personaForm};
+    return {assistantForm};
   },
   methods: {},
 });
@@ -48,15 +48,11 @@ export default defineComponent({
 
 <template>
   <div class="mb-3 p-3">
-    <select id="selectChatModel" v-model="personaForm.properties[PersonaProperties.CHATGPT_MODEL]"
+    <select id="selectChatModel" v-model="assistantForm.model"
             aria-label="Chat Model"
             class="form-select my-2">
-      <!--      <option value="gpt-4">GPT 4</option>-->
-      <!--      <option value="gpt-3.5-turbo">GPT 3.5 Turbo</option>-->
-
       <option v-for="model in chatGptModels" :key="model" :value="model">{{ model }}
       </option>
-
     </select>
 
     <label class="form-label my-2" for="rangeTemperature">Temperature</label>
@@ -64,12 +60,12 @@ export default defineComponent({
     <div class="container">
       <div class="row">
         <div class="col-10 p-0">
-          <input id="rangeTemperature" v-model="personaForm.properties[PersonaProperties.CHATGPT_TEMPERATURE]"
+          <input id="rangeTemperature" v-model="assistantForm.properties[assistantProperties.CHATGPT_TEMPERATURE]"
                  class="form-range" max="1.0"
                  min="0.0" step="0.1" type="range">
         </div>
         <div class="col-2">
-          <label>{{ personaForm.properties[PersonaProperties.CHATGPT_TEMPERATURE] }}</label>
+          <label>{{ assistantForm.properties[assistantProperties.CHATGPT_TEMPERATURE] }}</label>
         </div>
       </div>
     </div>
@@ -79,12 +75,12 @@ export default defineComponent({
     <div class="container">
       <div class="row">
         <div class="col-10 p-0">
-          <input id="rangeTopP" v-model="personaForm.properties[PersonaProperties.CHATGPT_TOP_P]" class="form-range"
+          <input id="rangeTopP" v-model="assistantForm.properties[assistantProperties.CHATGPT_TOP_P]" class="form-range"
                  max="1.0" min="0.0"
                  step="0.1" type="range">
         </div>
         <div class="col-2">
-          <label>{{ personaForm.properties[PersonaProperties.CHATGPT_TOP_P] }}</label>
+          <label>{{ assistantForm.properties[assistantProperties.CHATGPT_TOP_P] }}</label>
         </div>
       </div>
     </div>
@@ -95,12 +91,12 @@ export default defineComponent({
       <div class="row">
         <div class="col-10 p-0">
           <input id="rangeFrequencePenalty"
-                 v-model="personaForm.properties[PersonaProperties.CHATGPT_FREQUENCY_PENALTY]" class="form-range"
+                 v-model="assistantForm.properties[assistantProperties.CHATGPT_FREQUENCY_PENALTY]" class="form-range"
                  max="1.0" min="0.0"
                  step="0.1" type="range">
         </div>
         <div class="col-2">
-          <label>{{ personaForm.properties[PersonaProperties.CHATGPT_FREQUENCY_PENALTY] }}</label>
+          <label>{{ assistantForm.properties[assistantProperties.CHATGPT_FREQUENCY_PENALTY] }}</label>
         </div>
       </div>
     </div>
@@ -110,13 +106,14 @@ export default defineComponent({
     <div class="container">
       <div class="row">
         <div class="col-10 p-0">
-          <input id="rangePresencePenalty" v-model="personaForm.properties[PersonaProperties.CHATGPT_PRESENCE_PENALTY]"
+          <input id="rangePresencePenalty"
+                 v-model="assistantForm.properties[assistantProperties.CHATGPT_PRESENCE_PENALTY]"
                  class="form-range"
                  max="1.0" min="0.0"
                  step="0.1" type="range">
         </div>
         <div class="col-2">
-          <label>{{ personaForm.properties[PersonaProperties.CHATGPT_PRESENCE_PENALTY] }}</label>
+          <label>{{ assistantForm.properties[assistantProperties.CHATGPT_PRESENCE_PENALTY] }}</label>
         </div>
       </div>
     </div>

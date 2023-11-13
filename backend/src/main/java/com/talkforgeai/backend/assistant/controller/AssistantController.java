@@ -20,6 +20,7 @@ import com.talkforgeai.backend.assistant.dto.*;
 import com.talkforgeai.backend.assistant.service.AssistantService;
 import com.talkforgeai.backend.persona.controller.GenerateImageRequest;
 import com.talkforgeai.backend.persona.controller.GenerateImageResponse;
+import com.talkforgeai.backend.persona.dto.PersonaImageUploadResponse;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.service.openai.assistant.dto.*;
 import jakarta.websocket.server.PathParam;
@@ -32,6 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -71,6 +73,11 @@ public class AssistantController {
         assistantService.modifyAssistant(assistantId, modifiedAssistant);
     }
 
+    @PostMapping("/assistants")
+    public AssistantDto createAssistant(@RequestBody AssistantDto modifiedAssistant) {
+        return assistantService.createAssistant(modifiedAssistant);
+    }
+
     @GetMapping("/assistants/images/{imageFile}")
     public ResponseEntity<byte[]> getImage(@PathVariable String imageFile) {
         try {
@@ -85,6 +92,11 @@ public class AssistantController {
             LOGGER.error("Error loading image file: {}.", imageFile, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @PostMapping("/assistants/images/upload")
+    public PersonaImageUploadResponse singleFileUpload(@RequestParam("file") MultipartFile file) {
+        return assistantService.uploadImage(file);
     }
 
     @PostMapping("/assistants/images/generate")
