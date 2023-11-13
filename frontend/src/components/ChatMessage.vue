@@ -37,7 +37,7 @@ export default {
   },
   computed: {
     personaImage() {
-      return this.store.selectedPersona.imageUrl;
+      return this.store.selectedAssistant.imageUrl;
     },
     messageClass() {
       return {
@@ -46,7 +46,7 @@ export default {
       };
     },
     isAssistant() {
-      return this.message.role === Role.ASSISTANT && !!this.store.selectedPersona.imagePath;
+      return this.message.role === Role.ASSISTANT && !!this.store.selectedAssistant.imagePath;
     },
     isUser() {
       return this.message.role === Role.USER;

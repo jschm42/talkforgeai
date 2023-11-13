@@ -126,6 +126,7 @@ export const useChatStore = defineStore('chat', {
         if (runT.status === 'completed') {
           console.log('Run completed');
           try {
+            clearInterval(pollingInterval);
             await this.handleResult();
           } catch (e) {
             console.error('Error while handling result', e);
@@ -176,9 +177,13 @@ export const useChatStore = defineStore('chat', {
       await assistantService.runConversation(this.threadId, this.selectedAssistant.id);
     },
     async generateThreadTitle(threadId: string, userMessage: string, assistantMessage: string) {
-      const response = await assistantService.generateThreadTitle(threadId, userMessage, assistantMessage);
-      console.log('Generated title response', response);
-      await this.retrieveThreads();
+      // Find selected thread
+      const thread = this.threads.find(t => t.id === threadId);
+      if (thread && (thread.title === '<no title>' || thread.title === '' || thread.title === undefined)) {
+        const response = await assistantService.generateThreadTitle(threadId, userMessage, assistantMessage);
+        console.log('Generated title response', response);
+        await this.retrieveThreads();
+      }
     },
     // ************** Old code *****************
     async newSession() {
