@@ -29,7 +29,7 @@
           <div class="row g-0">
             <div class="col-md-4">
               <img v-if="isShowAssistantImage(assistant)" :alt="assistant.name" :src="assistant.imageUrl"
-                   class="persona-icon" role="button" @click.prevent="onPersonaSelected(assistant)"/>
+                   class="persona-icon" role="button" @click.prevent="onPersonaSelected(assistant.id)"/>
               <i v-else class="fs-1 bi bi-robot robot-icon"></i>
             </div>
             <div class="col-md-6">
@@ -47,7 +47,7 @@
             <small class="text-body-secondary">{{ assistant.description }}</small>
           </div>
 
-          <persona-compact-info :persona="assistant"></persona-compact-info>
+          <persona-compact-info :assistant="assistant"></persona-compact-info>
 
         </div>
 
@@ -95,17 +95,14 @@ export default defineComponent({
     isShowAssistantImage(assistant) {
       return !!assistant.imagePath;
     },
-    onPersonaSelected(assistant) {
-      this.$router.push({name: 'chat', params: {assistantId: assistant.id}});
+    onPersonaSelected(assistantId) {
+      this.$router.push({name: 'chat', params: {assistantId}});
     },
     onCreateNewPersona() {
-      console.log('onCreateNewPersona');
       this.$router.push({name: 'persona-create'});
     },
-    onEditPersona(personaId) {
-      console.log('onEditPersona', personaId);
-
-      this.$router.push({name: 'persona-edit', params: {personaId}});
+    onEditPersona(assistantId) {
+      this.$router.push({name: 'persona-edit', params: {assistantId}});
     },
   },
   async mounted() {

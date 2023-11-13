@@ -15,16 +15,16 @@
  */
 
 import {defineStore} from 'pinia';
-import Persona from '@/store/to/persona';
+import Assistant from '@/store/to/assistant';
 
 export const usePersonaFormStore = defineStore('personaFormStore', {
   state: () => {
     return {
-      form: new Persona(),
+      form: new Assistant(),
     };
   },
   getters: {
-    personaForm(): Persona {
+    personaForm(): Assistant {
       return this.form;
     },
   },
@@ -32,7 +32,7 @@ export const usePersonaFormStore = defineStore('personaFormStore', {
     resetPersonaEditForm() {
       this.$reset();
     },
-    setPersonaEditForm(persona: Persona) {
+    setPersonaEditForm(persona: Assistant) {
       this.form = {...persona};
     },
   },

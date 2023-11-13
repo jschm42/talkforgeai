@@ -38,7 +38,7 @@ const routes: Array<RouteRecordRaw> = [
   },
 
   {
-    path: '/persona/edit/:personaId',
+    path: '/persona/edit/:assistantId',
     name: 'persona-edit',
     component: PersonaEditorView,
     props: true,

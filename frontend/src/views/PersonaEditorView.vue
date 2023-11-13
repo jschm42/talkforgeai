@@ -84,13 +84,13 @@
 <script>
 import {defineComponent} from 'vue';
 import PersonaService from '@/service/persona.service';
-import Persona from '@/store/to/persona';
 import {usePersonaFormStore} from '@/store/persona-form-store';
 import PersonaTabModel from '@/components/persona/PersonaTabModel.vue';
 import PersonaTabProfile from '@/components/persona/PersonaTabProfile.vue';
 import PersonaTabVoice from '@/components/persona/PersonaTabVoice.vue';
 import PersonaTabFeatures from '@/components/persona/PersonaTabFeatures.vue';
 import QuestionModal from '@/components/QuestionModal.vue';
+import Assistant from '@/store/to/assistant';
 
 const personaService = new PersonaService();
 
@@ -105,24 +105,24 @@ export default defineComponent({
       showModal: false,
     };
   },
-  props: ['personaId'],
+  props: ['assistantId'],
   methods: {
     async handleSubmit() {
       console.log('handleSubmit');
 
-      const form = this.store.personaForm;
-      const persona = new Persona();
-      persona.personaId = form.personaId;
-      persona.imagePath = form.imagePath;
-      persona.name = form.name;
-      persona.description = form.description;
-      persona.system = form.system;
-      persona.properties = form.properties;
+      const form = this.store.form;
+      const assistant = new Assistant();
+      assistant.id = form.id;
+      //assistant.imagePath = form.imagePath;
+      assistant.name = form.name;
+      assistant.description = form.description;
+      //assistant.system = form.system;
+      //assistant.properties = form.properties;
 
       try {
-        await personaService.writePersona(persona);
+        await personaService.writePersona(assistant);
 
-        this.$router.push({name: 'persona-choice'});
+        this.$router.push({name: 'assistant-choice'});
       } catch (error) {
         console.error(error);
       }
