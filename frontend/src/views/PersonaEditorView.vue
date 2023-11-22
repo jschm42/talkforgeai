@@ -21,30 +21,39 @@
 
       <ul id="personaTab" class="nav nav-tabs" role="tablist">
         <li class="nav-item">
-          <button id="home-tab" aria-controls="home-tab-pane" aria-selected="true" class="nav-link active"
-                  data-bs-target="#main-tab-pane" data-bs-toggle="tab" role="tab" type="button">Profile
+          <button id="home-tab" aria-controls="home-tab-pane" aria-selected="true"
+                  class="nav-link active"
+                  data-bs-target="#main-tab-pane" data-bs-toggle="tab" role="tab" type="button">
+            Profile
           </button>
         </li>
         <li class="nav-item">
-          <button id="model-tab" aria-controls="model-tab-pane" aria-selected="true" class="nav-link"
-                  data-bs-target="#model-tab-pane" data-bs-toggle="tab" role="tab" type="button">Model
+          <button id="model-tab" aria-controls="model-tab-pane" aria-selected="true"
+                  class="nav-link"
+                  data-bs-target="#model-tab-pane" data-bs-toggle="tab" role="tab" type="button">
+            Model
           </button>
         </li>
         <li class="nav-item">
-          <button id="voice-tab" aria-controls="voice-tab-pane" aria-selected="true" class="nav-link"
-                  data-bs-target="#voice-tab-pane" data-bs-toggle="tab" role="tab" type="button">Voice
+          <button id="voice-tab" aria-controls="voice-tab-pane" aria-selected="true"
+                  class="nav-link"
+                  data-bs-target="#voice-tab-pane" data-bs-toggle="tab" role="tab" type="button">
+            Voice
           </button>
         </li>
         <li class="nav-item">
-          <button id="features-tab" aria-controls="features-tab-pane" aria-selected="true" class="nav-link"
-                  data-bs-target="#features-tab-pane" data-bs-toggle="tab" role="tab" type="button">Features
+          <button id="features-tab" aria-controls="features-tab-pane" aria-selected="true"
+                  class="nav-link"
+                  data-bs-target="#features-tab-pane" data-bs-toggle="tab" role="tab" type="button">
+            Features
           </button>
         </li>
       </ul>
 
       <div id="personaTabContent" class="tab-content">
 
-        <div id="main-tab-pane" aria-labelledby="main-tab" class="tab-pane fade show active" role="tabpanel"
+        <div id="main-tab-pane" aria-labelledby="main-tab" class="tab-pane fade show active"
+             role="tabpanel"
              tabindex="0">
           <persona-tab-profile ref="mainTabPane"></persona-tab-profile>
 
@@ -60,7 +69,8 @@
           <persona-tab-voice ref="voiceTabPane"></persona-tab-voice>
         </div>
 
-        <div id="features-tab-pane" aria-labelledby="features-tab" class="tab-pane fade" role="tabpanel"
+        <div id="features-tab-pane" aria-labelledby="features-tab" class="tab-pane fade"
+             role="tabpanel"
              tabindex="0">
           <persona-tab-features ref="featuresTabPane"></persona-tab-features>
         </div>
@@ -74,16 +84,15 @@
   </div>
 
   <QuestionModal
-    :isOpen="showModal"
-    message="Are you sure you want to delete this persona?"
-    title="Delete Persona"
-    @answer="handleDeleteQuestionAnswer"
+      :isOpen="showModal"
+      message="Are you sure you want to delete this persona?"
+      title="Delete Persona"
+      @answer="handleDeleteQuestionAnswer"
   />
 </template>
 
 <script>
 import {defineComponent} from 'vue';
-import PersonaService from '@/service/persona.service';
 import {usePersonaFormStore} from '@/store/persona-form-store';
 import PersonaTabModel from '@/components/persona/PersonaTabModel.vue';
 import PersonaTabProfile from '@/components/persona/PersonaTabProfile.vue';
@@ -93,11 +102,16 @@ import QuestionModal from '@/components/QuestionModal.vue';
 import Assistant from '@/store/to/assistant';
 import AssistantService from '@/service/assistant.service';
 
-const personaService = new PersonaService();
 const assistantService = new AssistantService();
 
 export default defineComponent({
-  components: {PersonaTabFeatures, PersonaTabVoice, PersonaTabModel, PersonaTabProfile, QuestionModal},
+  components: {
+    PersonaTabFeatures,
+    PersonaTabVoice,
+    PersonaTabModel,
+    PersonaTabProfile,
+    QuestionModal,
+  },
   setup() {
     const store = usePersonaFormStore(); // Call useMyStore() inside the setup function
     return {store};
@@ -146,7 +160,7 @@ export default defineComponent({
     handleDeleteQuestionAnswer(answer) {
       this.showModal = false;
       if (answer) {
-        personaService.deletePersona(this.store.personaForm.personaId).then(() => {
+        assistantService.deleteAssistant(this.assistantId).then(() => {
           this.$router.push({name: 'persona-choice'});
         });
       }

@@ -16,7 +16,11 @@
 
 import axios from 'axios';
 import Run from '@/store/to/run';
-import Thread, {ParsedThreadMessage, ThreadMessage, TreadMessageListParsed} from '@/store/to/thread';
+import Thread, {
+  ParsedThreadMessage,
+  ThreadMessage,
+  TreadMessageListParsed,
+} from '@/store/to/thread';
 import Assistant from '@/store/to/assistant';
 
 class AssistantService {
@@ -71,6 +75,16 @@ class AssistantService {
     }
   }
 
+  async deleteAssistant(assistantId: string) {
+    console.log('Delete assistant with id:', assistantId);
+    try {
+      const result = await axios.delete(`/api/v1/assistants/${assistantId}`);
+      return result.data;
+    } catch (error) {
+      throw new Error('Error on deletion of assistant: ' + error);
+    }
+  }
+
   async createAssistant(assistant: Assistant) {
     console.log('Create assistant.');
     try {
@@ -105,8 +119,8 @@ class AssistantService {
   async submitUserMessage(threadId: string, content: string) {
     try {
       const result = await axios.post(
-        `/api/v1/threads/${threadId}/messages`,
-        {content, role: 'user'},
+          `/api/v1/threads/${threadId}/messages`,
+          {content, role: 'user'},
       );
       return result.data;
     } catch (error) {
@@ -116,7 +130,8 @@ class AssistantService {
 
   async runConversation(threadId: string, assistantId: string): Promise<Run> {
     try {
-      const result = await axios.post(`/api/v1/threads/${threadId}/runs`, {assistant_id: assistantId});
+      const result = await axios.post(`/api/v1/threads/${threadId}/runs`,
+          {assistant_id: assistantId});
       return result.data;
     } catch (error) {
       throw new Error('Error submitting message: ' + error);
@@ -135,18 +150,19 @@ class AssistantService {
   async retrieveLastAssistentMessage(threadId: string): Promise<ThreadMessage | undefined> {
     try {
       const result = await axios.get(
-        `/api/v1/threads/${threadId}/messages`,
-        {
-          params: {
-            limit: 1,
-            order: 'desc',
+          `/api/v1/threads/${threadId}/messages`,
+          {
+            params: {
+              limit: 1,
+              order: 'desc',
+            },
           },
-        },
       );
       const response = result.data;
       console.log('Response: ', response);
 
-      if (response.message_list && response.message_list.data && response.message_list.data.length > 0) {
+      if (response.message_list && response.message_list.data && response.message_list.data.length >
+          0) {
         return response.message_list.data[0];
       }
     } catch (error) {
@@ -157,12 +173,12 @@ class AssistantService {
   async retrieveMessages(threadId: string): Promise<TreadMessageListParsed> {
     try {
       const result = await axios.get(
-        `/api/v1/threads/${threadId}/messages`,
-        {
-          params: {
-            order: 'asc',
+          `/api/v1/threads/${threadId}/messages`,
+          {
+            params: {
+              order: 'asc',
+            },
           },
-        },
       );
 
       return result.data;
@@ -171,7 +187,8 @@ class AssistantService {
     }
   }
 
-  async generateThreadTitle(threadId: string, userMessageContent: string, assistantMessageContent: string) {
+  async generateThreadTitle(
+      threadId: string, userMessageContent: string, assistantMessageContent: string) {
     console.log('Generating title for thread:', threadId);
 
     const thread = await this.retrieveThread(threadId);
@@ -183,10 +200,10 @@ class AssistantService {
 
     try {
       const result = await axios.post(`/api/v1/threads/${threadId}/title/generate`,
-        {
-          userMessageContent,
-          assistantMessageContent,
-        });
+          {
+            userMessageContent,
+            assistantMessageContent,
+          });
       return result.data;
     } catch (error) {
       throw new Error('Error while generating title for thread: ' + error);
@@ -195,10 +212,10 @@ class AssistantService {
 
   async retrieveThreads(): Promise<Array<Thread>> {
     const result = await axios.get(
-      `/api/v1/threads`,
-      {
-        params: {},
-      },
+        `/api/v1/threads`,
+        {
+          params: {},
+        },
     );
 
     return result.data;
@@ -206,15 +223,15 @@ class AssistantService {
 
   async postprocessMessage(threadId: string, messageId: string): Promise<ParsedThreadMessage> {
     const result = await axios.post(
-      `/api/v1/threads/${threadId}/messages/${messageId}/postprocess`,
-      {},
+        `/api/v1/threads/${threadId}/messages/${messageId}/postprocess`,
+        {},
     );
     return result.data;
   }
 
   private async retrieveThread(threadId: string) {
     const result = await axios.get(
-      `/api/v1/threads/${threadId}`,
+        `/api/v1/threads/${threadId}`,
     );
     return result.data;
   }

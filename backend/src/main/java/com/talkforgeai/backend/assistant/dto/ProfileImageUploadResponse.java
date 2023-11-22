@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.persona.controller;
+package com.talkforgeai.backend.assistant.dto;
 
-public record GenerateImageResponse(String fileName) {
+public record ProfileImageUploadResponse(String filename) {
+
 }

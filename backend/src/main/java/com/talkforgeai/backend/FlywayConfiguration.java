@@ -16,25 +16,26 @@
 
 package com.talkforgeai.backend;
 
+import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.sql.DataSource;
-
 @Configuration
 public class FlywayConfiguration {
-    final DataSource dataSource;
 
-    public FlywayConfiguration(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+  final DataSource dataSource;
 
-    @Bean(initMethod = "migrate")
-    Flyway flyway() {
-        return Flyway.configure()
-                .dataSource(dataSource)
-                // other custom configurations
-                .load();
-    }
+  public FlywayConfiguration(DataSource dataSource) {
+    this.dataSource = dataSource;
+  }
+
+  @Bean(initMethod = "migrate")
+  Flyway flyway() {
+    return Flyway.configure()
+        .dataSource(dataSource)
+        // other custom configurations
+        .load();
+  }
+    
 }

@@ -25,21 +25,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class CORSConfiguration {
-    @Value("${server.port}")
-    private int serverPort;
 
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(@NotNull CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins(
-                                "http://localhost:" + serverPort,
-                                "http://localhost:8080"
-                        )
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS");
-            }
-        };
-    }
+  @Value("${server.port}")
+  private int serverPort;
+
+  @Bean
+  public WebMvcConfigurer corsConfigurer() {
+    return new WebMvcConfigurer() {
+      @Override
+      public void addCorsMappings(@NotNull CorsRegistry registry) {
+        registry.addMapping("/**")
+            .allowedOrigins(
+                "http://localhost:" + serverPort,
+                "http://localhost:8080"
+            )
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS");
+      }
+    };
+  }
 }

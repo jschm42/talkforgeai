@@ -17,86 +17,80 @@
 package com.talkforgeai.backend.assistant.service;
 
 
+import static java.util.Objects.requireNonNullElse;
+
 import com.talkforgeai.backend.assistant.domain.AssistantEntity;
 import com.talkforgeai.backend.assistant.domain.AssistantPropertyValue;
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
-import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.service.openai.assistant.dto.Assistant;
-import org.springframework.stereotype.Component;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.talkforgeai.backend.persona.service.PersonaProperties.values;
-import static java.util.Objects.requireNonNullElse;
+import org.springframework.stereotype.Component;
 
 @Component
 public class AssistantMapper {
-    private final FileStorageService fileStorageService;
 
-    public AssistantMapper(FileStorageService fileStorageService) {
-        this.fileStorageService = fileStorageService;
-    }
 
-    AssistantDto mapAssistantDto(Assistant assistant, AssistantEntity assistantEntity) {
-        return new AssistantDto(
-                assistant.id(),
-                assistant.object(),
-                assistant.createdAt(),
-                assistant.name(),
-                assistant.description(),
-                assistant.model(),
-                assistant.instructions(),
-                assistant.tools(),
-                assistant.fileIds(),
-                assistant.metadata(),
-                assistantEntity.getImagePath(),
-                mapAssistantProperties(assistantEntity.getProperties())
+  AssistantDto mapAssistantDto(Assistant assistant, AssistantEntity assistantEntity) {
+    return new AssistantDto(
+        assistant.id(),
+        assistant.object(),
+        assistant.createdAt(),
+        assistant.name(),
+        assistant.description(),
+        assistant.model(),
+        assistant.instructions(),
+        assistant.tools(),
+        assistant.fileIds(),
+        assistant.metadata(),
+        assistantEntity.getImagePath(),
+        mapAssistantProperties(assistantEntity.getProperties())
+    );
+  }
+
+  Assistant mapAssistant(AssistantDto dto) {
+    return new Assistant(
+        dto.id(),
+        dto.object(),
+        dto.createdAt(),
+        dto.name(),
+        dto.description(),
+        dto.model(),
+        dto.instructions(),
+        dto.tools(),
+        dto.fileIds(),
+        dto.metadata()
+    );
+  }
+
+  public Map<String, String> mapAssistantProperties(
+      Map<String, AssistantPropertyValue> properties) {
+    Map<String, String> mappedProperties = new HashMap<>();
+
+    Arrays.stream(AssistantProperties.values()).forEach(property -> {
+      AssistantPropertyValue propertyValue = properties.get(property.getKey());
+      if (propertyValue != null) {
+        mappedProperties.put(
+            property.getKey(),
+            requireNonNullElse(propertyValue.getPropertyValue(), property.getKey())
         );
-    }
+      }
+    });
 
-    Assistant mapAssistant(AssistantDto dto) {
-        return new Assistant(
-                dto.id(),
-                dto.object(),
-                dto.createdAt(),
-                dto.name(),
-                dto.description(),
-                dto.model(),
-                dto.instructions(),
-                dto.tools(),
-                dto.fileIds(),
-                dto.metadata()
-        );
-    }
+    return mappedProperties;
+  }
 
-    public Map<String, String> mapAssistantProperties(Map<String, AssistantPropertyValue> properties) {
-        Map<String, String> mappedProperties = new HashMap<>();
+  public Map<String, AssistantPropertyValue> mapProperties(Map<String, String> properties) {
+    Map<String, AssistantPropertyValue> mappedProperties = new HashMap<>();
 
-        Arrays.stream(values()).forEach(property -> {
-            AssistantPropertyValue propertyValue = properties.get(property.getKey());
-            if (propertyValue != null) {
-                mappedProperties.put(
-                        property.getKey(),
-                        requireNonNullElse(propertyValue.getPropertyValue(), property.getKey())
-                );
-            }
-        });
+    Arrays.stream(AssistantProperties.values()).forEach(property -> {
+      String propertyValue = properties.get(property.getKey());
+      AssistantPropertyValue assistantPropertyValue = new AssistantPropertyValue();
+      assistantPropertyValue.setPropertyValue(propertyValue);
+      mappedProperties.put(property.getKey(), assistantPropertyValue);
+    });
 
-        return mappedProperties;
-    }
-
-    public Map<String, AssistantPropertyValue> mapProperties(Map<String, String> properties) {
-        Map<String, AssistantPropertyValue> mappedProperties = new HashMap<>();
-
-        Arrays.stream(values()).forEach(property -> {
-            String propertyValue = properties.get(property.getKey());
-            AssistantPropertyValue assistantPropertyValue = new AssistantPropertyValue();
-            assistantPropertyValue.setPropertyValue(propertyValue);
-            mappedProperties.put(property.getKey(), assistantPropertyValue);
-        });
-
-        return mappedProperties;
-    }
+    return mappedProperties;
+  }
 }

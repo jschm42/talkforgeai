@@ -16,55 +16,48 @@
 
 package com.talkforgeai.backend.voice.service;
 
-import com.talkforgeai.backend.persona.domain.PersonaEntity;
-import com.talkforgeai.backend.persona.service.PersonaMapper;
-import com.talkforgeai.backend.persona.service.PersonaProperties;
-import com.talkforgeai.backend.persona.service.PersonaService;
+import com.talkforgeai.backend.assistant.dto.AssistantDto;
+import com.talkforgeai.backend.assistant.service.AssistantProperties;
+import com.talkforgeai.backend.assistant.service.AssistantService;
 import com.talkforgeai.backend.voice.dto.TTSRequest;
 import com.talkforgeai.service.elevenlabs.ElevenLabsService;
 import com.talkforgeai.service.elevenlabs.dto.ElevenLabsModel;
 import com.talkforgeai.service.elevenlabs.dto.ElevenLabsRequest;
 import com.talkforgeai.service.elevenlabs.dto.ElevenLabsVoicesResponse;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
+import org.springframework.stereotype.Service;
 
 @Service
 public class TTSService {
 
-    private final PersonaService personaService;
+  private final ElevenLabsService elevenLabsService;
+  private final AssistantService assistantService;
 
-    private final PersonaMapper personaMapper;
-    private final ElevenLabsService elevenLabsService;
+  public TTSService(ElevenLabsService elevenLabsService, AssistantService assistantService) {
+    this.assistantService = assistantService;
+    this.elevenLabsService = elevenLabsService;
+  }
 
-    public TTSService(ElevenLabsService elevenLabsService, PersonaService personaService, PersonaMapper personaMapper) {
-        this.personaService = personaService;
-        this.elevenLabsService = elevenLabsService;
-        this.personaMapper = personaMapper;
-    }
+  public byte[] streamElevenLabsVoice(TTSRequest TTSRequest) {
+    AssistantDto assistantDto = assistantService.retrieveAssistant(TTSRequest.assistantId());
+    Map<String, String> assistantProperties = assistantDto.properties();
 
-    public byte[] streamElevenLabsVoice(TTSRequest TTSRequest) {
-        PersonaEntity persona = personaService.getPersonaById(TTSRequest.personaId())
-                .orElseThrow(() -> new RuntimeException("Persona not found:  " + TTSRequest.personaId()));
+    ElevenLabsRequest request = new ElevenLabsRequest(
+        TTSRequest.text(),
+        assistantProperties.get(AssistantProperties.ELEVENLABS_VOICEID.getKey()),
+        assistantProperties.get(AssistantProperties.ELEVENLABS_MODELID.getKey()),
+        new ElevenLabsRequest.VoiceSettings()
+    );
 
-        Map<String, String> personaProperties = personaMapper.mapEntityProperties(persona.getProperties());
+    return elevenLabsService.stream(request);
+  }
 
-        ElevenLabsRequest request = new ElevenLabsRequest(
-                TTSRequest.text(),
-                personaProperties.get(PersonaProperties.ELEVENLABS_VOICEID.getKey()),
-                personaProperties.get(PersonaProperties.ELEVENLABS_MODELID.getKey()),
-                new ElevenLabsRequest.VoiceSettings()
-        );
+  public List<ElevenLabsModel> getElevenLabsModels() {
+    return elevenLabsService.getModels();
+  }
 
-        return elevenLabsService.stream(request);
-    }
-
-    public List<ElevenLabsModel> getElevenLabsModels() {
-        return elevenLabsService.getModels();
-    }
-
-    public ElevenLabsVoicesResponse getElevenLabsVoices() {
-        return elevenLabsService.getVoices();
-    }
+  public ElevenLabsVoicesResponse getElevenLabsVoices() {
+    return elevenLabsService.getVoices();
+  }
 }
