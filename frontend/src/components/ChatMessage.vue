@@ -18,9 +18,8 @@
 
 import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
-import hljs from 'highlight.js';
-import ChatMessage from '@/store/to/chat-message';
 import ChatMessageTextToSpeech from '@/components/ChatMessageTextToSpeech.vue';
+import {ThreadMessage} from '@/store/to/thread';
 
 export default {
   name: 'ChatMessage',
@@ -33,33 +32,36 @@ export default {
     return {};
   },
   props: {
-    message: ChatMessage,
+    message: ThreadMessage,
     messageIndex: Number,
   },
   computed: {
     personaImage() {
-      return this.store.selectedPersona.imageUrl;
+      return this.store.getAssistantImageUrl(this.store.selectedAssistant.image_path);
     },
     messageClass() {
       return {
         'role-user': this.message.role === Role.USER,
-        'role-assistant': this.message.role === Role.ASSISTANT,
+        'role-assistantEntity': this.message.role === Role.ASSISTANT,
       };
     },
+    hasProfileImage() {
+      return this.store.selectedAssistant.image_path;
+    },
     isAssistant() {
-      return this.message.role === Role.ASSISTANT && !!this.store.selectedPersona.imagePath;
+      return this.message.role === Role.ASSISTANT;
     },
     isUser() {
-      return this.message.role === Role.USER && !this.message.name;
+      return this.message.role === Role.USER;
     },
-    isFunctionCall() {
-      return this.message.function_call;
-    },
-    isFunctionResponse() {
-      return this.message.name && this.message.content;
-    },
+    // isFunctionCall() {
+    //   return this.message.function_call;
+    // },
+    // isFunctionResponse() {
+    //   return this.message.name && this.message.content;
+    // },
     isSpeakable() {
-      return !this.isFunctionCall;
+      return true;
     },
     avatarImageClass() {
       return {
@@ -79,14 +81,14 @@ export default {
       await this.$refs.chatMessageAudioPlayerRef.playAudio();
     },
     getContent() {
-      if (this.message.function_call) {
-        const func = this.message.function_call;
-        const argumentsHighlighted = hljs.highlight(func.arguments, {language: 'json'}).value;
+      // if (this.message.function_call) {
+      //   const func = this.message.function_call;
+      //   const argumentsHighlighted = hljs.highlight(func.arguments, {language: 'json'}).value;
+      //
+      //   return `<strong>${func.name}(<p>${argumentsHighlighted}</p>)</strong>`;
+      // }
 
-        return `<strong>${func.name}(<p>${argumentsHighlighted}</p>)</strong>`;
-      }
-
-      return this.message.content;
+      return this.message.content[0].text.value;
     },
     getMessageStatus() {
       if (this.messageIndex === this.store.maxMessageIndex) {
@@ -108,27 +110,27 @@ export default {
   <div :class="messageClass" class="card m-1 p-1 shadow">
     <div class="row">
       <div class="col-md-1">
-        <i v-if="isUser" class="fs-1 bi bi-person text-gradient-silver"></i>
-        <img v-else-if="isAssistant" :src="personaImage" alt="Assistant" class="persona-icon">
-        <i v-else-if="isFunctionCall" class="fs-1 bi bi-gear"></i>
-        <i v-else-if="isFunctionResponse" class="fs-1 bi bi-arrow-return-left"></i>
-        <i v-else class="fs-1 bi bi-robot text-gradient-silver"></i>
+        <i v-if="isUser" class="fs-1 bi bi-person"></i>
+        <img v-else-if="isAssistant && hasProfileImage" :src="personaImage" alt="Assistant" class="persona-icon">
+        <!--        <i v-else-if="isFunctionCall" class="fs-1 bi bi-gear"></i>-->
+        <!--        <i v-else-if="isFunctionResponse" class="fs-1 bi bi-arrow-return-left"></i>-->
+        <i v-else class="fs-1 bi bi-robot robot-icon"></i>
       </div>
       <div class="col-md-10">
         <div class="card-body">
-          <div class="card-text text-start" v-html="getContent()"></div>
+          <div v-if="getMessageStatusType() === 'running'" class="spinner-grow text-primary" role="status">
+          </div>
+          <i v-else-if="getMessageStatusType() === 'error'" class="bi bi-exclamation-lg bg-danger"></i>
+          <div v-else class="card-text text-start" v-html="getContent()"></div>
         </div>
       </div>
       <div class="col-md-1 text-end">
         <chat-message-text-to-speech v-if="isAssistant" ref="chatMessageAudioPlayerRef"
-                                     :message="this.message"></chat-message-text-to-speech>
+                                     :message="message"></chat-message-text-to-speech>
       </div>
     </div>
     <footer>
-      <div v-if="getMessageStatusType() === 'running'" role="status">
-        <span class="sr-only">{{ getMessageStatus() }}</span>
-      </div>
-      <i v-else-if="getMessageStatusType() === 'error'" class="bi bi-exclamation-lg bg-danger"></i>
+
     </footer>
   </div>
 
@@ -139,7 +141,7 @@ export default {
   background-color: #2c3e50;
 }
 
-.role-assistant {
+.role-assistantEntity {
 //background-color: #000000;
 }
 
@@ -166,6 +168,10 @@ export default {
 
 footer {
   font-style: italic;
+}
+
+.robot-icon {
+  color: darksalmon;
 }
 
 </style>

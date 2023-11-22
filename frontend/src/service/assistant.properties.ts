@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-const PersonaProperties = {
+const AssistantProperties = {
   TTS_TYPE: 'tts_type',
   SPEECHAPI_VOICE: 'speechAPI_voice',
   ELEVENLABS_VOICEID: 'elevenlabs_voiceId',
   ELEVENLABS_MODELID: 'elevenlabs_modelId',
   ELEVENLABS_SIMILARITYBOOST: 'elevenlabs_similarityBoost',
   ELEVENLABS_STABILITY: 'elevenlabs_stability',
-  CHATGPT_MODEL: 'chatgpt_model',
   CHATGPT_TEMPERATURE: 'chatgpt_temperature',
   CHATGPT_TOP_P: 'chatgpt_topP',
   CHATGPT_FREQUENCY_PENALTY: 'chatgpt_frequencyPenalty',
@@ -38,6 +37,23 @@ const TTSType = {
   DISABLED: '',
 };
 
-export default PersonaProperties;
-export {TTSType};
+const AssistantPropertiesDefault = {
+  [AssistantProperties.TTS_TYPE]: TTSType.DISABLED,
+  [AssistantProperties.SPEECHAPI_VOICE]: '',
+  [AssistantProperties.ELEVENLABS_VOICEID]: '',
+  [AssistantProperties.ELEVENLABS_MODELID]: '',
+  [AssistantProperties.ELEVENLABS_SIMILARITYBOOST]: '0',
+  [AssistantProperties.ELEVENLABS_STABILITY]: '0',
+  [AssistantProperties.CHATGPT_TEMPERATURE]: '0.7',
+  [AssistantProperties.CHATGPT_TOP_P]: '1.0',
+  [AssistantProperties.CHATGPT_FREQUENCY_PENALTY]: '0',
+  [AssistantProperties.CHATGPT_PRESENCE_PENALTY]: '0',
+  [AssistantProperties.FEATURE_PLANTUML]: 'false',
+  [AssistantProperties.FEATURE_IMAGEGENERATION]: 'true',
+  [AssistantProperties.FEATURE_AUTOSPEAKDEFAULT]: 'false',
+  [AssistantProperties.FEATURE_TITLEGENERATION]: 'true',
+};
+
+export default AssistantProperties;
+export {TTSType, AssistantPropertiesDefault};
 

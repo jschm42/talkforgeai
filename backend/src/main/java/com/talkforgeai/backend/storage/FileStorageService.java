@@ -59,16 +59,12 @@ public class FileStorageService {
         return this.dataDirectory;
     }
 
-    public Path getPersonaImportDirectory() {
-        return getDataDirectory().resolve("import/persona");
+    public Path getAssistantsDirectory() {
+        return getDataDirectory().resolve("assistants");
     }
 
-    public Path getPersonaDirectory() {
-        return getDataDirectory().resolve("persona");
-    }
-
-    public Path getChatDirectory() {
-        return getDataDirectory().resolve("chat");
+    public Path getThreadDirectory() {
+        return getDataDirectory().resolve("threads");
     }
 
     public void createDataDirectories() {
@@ -76,11 +72,11 @@ public class FileStorageService {
             Path createdPath = Files.createDirectories(getDataDirectory());
             LOGGER.info("Created data directory {}", createdPath);
 
-            createdPath = Files.createDirectories(getPersonaDirectory());
-            LOGGER.info("Created persona directory {}", createdPath);
+            createdPath = Files.createDirectories(getThreadDirectory());
+            LOGGER.info("Created threads directory {}", createdPath);
 
-            createdPath = Files.createDirectories(getPersonaImportDirectory());
-            LOGGER.info("Created persona import directory {}", createdPath);
+            createdPath = Files.createDirectories(getAssistantsDirectory());
+            LOGGER.info("Created assistants directory {}", createdPath);
 
             LOGGER.info("Directories created successfully");
         } catch (IOException e) {

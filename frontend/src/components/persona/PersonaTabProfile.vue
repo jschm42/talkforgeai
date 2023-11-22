@@ -19,9 +19,10 @@ import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
 import axios from 'axios';
-import PersonaService from '@/service/persona.service';
+import AssistantService from '@/service/assistant.service';
+import {useChatStore} from '@/store/chat-store';
 
-const personaService = new PersonaService();
+const assistantService = new AssistantService();
 
 export default defineComponent({
   name: 'PersonaTabProfile',
@@ -33,13 +34,14 @@ export default defineComponent({
     };
   },
   setup() {
-    const {personaForm} = storeToRefs(usePersonaFormStore());
+    const store = useChatStore();
+    const {assistantForm} = storeToRefs(usePersonaFormStore());
 
-    return {personaForm};
+    return {assistantForm, store};
   },
   methods: {
     getImageUrl(fileName) {
-      return '/api/v1/persona/image/' + fileName;
+      return this.store.getAssistantImageUrl(fileName);
     },
     async onFileSelected(event) {
       const selectedFile = event.target.files[0];
@@ -50,7 +52,7 @@ export default defineComponent({
 
       this.$refs.fileInput.textContent = uploadedFileName.data.filename;
 
-      this.personaForm.imagePath = uploadedFileName.data.filename;
+      this.assistantForm.image_path = uploadedFileName.data.filename;
     },
     async uploadImage(file) {
       const formData = new FormData();
@@ -70,13 +72,13 @@ export default defineComponent({
       this.$refs.fileInput.click();
     },
     getAltImageText() {
-      return this.personaForm.imagePath;
+      return this.personaForm.image_path;
     },
     async onGenerateImage() {
       this.isGenerationRunning = true;
-      const imageResponse = await personaService.generatePersonaImage(this.imageGenerationPrompt);
+      const imageResponse = await assistantService.generateAssistantImage(this.imageGenerationPrompt);
       console.log('Image response: ', imageResponse);
-      this.personaForm.imagePath = imageResponse.data.fileName;
+      this.assistantForm.image_path = imageResponse.data.fileName;
       this.showModal = false;
       this.isGenerationRunning = false;
     },
@@ -91,13 +93,13 @@ export default defineComponent({
   <div class="mb-3">
     <div class="row">
       <div class="col-4">
-        <div v-if="!personaForm.imagePath"
+        <div v-if="!assistantForm.image_path"
              class="placeholder-image img-thumbnail d-flex justify-content-center align-items-center" role="button"
              @click="triggerFileInput">
           <i class="bi bi-person"></i>
         </div>
-        <img v-else :alt="personaForm.imagePath" :src="getImageUrl(personaForm.imagePath)"
-             :title="personaForm.imagePath"
+        <img v-else :alt="assistantForm.imagePath" :src="getImageUrl(assistantForm.image_path)"
+             :title="assistantForm.image_path"
              class="img-thumbnail thumbnail-image"
              role="button" @click="triggerFileInput"/>
         <input id="personaImage" ref="fileInput" class=" col-10 form-control" style="display: none" type="file"
@@ -115,24 +117,19 @@ export default defineComponent({
 
   <div class="mb-3">
     <label class="form-label" for="personaName">Name</label>
-    <input id="personaName" v-model="personaForm.name" class="form-control" maxlength="32" required
+    <input id="personaName" v-model="assistantForm.name" class="form-control" maxlength="32" required
            type="text">
   </div>
   <div class="mb-3">
     <label class="form-label" for="personaDescription">Description (will not be used in generation requests)</label>
-    <textarea id="personaDescription" v-model="personaForm.description" class="form-control"
+    <textarea id="personaDescription" v-model="assistantForm.description" class="form-control"
               maxlength="256"
               rows="2"></textarea>
   </div>
   <div class="mb-3">
-    <label class="form-label" for="personaBackground">What would you like the persona to recall?</label>
-    <textarea id="personaBackground" v-model="personaForm.background" class="form-control" maxlength="16384"
-              rows="5"></textarea>
-  </div>
-  <div class="mb-3">
     <label class="form-label" for="personaPersonality">Describe the persona's character traits. How would you prefer it
       to respond?</label>
-    <textarea id="personaPersonality" v-model="personaForm.personality" class="form-control" maxlength="16384"
+    <textarea id="personaPersonality" v-model="assistantForm.instructions" class="form-control" maxlength="16384"
               rows="5"></textarea>
   </div>
 

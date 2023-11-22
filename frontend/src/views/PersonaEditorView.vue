@@ -16,7 +16,7 @@
 
 <template>
   <div class="container col-lg-5 col-10">
-    <h2>Persona Editor</h2>
+    <h2>Assistant Editor</h2>
     <form class="form-panel" @submit.prevent="handleSubmit">
 
       <ul id="personaTab" class="nav nav-tabs" role="tablist">
@@ -84,15 +84,17 @@
 <script>
 import {defineComponent} from 'vue';
 import PersonaService from '@/service/persona.service';
-import Persona from '@/store/to/persona';
 import {usePersonaFormStore} from '@/store/persona-form-store';
 import PersonaTabModel from '@/components/persona/PersonaTabModel.vue';
 import PersonaTabProfile from '@/components/persona/PersonaTabProfile.vue';
 import PersonaTabVoice from '@/components/persona/PersonaTabVoice.vue';
 import PersonaTabFeatures from '@/components/persona/PersonaTabFeatures.vue';
 import QuestionModal from '@/components/QuestionModal.vue';
+import Assistant from '@/store/to/assistant';
+import AssistantService from '@/service/assistant.service';
 
 const personaService = new PersonaService();
+const assistantService = new AssistantService();
 
 export default defineComponent({
   components: {PersonaTabFeatures, PersonaTabVoice, PersonaTabModel, PersonaTabProfile, QuestionModal},
@@ -105,22 +107,30 @@ export default defineComponent({
       showModal: false,
     };
   },
-  props: ['personaId'],
+  props: ['assistantId'],
   methods: {
     async handleSubmit() {
       console.log('handleSubmit');
 
-      const form = this.store.personaForm;
-      const persona = new Persona();
-      persona.personaId = form.personaId;
-      persona.imagePath = form.imagePath;
-      persona.name = form.name;
-      persona.description = form.description;
-      persona.system = form.system;
-      persona.properties = form.properties;
+      const form = this.store.assistantForm;
+      const assistant = new Assistant();
+      assistant.image_path = form.image_path;
+      assistant.id = undefined;
+      assistant.instructions = form.instructions;
+      assistant.name = form.name;
+      assistant.description = form.description || '';
+      assistant.model = form.model;
+      assistant.tools = [];
+      assistant.file_ids = [];
+      assistant.metadata = {};
+      assistant.properties = {...form.properties};
 
       try {
-        await personaService.writePersona(persona);
+        if (this.assistantId) {
+          await assistantService.modifyAssistant(this.assistantId, assistant);
+        } else {
+          await assistantService.createAssistant(assistant);
+        }
 
         this.$router.push({name: 'persona-choice'});
       } catch (error) {
@@ -142,14 +152,11 @@ export default defineComponent({
       }
     },
   },
-  mounted() {
+  async mounted() {
     this.store.resetPersonaEditForm();
-    if (this.personaId) {
-      personaService.readPersona(this.personaId).then((persona) => {
-        console.log('Read persona', persona);
-
-        this.store.setPersonaEditForm(persona);
-      });
+    if (this.assistantId) {
+      const assistant = await assistantService.retrieveAssistant(this.assistantId);
+      this.store.setPersonaEditForm(assistant);
     }
   },
 });

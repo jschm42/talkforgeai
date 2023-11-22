@@ -19,7 +19,6 @@ package com.talkforgeai.backend.transformers;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
 import com.talkforgeai.service.openai.OpenAIImageService;
-import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
 import com.talkforgeai.service.plantuml.PlantUMLService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Component
 public class MessageProcessor {
@@ -46,18 +44,18 @@ public class MessageProcessor {
         transformers.add(new ImageDownloadTransformer(imageService));
     }
 
-    public OpenAIChatMessage transform(OpenAIChatMessage message, UUID sessionId) {
-        if (message.content() == null || message.content().isEmpty()) {
-            return new OpenAIChatMessage(message.role(), "");
+    public String transform(String content, String threadId, String messageId) {
+        if (content == null || content.isEmpty()) {
+            return "";
         }
 
-        String processedContent = message.content();
+        String processedContent = content;
 
         TransformerContext context = new TransformerContext(
-                sessionId,
-                fileStorageService.getPersonaDirectory(),
-                fileStorageService.getPersonaImportDirectory(),
-                fileStorageService.getChatDirectory()
+                threadId,
+                messageId,
+                fileStorageService.getAssistantsDirectory(),
+                fileStorageService.getThreadDirectory()
         );
 
         for (Transformer t : transformers) {
@@ -66,7 +64,7 @@ public class MessageProcessor {
         }
 
         logger.info("Transformation done.");
-        return new OpenAIChatMessage(message.role(), processedContent);
+        return processedContent;
     }
 
 }

@@ -16,7 +16,7 @@
 
 import axios from 'axios';
 import Persona from '@/store/to/persona';
-import PersonaProperties from '@/service/persona.properties';
+import AssistantProperties from '@/service/assistant.properties';
 
 class TtsService {
 
@@ -75,7 +75,7 @@ class TtsService {
     return new Promise((resolve, reject) => {
       const msg = new SpeechSynthesisUtterance();
       msg.text = text;
-      const personaVoice = persona.properties[PersonaProperties.SPEECHAPI_VOICE];
+      const personaVoice = persona.properties[AssistantProperties.SPEECHAPI_VOICE];
       const voice = window.speechSynthesis.getVoices().find((voice) => voice.name === personaVoice);
 
       if (voice) {

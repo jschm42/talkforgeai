@@ -47,12 +47,12 @@
 import {defineComponent} from 'vue';
 import ChatContainer from '@/components/ChatContainer.vue';
 import ChatHistory from '@/components/history/ChatHistory.vue';
-import ChatHeader from '@/components/ChatHeader.vue';
 import {useChatStore} from '@/store/chat-store';
+import ChatHeader from '@/components/ChatHeader.vue';
 
 export default defineComponent({
   components: {ChatHeader, ChatHistory, ChatContainer},
-  props: ['personaId'],
+  props: ['assistantId'],
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
     return {store};
@@ -61,7 +61,8 @@ export default defineComponent({
     return {};
   },
   async mounted() {
-    await this.store.selectPersonaById(this.personaId);
+    await this.store.selectAssistant(this.assistantId);
+    await this.store.retrieveThreads();
   },
 });
 </script>

@@ -37,7 +37,7 @@ public class CommandLineRunnerConfiguration {
     CommandLineRunner commandLineRunner() {
         return args -> {
             fileStorageService.createDataDirectories();
-            personaImportService.importPersona();
+            //personaImportService.importPersona();
         };
     }
 }

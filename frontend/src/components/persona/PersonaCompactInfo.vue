@@ -29,8 +29,8 @@
 <script>
 
 import {useChatStore} from '@/store/chat-store';
-import PersonaProperties, {TTSType} from '@/service/persona.properties';
-import Persona from '@/store/to/persona';
+import Assistant from '@/store/to/assistant';
+import AssistantProperties, {TTSType} from '@/service/assistant.properties';
 
 export default {
   name: 'PersonaCompactInfo',
@@ -45,8 +45,8 @@ export default {
     };
   },
   props: {
-    persona: {
-      type: Persona,
+    assistant: {
+      type: Assistant,
       required: true,
     },
     showProperties: {
@@ -57,8 +57,8 @@ export default {
   mounted() {
     if (this.showProperties) {
       this.allowedKeys.push(
-        PersonaProperties.CHATGPT_TEMPERATURE,
-        PersonaProperties.CHATGPT_TOP_P,
+        AssistantProperties.CHATGPT_TEMPERATURE,
+        AssistantProperties.CHATGPT_TOP_P,
       );
     }
   },
@@ -66,32 +66,32 @@ export default {
     properties() {
       let result = [];
 
-      if (this.persona.properties[PersonaProperties.CHATGPT_MODEL]) {
-        result.push({
-          key: PersonaProperties.CHATGPT_MODEL,
-          value: this.persona.properties[PersonaProperties.CHATGPT_MODEL],
-        });
-      }
+      // if (this.assistant.properties[PersonaProperties.CHATGPT_MODEL]) {
+      //   result.push({
+      //     key: PersonaProperties.CHATGPT_MODEL,
+      //     value: this.persona.properties[PersonaProperties.CHATGPT_MODEL],
+      //   });
+      // }
+      //
+      // if (this.persona.properties[PersonaProperties.TTS_TYPE] === TTSType.ELEVENLABS) {
+      //   result.push({
+      //     key: TTSType.ELEVENLABS,
+      //     value: this.persona.properties[PersonaProperties.ELEVENLABS_MODELID],
+      //   });
+      // } else if (this.persona.properties[PersonaProperties.TTS_TYPE] === TTSType.SPEECHAPI) {
+      //   result.push({
+      //     key: TTSType.SPEECHAPI,
+      //     value: this.persona.properties[PersonaProperties.SPEECHAPI_VOICE],
+      //   });
+      // }
 
-      if (this.persona.properties[PersonaProperties.TTS_TYPE] === TTSType.ELEVENLABS) {
-        result.push({
-          key: TTSType.ELEVENLABS,
-          value: this.persona.properties[PersonaProperties.ELEVENLABS_MODELID],
-        });
-      } else if (this.persona.properties[PersonaProperties.TTS_TYPE] === TTSType.SPEECHAPI) {
-        result.push({
-          key: TTSType.SPEECHAPI,
-          value: this.persona.properties[PersonaProperties.SPEECHAPI_VOICE],
-        });
-      }
-
-      if (this.persona.properties) {
-        Object.keys(this.persona.properties).filter((key) => {
-          return this.allowedKeys.indexOf(key) !== -1;
-        }).forEach((key) => {
-          result.push({key: key, value: this.persona.properties[key]});
-        });
-      }
+      // if (this.persona.properties) {
+      //   Object.keys(this.persona.properties).filter((key) => {
+      //     return this.allowedKeys.indexOf(key) !== -1;
+      //   }).forEach((key) => {
+      //     result.push({key: key, value: this.persona.properties[key]});
+      //   });
+      // }
 
       return result;
     },
@@ -99,14 +99,14 @@ export default {
   methods: {
     badgeColor(key) {
       switch (key) {
-        case PersonaProperties.CHATGPT_MODEL:
+        case AssistantProperties.CHATGPT_MODEL:
           return 'text-bg-primary';
         case TTSType.ELEVENLABS:
         case TTSType.SPEECHAPI:
           return 'text-bg-info';
-        case PersonaProperties.CHATGPT_TEMPERATURE:
+        case AssistantProperties.CHATGPT_TEMPERATURE:
           return 'text-bg-success';
-        case PersonaProperties.ELEVENLABS_MODELID:
+        case AssistantProperties.ELEVENLABS_MODELID:
           return 'text-bg-warning';
         default:
           return 'text-bg-secondary';
@@ -114,12 +114,12 @@ export default {
     },
     badgeLabel(item) {
       switch (item.key) {
-        case PersonaProperties.CHATGPT_MODEL:
-        case PersonaProperties.ELEVENLABS_MODELID:
+        case AssistantProperties.CHATGPT_MODEL:
+        case AssistantProperties.ELEVENLABS_MODELID:
           return item.value;
-        case PersonaProperties.CHATGPT_TEMPERATURE:
+        case AssistantProperties.CHATGPT_TEMPERATURE:
           return 'Temp: ' + item.value;
-        case PersonaProperties.CHATGPT_TOP_P:
+        case AssistantProperties.CHATGPT_TOP_P:
           return 'TopP: ' + item.value;
         case TTSType.SPEECHAPI:
           return 'SpeechAPI';

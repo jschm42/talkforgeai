@@ -59,7 +59,7 @@ public class PlantUMLTransformer implements Transformer {
             String code = "@startuml\n" + matcher.group(2);
 
             String fileName = UUID.randomUUID() + "_plantuml.png";
-            Path subDirectoryPath = context.chatDirectory().resolve(context.sessionId().toString());
+            Path subDirectoryPath = context.threadDirectory().resolve(context.messageId());
             Path localFilePath = subDirectoryPath.resolve(fileName);
 
             // Ensure the directory exists and is writable
@@ -77,7 +77,7 @@ public class PlantUMLTransformer implements Transformer {
             DiagramDescription diagramDescription = service.generateUmlDiagram(code, localFilePath.toString());
             LOGGER.info("Generated PlantUML diagram: {}", diagramDescription.getDescription());
 
-            String imageUrl = "/api/v1/session/" + context.sessionId() + "/" + fileName;
+            String imageUrl = "/api/v1/session/" + context.threadId() + "/" + fileName;
 
             // Perform your Mustache template replacement here
             String formattedContent = template.formatted(NO_LB_MARKER_START, imageUrl, code, NO_LB_MARKER_END);
