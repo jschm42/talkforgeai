@@ -29,8 +29,8 @@
 <script>
 
 import {useChatStore} from '@/store/chat-store';
-import AssistantProperties, {TTSType} from '@/service/assistantProperties';
 import Assistant from '@/store/to/assistant';
+import AssistantProperties, {TTSType} from '@/service/assistant.properties';
 
 export default {
   name: 'PersonaCompactInfo',

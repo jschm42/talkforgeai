@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-import {AssistantPropertiesDefault} from '@/service/assistant.properties';
+package com.talkforgeai.backend.assistant.dto;
 
-class Assistant {
-  id = '';
-  name = '';
-  description = '';
-  model = '';
-  image_path = '';
-  properties = {...AssistantPropertiesDefault};
+public record ModelDto(String name) {
 }
-
-export default Assistant;

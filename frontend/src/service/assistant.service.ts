@@ -21,6 +21,16 @@ import Assistant from '@/store/to/assistant';
 
 class AssistantService {
 
+  async retrieveGPTModels() {
+    console.log('Retrieving GPT models');
+    try {
+      const result = await axios.get('/api/v1/assistants/models');
+      return result.data;
+    } catch (error) {
+      throw new Error('Error retrieving GPT models: ' + error);
+    }
+  }
+
   async syncAssistants() {
     console.log('Syncing assistants');
     try {

@@ -18,21 +18,16 @@
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
-import AssistantProperties from '@/service/assistantProperties';
+import AssistantProperties from '@/service/assistant.properties';
+import AssistantService from '@/service/assistant.service';
+
+const assistantService = new AssistantService();
 
 export default defineComponent({
   name: 'PersonaTabModel',
   data() {
     return {
-      chatGptModels: [
-        'gpt-4',
-        'gpt-4-32k',
-        'gpt-4-1106-preview',
-        'gpt-4-vision-preview',
-        'gpt-3.5-turbo',
-        'gpt-3.5-turbo-16k',
-        'gpt-3.5-turbo-1106',
-      ],
+      chatGptModels: [],
     };
   },
   computed: {
@@ -46,6 +41,12 @@ export default defineComponent({
     return {assistantForm};
   },
   methods: {},
+  async mounted() {
+    this.chatGptModels = await assistantService.retrieveGPTModels();
+    if (!this.assistantForm.model) {
+      this.assistantForm.model = this.chatGptModels[0];
+    }
+  },
 });
 </script>
 

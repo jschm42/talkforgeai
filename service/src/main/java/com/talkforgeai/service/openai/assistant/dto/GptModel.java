@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-import {AssistantPropertiesDefault} from '@/service/assistant.properties';
+package com.talkforgeai.service.openai.assistant.dto;
 
-class Assistant {
-  id = '';
-  name = '';
-  description = '';
-  model = '';
-  image_path = '';
-  properties = {...AssistantPropertiesDefault};
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record GptModel(String id) {
 }
-
-export default Assistant;

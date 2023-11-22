@@ -19,7 +19,7 @@ import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
 import TtsService from '@/service/tts.service';
-import AssistantProperties, {TTSType} from '@/service/assistantProperties';
+import AssistantProperties, {TTSType} from '@/service/assistant.properties';
 
 const ttsService = new TtsService();
 

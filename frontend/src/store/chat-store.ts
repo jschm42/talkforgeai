@@ -23,10 +23,10 @@ import PersonaService from '@/service/persona.service';
 import Role from '@/store/to/role';
 import ChatStreamService from '@/service/chat-stream.service';
 import HighlightingService from '@/service/highlighting.service';
-import AssistantProperties, {TTSType} from '@/service/assistantProperties';
 import AssistantService from '@/service/assistant.service';
 import Thread, {ThreadMessage} from '@/store/to/thread';
 import Assistant from '@/store/to/assistant';
+import AssistantProperties, {TTSType} from '@/service/assistant.properties';
 
 const chatService = new ChatService();
 const chatStreamService = new ChatStreamService();

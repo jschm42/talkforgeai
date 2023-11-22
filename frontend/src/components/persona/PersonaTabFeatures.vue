@@ -18,7 +18,7 @@
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
-import AssistantProperties from '@/service/assistantProperties';
+import AssistantProperties from '@/service/assistant.properties';
 
 export default defineComponent({
   name: 'PersonaTabFeatures',

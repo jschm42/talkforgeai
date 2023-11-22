@@ -53,6 +53,11 @@ public class AssistantController {
         this.fileStorageService = fileStorageService;
     }
 
+    @GetMapping("/assistants/models")
+    public List<String> retrieveAssistantModelIds() {
+        return assistantService.retrieveModels();
+    }
+
     @GetMapping("/assistants/{assistantId}")
     public AssistantDto retrieveAssistant(@PathVariable("assistantId") String assistantId) {
         return assistantService.retrieveAssistant(assistantId);

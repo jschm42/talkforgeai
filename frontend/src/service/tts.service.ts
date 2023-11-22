@@ -16,7 +16,7 @@
 
 import axios from 'axios';
 import Persona from '@/store/to/persona';
-import AssistantProperties from '@/service/assistantProperties';
+import AssistantProperties from '@/service/assistant.properties';
 
 class TtsService {
 

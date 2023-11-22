@@ -57,7 +57,7 @@
         <div class="card bg-gradient text-center persona-card" role="button" @click.prevent="onCreateNewPersona">
           <div class="card-body">
             <h5 class="card-title">
-              Create new persona...
+              Create new assistant...
             </h5>
           </div>
         </div>

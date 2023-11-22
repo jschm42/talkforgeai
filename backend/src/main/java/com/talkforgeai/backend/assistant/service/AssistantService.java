@@ -374,4 +374,11 @@ public class AssistantService {
 
         return assistantMapper.mapAssistantDto(newAssistant, assistantEntity);
     }
+
+    public List<String> retrieveModels() {
+        return openAIAssistantService.retrieveModels().data().stream()
+                .map(GptModel::id)
+                .filter(id -> id.startsWith("gpt") && !id.contains("instruct"))
+                .toList();
+    }
 }

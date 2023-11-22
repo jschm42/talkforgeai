@@ -111,6 +111,11 @@ public class OpenAIAssistantService {
         return executeRequest(request, Message.class);
     }
 
+    public GptModelList retrieveModels() {
+        Request request = createGetRequest("/models");
+        return executeRequest(request, GptModelList.class);
+    }
+
     private Headers.Builder createDefaultHeaderBuilder() {
         Headers.Builder headersBuilder = new Headers.Builder();
         headersBuilder.add("Authorization", "Bearer " + openAIProperties.apiKey());
