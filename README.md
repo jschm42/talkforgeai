@@ -2,26 +2,27 @@
 
 ## Overview
 
-TalkforgeAI is an AI-powered chat software that facilitates the creation of personalized chatbots using the ChatGPT
-platform. It allows users to tailor the chat experience by creating individual AI profiles, known as Personas, each with
-its own personality profile and avatar image. In addition to text input, prompts can be generated via voice input, and
-the AI's responses can be delivered through browser-based or Elevenlabs text-to-speech output.
+TalkforgeAI is an AI-powered chat software that facilitates the creation of personalized chatbots using the OpenAI
+Assistant API. It allows users to tailor the chat experience by creating individual AI profiles, known as Personas, each
+with its own personality profile and avatar image. In addition to text input, prompts can be generated via voice input,
+and the AI's responses can be delivered through browser-based or Elevenlabs text-to-speech output.
 
 ### Prerequisites
 
-- An OpenAI API key is required. To obtain one, visit the [OpenAI website](https://openai.com/) and follow the
-  instructions for API key generation.
+- An OpenAI API key is required to use the OpenAI Assistant API. To obtain one, visit
+  the [OpenAI website](https://openai.com/) and follow the instructions for API key generation.
 - For optional Elevenlabs speech output, an API key is also necessary. Please visit
   the [Elevenlabs website](https://elevenlabs.io/) for instructions.
 
 ## Features
 
-- Create individual chatbot profiles with custom personalities
-- Generate a profile picture for your chatbot right inside the app
-- Image generation through DALL-E 2 directly in chat, compatible with both GPT-3.5 and GPT-4 models.
+- Create individual chatbot profiles with custom personalities using the OpenAI Assistant API.
+- Generate a profile picture for your chatbot right inside the app.
+- Image generation through DALL-E 3 directly in chat, compatible with both GPT-3.5 and GPT-4 models.
 - Access to all relevant GPT models:
     - gpt-4
     - gpt-4-32k
+    - gpt-4-vision-preview
     - gpt-3.5-turbo
     - gpt-3.5-turbo-16k
 
@@ -38,7 +39,6 @@ the AI's responses can be delivered through browser-based or Elevenlabs text-to-
 - Image interpretation, initially supported by Huggingface models.
 - Reading and evaluating web links.
 - Upload of files to be interpreted by the AI (PDF, TXT, etc.)
-- Support for DALL-E 3 (as soon as API will be available)
 - Memory feature to store critical information in the database and retrieve it as needed, allowing for the persistence
   of information beyond the maximum token limit.
 - Function support for tasks such as sending emails, querying calendar data, etc.
@@ -47,7 +47,7 @@ the AI's responses can be delivered through browser-based or Elevenlabs text-to-
 
 ### Building the Project
 
-- Ensure Java 19 or higher is installed on your system and the JAVA_HOME environment variable ist set correctly.
+- Ensure Java 19 or higher is installed on your system and the JAVA_HOME environment variable is set correctly.
 
 ### Starting the Server
 
@@ -105,3 +105,4 @@ For support and queries, please open an issue on the GitHub repository or contac
 
 This README is a basic guide for getting started with TalkforgeAI. For more detailed documentation, please refer to the
 project's documentation site.
+
