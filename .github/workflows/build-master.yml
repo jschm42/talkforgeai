@@ -37,13 +37,13 @@ jobs:
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag talkforgeai/talkforgeai:latest
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.TALKFORGEAI_DOCKER_USER }}
           password: ${{ secrets.TALKFORGEAI_DOCKER_TOKEN }}
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
