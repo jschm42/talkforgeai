@@ -71,6 +71,10 @@ export default {
         value: this.assistant.model,
       });
 
+      if (!this.assistant.properties) {
+        return result;
+      }
+
       if (this.assistant.properties[AssistantProperties.TTS_TYPE] === TTSType.ELEVENLABS) {
         result.push({
           key: TTSType.ELEVENLABS,
