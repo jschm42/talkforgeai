@@ -1,0 +1,105 @@
+<!--
+  - Copyright (c) 2023 Jean Schmitz.
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
+<script>
+
+import {useChatStore} from '@/store/chat-store';
+import Assistant from '@/store/to/assistant';
+import PersonaCompactInfo from '@/components/persona/PersonaCompactInfo.vue';
+
+export default {
+  name: 'AssistantElement',
+  components: {PersonaCompactInfo},
+  setup() {
+    const store = useChatStore(); // Call useMyStore() inside the setup function
+    return {store};
+  },
+  data() {
+    return {};
+  },
+  props: {
+    assistant: Assistant,
+  },
+  computed: {
+    imageSrc() {
+      return this.store.getAssistantImageUrl(this.assistant.image_path);
+    },
+    isShowAssistantImage() {
+      return !!this.assistant.image_path;
+    },
+  },
+  methods: {
+    onPersonaSelected() {
+      console.log('PersonaChoiceView.onPersonaSelected: ' + this.assistant.id,
+          this.store.assistantList);
+      this.$router.push({name: 'chat', params: {assistantId: this.assistant.id}});
+    },
+    onEditPersona() {
+      this.$router.push({name: 'persona-edit', params: {assistantId: this.assistant.id}});
+    },
+  },
+};
+</script>
+
+<template>
+  <div class="card mb-3 persona-card"
+       style="max-width: 300px;">
+    <div class="row g-0">
+      <div class="col-md-4">
+        <img v-if="isShowAssistantImage" :alt="assistant.name"
+             :src="imageSrc"
+             class="persona-icon" role="button" @click.prevent="onPersonaSelected()"/>
+        <i v-else class="fs-1 bi bi-robot robot-icon"></i>
+      </div>
+      <div class="col-md-6">
+        <div class="card-body">
+          <h5 class="card-title" @click.prevent="onPersonaSelected()">{{
+              assistant.name
+            }}</h5>
+        </div>
+      </div>
+
+      <div class="col-2 d-inline-flex flex-row-reverse my-1 p-2">
+        <i class="bi bi-pencil edit-button" role="button"
+           @click.prevent="onEditPersona()"></i>
+      </div>
+    </div>
+
+    <div class="row g-0 p-3" role="button" @click.prevent="onPersonaSelected()">
+      <small class="text-body-secondary">{{ assistant.description }}</small>
+    </div>
+
+    <persona-compact-info :assistant="assistant"></persona-compact-info>
+
+  </div>
+</template>
+
+<style scoped>
+
+.persona-card {
+  min-width: 200px;
+  min-height: 170px;
+}
+
+.persona-icon {
+  width: 6em;
+  height: 6em;
+}
+
+.robot-icon {
+  color: darksalmon;
+}
+</style>

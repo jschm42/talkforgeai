@@ -24,37 +24,12 @@
     <div class="row scrollable-persona-list">
 
       <div v-for="assistant in assistantList" :key="assistant.id" class="col-md-3">
-        <div class="card mb-3 persona-card"
-             style="max-width: 300px;">
-          <div class="row g-0">
-            <div class="col-md-4">
-              <img v-if="isShowAssistantImage(assistant)" :alt="assistant.name" :src="imageSrc(assistant.image_path)"
-                   class="persona-icon" role="button" @click.prevent="onPersonaSelected(assistant.id)"/>
-              <i v-else class="fs-1 bi bi-robot robot-icon"></i>
-            </div>
-            <div class="col-md-6">
-              <div class="card-body">
-                <h5 class="card-title" @click.prevent="onPersonaSelected(assistant)">{{ assistant.name }}</h5>
-              </div>
-            </div>
-
-            <div class="col-2 d-inline-flex flex-row-reverse my-1 p-2">
-              <i class="bi bi-pencil edit-button" role="button" @click.prevent="onEditPersona(assistant.id)"></i>
-            </div>
-          </div>
-
-          <div class="row g-0 p-3" role="button" @click.prevent="onPersonaSelected(assistant.id)">
-            <small class="text-body-secondary">{{ assistant.description }}</small>
-          </div>
-
-          <persona-compact-info :assistant="assistant"></persona-compact-info>
-
-        </div>
-
+        <assistant-element :assistant="assistant"></assistant-element>
       </div>
 
       <div class="col-md-3">
-        <div class="card bg-gradient text-center persona-card" role="button" @click.prevent="onCreateNewPersona">
+        <div class="card bg-gradient text-center persona-card" role="button"
+             @click.prevent="onCreateNewPersona">
           <div class="card-body">
             <h5 class="card-title">
               Create new assistant...
@@ -70,10 +45,10 @@
 <script>
 import {defineComponent} from 'vue';
 import {useChatStore} from '@/store/chat-store';
-import PersonaCompactInfo from '@/components/persona/PersonaCompactInfo.vue';
+import AssistantElement from '@/components/choice/AssistantElement.vue';
 
 export default defineComponent({
-  components: {PersonaCompactInfo},
+  components: {AssistantElement},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
     return {store};
@@ -89,22 +64,15 @@ export default defineComponent({
     },
   },
   methods: {
-    imageSrc(imagePath) {
-      return this.store.getAssistantImageUrl(imagePath);
-    },
+
     isShowAssistantImage(assistant) {
       return !!assistant.image_path;
     },
-    onPersonaSelected(assistantId) {
-      console.log('PersonaChoiceView.onPersonaSelected: ' + assistantId, this.store.assistantList);
-      this.$router.push({name: 'chat', params: {assistantId}});
-    },
+
     onCreateNewPersona() {
       this.$router.push({name: 'persona-create'});
     },
-    onEditPersona(assistantId) {
-      this.$router.push({name: 'persona-edit', params: {assistantId}});
-    },
+
   },
   async mounted() {
     await this.store.syncAssistants();
