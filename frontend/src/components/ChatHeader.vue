@@ -16,38 +16,47 @@
 
 <template>
   <div class="container">
-    <div class="row text-start">
-      <div class="col-3">
-        <img v-if="isShowAssistantImage(selectedAssistant)" :alt="selectedAssistant.name"
-             :src="imageSrc(selectedAssistant.image_path)"
-             class="persona-icon"/>
-        <i v-else class="fs-1 bi bi-robot text-gradient-silver"></i>
-      </div>
-
-      <div class="col-9">
-        <div class="row persona-name mx-1">
-          {{ personaName }}
-        </div>
-        <div class="row persona-description mx-1">
-          {{ personaDescription }}
-        </div>
-      </div>
-    </div>
     <div class="row">
-      <persona-compact-info :assistant="store.selectedAssistant" :show-properties="true"></persona-compact-info>
+      <div class="col-12">
+        <div class="persona-info">
+          <figure class="figure persona-icon">
+            <img v-if="isShowAssistantImage(selectedAssistant)"
+                 :src="imageSrc(selectedAssistant.image_path)" alt="..."
+                 class="figure-img img-fluid rounded">
+            <img v-else src="@/assets/robot.svg" title="Robot">
+            <figcaption class="figure-caption">{{ personaName }}</figcaption>
+          </figure>
+          <div class="persona-description">
+            {{ personaDescription }}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!--        <img v-if="isShowAssistantImage(selectedAssistant)" :alt="selectedAssistant.name"-->
+  <!--             :src="imageSrc(selectedAssistant.image_path)"-->
+  <!--             class="persona-icon"/>-->
+  <!--        <img v-else class="robot-icon" src="@/assets/robot.svg" title="Robot">-->
+
+
+  <!--        <div class="row persona-name mx-1">-->
+  <!--          {{ personaName }}-->
+  <!--        </div>-->
+  <!--        <div class="row persona-description mx-1">-->
+  <!--          {{ personaDescription }}-->
+  <!--        </div>-->
+
 
 </template>
 
 <script>
 
 import {useChatStore} from '@/store/chat-store';
-import PersonaCompactInfo from '@/components/persona/PersonaCompactInfo.vue';
 
 export default {
   name: 'ChatHeader',
-  components: {PersonaCompactInfo},
+  components: {},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
 
@@ -86,6 +95,15 @@ export default {
 
 <style scoped>
 
+.persona-info {
+  display: flex;
+  align-items: center;
+}
+
+.persona-description {
+  margin-left: 10px;
+}
+
 .persona-name {
   font-size: 1.5rem;
   font-weight: 500;
@@ -97,6 +115,7 @@ export default {
   font-style: italic;
   color: #cccccc;
   overflow: hidden;
+  height: 100px;
 }
 
 .back-button {
@@ -105,7 +124,8 @@ export default {
 }
 
 .persona-icon {
-  width: 7rem;
-  height: 7rem
+  min-width: 100px;
+  width: 100px;
+  height: 100px;
 }
 </style>
