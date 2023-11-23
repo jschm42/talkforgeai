@@ -23,12 +23,13 @@
     </div>
     <div class="row scrollable-persona-list">
 
-      <div v-for="assistant in assistantList" :key="assistant.id" class="col-md-3">
+      <div v-for="assistant in assistantList" :key="assistant.id"
+           class="col-md-3 assistant-element">
         <assistant-element :assistant="assistant"></assistant-element>
       </div>
 
       <div class="col-md-3">
-        <div class="card bg-gradient text-center persona-card" role="button"
+        <div class="card bg-gradient text-center create-card" role="button"
              @click.prevent="onCreateNewPersona">
           <div class="card-body">
             <h5 class="card-title">
@@ -81,28 +82,14 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.robot-icon {
-  color: darksalmon;
-}
-
-.persona-card {
-  min-width: 200px;
-  min-height: 170px;
-}
-
-.persona-icon {
-  width: 6em;
-  height: 6em;
-}
-
-.active {
-  border: 2px solid #007BFF; /* blue border */
-  background: #2c3e50; /* grey-ish background */
-}
-
 .scrollable-persona-list {
   height: 75vh;
   overflow-y: auto;
+}
+
+.create-card {
+  width: 200px;
+  height: 180px;
 }
 
 .logo {
@@ -112,10 +99,6 @@ export default defineComponent({
 
 .header {
   margin-bottom: 1em;
-}
-
-.edit-button {
-  font-size: 1.3em;
 }
 
 </style>
