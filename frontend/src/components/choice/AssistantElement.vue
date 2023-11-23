@@ -82,7 +82,7 @@ export default {
       <small class="text-body-secondary">{{ assistant.description }}</small>
     </div>
 
-    <persona-compact-info :assistant="assistant"></persona-compact-info>
+    <persona-compact-info :assistant="assistant" :show-properties="false"></persona-compact-info>
 
   </div>
 </template>

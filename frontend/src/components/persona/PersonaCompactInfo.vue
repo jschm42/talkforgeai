@@ -57,8 +57,8 @@ export default {
   mounted() {
     if (this.showProperties) {
       this.allowedKeys.push(
-        AssistantProperties.CHATGPT_TEMPERATURE,
-        AssistantProperties.CHATGPT_TOP_P,
+          AssistantProperties.CHATGPT_TEMPERATURE,
+          AssistantProperties.CHATGPT_TOP_P,
       );
     }
   },
@@ -66,32 +66,30 @@ export default {
     properties() {
       let result = [];
 
-      // if (this.assistant.properties[PersonaProperties.CHATGPT_MODEL]) {
-      //   result.push({
-      //     key: PersonaProperties.CHATGPT_MODEL,
-      //     value: this.persona.properties[PersonaProperties.CHATGPT_MODEL],
-      //   });
-      // }
-      //
-      // if (this.persona.properties[PersonaProperties.TTS_TYPE] === TTSType.ELEVENLABS) {
-      //   result.push({
-      //     key: TTSType.ELEVENLABS,
-      //     value: this.persona.properties[PersonaProperties.ELEVENLABS_MODELID],
-      //   });
-      // } else if (this.persona.properties[PersonaProperties.TTS_TYPE] === TTSType.SPEECHAPI) {
-      //   result.push({
-      //     key: TTSType.SPEECHAPI,
-      //     value: this.persona.properties[PersonaProperties.SPEECHAPI_VOICE],
-      //   });
-      // }
+      result.push({
+        key: 'model',
+        value: this.assistant.model,
+      });
 
-      // if (this.persona.properties) {
-      //   Object.keys(this.persona.properties).filter((key) => {
-      //     return this.allowedKeys.indexOf(key) !== -1;
-      //   }).forEach((key) => {
-      //     result.push({key: key, value: this.persona.properties[key]});
-      //   });
-      // }
+      if (this.assistant.properties[AssistantProperties.TTS_TYPE] === TTSType.ELEVENLABS) {
+        result.push({
+          key: TTSType.ELEVENLABS,
+          value: this.assistant.properties[AssistantProperties.ELEVENLABS_MODELID],
+        });
+      } else if (this.assistant.properties[AssistantProperties.TTS_TYPE] === TTSType.SPEECHAPI) {
+        result.push({
+          key: TTSType.SPEECHAPI,
+          value: this.assistant.properties[AssistantProperties.SPEECHAPI_VOICE],
+        });
+      }
+
+      if (this.assistant.properties) {
+        Object.keys(this.assistant.properties).filter((key) => {
+          return this.allowedKeys.indexOf(key) !== -1;
+        }).forEach((key) => {
+          result.push({key: key, value: this.assistant.properties[key]});
+        });
+      }
 
       return result;
     },
@@ -99,8 +97,7 @@ export default {
   methods: {
     badgeColor(key) {
       switch (key) {
-        case AssistantProperties.CHATGPT_MODEL:
-          return 'text-bg-primary';
+        case 'model':
         case TTSType.ELEVENLABS:
         case TTSType.SPEECHAPI:
           return 'text-bg-info';
@@ -114,7 +111,8 @@ export default {
     },
     badgeLabel(item) {
       switch (item.key) {
-        case AssistantProperties.CHATGPT_MODEL:
+        case 'model':
+          return item.value;
         case AssistantProperties.ELEVENLABS_MODELID:
           return item.value;
         case AssistantProperties.CHATGPT_TEMPERATURE:
