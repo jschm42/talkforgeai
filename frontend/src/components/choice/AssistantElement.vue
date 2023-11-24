@@ -75,8 +75,9 @@ export default {
 
     <div class="card-image" role="button" @mouseleave="onMouseLeave()" @mouseover="onMouseOver()">
       <img v-if="isShowAssistantImage" :alt="assistant.name" :src="imageSrc"
-           class="persona-icon" role="button" @click.prevent="onPersonaSelected()"/>
-      <img v-else class="robot-icon" src="@/assets/robot.svg" title="Robot"
+           class="persona-icon rounded-border" role="button"
+           @click.prevent="onPersonaSelected()"/>
+      <img v-else class="robot-icon rounded-border" src="@/assets/robot.svg" title="Robot"
            @click.prevent="onPersonaSelected()">
       <h5 class="card-title" @click.prevent="onPersonaSelected()">{{ assistant.name }}</h5>
       <assistant-tooltip v-if="showTooltip && hasDescription" @click.prevent="onPersonaSelected()">
@@ -100,6 +101,7 @@ export default {
   height: 170px; /* Set a fixed height */
   position: relative;
   display: inline-block;
+  border-radius: 10px;
 }
 
 .persona-icon {
@@ -131,22 +133,6 @@ export default {
   padding: 2px;
 }
 
-.card-description {
-  position: absolute;
-  bottom: -20px;
-  left: 10px;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 2px;
-  font-style: italic;
-  display: -webkit-box; /* Required for line-clamp to work */
-  -webkit-line-clamp: 2; /* Truncate text at 2 lines */
-  -webkit-box-orient: vertical; /* Required for line-clamp to work */
-  overflow: hidden; /* Hides the text that overflows the card width */
-  text-overflow: ellipsis; /* Shows an ellipsis when the text overflows */
-  width: 90%; /* Adjust as needed */
-}
-
 .edit-button {
   position: absolute;
   top: 10px;
@@ -156,6 +142,10 @@ export default {
   border-radius: 50%; /* Make the button round */
   padding: 5px; /* Add some padding */
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.rounded-border {
+  border-radius: 15px;
 }
 
 </style>

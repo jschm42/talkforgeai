@@ -31,10 +31,9 @@ export default defineComponent({
 <style scoped>
 .tooltip-content {
   position: absolute;
-  bottom: -30px; /* Adjust as needed */
+  bottom: -20px; /* Adjust as needed */
   left: 20%; /* Center the tooltip */
   transform: translateX(-15%);
-  background-color: black;
   color: white;
   padding: 5px;
   border-radius: 5px;
