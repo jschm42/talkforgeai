@@ -18,7 +18,8 @@
   <div class="d-flex flex-column full-height">
 
     <div ref="entries" class="flex-grow-1 vertical-scrollbar no-horizontal-scrollbar">
-      <ChatMessage v-for="(message, index) in store.threadMessages" ref="chatMessageRef" v-bind:key="index"
+      <ChatMessage v-for="(message, index) in store.threadMessages" ref="chatMessageRef"
+                   v-bind:key="index"
                    :message="message" :messageIndex="index"></ChatMessage>
     </div>
     <!-- Input Section -->
@@ -34,14 +35,15 @@
 import ChatControl from './ChatControl.vue';
 import ChatMessage from './ChatMessage.vue';
 import {useChatStore} from '@/store/chat-store';
+import {useAppStore} from '@/store/app-store';
 
 export default {
   name: 'ChatContainer',
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
-
+    const appStore = useAppStore();
     return {
-      store,
+      store, appStore,
     };
   },
   data() {
@@ -50,6 +52,9 @@ export default {
   components: {ChatControl, ChatMessage},
   mounted() {
     this.populateVoices();
+    this.appStore.addError(
+        'This is another error message',
+    );
   },
   methods: {
     async submitResultReceived() {

@@ -16,6 +16,8 @@
 
 <template>
   <router-view/>
+
+  <error-alerts></error-alerts>
 </template>
 
 <style>
@@ -42,9 +44,11 @@
 <script>
 import {useChatStore} from '@/store/chat-store';
 import {usePersonaFormStore} from '@/store/persona-form-store';
+import ErrorAlerts from '@/components/ErrorAlerts.vue';
 
 export default {
   name: 'ChatContainer',
+  components: {ErrorAlerts},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
     const personaStore = usePersonaFormStore();
