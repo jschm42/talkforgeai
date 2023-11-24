@@ -76,7 +76,8 @@ export default defineComponent({
     },
     async onGenerateImage() {
       this.isGenerationRunning = true;
-      const imageResponse = await assistantService.generateAssistantImage(this.imageGenerationPrompt);
+      const imageResponse = await assistantService.generateAssistantImage(
+          this.imageGenerationPrompt);
       console.log('Image response: ', imageResponse);
       this.assistantForm.image_path = imageResponse.data.fileName;
       this.showModal = false;
@@ -94,7 +95,8 @@ export default defineComponent({
     <div class="row">
       <div class="col-4">
         <div v-if="!assistantForm.image_path"
-             class="placeholder-image img-thumbnail d-flex justify-content-center align-items-center" role="button"
+             class="placeholder-image img-thumbnail d-flex justify-content-center align-items-center"
+             role="button"
              @click="triggerFileInput">
           <i class="bi bi-person"></i>
         </div>
@@ -102,7 +104,8 @@ export default defineComponent({
              :title="assistantForm.image_path"
              class="img-thumbnail thumbnail-image"
              role="button" @click="triggerFileInput"/>
-        <input id="personaImage" ref="fileInput" class=" col-10 form-control" style="display: none" type="file"
+        <input id="personaImage" ref="fileInput" class=" col-10 form-control" style="display: none"
+               type="file"
                @change="onFileSelected">
       </div>
     </div>
@@ -117,19 +120,23 @@ export default defineComponent({
 
   <div class="mb-3">
     <label class="form-label" for="personaName">Name</label>
-    <input id="personaName" v-model="assistantForm.name" class="form-control" maxlength="32" required
+    <input id="personaName" v-model="assistantForm.name" class="form-control" maxlength="32"
+           required
            type="text">
   </div>
   <div class="mb-3">
-    <label class="form-label" for="personaDescription">Description (will not be used in generation requests)</label>
+    <label class="form-label" for="personaDescription">Description (will not be used in generation
+      requests)</label>
     <textarea id="personaDescription" v-model="assistantForm.description" class="form-control"
               maxlength="256"
               rows="2"></textarea>
   </div>
   <div class="mb-3">
-    <label class="form-label" for="personaPersonality">Describe the persona's character traits. How would you prefer it
+    <label class="form-label" for="personaPersonality">Describe the persona's character traits. How
+      would you prefer it
       to respond?</label>
-    <textarea id="personaPersonality" v-model="assistantForm.instructions" class="form-control" maxlength="16384"
+    <textarea id="personaPersonality" v-model="assistantForm.instructions" class="form-control"
+              maxlength="16384"
               rows="5"></textarea>
   </div>
 
@@ -139,7 +146,8 @@ export default defineComponent({
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Generate persona image</h5>
-          <button :disabled="isGenerationRunning" aria-label="Close" class="close" data-dismiss="modal" type="button"
+          <button :disabled="isGenerationRunning" aria-label="Close" class="close"
+                  data-dismiss="modal" type="button"
                   @click="showModal = false">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -160,7 +168,8 @@ export default defineComponent({
           </button>
           <button :disabled="isGenerationRunning" class="btn btn-primary" type="button"
                   @click.prevent="onGenerateImage">
-            <span v-if="isGenerationRunning" aria-hidden="true" class="spinner-border spinner-border-sm mx-2"
+            <span v-if="isGenerationRunning" aria-hidden="true"
+                  class="spinner-border spinner-border-sm mx-2"
                   role="status"></span>
             <span v-if="isGenerationRunning">Generating...</span>
             <span v-else>Generate</span>
@@ -181,6 +190,8 @@ export default defineComponent({
 }
 
 .thumbnail-image {
+  min-width: 200px;
+  min-height: 200px;
   width: 200px;
   height: 200px;
 }

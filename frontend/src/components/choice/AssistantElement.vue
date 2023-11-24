@@ -55,13 +55,13 @@ export default {
 
 <template>
   <div class="persona-card">
-    <div class="card-image">
+    <div class="card-image" role="button">
       <img v-if="isShowAssistantImage" :alt="assistant.name" :src="imageSrc"
            class="persona-icon" role="button" @click.prevent="onPersonaSelected()"/>
       <img v-else class="robot-icon" src="@/assets/robot.svg" title="Robot"
            @click.prevent="onPersonaSelected()">
       <h5 class="card-title" @click.prevent="onPersonaSelected()">{{ assistant.name }}</h5>
-      <div class="card-description">{{ assistant.description }}
+      <div class="card-description" @click.prevent="onEditPersona()">{{ assistant.description }}
       </div>
     </div>
     <div class="col-2 d-inline-flex flex-row-reverse my-1 p-2">

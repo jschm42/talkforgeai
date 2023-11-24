@@ -97,7 +97,7 @@ export default {
 
 .persona-info {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .persona-description {
@@ -124,8 +124,12 @@ export default {
 }
 
 .persona-icon {
-  min-width: 100px;
-  width: 100px;
-  height: 100px;
+  min-width: 150px;
+  min-height: 150px;
+  max-width: 200px;
+  max-height: 200px;
+  width: 150px;
+  height: 1500px;
+
 }
 </style>
