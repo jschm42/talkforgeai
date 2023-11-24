@@ -18,16 +18,19 @@
 
 import {useChatStore} from '@/store/chat-store';
 import Assistant from '@/store/to/assistant';
+import AssistantTooltip from '@/components/AssistantTooltip.vue';
 
 export default {
   name: 'AssistantElement',
-  components: {},
+  components: {AssistantTooltip},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
     return {store};
   },
   data() {
-    return {};
+    return {
+      showTooltip: false,
+    };
   },
   props: {
     assistant: Assistant,
@@ -39,6 +42,9 @@ export default {
     isShowAssistantImage() {
       return !!this.assistant.image_path;
     },
+    hasDescription() {
+      return !!this.assistant.description;
+    },
   },
   methods: {
     onPersonaSelected() {
@@ -49,26 +55,41 @@ export default {
     onEditPersona() {
       this.$router.push({name: 'persona-edit', params: {assistantId: this.assistant.id}});
     },
+    onMouseOver() {
+      console.log('onMouseOver');
+      this.showTooltip = true;
+    },
+    onMouseLeave() {
+      console.log('onMouseLeave');
+      this.showTooltip = false;
+    },
+  },
+  mounted() {
+    console.log('AssistantElement.mounted: ', this.assistant);
   },
 };
 </script>
 
 <template>
   <div class="persona-card">
-    <div class="card-image" role="button">
+
+    <div class="card-image" role="button" @mouseleave="onMouseLeave()" @mouseover="onMouseOver()">
       <img v-if="isShowAssistantImage" :alt="assistant.name" :src="imageSrc"
            class="persona-icon" role="button" @click.prevent="onPersonaSelected()"/>
       <img v-else class="robot-icon" src="@/assets/robot.svg" title="Robot"
            @click.prevent="onPersonaSelected()">
       <h5 class="card-title" @click.prevent="onPersonaSelected()">{{ assistant.name }}</h5>
-      <div class="card-description" @click.prevent="onEditPersona()">{{ assistant.description }}
-      </div>
+      <assistant-tooltip v-if="showTooltip && hasDescription" @click.prevent="onPersonaSelected()">
+        {{ assistant.description }}
+      </assistant-tooltip>
     </div>
     <div class="col-2 d-inline-flex flex-row-reverse my-1 p-2">
       <i class="bi bi-pencil edit-button" role="button"
          @click.prevent="onEditPersona()"></i>
     </div>
+
   </div>
+
 </template>
 
 <style scoped>
@@ -78,6 +99,7 @@ export default {
   width: 200px; /* Set a fixed width */
   height: 170px; /* Set a fixed height */
   position: relative;
+  display: inline-block;
 }
 
 .persona-icon {
@@ -97,6 +119,7 @@ export default {
   width: 100%;
   height: 100%;
   position: relative;
+  display: inline-block;
 }
 
 .card-title {
@@ -134,4 +157,5 @@ export default {
   padding: 5px; /* Add some padding */
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
+
 </style>
