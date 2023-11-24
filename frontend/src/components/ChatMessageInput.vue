@@ -19,7 +19,8 @@
     <div class="input-group-text">
       <whisper-component @onReceiveText="onReceiveWhisperText"></whisper-component>
     </div>
-    <textarea ref="promptInputArea" v-model="prompt" :disabled="isInputLocked" class="form-control shadow"
+    <textarea ref="promptInputArea" v-model="prompt" :disabled="isInputLocked"
+              class="form-control shadow"
               placeholder="Enter prompt..."
               rows="5"
               @keyup.enter.exact="submit"></textarea>
@@ -39,28 +40,28 @@ export default {
   name: 'ChatMessageInput',
   components: {WhisperComponent},
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
+    const chatStore = useChatStore(); // Call useMyStore() inside the setup function
 
-    return {store};
+    return {chatStore};
   },
   data() {
     return {
       prompt: '',
       isInputLocked: false,
-      chatState: this.store.chat,
+      chatState: this.chatStore.chat,
     };
   },
   methods: {
     async submit() {
       this.isInputLocked = true;
 
-      this.store.currentStatusMessage = 'Thinking...';
+      this.chatStore.currentStatusMessage = 'Thinking...';
       try {
-        await this.store.submitUserMessage(this.prompt);
+        await this.chatStore.submitUserMessage(this.prompt);
         this.$emit('chunkUpdateReceived');
       } catch (error) {
         console.error(error);
-        this.store.updateStatus('Error: ' + error, 'error');
+        this.chatStore.updateStatus('Error: ' + error, 'error');
       } finally {
         this.isInputLocked = false;
       }

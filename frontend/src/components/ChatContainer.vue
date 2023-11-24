@@ -52,9 +52,6 @@ export default {
   components: {ChatControl, ChatMessage},
   mounted() {
     this.populateVoices();
-    this.appStore.addError(
-        'This is another error message',
-    );
   },
   methods: {
     async submitResultReceived() {

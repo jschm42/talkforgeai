@@ -37,12 +37,7 @@ class AssistantService {
 
   async syncAssistants() {
     console.log('Syncing assistants');
-    try {
-      const result = await axios.post('/api/v1/assistants/sync');
-      return result.data;
-    } catch (error) {
-      throw new Error('Error syncing assistants: ' + error);
-    }
+    return await axios.post('/api/v1/assistants/sync');
   }
 
   async retrieveAssistants(): Promise<Array<Assistant>> {

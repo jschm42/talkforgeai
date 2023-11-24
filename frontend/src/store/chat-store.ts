@@ -85,7 +85,6 @@ export const useChatStore = defineStore('chat', {
     },
     async retrieveAssistants() {
       this.assistantList = await assistantService.retrieveAssistants();
-      console.log('Assistant list', this.assistantList);
     },
     async selectAssistant(assistantId: string) {
       this.selectedAssistant = await assistantService.retrieveAssistant(assistantId);
@@ -146,7 +145,8 @@ export const useChatStore = defineStore('chat', {
 
     },
     getThreadMessageTextContent(threadMessage: ThreadMessage) {
-      if (threadMessage.content && threadMessage.content.length > 0 && threadMessage.content[0].text) {
+      if (threadMessage.content && threadMessage.content.length > 0 &&
+          threadMessage.content[0].text) {
         return threadMessage.content[0].text.value || '';
       }
       return '';
@@ -156,9 +156,11 @@ export const useChatStore = defineStore('chat', {
       const threadMessage = await assistantService.retrieveLastAssistentMessage(this.threadId);
       console.log('Received result', threadMessage);
       if (threadMessage) {
-        const parsedThreadMessage = await assistantService.postprocessMessage(this.threadId, threadMessage.id);
+        const parsedThreadMessage = await assistantService.postprocessMessage(this.threadId,
+            threadMessage.id);
 
-        if (threadMessage.content && threadMessage.content.length > 0 && threadMessage.content[0].text) {
+        if (threadMessage.content && threadMessage.content.length > 0 &&
+            threadMessage.content[0].text) {
           const content = parsedThreadMessage.parsed_content;
 
           if (content) {
@@ -186,7 +188,8 @@ export const useChatStore = defineStore('chat', {
     },
     async generateThreadTitle(threadId: string, userMessage: string, assistantMessage: string) {
       // Find selected thread
-      const response = await assistantService.generateThreadTitle(threadId, userMessage, assistantMessage);
+      const response = await assistantService.generateThreadTitle(threadId, userMessage,
+          assistantMessage);
       console.log('Generated title response', response);
       await this.retrieveThreads();
     },
@@ -223,7 +226,8 @@ export const useChatStore = defineStore('chat', {
     async selectPersona(persona: Persona): Promise<void> {
       this.resetChat();
       this.selectedPersona = persona;
-      this.chat.autoSpeak = persona.properties[AssistantProperties.FEATURE_AUTOSPEAKDEFAULT] === 'true';
+      this.chat.autoSpeak = persona.properties[AssistantProperties.FEATURE_AUTOSPEAKDEFAULT] ===
+          'true';
       await this.loadIndex(persona.personaId);
     },
     async selectPersonaById(personaId: string): Promise<void> {
@@ -241,10 +245,10 @@ export const useChatStore = defineStore('chat', {
     },
     encodePrompt(prompt: string): string {
       return prompt.replace(/&/g, '&amp;').
-        replace(/</g, '&lt;').
-        replace(/>/g, '&gt;').
-        replace(/"/g, '&quot;').
-        replace(/\n/g, '<br/>');
+          replace(/</g, '&lt;').
+          replace(/>/g, '&gt;').
+          replace(/"/g, '&quot;').
+          replace(/\n/g, '<br/>');
     },
     async streamPrompt(prompt: string, chunkUpdateCallback: () => void) {
       this.chat.configHeaderEnabled = false;
@@ -307,13 +311,15 @@ export const useChatStore = defineStore('chat', {
       await chatService.updateSessionTitle(sessionId, newTitle);
     },
     isSessionTitleGenerationEnabled() {
-      return this.selectedPersona.properties[AssistantProperties.FEATURE_TITLEGENERATION] === 'true';
+      return this.selectedPersona.properties[AssistantProperties.FEATURE_TITLEGENERATION] ===
+          'true';
     },
     hasEmptySessionTitle(sessionId: string) {
       const currentSession = this.sessions.find(s => s.id === sessionId);
       console.log('currentSession', currentSession);
       if (currentSession) {
-        return currentSession.title === '' || currentSession.title === undefined || currentSession.title === '<empty>';
+        return currentSession.title === '' || currentSession.title === undefined ||
+            currentSession.title === '<empty>';
       }
       return true;
     },

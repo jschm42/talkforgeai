@@ -18,7 +18,7 @@
   <div class="container p-3">
     <div class="row header">
       <div class="header">
-        <img class="logo" src="@/assets/logo.png" title="Talkforge AI">
+        <img alt="Talkforge AI" class="logo" src="@/assets/logo.png" title="Talkforge AI">
       </div>
     </div>
     <div class="row scrollable-persona-list">
@@ -47,12 +47,14 @@
 import {defineComponent} from 'vue';
 import {useChatStore} from '@/store/chat-store';
 import AssistantElement from '@/components/choice/AssistantElement.vue';
+import {useAppStore} from '@/store/app-store';
 
 export default defineComponent({
   components: {AssistantElement},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
-    return {store};
+    const appStore = useAppStore();
+    return {store, appStore};
   },
   data() {
     return {
@@ -76,7 +78,12 @@ export default defineComponent({
 
   },
   async mounted() {
-    await this.store.syncAssistants();
+    try {
+      await this.store.syncAssistants();
+    } catch (error) {
+      console.error(error);
+      this.appStore.addError(error);
+    }
   },
 });
 </script>
