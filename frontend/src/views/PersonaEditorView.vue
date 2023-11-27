@@ -101,6 +101,7 @@ import PersonaTabFeatures from '@/components/persona/PersonaTabFeatures.vue';
 import QuestionModal from '@/components/QuestionModal.vue';
 import Assistant from '@/store/to/assistant';
 import AssistantService from '@/service/assistant.service';
+import {useAppStore} from '@/store/app-store';
 
 const assistantService = new AssistantService();
 
@@ -114,7 +115,8 @@ export default defineComponent({
   },
   setup() {
     const store = usePersonaFormStore(); // Call useMyStore() inside the setup function
-    return {store};
+    const appStore = useAppStore();
+    return {store, appStore};
   },
   data() {
     return {
@@ -148,7 +150,7 @@ export default defineComponent({
 
         this.$router.push({name: 'persona-choice'});
       } catch (error) {
-        console.error(error);
+        this.appStore.handleError(error);
       }
     },
     onCancel() {
@@ -160,17 +162,25 @@ export default defineComponent({
     handleDeleteQuestionAnswer(answer) {
       this.showModal = false;
       if (answer) {
-        assistantService.deleteAssistant(this.assistantId).then(() => {
-          this.$router.push({name: 'persona-choice'});
-        });
+        try {
+          assistantService.deleteAssistant(this.assistantId).then(() => {
+            this.$router.push({name: 'persona-choice'});
+          });
+        } catch (error) {
+          this.appStore.handleError(error);
+        }
       }
     },
   },
   async mounted() {
     this.store.resetPersonaEditForm();
     if (this.assistantId) {
-      const assistant = await assistantService.retrieveAssistant(this.assistantId);
-      this.store.setPersonaEditForm(assistant);
+      try {
+        const assistant = await assistantService.retrieveAssistant(this.assistantId);
+        this.store.setPersonaEditForm(assistant);
+      } catch (error) {
+        this.appStore.handleError(error);
+      }
     }
   },
 });

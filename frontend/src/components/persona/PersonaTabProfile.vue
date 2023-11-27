@@ -21,6 +21,7 @@ import {usePersonaFormStore} from '@/store/persona-form-store';
 import axios from 'axios';
 import AssistantService from '@/service/assistant.service';
 import {useChatStore} from '@/store/chat-store';
+import {useAppStore} from '@/store/app-store';
 
 const assistantService = new AssistantService();
 
@@ -35,9 +36,10 @@ export default defineComponent({
   },
   setup() {
     const store = useChatStore();
+    const appStore = useAppStore();
     const {assistantForm} = storeToRefs(usePersonaFormStore());
 
-    return {assistantForm, store};
+    return {assistantForm, store, appStore};
   },
   methods: {
     getImageUrl(fileName) {
@@ -65,7 +67,7 @@ export default defineComponent({
           },
         });
       } catch (error) {
-        console.log('Failed to upload image: ', error);
+        this.appStore.handleError(error);
       }
     },
     triggerFileInput() {
@@ -76,12 +78,17 @@ export default defineComponent({
     },
     async onGenerateImage() {
       this.isGenerationRunning = true;
-      const imageResponse = await assistantService.generateAssistantImage(
-          this.imageGenerationPrompt);
-      console.log('Image response: ', imageResponse);
-      this.assistantForm.image_path = imageResponse.data.fileName;
-      this.showModal = false;
-      this.isGenerationRunning = false;
+      try {
+        const imageResponse = await assistantService.generateAssistantImage(
+            this.imageGenerationPrompt);
+        console.log('Image response: ', imageResponse);
+        this.assistantForm.image_path = imageResponse.data.fileName;
+        this.showModal = false;
+        this.isGenerationRunning = false;
+      } catch (error) {
+        this.appStore.handleError(error);
+        this.isGenerationRunning = false;
+      }
     },
     onShowGenerationModal() {
       this.showModal = true;

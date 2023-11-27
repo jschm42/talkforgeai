@@ -35,14 +35,16 @@
 
 import {useChatStore} from '@/store/chat-store';
 import WhisperComponent from '@/components/WhisperComponent.vue';
+import {useAppStore} from '@/store/app-store';
 
 export default {
   name: 'ChatMessageInput',
   components: {WhisperComponent},
   setup() {
     const chatStore = useChatStore(); // Call useMyStore() inside the setup function
+    const appStore = useAppStore();
 
-    return {chatStore};
+    return {chatStore, appStore};
   },
   data() {
     return {
@@ -60,7 +62,7 @@ export default {
         await this.chatStore.submitUserMessage(this.prompt);
         this.$emit('chunkUpdateReceived');
       } catch (error) {
-        console.error(error);
+        this.appStore.handleError(error);
         this.chatStore.updateStatus('Error: ' + error, 'error');
       } finally {
         this.isInputLocked = false;

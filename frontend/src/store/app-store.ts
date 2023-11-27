@@ -46,11 +46,13 @@ export const useAppStore = defineStore('app', {
       } else if (error.request) {
         // The request was made but no response was received
         console.error('Error request without response: ', error.request);
-        this.addError(error.request);
+        const responseText = error.request.response || '';
+        this.addError('Error on request. ' + responseText);
       } else {
         // Something happened in setting up the request that triggered an Error
         console.error('Error: ', error.message);
-        this.addError(error.message);
+        const errorText = error.message || '';
+        this.addError('Error. ' + errorText);
       }
     },
   },

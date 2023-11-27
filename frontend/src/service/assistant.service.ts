@@ -27,12 +27,8 @@ class AssistantService {
 
   async retrieveGPTModels() {
     console.log('Retrieving GPT models');
-    try {
-      const result = await axios.get('/api/v1/assistants/models');
-      return result.data;
-    } catch (error) {
-      throw new Error('Error retrieving GPT models: ' + error);
-    }
+    const result = await axios.get('/api/v1/assistants/models');
+    return result.data;
   }
 
   async syncAssistants() {
@@ -42,53 +38,32 @@ class AssistantService {
 
   async retrieveAssistants(): Promise<Array<Assistant>> {
     console.log('Retrieving assistants');
-    try {
-      const result = await axios.get('/api/v1/assistants');
-      return result.data;
-    } catch (error) {
-      console.log('ERROR', error);
-      throw new Error('Error reading assistants data: ' + error);
-    }
+    const result = await axios.get('/api/v1/assistants');
+    return result.data;
   }
 
   async retrieveAssistant(assistantId: string): Promise<Assistant> {
     console.log('Retrieving assistant with id:', assistantId);
-    try {
-      const result = await axios.get(`/api/v1/assistants/${assistantId}`);
-      return result.data;
-    } catch (error) {
-      throw new Error('Error reading assistant data: ' + error);
-    }
+    const result = await axios.get(`/api/v1/assistants/${assistantId}`);
+    return result.data;
   }
 
   async modifyAssistant(assistantId: string, assistant: Assistant) {
     console.log('Modify assistant with id:', assistantId);
-    try {
-      const result = await axios.post(`/api/v1/assistants/${assistantId}`, assistant);
-      return result.data;
-    } catch (error) {
-      throw new Error('Error modifying assistant: ' + error);
-    }
+    const result = await axios.post(`/api/v1/assistants/${assistantId}`, assistant);
+    return result.data;
   }
 
   async deleteAssistant(assistantId: string) {
     console.log('Delete assistant with id:', assistantId);
-    try {
-      const result = await axios.delete(`/api/v1/assistants/${assistantId}`);
-      return result.data;
-    } catch (error) {
-      throw new Error('Error on deletion of assistant: ' + error);
-    }
+    const result = await axios.delete(`/api/v1/assistants/${assistantId}`);
+    return result.data;
   }
 
   async createAssistant(assistant: Assistant) {
     console.log('Create assistant.');
-    try {
-      const result = await axios.post(`/api/v1/assistants`, assistant);
-      return result.data;
-    } catch (error) {
-      throw new Error('Error creating assistants: ' + error);
-    }
+    const result = await axios.post(`/api/v1/assistants`, assistant);
+    return result.data;
   }
 
   getAssistantImageUrl(imageFile: string) {
@@ -96,91 +71,63 @@ class AssistantService {
   }
 
   async generateAssistantImage(prompt: string) {
-    try {
-      return await axios.post(`/api/v1/assistants/images/generate`, {prompt});
-    } catch (error) {
-      console.error('Error generating persona image: ', error);
-    }
+    return await axios.post(`/api/v1/assistants/images/generate`, {prompt});
   }
 
   async createThread() {
-    try {
-      const result = await axios.post(`/api/v1/threads`);
-      return result.data;
-    } catch (error) {
-      throw new Error('Error creating thread: ' + error);
-    }
+    const result = await axios.post(`/api/v1/threads`);
+    return result.data;
   }
 
   async submitUserMessage(threadId: string, content: string) {
-    try {
-      const result = await axios.post(
-          `/api/v1/threads/${threadId}/messages`,
-          {content, role: 'user'},
-      );
-      return result.data;
-    } catch (error) {
-      throw new Error('Error submitting message: ' + error);
-    }
+    const result = await axios.post(
+        `/api/v1/threads/${threadId}/messages`,
+        {content, role: 'user'},
+    );
+    return result.data;
   }
 
   async runConversation(threadId: string, assistantId: string): Promise<Run> {
-    try {
-      const result = await axios.post(`/api/v1/threads/${threadId}/runs`,
-          {assistant_id: assistantId});
-      return result.data;
-    } catch (error) {
-      throw new Error('Error submitting message: ' + error);
-    }
+    const result = await axios.post(`/api/v1/threads/${threadId}/runs`,
+        {assistant_id: assistantId});
+    return result.data;
   }
 
   async retrieveRun(threadId: string, runId: string): Promise<Run> {
-    try {
-      const result = await axios.get(`/api/v1/threads/${threadId}/runs/${runId}`);
-      return result.data;
-    } catch (error) {
-      throw new Error('Error retrieving run: ' + error);
-    }
+    const result = await axios.get(`/api/v1/threads/${threadId}/runs/${runId}`);
+    return result.data;
   }
 
   async retrieveLastAssistentMessage(threadId: string): Promise<ThreadMessage | undefined> {
-    try {
-      const result = await axios.get(
-          `/api/v1/threads/${threadId}/messages`,
-          {
-            params: {
-              limit: 1,
-              order: 'desc',
-            },
+    const result = await axios.get(
+        `/api/v1/threads/${threadId}/messages`,
+        {
+          params: {
+            limit: 1,
+            order: 'desc',
           },
-      );
-      const response = result.data;
-      console.log('Response: ', response);
+        },
+    );
+    const response = result.data;
+    console.log('Response: ', response);
 
-      if (response.message_list && response.message_list.data && response.message_list.data.length >
-          0) {
-        return response.message_list.data[0];
-      }
-    } catch (error) {
-      throw new Error('Error retrieving messages: ' + error);
+    if (response.message_list && response.message_list.data && response.message_list.data.length >
+        0) {
+      return response.message_list.data[0];
     }
   }
 
   async retrieveMessages(threadId: string): Promise<TreadMessageListParsed> {
-    try {
-      const result = await axios.get(
-          `/api/v1/threads/${threadId}/messages`,
-          {
-            params: {
-              order: 'asc',
-            },
+    const result = await axios.get(
+        `/api/v1/threads/${threadId}/messages`,
+        {
+          params: {
+            order: 'asc',
           },
-      );
+        },
+    );
 
-      return result.data;
-    } catch (error) {
-      throw new Error('Error retrieving messages: ' + error);
-    }
+    return result.data;
   }
 
   async generateThreadTitle(
@@ -194,16 +141,12 @@ class AssistantService {
       return thread.title;
     }
 
-    try {
-      const result = await axios.post(`/api/v1/threads/${threadId}/title/generate`,
-          {
-            userMessageContent,
-            assistantMessageContent,
-          });
-      return result.data;
-    } catch (error) {
-      throw new Error('Error while generating title for thread: ' + error);
-    }
+    const result = await axios.post(`/api/v1/threads/${threadId}/title/generate`,
+        {
+          userMessageContent,
+          assistantMessageContent,
+        });
+    return result.data;
   }
 
   async retrieveThreads(): Promise<Array<Thread>> {

@@ -20,6 +20,7 @@ import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
 import AssistantProperties from '@/service/assistant.properties';
 import AssistantService from '@/service/assistant.service';
+import {useAppStore} from '@/store/app-store';
 
 const assistantService = new AssistantService();
 
@@ -37,14 +38,19 @@ export default defineComponent({
   },
   setup() {
     const {assistantForm} = storeToRefs(usePersonaFormStore());
+    const appStore = useAppStore();
 
-    return {assistantForm};
+    return {assistantForm, appStore};
   },
   methods: {},
   async mounted() {
-    this.chatGptModels = await assistantService.retrieveGPTModels();
-    if (!this.assistantForm.model) {
-      this.assistantForm.model = this.chatGptModels[0];
+    try {
+      this.chatGptModels = await assistantService.retrieveGPTModels();
+      if (!this.assistantForm.model) {
+        this.assistantForm.model = this.chatGptModels[0];
+      }
+    } catch (error) {
+      this.appStore.handleError(error);
     }
   },
 });
@@ -64,7 +70,8 @@ export default defineComponent({
     <div class="container">
       <div class="row">
         <div class="col-10 p-0">
-          <input id="rangeTemperature" v-model="assistantForm.properties[assistantProperties.CHATGPT_TEMPERATURE]"
+          <input id="rangeTemperature"
+                 v-model="assistantForm.properties[assistantProperties.CHATGPT_TEMPERATURE]"
                  class="form-range" max="1.0"
                  min="0.0" step="0.1" type="range">
         </div>
@@ -79,7 +86,9 @@ export default defineComponent({
     <div class="container">
       <div class="row">
         <div class="col-10 p-0">
-          <input id="rangeTopP" v-model="assistantForm.properties[assistantProperties.CHATGPT_TOP_P]" class="form-range"
+          <input id="rangeTopP"
+                 v-model="assistantForm.properties[assistantProperties.CHATGPT_TOP_P]"
+                 class="form-range"
                  max="1.0" min="0.0"
                  step="0.1" type="range">
         </div>
@@ -95,12 +104,15 @@ export default defineComponent({
       <div class="row">
         <div class="col-10 p-0">
           <input id="rangeFrequencePenalty"
-                 v-model="assistantForm.properties[assistantProperties.CHATGPT_FREQUENCY_PENALTY]" class="form-range"
+                 v-model="assistantForm.properties[assistantProperties.CHATGPT_FREQUENCY_PENALTY]"
+                 class="form-range"
                  max="1.0" min="0.0"
                  step="0.1" type="range">
         </div>
         <div class="col-2">
-          <label>{{ assistantForm.properties[assistantProperties.CHATGPT_FREQUENCY_PENALTY] }}</label>
+          <label>{{
+              assistantForm.properties[assistantProperties.CHATGPT_FREQUENCY_PENALTY]
+            }}</label>
         </div>
       </div>
     </div>
@@ -117,7 +129,9 @@ export default defineComponent({
                  step="0.1" type="range">
         </div>
         <div class="col-2">
-          <label>{{ assistantForm.properties[assistantProperties.CHATGPT_PRESENCE_PENALTY] }}</label>
+          <label>{{
+              assistantForm.properties[assistantProperties.CHATGPT_PRESENCE_PENALTY]
+            }}</label>
         </div>
       </div>
     </div>
