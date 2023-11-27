@@ -81,8 +81,7 @@ export default defineComponent({
     try {
       await this.store.syncAssistants();
     } catch (error) {
-      console.error(error);
-      this.appStore.addError(error);
+      this.appStore.handleError(error);
     }
   },
 });

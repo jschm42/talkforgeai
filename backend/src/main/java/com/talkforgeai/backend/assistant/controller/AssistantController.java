@@ -27,6 +27,7 @@ import com.talkforgeai.backend.assistant.dto.ThreadTitleDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleRequestDto;
 import com.talkforgeai.backend.assistant.service.AssistantService;
 import com.talkforgeai.backend.storage.FileStorageService;
+import com.talkforgeai.service.openai.OpenAIException;
 import com.talkforgeai.service.openai.assistant.dto.ListRequest;
 import com.talkforgeai.service.openai.assistant.dto.Message;
 import com.talkforgeai.service.openai.assistant.dto.PostMessageRequest;
@@ -93,8 +94,15 @@ public class AssistantController {
   }
 
   @PostMapping("/assistants/sync")
-  public void syncAssistants() {
-    assistantService.syncAssistants();
+  public ResponseEntity<String> syncAssistants() {
+    try {
+      assistantService.syncAssistants();
+    } catch (OpenAIException e) {
+      LOGGER.error("Error syncing assistants.", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(e.getErrorDetail().message());
+    }
+    return ResponseEntity.ok().build();
   }
 
   @PostMapping("/assistants/{assistantId}")

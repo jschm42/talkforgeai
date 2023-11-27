@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkforgeai.service.openai.OpenAIChatService;
 import com.talkforgeai.service.openai.OpenAIException;
+import com.talkforgeai.service.openai.assistant.dto.ApiError;
 import com.talkforgeai.service.openai.assistant.dto.Assistant;
 import com.talkforgeai.service.openai.assistant.dto.AssistantList;
 import com.talkforgeai.service.openai.assistant.dto.GptModelList;
@@ -151,6 +152,12 @@ public class OpenAIAssistantService {
     ObjectMapper objectMapper = new ObjectMapper();
 
     try (Response response = client.newCall(request).execute()) {
+      if (response.code() != 200) {
+        ApiError error = objectMapper.readValue(response.body().string(), ApiError.class);
+        throw new OpenAIException(
+            "Request failed with code " + response.code() + " and message " + error.body()
+                .message(), error.body());
+      }
       return objectMapper.readValue(response.body().string(), clazz);
     } catch (IOException e) {
       throw new OpenAIException("Message creation failed.", e);

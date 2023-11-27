@@ -16,19 +16,34 @@
 
 package com.talkforgeai.service.openai;
 
+import com.talkforgeai.service.openai.assistant.dto.ApiError.ApiErrorBody;
+
 public class OpenAIException extends RuntimeException {
-    private String errorDetail = "";
 
-    public OpenAIException(String message, String errorDetail) {
-        super(message);
-        this.errorDetail = errorDetail;
-    }
+  private ApiErrorBody errorDetail;
+  private String detail;
 
-    public OpenAIException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  @Deprecated
+  public OpenAIException(String message, String detail) {
+    super(message);
+    this.detail = detail;
+  }
 
-    public String getErrorDetail() {
-        return errorDetail;
-    }
+  public OpenAIException(String message, ApiErrorBody errorDetail) {
+    super(message);
+    this.errorDetail = errorDetail;
+  }
+
+  public OpenAIException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  @Deprecated
+  public String getDetail() {
+    return detail;
+  }
+
+  public ApiErrorBody getErrorDetail() {
+    return errorDetail;
+  }
 }

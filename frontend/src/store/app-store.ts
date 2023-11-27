@@ -36,5 +36,22 @@ export const useAppStore = defineStore('app', {
     clearErrors() {
       this.errors = [];
     },
+    handleError(error: any) {
+      if (error.response) {
+        // Request made and server responded
+        console.error('Error response: ', error.response.data);
+        console.error('Error status: ', error.response.status);
+        console.error('Error headers: ', error.response.headers);
+        this.addError(error.response.data);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Error request without response: ', error.request);
+        this.addError(error.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error: ', error.message);
+        this.addError(error.message);
+      }
+    },
   },
 });

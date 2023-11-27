@@ -46,6 +46,7 @@ class AssistantService {
       const result = await axios.get('/api/v1/assistants');
       return result.data;
     } catch (error) {
+      console.log('ERROR', error);
       throw new Error('Error reading assistants data: ' + error);
     }
   }
