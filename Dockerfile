@@ -1,4 +1,4 @@
-FROM amazoncorretto:19-alpine-jdk
+FROM amazoncorretto:21-alpine-jdk
 
 # 8090 is the port number the application will use
 EXPOSE 8090
