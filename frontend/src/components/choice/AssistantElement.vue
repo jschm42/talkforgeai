@@ -95,10 +95,10 @@ export default {
 
 <style scoped>
 .persona-card {
-  min-width: 200px;
-  min-height: 170px;
+  min-width: 100px;
+  min-height: auto;
   width: 200px; /* Set a fixed width */
-  height: 170px; /* Set a fixed height */
+  height: auto; /* Set a fixed height */
   position: relative;
   display: inline-block;
   border-radius: 10px;
