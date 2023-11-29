@@ -49,20 +49,26 @@ import ChatContainer from '@/components/ChatContainer.vue';
 import ChatHistory from '@/components/history/ChatHistory.vue';
 import {useChatStore} from '@/store/chat-store';
 import ChatHeader from '@/components/ChatHeader.vue';
+import {useAppStore} from '@/store/app-store';
 
 export default defineComponent({
   components: {ChatHeader, ChatHistory, ChatContainer},
   props: ['assistantId'],
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
-    return {store};
+    const appStore = useAppStore();
+    return {store, appStore};
   },
   data() {
     return {};
   },
   async mounted() {
-    await this.store.selectAssistant(this.assistantId);
-    await this.store.retrieveThreads();
+    try {
+      await this.store.selectAssistant(this.assistantId);
+      await this.store.retrieveThreads();
+    } catch (error) {
+      this.appStore.handleError(error);
+    }
   },
 });
 </script>

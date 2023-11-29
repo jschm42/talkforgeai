@@ -126,8 +126,6 @@ export default defineComponent({
   props: ['assistantId'],
   methods: {
     async handleSubmit() {
-      console.log('handleSubmit');
-
       const form = this.store.assistantForm;
       const assistant = new Assistant();
       assistant.image_path = form.image_path;

@@ -20,6 +20,7 @@ import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
 import TtsService from '@/service/tts.service';
 import AssistantProperties, {TTSType} from '@/service/assistant.properties';
+import {useAppStore} from '@/store/app-store';
 
 const ttsService = new TtsService();
 
@@ -34,8 +35,9 @@ export default defineComponent({
   },
   setup() {
     const {assistantForm} = storeToRefs(usePersonaFormStore());
+    const appStore = useAppStore();
 
-    return {assistantForm};
+    return {assistantForm, appStore};
   },
   computed: {
     TTSType() {
@@ -53,7 +55,8 @@ export default defineComponent({
     updateVoiceIdSelection() {
       // If voiceId matches a voice in the list, select it
       const voice = this.elevenLabsVoices.find(
-        voice => voice.voice_id === this.assistantForm.properties[AssistantProperties.ELEVENLABS_VOICEID]);
+          voice => voice.voice_id ===
+              this.assistantForm.properties[AssistantProperties.ELEVENLABS_VOICEID]);
       // If voice ist not found, set select element to show "Custom" and be disabled
       if (!voice) {
         this.assistantForm.properties.elevenlabs_voiceId = '';
@@ -73,14 +76,18 @@ export default defineComponent({
     },
   },
   async mounted() {
-    const elevenLabsVoices = await ttsService.getElevenlabsVoices();
-    this.elevenLabsVoices = elevenLabsVoices['voices'];
-    console.log('this.elevenLabsVoices', this.elevenLabsVoices);
-    this.updateVoiceIdSelection();
+    try {
+      const elevenLabsVoices = await ttsService.getElevenlabsVoices();
+      this.elevenLabsVoices = elevenLabsVoices['voices'];
+      console.log('this.elevenLabsVoices', this.elevenLabsVoices);
+      this.updateVoiceIdSelection();
 
-    this.elevenLabsModels = await ttsService.getElevenlabsModels();
-    console.log('this.elevenLabsModels', this.elevenLabsModels);
-    this.populateVoices();
+      this.elevenLabsModels = await ttsService.getElevenlabsModels();
+      console.log('this.elevenLabsModels', this.elevenLabsModels);
+      this.populateVoices();
+    } catch (error) {
+      this.appStore.handleError(error);
+    }
   },
   unmounted() {
     speechSynthesis.onvoiceschanged = null;
@@ -102,7 +109,8 @@ export default defineComponent({
 
     <div v-if="assistantForm.properties[PersonaProperties.TTS_TYPE] === 'elevenlabs'">
       <label class="form-label my-2" for="selectElevenLabsModel">Model</label>
-      <select id="selectElevenLabsModel" v-model="assistantForm.properties[PersonaProperties.ELEVENLABS_MODELID]"
+      <select id="selectElevenLabsModel"
+              v-model="assistantForm.properties[PersonaProperties.ELEVENLABS_MODELID]"
               aria-label="ElevenLabs Model"
               class="form-select my-2" @change="onChangeElevenLabsVoice">
         <option v-for="model in elevenLabsModels" :key="model.model_id" :value="model.model_id">{{
@@ -118,13 +126,15 @@ export default defineComponent({
               class="form-select my-2">
         <option v-for="voice in elevenLabsVoices" :key="voice.voice_id" :value="voice.voice_id">{{
             voice.name
-          }} - {{ voice.labels.description }} {{ voice.labels.age }} {{ voice.labels.accent }} {{ voice.labels.gender }}
+          }} - {{ voice.labels.description }} {{ voice.labels.age }} {{ voice.labels.accent }}
+          {{ voice.labels.gender }}
 
         </option>
       </select>
 
       <label class="form-label" for="elevenlabsVoiceID">Voice-ID</label>
-      <input id="elevenlabsVoiceID" v-model="assistantForm.properties[PersonaProperties.ELEVENLABS_VOICEID]"
+      <input id="elevenlabsVoiceID"
+             v-model="assistantForm.properties[PersonaProperties.ELEVENLABS_VOICEID]"
              class="form-control"
              maxlength="32" required
              type="text">
@@ -139,7 +149,9 @@ export default defineComponent({
                    step="0.1" type="range">
           </div>
           <div class="col-2">
-            <label>{{ assistantForm.properties[PersonaProperties.ELEVENLABS_SIMILARITYBOOST] }}</label>
+            <label>{{
+                assistantForm.properties[PersonaProperties.ELEVENLABS_SIMILARITYBOOST]
+              }}</label>
           </div>
         </div>
       </div>
@@ -148,7 +160,8 @@ export default defineComponent({
       <div class="container">
         <div class="row">
           <div class="col-10 p-0">
-            <input id="rangeELVoiceStability" v-model="assistantForm.properties[PersonaProperties.ELEVENLABS_STABILITY]"
+            <input id="rangeELVoiceStability"
+                   v-model="assistantForm.properties[PersonaProperties.ELEVENLABS_STABILITY]"
                    class="form-range"
                    max="1.0" min="0.0"
                    step="0.1" type="range">
@@ -162,7 +175,8 @@ export default defineComponent({
 
     <div v-else-if="assistantForm.properties[PersonaProperties.TTS_TYPE] === TTSType.SPEECHAPI">
       <label class="form-label my-2" for="selectSpeechAPIVoice">Voices</label>
-      <select id="selectSpeechAPIVoice" v-model="assistantForm.properties[PersonaProperties.SPEECHAPI_VOICE]"
+      <select id="selectSpeechAPIVoice"
+              v-model="assistantForm.properties[PersonaProperties.SPEECHAPI_VOICE]"
               aria-label="SpeechAPI Voice"
               class="form-select my-2">
         <option v-for="voice in speechApiVoices" :key="voice.name" :value="voice.name">{{
