@@ -70,6 +70,17 @@ class AssistantService {
     return `/api/v1/assistants/images/${imageFile}`;
   }
 
+  async uploadAssistantImage(file: any) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return await axios.post('/api/v1/assistants/images/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  }
+
   async generateAssistantImage(prompt: string) {
     return await axios.post(`/api/v1/assistants/images/generate`, {prompt});
   }

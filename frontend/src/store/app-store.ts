@@ -37,12 +37,13 @@ export const useAppStore = defineStore('app', {
       this.errors = [];
     },
     handleError(error: any) {
+      console.log('HANDLE ERROR', error);
       if (error.response) {
         // Request made and server responded
-        console.error('Error response: ', error.response.data);
+        console.error('Error response: ', error.response.data.message);
         console.error('Error status: ', error.response.status);
         console.error('Error headers: ', error.response.headers);
-        this.addError(error.response.data);
+        this.addError(error.response.data.message);
       } else if (error.request) {
         // The request was made but no response was received
         console.error('Error request without response: ', error.request);

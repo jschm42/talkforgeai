@@ -18,7 +18,6 @@
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
-import axios from 'axios';
 import AssistantService from '@/service/assistant.service';
 import {useChatStore} from '@/store/chat-store';
 import {useAppStore} from '@/store/app-store';
@@ -49,23 +48,13 @@ export default defineComponent({
       const selectedFile = event.target.files[0];
       console.log('Selected file:', selectedFile);
 
-      const uploadedFileName = await this.uploadImage(selectedFile);
-      console.log('Uploaded file:', uploadedFileName.data);
-
-      this.$refs.fileInput.textContent = uploadedFileName.data.filename;
-
-      this.assistantForm.image_path = uploadedFileName.data.filename;
-    },
-    async uploadImage(file) {
-      const formData = new FormData();
-      formData.append('file', file);
-
       try {
-        return await axios.post('/api/v1/persona/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+        const uploadedFileName = await assistantService.uploadAssistantImage(selectedFile);
+        if (uploadedFileName) {
+          console.log('Uploaded file:', uploadedFileName.data);
+          this.$refs.fileInput.textContent = uploadedFileName.data.filename;
+          this.assistantForm.image_path = uploadedFileName.data.filename;
+        }
       } catch (error) {
         this.appStore.handleError(error);
       }

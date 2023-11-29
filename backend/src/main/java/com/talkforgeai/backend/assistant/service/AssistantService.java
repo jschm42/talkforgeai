@@ -53,6 +53,7 @@ import com.talkforgeai.service.openai.dto.OpenAIChatResponse;
 import com.talkforgeai.service.openai.dto.OpenAIImageRequest;
 import com.talkforgeai.service.openai.dto.OpenAIImageResponse;
 import jakarta.transaction.Transactional;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -66,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import javax.imageio.ImageIO;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -385,11 +387,26 @@ public class AssistantService {
       Path path = fileStorageService.getAssistantsDirectory().resolve(filename);
       Files.write(path, bytes);
 
+      if (!isImageFile(path)) {
+        Files.delete(path);
+        throw new AssistentException("File is not an image.");
+      }
+
       return new ProfileImageUploadResponse(filename);
     } catch (IOException e) {
-      throw new IllegalArgumentException("Failed to upload file", e);
+      throw new AssistentException("Failed to upload file", e);
     }
   }
+
+  private boolean isImageFile(Path filePath) {
+    try {
+      BufferedImage image = ImageIO.read(filePath.toFile());
+      return image != null;
+    } catch (IOException e) {
+      return false;
+    }
+  }
+
 
   @Transactional
   public AssistantDto createAssistant(AssistantDto modifiedAssistant) {
