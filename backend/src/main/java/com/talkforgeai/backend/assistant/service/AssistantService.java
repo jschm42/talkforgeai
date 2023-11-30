@@ -28,7 +28,7 @@ import com.talkforgeai.backend.assistant.dto.ProfileImageUploadResponse;
 import com.talkforgeai.backend.assistant.dto.ThreadDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleRequestDto;
-import com.talkforgeai.backend.assistant.exceptions.AssistentException;
+import com.talkforgeai.backend.assistant.exception.AssistentException;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;

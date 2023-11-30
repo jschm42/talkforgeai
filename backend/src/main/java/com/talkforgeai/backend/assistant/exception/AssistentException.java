@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.assistant.exceptions;
+package com.talkforgeai.backend.assistant.exception;
 
 public class AssistentException extends RuntimeException {
-    public AssistentException(String message) {
-        super(message);
-    }
 
-    public AssistentException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public AssistentException(String message) {
+    super(message);
+  }
+
+  public AssistentException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }
