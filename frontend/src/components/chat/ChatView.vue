@@ -46,7 +46,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue';
 import ChatContainer from '@/components/ChatContainer.vue';
-import ChatHistory from '@/components/history/ChatHistory.vue';
+import ChatHistory from '@/components/thread/ChatHistory.vue';
 import {useChatStore} from '@/store/chat-store';
 import ChatHeader from '@/components/ChatHeader.vue';
 import {useAppStore} from '@/store/app-store';

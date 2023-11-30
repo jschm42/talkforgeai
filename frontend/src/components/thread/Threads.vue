@@ -40,7 +40,7 @@
 
 <script>
 import {useChatStore} from '@/store/chat-store';
-import ChatHistoryEntry from '@/components/history/ChatHistoryEntry.vue';
+import ChatHistoryEntry from '@/components/thread/ChatHistoryEntry.vue';
 
 export default {
   name: 'ChatHistory',
