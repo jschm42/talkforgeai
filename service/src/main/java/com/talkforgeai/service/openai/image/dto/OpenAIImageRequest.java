@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai.dto;
+package com.talkforgeai.service.openai.image.dto;
 
-public record ChatStreamChunk(String content) {
+public record OpenAIImageRequest(String prompt, int n, String size, String model) {
+
+  public OpenAIImageRequest(String prompt, int n, String size) {
+    this(prompt, n, size, "dall-e-3");
+  }
+
+  public OpenAIImageRequest(String prompt) {
+    this(prompt, 1, "1024x1024", "dall-e-3");
+  }
 }

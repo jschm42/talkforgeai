@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai.dto;
+package com.talkforgeai.service.openai.image.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Date;
 import java.util.List;
 
 public record OpenAIImageResponse(Date created, List<ImageData> data) {
 
-    public record ImageData(String url,
-                            @JsonProperty("revised_prompt")
-                            String revisedPrompt,
-                            @JsonProperty("b64_json") String b64Json) {
-    }
+  public record ImageData(String url,
+                          @JsonProperty("revised_prompt")
+                          String revisedPrompt,
+                          @JsonProperty("b64_json") String b64Json) {
+
+  }
 }

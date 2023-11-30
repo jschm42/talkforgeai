@@ -18,8 +18,6 @@ package com.talkforgeai.service.openai.assistant;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.talkforgeai.service.openai.OpenAIChatService;
-import com.talkforgeai.service.openai.OpenAIException;
 import com.talkforgeai.service.openai.assistant.dto.ApiError;
 import com.talkforgeai.service.openai.assistant.dto.Assistant;
 import com.talkforgeai.service.openai.assistant.dto.AssistantList;
@@ -31,6 +29,8 @@ import com.talkforgeai.service.openai.assistant.dto.PostMessageRequest;
 import com.talkforgeai.service.openai.assistant.dto.Run;
 import com.talkforgeai.service.openai.assistant.dto.RunConversationRequest;
 import com.talkforgeai.service.openai.assistant.dto.Thread;
+import com.talkforgeai.service.openai.chat.OpenAIChatService;
+import com.talkforgeai.service.openai.exception.OpenAIException;
 import com.talkforgeai.service.properties.OpenAIProperties;
 import java.io.IOException;
 import java.util.ArrayList;

@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai.dto;
+package com.talkforgeai.service.openai.chat;
 
-public record OpenAIImageRequest(String prompt, int n, String size, String model) {
-    public OpenAIImageRequest(String prompt, int n, String size) {
-        this(prompt, n, size, "dall-e-3");
-    }
+import com.talkforgeai.service.openai.chat.dto.OpenAIChatMessage;
 
-    public OpenAIImageRequest(String prompt) {
-        this(prompt, 1, "1024x1024", "dall-e-3");
-    }
+@FunctionalInterface
+public interface ResultCallback {
+
+  void call(OpenAIChatMessage message);
 }

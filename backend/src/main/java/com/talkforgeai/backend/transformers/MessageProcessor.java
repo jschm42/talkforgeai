@@ -18,53 +18,54 @@ package com.talkforgeai.backend.transformers;
 
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
-import com.talkforgeai.service.openai.OpenAIImageService;
+import com.talkforgeai.service.openai.image.OpenAIImageService;
 import com.talkforgeai.service.plantuml.PlantUMLService;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Component
 public class MessageProcessor {
-    private final FileStorageService fileStorageService;
 
-    Logger logger = LoggerFactory.getLogger(MessageProcessor.class);
-    List<Transformer> transformers = new ArrayList<>();
+  private final FileStorageService fileStorageService;
 
-    public MessageProcessor(OpenAIImageService imageService, FileStorageService fileStorageService, PlantUMLService plantUMLService) {
-        this.fileStorageService = fileStorageService;
+  Logger logger = LoggerFactory.getLogger(MessageProcessor.class);
+  List<Transformer> transformers = new ArrayList<>();
 
-        transformers.add(new LaTeXTransformer());
-        transformers.add(new PlantUMLTransformer(plantUMLService));
-        transformers.add(new CodeBlockTransformer());
-        transformers.add(new NewLineTransformer());
-        transformers.add(new ImageDownloadTransformer(imageService));
+  public MessageProcessor(OpenAIImageService imageService, FileStorageService fileStorageService,
+      PlantUMLService plantUMLService) {
+    this.fileStorageService = fileStorageService;
+
+    transformers.add(new LaTeXTransformer());
+    transformers.add(new PlantUMLTransformer(plantUMLService));
+    transformers.add(new CodeBlockTransformer());
+    transformers.add(new NewLineTransformer());
+    transformers.add(new ImageDownloadTransformer(imageService));
+  }
+
+  public String transform(String content, String threadId, String messageId) {
+    if (content == null || content.isEmpty()) {
+      return "";
     }
 
-    public String transform(String content, String threadId, String messageId) {
-        if (content == null || content.isEmpty()) {
-            return "";
-        }
+    String processedContent = content;
 
-        String processedContent = content;
+    TransformerContext context = new TransformerContext(
+        threadId,
+        messageId,
+        fileStorageService.getAssistantsDirectory(),
+        fileStorageService.getThreadDirectory()
+    );
 
-        TransformerContext context = new TransformerContext(
-                threadId,
-                messageId,
-                fileStorageService.getAssistantsDirectory(),
-                fileStorageService.getThreadDirectory()
-        );
-
-        for (Transformer t : transformers) {
-            logger.info("Transforming with " + t.getClass().getName() + "...");
-            processedContent = t.process(processedContent, context);
-        }
-
-        logger.info("Transformation done.");
-        return processedContent;
+    for (Transformer t : transformers) {
+      logger.info("Transforming with " + t.getClass().getName() + "...");
+      processedContent = t.process(processedContent, context);
     }
+
+    logger.info("Transformation done.");
+    return processedContent;
+  }
 
 }

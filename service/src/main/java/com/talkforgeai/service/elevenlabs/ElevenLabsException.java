@@ -14,26 +14,16 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.websocket.dto;
+package com.talkforgeai.service.elevenlabs;
 
+public class ElevenLabsException extends RuntimeException {
 
-import com.talkforgeai.service.openai.chat.dto.OpenAIChatMessage;
-import java.util.UUID;
-
-public class WSChatFunctionMessage extends WebsocketMessage {
-
-  OpenAIChatMessage message;
-
-  public WSChatFunctionMessage(UUID sessionId, OpenAIChatMessage message) {
-    super(sessionId, WebsocketMessageType.FUNCTION_CALL);
-    this.message = message;
+  public ElevenLabsException(String message) {
+    super(message);
   }
 
-  public OpenAIChatMessage getMessage() {
-    return message;
+  public ElevenLabsException(String message, Throwable throwable) {
+    super(message, throwable);
   }
 
-  public void setMessage(OpenAIChatMessage message) {
-    this.message = message;
-  }
 }

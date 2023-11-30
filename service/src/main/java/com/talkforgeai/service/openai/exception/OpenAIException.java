@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai;
+package com.talkforgeai.service.openai.exception;
 
 import com.talkforgeai.service.openai.assistant.dto.ApiError.ApiErrorBody;
 

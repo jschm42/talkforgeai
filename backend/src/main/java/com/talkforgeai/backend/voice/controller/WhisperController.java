@@ -17,7 +17,7 @@
 package com.talkforgeai.backend.voice.controller;
 
 import com.talkforgeai.backend.storage.FileStorageService;
-import com.talkforgeai.service.openai.OpenAIWhisperService;
+import com.talkforgeai.service.openai.whisper.OpenAIWhisperService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,17 +27,19 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class WhisperController {
 
-    private final OpenAIWhisperService openAIWhisperService;
+  private final OpenAIWhisperService openAIWhisperService;
 
-    private final FileStorageService fileStorageService;
+  private final FileStorageService fileStorageService;
 
-    public WhisperController(OpenAIWhisperService openAIWhisperService, FileStorageService fileStorageService) {
-        this.openAIWhisperService = openAIWhisperService;
-        this.fileStorageService = fileStorageService;
-    }
+  public WhisperController(OpenAIWhisperService openAIWhisperService,
+      FileStorageService fileStorageService) {
+    this.openAIWhisperService = openAIWhisperService;
+    this.fileStorageService = fileStorageService;
+  }
 
-    @PostMapping("/api/convert")
-    public ResponseEntity<String> convert(@RequestParam("file") MultipartFile file) {
-        return openAIWhisperService.convert(file, fileStorageService.getDataDirectory().resolve("uploads"));
-    }
+  @PostMapping("/api/convert")
+  public ResponseEntity<String> convert(@RequestParam("file") MultipartFile file) {
+    return openAIWhisperService.convert(file,
+        fileStorageService.getDataDirectory().resolve("uploads"));
+  }
 }

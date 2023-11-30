@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai.dto;
+package com.talkforgeai.service.openai.chat.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Date;
 import java.util.List;
 
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public record OpenAIChatResponse(String id,
-                                 String object,
-                                 Date created,
-                                 String model,
-                                 List<ResponseChoice> choices,
-                                 ResponseUsage usage) {
+public record OpenAIChatStreamResponse(String id,
+                                       String object,
+                                       Date created,
+                                       String model,
+                                       List<StreamResponseChoice> choices,
+                                       ResponseUsage usage) {
 
-  public record ResponseChoice(Integer index,
-                               OpenAIChatMessage message,
-                               @JsonProperty("finish_reason") FinishReason finishReason) {
+  public record StreamResponseChoice(Integer index,
+                                     OpenAIChatMessage delta,
+                                     @JsonProperty("finish_reason") FinishReason finishReason) {
 
     public enum FinishReason {
       STOP("stop"),

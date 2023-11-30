@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai;
+package com.talkforgeai.service.openai.chat.dto;
 
-import com.talkforgeai.service.openai.dto.OpenAIChatMessage;
+public record ChatStreamChunk(String content) {
 
-@FunctionalInterface
-public interface ResultCallback {
-    void call(OpenAIChatMessage message);
 }
