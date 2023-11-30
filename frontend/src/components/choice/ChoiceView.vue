@@ -46,8 +46,8 @@
 <script>
 import {defineComponent} from 'vue';
 import {useChatStore} from '@/store/chat-store';
-import AssistantElement from '@/components/choice/AssistantElement.vue';
 import {useAppStore} from '@/store/app-store';
+import AssistantElement from '@/components/assistant/AssistantElement.vue';
 
 export default defineComponent({
   components: {AssistantElement},

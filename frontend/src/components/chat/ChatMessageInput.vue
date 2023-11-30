@@ -34,8 +34,8 @@
 <script>
 
 import {useChatStore} from '@/store/chat-store';
-import WhisperComponent from '@/components/WhisperComponent.vue';
 import {useAppStore} from '@/store/app-store';
+import WhisperComponent from '@/components/common/WhisperComponent.vue';
 
 export default {
   name: 'ChatMessageInput',

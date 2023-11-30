@@ -57,7 +57,7 @@ export default {
     async submitResultReceived() {
       console.log('Submit Result Received');
 
-      if (this.store.chat.autoSpeak && this.store.isTTSEnabled) {
+      if (this.store.isAutoSpeak && this.store.isTTSEnabled) {
         const lastChatMessage = this.$refs.chatMessageRef.slice(-1)[0];
         console.log('Auto speaking last Chat-Message:');
         await lastChatMessage.playAudio();

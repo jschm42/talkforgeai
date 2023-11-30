@@ -18,7 +18,7 @@
 
 import {useChatStore} from '@/store/chat-store';
 import Assistant from '@/store/to/assistant';
-import AssistantTooltip from '@/components/AssistantTooltip.vue';
+import AssistantTooltip from '@/components/assistant/AssistantTooltip.vue';
 
 export default {
   name: 'AssistantElement',

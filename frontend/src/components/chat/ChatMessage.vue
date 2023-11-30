@@ -18,8 +18,8 @@
 
 import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
-import ChatMessageTextToSpeech from '@/components/ChatMessageTextToSpeech.vue';
 import {ThreadMessage} from '@/store/to/thread';
+import ChatMessageTextToSpeech from '@/components/chat/ChatMessageTextToSpeech.vue';
 
 export default {
   name: 'ChatMessage',
@@ -37,7 +37,13 @@ export default {
   },
   computed: {
     personaImage() {
-      return this.store.getAssistantImageUrl(this.store.selectedAssistant.image_path);
+      // Find the assistant in the store
+      const assistantId = this.message.assistant_id;
+      const assistant = this.store.assistantList.find(a => a.id === assistantId);
+      if (assistant) {
+        return this.store.getAssistantImageUrl(assistant.image_path);
+      }
+      return '';
     },
     messageClass() {
       return {
@@ -111,16 +117,19 @@ export default {
     <div class="row">
       <div class="col-md-1">
         <i v-if="isUser" class="fs-1 bi bi-person"></i>
-        <img v-else-if="isAssistant && hasProfileImage" :src="personaImage" alt="Assistant" class="persona-icon">
+        <img v-else-if="isAssistant && hasProfileImage" :src="personaImage" alt="Assistant"
+             class="persona-icon">
         <!--        <i v-else-if="isFunctionCall" class="fs-1 bi bi-gear"></i>-->
         <!--        <i v-else-if="isFunctionResponse" class="fs-1 bi bi-arrow-return-left"></i>-->
         <i v-else class="fs-1 bi bi-robot robot-icon"></i>
       </div>
       <div class="col-md-10">
         <div class="card-body">
-          <div v-if="getMessageStatusType() === 'running'" class="spinner-grow text-primary" role="status">
+          <div v-if="getMessageStatusType() === 'running'" class="spinner-grow text-primary"
+               role="status">
           </div>
-          <i v-else-if="getMessageStatusType() === 'error'" class="bi bi-exclamation-lg bg-danger"></i>
+          <i v-else-if="getMessageStatusType() === 'error'"
+             class="bi bi-exclamation-lg bg-danger"></i>
           <div v-else class="card-text text-start" v-html="getContent()"></div>
         </div>
       </div>

@@ -37,8 +37,8 @@
 
 <script>
 import {useChatStore} from '@/store/chat-store';
-import ChatMessageInput from '@/components/ChatMessageInput.vue';
 import {ref, watch} from 'vue';
+import ChatMessageInput from '@/components/chat/ChatMessageInput.vue';
 
 export default {
   name: 'ChatControl',
@@ -63,9 +63,9 @@ export default {
   },
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
-    const localIsAutoSpeak = ref(store.chat.autoSpeak);
+    const localIsAutoSpeak = ref(store.isAutoSpeak);
 
-    watch(() => store.chat.autoSpeak, (newValue) => {
+    watch(() => store.isAutoSpeak, (newValue) => {
       localIsAutoSpeak.value = newValue;
     });
 

@@ -55,24 +55,24 @@
         <div id="main-tab-pane" aria-labelledby="main-tab" class="tab-pane fade show active"
              role="tabpanel"
              tabindex="0">
-          <persona-tab-profile ref="mainTabPane"></persona-tab-profile>
+          <editor-tab-profile ref="mainTabPane"></editor-tab-profile>
 
         </div>
 
         <div id="model-tab-pane" aria-labelledby="model-tab" class="tab-pane fade" role="tabpanel"
              tabindex="0">
-          <persona-tab-model ref="modelTabPane"></persona-tab-model>
+          <editor-tab-model ref="modelTabPane"></editor-tab-model>
         </div>
 
         <div id="voice-tab-pane" aria-labelledby="voice-tab" class="tab-pane fade" role="tabpanel"
              tabindex="0">
-          <persona-tab-voice ref="voiceTabPane"></persona-tab-voice>
+          <editor-tab-voice ref="voiceTabPane"></editor-tab-voice>
         </div>
 
         <div id="features-tab-pane" aria-labelledby="features-tab" class="tab-pane fade"
              role="tabpanel"
              tabindex="0">
-          <persona-tab-features ref="featuresTabPane"></persona-tab-features>
+          <editor-tab-features ref="featuresTabPane"></editor-tab-features>
         </div>
 
       </div>
@@ -94,23 +94,23 @@
 <script>
 import {defineComponent} from 'vue';
 import {usePersonaFormStore} from '@/store/persona-form-store';
-import PersonaTabModel from '@/components/persona/PersonaTabModel.vue';
-import PersonaTabProfile from '@/components/persona/PersonaTabProfile.vue';
-import PersonaTabVoice from '@/components/persona/PersonaTabVoice.vue';
-import PersonaTabFeatures from '@/components/persona/PersonaTabFeatures.vue';
-import QuestionModal from '@/components/QuestionModal.vue';
 import Assistant from '@/store/to/assistant';
 import AssistantService from '@/service/assistant.service';
 import {useAppStore} from '@/store/app-store';
+import EditorTabFeatures from '@/components/editor/EditorTabFeatures.vue';
+import EditorTabVoice from '@/components/editor/EditorTabVoice.vue';
+import EditorTabModel from '@/components/editor/EditorTabModel.vue';
+import EditorTabProfile from '@/components/editor/EditorTabProfile.vue';
+import QuestionModal from '@/components/common/QuestionModal.vue';
 
 const assistantService = new AssistantService();
 
 export default defineComponent({
   components: {
-    PersonaTabFeatures,
-    PersonaTabVoice,
-    PersonaTabModel,
-    PersonaTabProfile,
+    EditorTabFeatures,
+    EditorTabVoice,
+    EditorTabModel,
+    EditorTabProfile,
     QuestionModal,
   },
   setup() {

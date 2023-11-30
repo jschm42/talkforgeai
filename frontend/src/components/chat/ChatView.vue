@@ -24,35 +24,27 @@
       <!-- History Column -->
       <div class="col-3">
         <ChatHeader></ChatHeader>
-        <ChatHistory></ChatHistory>
+        <ThreadList></ThreadList>
       </div>
       <!-- End History Column -->
 
       <div class="col-9">
         <ChatContainer></ChatContainer>
       </div>
-
-      <!-- Chat Column -->
-      <!--      <div class="col-9 gx-3 full-height">-->
-      <!--        <div class="d-flex flex-column full-height">-->
-
-      <!--          <ChatContainer></ChatContainer>-->
-      <!--        </div>-->
-      <!--      </div>-->
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue';
-import ChatContainer from '@/components/ChatContainer.vue';
-import ChatHistory from '@/components/thread/ChatHistory.vue';
 import {useChatStore} from '@/store/chat-store';
-import ChatHeader from '@/components/ChatHeader.vue';
 import {useAppStore} from '@/store/app-store';
+import ChatHeader from '@/components/chat/ChatHeader.vue';
+import ChatContainer from '@/components/chat/ChatContainer.vue';
+import ThreadList from '@/components/thread/ThreadList.vue';
 
 export default defineComponent({
-  components: {ChatHeader, ChatHistory, ChatContainer},
+  components: {ThreadList, ChatHeader, ChatContainer},
   props: ['assistantId'],
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
@@ -62,13 +54,18 @@ export default defineComponent({
   data() {
     return {};
   },
-  async mounted() {
-    try {
-      await this.store.selectAssistant(this.assistantId);
-      await this.store.retrieveThreads();
-    } catch (error) {
-      this.appStore.handleError(error);
-    }
+  methods: {
+    async fetchData() {
+      try {
+        await this.store.selectAssistant(this.assistantId);
+        await this.store.retrieveThreads();
+      } catch (error) {
+        this.appStore.handleError(error);
+      }
+    },
+  },
+  mounted() {
+    this.fetchData();
   },
 });
 </script>

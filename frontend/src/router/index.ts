@@ -15,9 +15,9 @@
  */
 
 import {createRouter, createWebHashHistory, RouteRecordRaw} from 'vue-router';
-import PersonaChoiceView from '@/views/PersonaChoiceView.vue';
-import ChatView from '@/views/ChatView.vue';
-import PersonaEditorView from '@/views/PersonaEditorView.vue';
+import PersonaChoiceView from '@/components/choice/ChoiceView.vue';
+import ChatView from '@/components/chat/ChatView.vue';
+import EditorView from '@/components/editor/EditorView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -34,13 +34,13 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/persona/create',
     name: 'persona-create',
-    component: PersonaEditorView,
+    component: EditorView,
   },
 
   {
     path: '/persona/edit/:assistantId',
     name: 'persona-edit',
-    component: PersonaEditorView,
+    component: EditorView,
     props: true,
   },
 

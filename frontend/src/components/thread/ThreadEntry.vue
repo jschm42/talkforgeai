@@ -44,10 +44,7 @@
 <script>
 import {useChatStore} from '@/store/chat-store';
 import {format} from 'date-fns';
-import ChatService from '@/service/chat.service';
 import Thread from '@/store/to/thread';
-
-const chatService = new ChatService();
 
 export default {
   name: 'ChatHistoryEntry',
@@ -87,11 +84,9 @@ export default {
       }
     },
     onClickDelete() {
-      console.log('DELETE');
       this.isDeleteMode = true;
     },
     onClickEdit() {
-      console.log('EDIT');
       this.isEditMode = true;
     },
     async onClickConfirm() {

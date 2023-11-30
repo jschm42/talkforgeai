@@ -29,7 +29,7 @@
     <div class="list-group list-group-flush border-bottom">
 
       <div v-for="entry in allSessionEntries" :key="entry.id">
-        <ChatHistoryEntry :entry="entry" @entrySelected="onEntrySelected"/>
+        <ThreadEntry :entry="entry" @entrySelected="onEntrySelected"/>
       </div>
 
     </div>
@@ -40,11 +40,11 @@
 
 <script>
 import {useChatStore} from '@/store/chat-store';
-import ChatHistoryEntry from '@/components/thread/ChatHistoryEntry.vue';
+import ThreadEntry from '@/components/thread/ThreadEntry.vue';
 
 export default {
-  name: 'ChatHistory',
-  components: {ChatHistoryEntry},
+  name: 'ThreadList',
+  components: {ThreadEntry},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
 

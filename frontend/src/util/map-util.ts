@@ -16,7 +16,7 @@
 
 class MapUtil {
   static mapToJsonString(map: any) {
-    let json: any = {};
+    const json: any = {};
     map.forEach((value: any, key: string) => {
       json[key] = value;
     });

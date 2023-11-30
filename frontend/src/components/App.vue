@@ -44,7 +44,7 @@
 <script>
 import {useChatStore} from '@/store/chat-store';
 import {usePersonaFormStore} from '@/store/persona-form-store';
-import ErrorAlerts from '@/components/ErrorAlerts.vue';
+import ErrorAlerts from '@/components/common/ErrorAlerts.vue';
 
 export default {
   name: 'ChatContainer',
