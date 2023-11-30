@@ -79,8 +79,8 @@ export default {
 <style scoped>
 
 .persona-info {
-  display: flex;
-  align-items: flex-start;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .persona-description {
