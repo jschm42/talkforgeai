@@ -17,9 +17,10 @@
 <template>
   <div class="container p-3">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark rounded my-2">
       <a class="navbar-brand" href="#">
-        <img alt="Talkforge AI" class="logo" src="@/assets/logo.png" title="Talkforge AI">
+        <img alt="Talkforge AI" class="logo" src="@/assets/logo-notext.png"
+             title="Talkforge AI">
       </a>
       <button aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
               class="navbar-toggler"
@@ -27,11 +28,7 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div id="navbarNav" class="collapse navbar-collapse">
-        <ul class="navbar-nav">
-          <li class="nav-item active fs-2">
-            <a class="nav-link" href="#" @click.prevent="onCreateNewPersona">Create assistant...</a>
-          </li>
-        </ul>
+        <button class="btn btn-lg btn-outline-light">Create assistant...</button>
       </div>
     </nav>
 
@@ -103,7 +100,7 @@ export default defineComponent({
 }
 
 .logo {
-  height: 7rem;
+  height: 4rem;
   margin-left: 8px;
 }
 
