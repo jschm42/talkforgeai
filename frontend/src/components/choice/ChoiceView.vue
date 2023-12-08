@@ -104,4 +104,19 @@ export default defineComponent({
   margin-left: 8px;
 }
 
+@media (min-width: 800px) {
+  .assistant-element {
+    width: 15rem;
+    height: 21rem;
+  }
+}
+
+@media (min-width: 300px) {
+  .assistant-element {
+    width: 10rem;
+    height: 18rem;
+  }
+}
+
+
 </style>
