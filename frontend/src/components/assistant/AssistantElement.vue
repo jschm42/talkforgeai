@@ -18,11 +18,10 @@
 
 import {useChatStore} from '@/store/chat-store';
 import Assistant from '@/store/to/assistant';
-import AssistantTooltip from '@/components/assistant/AssistantTooltip.vue';
 
 export default {
   name: 'AssistantElement',
-  components: {AssistantTooltip},
+  components: {},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
     return {store};
@@ -71,81 +70,55 @@ export default {
 </script>
 
 <template>
-  <div class="persona-card">
-
-    <div class="card-image" role="button" @mouseleave="onMouseLeave()" @mouseover="onMouseOver()">
-      <img v-if="isShowAssistantImage" :alt="assistant.name" :src="imageSrc"
-           class="persona-icon rounded-border" role="button"
-           @click.prevent="onPersonaSelected()"/>
-      <img v-else class="robot-icon rounded-border" src="@/assets/robot.svg" title="Robot"
-           @click.prevent="onPersonaSelected()">
-      <h5 class="card-title" @click.prevent="onPersonaSelected()">{{ assistant.name }}</h5>
-      <assistant-tooltip v-if="showTooltip && hasDescription" @click.prevent="onPersonaSelected()">
-        {{ assistant.description }}
-      </assistant-tooltip>
+  <div class="card assistant-element">
+    <img v-if="isShowAssistantImage" :alt="assistant.name" :src="imageSrc"
+         class="persona-icon card-img-top img-fluid p-2" role="button"
+         @click.prevent="onPersonaSelected()"/>
+    <img v-else :alt="assistant.name" class="robot-icon card-img-top img-fluid p-2"
+         src="@/assets/robot.svg"
+         title="Robot"
+         @click.prevent="onPersonaSelected()">
+    <i class="bi bi-pencil edit-button rounded-5" role="button"
+       @click.prevent="onEditPersona()"></i>
+    <div class="card-body" role="button" @click.prevent="onPersonaSelected()">
+      <h5 class="card-title">{{ assistant.name }}</h5>
+      <div class="card-text truncate-text"> {{ assistant.description }}
+      </div>
     </div>
-    <div class="col-2 d-inline-flex flex-row-reverse my-1 p-2">
-      <i class="bi bi-pencil edit-button" role="button"
-         @click.prevent="onEditPersona()"></i>
-    </div>
-
   </div>
 
 </template>
 
 <style scoped>
-.persona-card {
-  min-width: 100px;
-  min-height: auto;
-  width: 200px; /* Set a fixed width */
-  height: auto; /* Set a fixed height */
-  position: relative;
-  display: inline-block;
-  border-radius: 10px;
+
+.assistant-element {
+  background-color: #303030;
 }
 
 .persona-icon {
-  width: 100%;
   height: auto;
 }
 
 .robot-icon {
-  width: 100%;
-  height: auto;
-  padding: 50px;
   color: #cccccc;
-  background-color: #303030;
-}
-
-.card-image {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  display: inline-block;
-}
-
-.card-title {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 2px;
 }
 
 .edit-button {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.7); /* Add a semi-transparent white background */
-  border-radius: 50%; /* Make the button round */
-  padding: 5px; /* Add some padding */
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  top: 0.1rem;
+  right: 0.1rem;
+  padding: 0.5rem;
+  color: #cccccc;
+  font-size: 1.3rem;
+  background-color: rgba(20, 20, 20, 0.7);
 }
 
-.rounded-border {
-  border-radius: 15px;
+.truncate-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 </style>

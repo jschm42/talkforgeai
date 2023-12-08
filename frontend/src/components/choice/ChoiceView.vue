@@ -16,29 +16,33 @@
 
 <template>
   <div class="container p-3">
-    <div class="row header">
-      <div class="header">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="#">
         <img alt="Talkforge AI" class="logo" src="@/assets/logo.png" title="Talkforge AI">
+      </a>
+      <button aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
+              class="navbar-toggler"
+              data-target="#navbarNav" data-toggle="collapse" type="button">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div id="navbarNav" class="collapse navbar-collapse">
+        <ul class="navbar-nav">
+          <li class="nav-item active fs-2">
+            <a class="nav-link" href="#" @click.prevent="onCreateNewPersona">Create assistant...</a>
+          </li>
+        </ul>
       </div>
-    </div>
-    <div class="row scrollable-persona-list">
+    </nav>
 
-      <div v-for="assistant in assistantList" :key="assistant.id"
-           class="col-md-3 assistant-element">
-        <assistant-element :assistant="assistant"></assistant-element>
-      </div>
+    <div class="row">
 
-      <div class="col-md-3">
-        <div class="card bg-gradient text-center create-card" role="button"
-             @click.prevent="onCreateNewPersona">
-          <div class="card-body">
-            <h5 class="card-title">
-              Create new assistant...
-            </h5>
-          </div>
+      <div class="d-flex flex-wrap justify-content-start scrollable-persona-list">
+        <div v-for="assistant in assistantList" :key="assistant.id"
+             class="p-1 m-1 assistant-element">
+          <assistant-element :assistant="assistant"></assistant-element>
         </div>
       </div>
-
     </div>
   </div>
 </template>
@@ -93,18 +97,14 @@ export default defineComponent({
   overflow-y: auto;
 }
 
-.create-card {
-  width: 200px;
-  height: 180px;
+.assistant-element {
+  width: 13rem;
+  height: 21rem;
 }
 
 .logo {
-  height: 10em;
+  height: 7rem;
   margin-left: 8px;
-}
-
-.header {
-  margin-bottom: 1em;
 }
 
 </style>
