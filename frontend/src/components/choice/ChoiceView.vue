@@ -15,31 +15,45 @@
   -->
 
 <template>
-  <div class="container p-3">
-
-    <nav class="navbar navbar-expand-lg navbar-dark rounded my-2">
-      <a class="navbar-brand" href="#">
-        <img alt="Talkforge AI" class="logo" src="@/assets/logo-notext.png"
-             title="Talkforge AI">
-      </a>
-      <button aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
-              class="navbar-toggler"
-              data-target="#navbarNav" data-toggle="collapse" type="button">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div id="navbarNav" class="collapse navbar-collapse">
-        <button class="btn btn-lg btn-outline-light">Create assistant...</button>
-      </div>
-    </nav>
-
+  <div class="container-fluid">
     <div class="row">
 
-      <div class="d-flex flex-wrap justify-content-start scrollable-persona-list">
-        <div v-for="assistant in assistantList" :key="assistant.id"
-             class="p-1 m-1 assistant-element">
-          <assistant-element :assistant="assistant"></assistant-element>
+      <!-- Sidebar visible on lg and higher screens -->
+      <div class="col-lg-2 d-none d-lg-block sidebar">
+        <!-- Sidebar content -->
+        <button class="btn btn-primary">Button 1</button>
+        <button class="btn btn-secondary">Button 2</button>
+        <!-- Add more buttons as needed -->
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-12 col-lg-10">
+
+        <!-- Toggler for small screens -->
+        <button class="btn btn-primary d-lg-none" @click="toggleSidebar">
+          Toggle Sidebar
+        </button>
+
+        <!-- Your main content goes here -->
+        <div class="row">
+          <div class="d-flex flex-wrap justify-content-start scrollable-persona-list">
+            <div v-for="assistant in assistantList" :key="assistant.id"
+                 class="p-1 m-1 assistant-element">
+              <assistant-element :assistant="assistant"></assistant-element>
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- Sidebar for xs to md screens, full screen -->
+      <div v-if="showSidebar" class="mobile-sidebar d-lg-none">
+        <!-- Sidebar content -->
+        <button class="btn btn-primary">Button 1</button>
+        <button class="btn btn-secondary">Button 2</button>
+        <!-- Add more buttons as needed -->
+        <button class="btn btn-danger" @click="toggleSidebar">Close</button>
+      </div>
+
     </div>
   </div>
 </template>
@@ -59,6 +73,7 @@ export default defineComponent({
   },
   data() {
     return {
+      showSidebar: false,
       isEntrySelected: false,
     };
   },
@@ -68,7 +83,9 @@ export default defineComponent({
     },
   },
   methods: {
-
+    toggleSidebar() {
+      this.showSidebar = !this.showSidebar;
+    },
     isShowAssistantImage(assistant) {
       return !!assistant.image_path;
     },
@@ -102,6 +119,39 @@ export default defineComponent({
 .logo {
   height: 4rem;
   margin-left: 8px;
+}
+
+/* Ensure sidebar is hidden on small screens and full screen when shown */
+.mobile-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000000;
+  z-index: 1050; /* Higher than the default navbar z-index to overlay on top */
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+/* Custom CSS for large screens */
+@media (min-width: 769px) {
+  .modal-fullscreen .modal-dialog {
+    max-width: none;
+    width: 20%;
+    height: 100%;
+    margin: 0;
+  }
+
+  .modal-fullscreen .modal-content {
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .modal-backdrop {
+    display: none;
+  }
 }
 
 @media (min-width: 800px) {
