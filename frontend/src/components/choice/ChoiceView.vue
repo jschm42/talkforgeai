@@ -199,15 +199,15 @@ ul {
 
 @media only screen and (min-width: 768px ) {
   .assistant-element {
-    width: 13rem;
+    width: 15rem;
     height: 21rem;
   }
 }
 
 @media only screen and (min-width: 375px) {
   .assistant-element {
-    width: 10rem;
-    height: 18rem;
+    width: 11rem;
+    height: 19rem;
   }
 }
 
