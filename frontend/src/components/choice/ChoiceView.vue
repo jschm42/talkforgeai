@@ -45,11 +45,14 @@
       <!-- Main Content -->
       <div class="col-12 col-lg-10">
 
-        <div class="row">
+        <div class="row toolbar-header p-2">
           <div class="d-flex">
 
-            <!--            <img alt="Talkforge AI" class="logo-small flex-grow-1" src="@/assets/logo-notext.png"-->
-            <!--                 title="Talkforge AI">-->
+            <img alt="Talkforge AI" class="logo-small d-lg-none"
+                 src="@/assets/logo-notext.png"
+                 title="Talkforge AI">
+
+            <h1 class="flex-grow-1 d-lg-none">Talkforge AI</h1>
 
             <!-- Toggler for small screens -->
             <button class="btn btn-primary d-lg-none" @click="toggleSidebar">
@@ -158,6 +161,10 @@ export default defineComponent({
 .logo {
   height: 10rem;
   margin: 1rem auto;
+}
+
+h1 {
+  color: #cccccc;
 }
 
 .logo-small {
