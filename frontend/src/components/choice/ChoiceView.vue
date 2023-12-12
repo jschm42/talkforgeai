@@ -21,8 +21,22 @@
       <!-- Sidebar visible on lg and higher screens -->
       <div class="col-lg-2 d-none d-lg-block sidebar">
         <!-- Sidebar content -->
-        <button class="btn btn-primary">Button 1</button>
-        <button class="btn btn-secondary">Button 2</button>
+        <img alt="Talkforge AI" class="logo" src="@/assets/logo.png" title="Talkforge AI">
+        <hr>
+        <ul class="nav nav-pills flex-column mb-auto">
+          <li class="nav-item">
+            <a aria-current="page" class="nav-link active" href="#">
+              <i class="bi bi-plus-circle-fill"></i>
+              Create assistant...
+            </a>
+          </li>
+          <li>
+            <a class="nav-link text-white" href="#">
+              <i class="bi bi-gear-fill"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
         <!-- Add more buttons as needed -->
       </div>
 
@@ -31,7 +45,7 @@
 
         <!-- Toggler for small screens -->
         <button class="btn btn-primary d-lg-none" @click="toggleSidebar">
-          Toggle Sidebar
+          <span class="navbar-toggler-icon"></span>
         </button>
 
         <!-- Your main content goes here -->
@@ -48,8 +62,24 @@
       <!-- Sidebar for xs to md screens, full screen -->
       <div v-if="showSidebar" class="mobile-sidebar d-lg-none">
         <!-- Sidebar content -->
-        <button class="btn btn-primary">Button 1</button>
-        <button class="btn btn-secondary">Button 2</button>
+        <img alt="Talkforge AI" class="logo" src="@/assets/logo.png" title="Talkforge AI">
+        <hr>
+        <ul class="nav nav-pills flex-column mb-auto">
+          <li class="nav-item">
+            <a aria-current="page" class="nav-link active" href="#">
+              <i class="bi bi-plus-circle-fill"></i>
+              Home
+            </a>
+          </li>
+          <li>
+            <a class="nav-link text-white" href="#">
+              <svg class="bi pe-none me-2" height="16" width="16">
+                <use xlink:href="#speedometer2"></use>
+              </svg>
+              Dashboard
+            </a>
+          </li>
+        </ul>
         <!-- Add more buttons as needed -->
         <button class="btn btn-danger" @click="toggleSidebar">Close</button>
       </div>
@@ -117,7 +147,7 @@ export default defineComponent({
 }
 
 .logo {
-  height: 4rem;
+  height: 8rem;
   margin-left: 8px;
 }
 
