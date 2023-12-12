@@ -62,17 +62,21 @@
           </div>
         </div>
 
-
         <!-- Your main content goes here -->
         <div class="row">
-          <div
-              class="d-flex flex-wrap align-items-start justify-content-start scrollable-persona-list">
-            <div v-for="assistant in assistantList" :key="assistant.id"
-                 class="p-1 m-1 assistant-element">
-              <assistant-element :assistant="assistant"></assistant-element>
+
+          <div class="container" style="overflow: auto; height: 90vh">
+            <div class="d-flex flex-wrap flex-row">
+              <div v-for="assistant in assistantList"
+                   :key="assistant.id" class="d-flex flex-column m-1 assistant-element">
+                <assistant-element :assistant="assistant"></assistant-element>
+              </div>
             </div>
           </div>
+
+
         </div>
+
 
       </div>
 
@@ -155,11 +159,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.scrollable-persona-list {
-  height: 100vh;
-  overflow-y: auto;
-}
-
 .logo {
   height: 10rem;
   margin: 1rem auto;

@@ -95,9 +95,6 @@ export default {
   background-color: #303030;
 }
 
-.persona-icon {
-  height: auto;
-}
 
 .robot-icon {
   color: #cccccc;
@@ -121,10 +118,15 @@ export default {
   text-overflow: ellipsis;
 }
 
+.persona-icon {
+  height: auto;
+}
+
 .description {
   font-size: 0.8rem;
   color: #cccccc;
 }
+
 
 @media only screen and (min-width: 768px ) {
   .description {
@@ -140,7 +142,7 @@ export default {
 
 @media only screen and (min-width: 768px ) {
   .title {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
 }
 
