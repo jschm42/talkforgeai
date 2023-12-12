@@ -65,13 +65,15 @@
 
         <!-- Your main content goes here -->
         <div class="row">
-          <div class="d-flex flex-wrap justify-content-start scrollable-persona-list">
+          <div
+              class="d-flex flex-wrap align-items-start justify-content-start scrollable-persona-list">
             <div v-for="assistant in assistantList" :key="assistant.id"
                  class="p-1 m-1 assistant-element">
               <assistant-element :assistant="assistant"></assistant-element>
             </div>
           </div>
         </div>
+
       </div>
 
       <!-- Sidebar for xs to md screens, full screen -->
@@ -154,7 +156,7 @@ export default defineComponent({
 
 <style scoped>
 .scrollable-persona-list {
-  height: 75vh;
+  height: 100vh;
   overflow-y: auto;
 }
 
