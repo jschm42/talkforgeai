@@ -45,10 +45,20 @@
       <!-- Main Content -->
       <div class="col-12 col-lg-10">
 
-        <!-- Toggler for small screens -->
-        <button class="btn btn-primary d-lg-none" @click="toggleSidebar">
-          <span class="navbar-toggler-icon"></span>
-        </button>
+        <div class="row">
+          <div class="d-flex">
+
+            <!--            <img alt="Talkforge AI" class="logo-small flex-grow-1" src="@/assets/logo-notext.png"-->
+            <!--                 title="Talkforge AI">-->
+
+            <!-- Toggler for small screens -->
+            <button class="btn btn-primary d-lg-none" @click="toggleSidebar">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+
+          </div>
+        </div>
+
 
         <!-- Your main content goes here -->
         <div class="row">
@@ -66,24 +76,26 @@
         <!-- Sidebar content -->
         <img alt="Talkforge AI" class="logo" src="@/assets/logo.png" title="Talkforge AI">
         <hr>
-        <ul class="nav nav-pills flex-column mb-auto">
+        <ul class="nav nav-pills flex-column align-items-start">
           <li class="nav-item">
-            <a aria-current="page" class="nav-link active" href="#">
+            <a class="nav-link text-white" href="#">
               <i class="bi bi-plus-circle-fill"></i>
-              Home
+              Create
             </a>
           </li>
-          <li>
+          <li class="nav-item">
             <a class="nav-link text-white" href="#">
-              <svg class="bi pe-none me-2" height="16" width="16">
-                <use xlink:href="#speedometer2"></use>
-              </svg>
-              Dashboard
+              <i class="bi bi-gear-fill"></i>
+              Settings
             </a>
           </li>
         </ul>
+        <hr>
         <!-- Add more buttons as needed -->
-        <button class="btn btn-danger" @click="toggleSidebar">Close</button>
+        <button class="btn btn-lg btn-primary" @click="toggleSidebar">
+          <i class="bi bi-x"></i>
+          Close
+        </button>
       </div>
 
     </div>
@@ -151,6 +163,10 @@ export default defineComponent({
 .logo {
   height: 10rem;
   margin: 1rem auto;
+}
+
+.logo-small {
+  height: 3rem;
 }
 
 /* Ensure sidebar is hidden on small screens and full screen when shown */
