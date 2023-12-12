@@ -81,8 +81,8 @@ export default {
     <i class="bi bi-pencil edit-button rounded-5" role="button"
        @click.prevent="onEditPersona()"></i>
     <div class="card-body" role="button" @click.prevent="onPersonaSelected()">
-      <h5 class="card-title">{{ assistant.name }}</h5>
-      <div class="card-text truncate-text"> {{ assistant.description }}
+      <h5 class="card-title title">{{ assistant.name }}</h5>
+      <div class="card-text description truncate-text"> {{ assistant.description }}
       </div>
     </div>
   </div>
@@ -119,6 +119,29 @@ export default {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.description {
+  font-size: 0.8rem;
+  color: #cccccc;
+}
+
+@media only screen and (min-width: 768px ) {
+  .description {
+    font-size: 1rem;
+  }
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #cccccc;
+}
+
+@media only screen and (min-width: 768px ) {
+  .title {
+    font-size: 1.2rem;
+  }
 }
 
 </style>

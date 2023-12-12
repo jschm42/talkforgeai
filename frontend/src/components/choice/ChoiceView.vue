@@ -155,11 +155,6 @@ export default defineComponent({
   overflow-y: auto;
 }
 
-.assistant-element {
-  width: 13rem;
-  height: 21rem;
-}
-
 .logo {
   height: 10rem;
   margin: 1rem auto;
@@ -190,39 +185,23 @@ ul {
   font-size: 1.5rem;
 }
 
-/* Custom CSS for large screens */
-@media (min-width: 769px) {
-  .modal-fullscreen .modal-dialog {
-    max-width: none;
-    width: 20%;
-    height: 100%;
-    margin: 0;
-  }
-
-  .modal-fullscreen .modal-content {
-    height: 100%;
-    border: 0;
-    border-radius: 0;
-  }
-
-  .modal-backdrop {
-    display: none;
-  }
+.assistant-element {
+  width: 8rem;
+  height: 16rem;
 }
 
-@media (min-width: 800px) {
+@media only screen and (min-width: 768px ) {
   .assistant-element {
-    width: 15rem;
+    width: 13rem;
     height: 21rem;
   }
 }
 
-@media (min-width: 300px) {
+@media only screen and (min-width: 375px) {
   .assistant-element {
     width: 10rem;
     height: 18rem;
   }
 }
-
 
 </style>
