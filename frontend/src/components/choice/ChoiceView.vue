@@ -21,16 +21,18 @@
       <!-- Sidebar visible on lg and higher screens -->
       <div class="col-lg-2 d-none d-lg-block sidebar">
         <!-- Sidebar content -->
-        <img alt="Talkforge AI" class="logo" src="@/assets/logo.png" title="Talkforge AI">
+        <div class="d-flex flex-grow-1 align-items-start">
+          <img alt="Talkforge AI" class="logo" src="@/assets/logo.png" title="Talkforge AI">
+        </div>
         <hr>
-        <ul class="nav nav-pills flex-column mb-auto">
+        <ul class="nav nav-pills flex-column align-items-start">
           <li class="nav-item">
-            <a aria-current="page" class="nav-link active" href="#">
+            <a class="nav-link text-white" href="#">
               <i class="bi bi-plus-circle-fill"></i>
-              Create assistant...
+              Create
             </a>
           </li>
-          <li>
+          <li class="nav-item">
             <a class="nav-link text-white" href="#">
               <i class="bi bi-gear-fill"></i>
               Settings
@@ -147,8 +149,8 @@ export default defineComponent({
 }
 
 .logo {
-  height: 8rem;
-  margin-left: 8px;
+  height: 10rem;
+  margin: 1rem auto;
 }
 
 /* Ensure sidebar is hidden on small screens and full screen when shown */
@@ -162,6 +164,14 @@ export default defineComponent({
   z-index: 1050; /* Higher than the default navbar z-index to overlay on top */
   overflow-y: auto;
   padding: 1rem;
+}
+
+hr {
+  color: #ffffff;
+}
+
+ul {
+  font-size: 1.5rem;
 }
 
 /* Custom CSS for large screens */
