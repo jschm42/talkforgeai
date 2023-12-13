@@ -15,22 +15,27 @@
   -->
 
 <template>
-  <div class="p-2">
+  <div class="container-fluid">
+
     <div class="row">
+      <!-- Sidebar visible on lg and higher screens -->
+      <div class="col-lg-2 d-none d-lg-block sidebar">
+        <!-- Sidebar content -->
+        <!--        <div class="d-flex flex-grow-1 align-items-start">-->
+        <!--          <img alt="Talkforge AI" class="logo" src="@/assets/logo.png" title="Talkforge AI">-->
+        <!--        </div>-->
+        <hr>
 
-    </div>
-
-    <div class="row g-1 full-height">
-      <!-- History Column -->
-      <div class="col-3">
         <ChatHeader></ChatHeader>
         <ThreadList></ThreadList>
-      </div>
-      <!-- End History Column -->
 
-      <div class="col-9">
+        <!-- Add more buttons as needed -->
+      </div>
+      <div class="col-12 col-lg-10">
+        <!-- Main Content -->
         <ChatContainer></ChatContainer>
       </div>
+
     </div>
   </div>
 </template>
@@ -92,17 +97,11 @@ body, html {
   height: 100vh;
 }
 
-.full-height {
-  height: 100vh;
+
+hr {
+  color: #ffffff;
 }
 
-.vertical-scrollbar {
-  overflow-y: auto;
-}
-
-.no-horizontal-scrollbar {
-  overflow-x: hidden;
-}
 
 .image-prompt-element {
   background-color: bisque;

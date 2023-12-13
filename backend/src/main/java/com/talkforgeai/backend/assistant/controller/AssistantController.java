@@ -24,7 +24,8 @@ import com.talkforgeai.backend.assistant.dto.ParsedMessageDto;
 import com.talkforgeai.backend.assistant.dto.ProfileImageUploadResponse;
 import com.talkforgeai.backend.assistant.dto.ThreadDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleDto;
-import com.talkforgeai.backend.assistant.dto.ThreadTitleRequestDto;
+import com.talkforgeai.backend.assistant.dto.ThreadTitleGenerationRequestDto;
+import com.talkforgeai.backend.assistant.dto.ThreadTitleUpdateRequestDto;
 import com.talkforgeai.backend.assistant.service.AssistantService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.service.openai.assistant.dto.ListRequest;
@@ -204,11 +205,23 @@ public class AssistantController {
     }
   }
 
+  @DeleteMapping("/threads/{threadId}")
+  @ResponseBody
+  public void deleteThread(@PathVariable("threadId") String threadId) {
+    assistantService.deleteThread(threadId);
+  }
+
+  @PostMapping("/threads/{threadId}/title")
+  @ResponseBody
+  public ThreadTitleDto updateThreadTitle(@PathVariable("threadId") String threadId,
+      @RequestBody ThreadTitleUpdateRequestDto request) {
+    return assistantService.updateThreadTitle(threadId, request);
+  }
 
   @PostMapping("/threads/{threadId}/title/generate")
   @ResponseBody
   public ThreadTitleDto generateThreadTitle(@PathVariable("threadId") String threadId,
-      @RequestBody ThreadTitleRequestDto request) {
+      @RequestBody ThreadTitleGenerationRequestDto request) {
     return assistantService.generateThreadTitle(threadId, request);
   }
 }

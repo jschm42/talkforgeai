@@ -27,17 +27,17 @@
         <hr>
         <ul class="nav nav-pills flex-column align-items-start">
           <li class="nav-item">
-            <a class="nav-link text-white" href="#">
+            <a class="nav-link text-white" href="#" @click.prevent="onCreateNewPersona">
               <i class="bi bi-plus-circle-fill"></i>
               Create
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#">
-              <i class="bi bi-gear-fill"></i>
-              Settings
-            </a>
-          </li>
+          <!--          <li class="nav-item">-->
+          <!--            <a class="nav-link text-white" href="#">-->
+          <!--              <i class="bi bi-gear-fill"></i>-->
+          <!--              Settings-->
+          <!--            </a>-->
+          <!--          </li>-->
         </ul>
         <!-- Add more buttons as needed -->
       </div>
@@ -87,17 +87,17 @@
         <hr>
         <ul class="nav nav-pills flex-column align-items-start">
           <li class="nav-item">
-            <a class="nav-link text-white" href="#">
+            <a class="nav-link text-white" href="#" @click.prevent="onCreateNewPersona">
               <i class="bi bi-plus-circle-fill"></i>
               Create
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#">
-              <i class="bi bi-gear-fill"></i>
-              Settings
-            </a>
-          </li>
+          <!--          <li class="nav-item">-->
+          <!--            <a class="nav-link text-white" href="#">-->
+          <!--              <i class="bi bi-gear-fill"></i>-->
+          <!--              Settings-->
+          <!--            </a>-->
+          <!--          </li>-->
         </ul>
         <hr>
         <!-- Add more buttons as needed -->

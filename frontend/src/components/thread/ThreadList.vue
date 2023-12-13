@@ -15,14 +15,14 @@
   -->
 
 <template>
-  <div class="p-3 full-height vertical-scrollbar shadow">
+  <div class="full-height vertical-scrollbar shadow">
 
     <div class="row align-items-center">
       <div class="col-1">
         <i class="bi bi-box-arrow-left exit-button" role="button" @click.prevent="onClickBack"></i>
       </div>
       <div class="col-11">
-        <button class="col-12" @click.prevent="onNewSession">New Chat</button>
+        <button class="col-12" @click.prevent="onNewThread">New Chat</button>
       </div>
     </div>
 
@@ -68,8 +68,8 @@ export default {
         await this.store.retrieveMessages(threadId);
       }
     },
-    onNewSession() {
-      this.store.newSession();
+    onNewThread() {
+      this.store.newThread();
     },
     onClickBack() {
       this.$router.push('/');

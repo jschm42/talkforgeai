@@ -34,6 +34,8 @@ export const useChatStore = defineStore('chat', {
       parsedMessages: {} as any,
       threadId: '',
       threads: [] as Array<Thread>,
+      threadEditMode: false,
+      threadDeleteMode: false,
       selectedAssistant: {} as Assistant,
       assistantList: [] as Array<Assistant>,
     };
@@ -90,6 +92,13 @@ export const useChatStore = defineStore('chat', {
         this.threadId = thread.id;
       }
       return this.threadId;
+    },
+    async newThread() {
+      this.threadId = '';
+      this.threadMessages = [];
+      this.parsedMessages = {};
+      this.threadEditMode = false;
+      this.threadDeleteMode = false;
     },
     async runConversationAndHandleResults() {
       let pollingInterval: undefined | number = undefined;
@@ -168,6 +177,14 @@ export const useChatStore = defineStore('chat', {
       const response = await assistantService.generateThreadTitle(threadId, userMessage,
           assistantMessage);
       console.log('Generated title response', response);
+      await this.retrieveThreads();
+    },
+    async updateThreadTitle(threadId: string, title: string) {
+      await assistantService.updateThreadTitle(threadId, title);
+      await this.retrieveThreads();
+    },
+    async deleteThread(threadId: string) {
+      await assistantService.deleteThread(threadId);
       await this.retrieveThreads();
     },
     getAssistantImageUrl(imageUrl: string) {

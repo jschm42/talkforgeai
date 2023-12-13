@@ -27,7 +27,8 @@ import com.talkforgeai.backend.assistant.dto.ParsedMessageDto;
 import com.talkforgeai.backend.assistant.dto.ProfileImageUploadResponse;
 import com.talkforgeai.backend.assistant.dto.ThreadDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleDto;
-import com.talkforgeai.backend.assistant.dto.ThreadTitleRequestDto;
+import com.talkforgeai.backend.assistant.dto.ThreadTitleGenerationRequestDto;
+import com.talkforgeai.backend.assistant.dto.ThreadTitleUpdateRequestDto;
 import com.talkforgeai.backend.assistant.exception.AssistentException;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.assistant.repository.MessageRepository;
@@ -277,7 +278,8 @@ public class AssistantService {
   }
 
   @Transactional
-  public ThreadTitleDto generateThreadTitle(String threadId, ThreadTitleRequestDto request) {
+  public ThreadTitleDto generateThreadTitle(String threadId,
+      ThreadTitleGenerationRequestDto request) {
     ThreadEntity threadEntity = threadRepository.findById(threadId)
         .orElseThrow(() -> new AssistentException("Thread not found"));
 
@@ -294,7 +296,7 @@ public class AssistantService {
   }
 
   @NotNull
-  private OpenAIChatRequest getTitleRequest(ThreadTitleRequestDto request) {
+  private OpenAIChatRequest getTitleRequest(ThreadTitleGenerationRequestDto request) {
     OpenAIChatRequest titleRequest = new OpenAIChatRequest();
     titleRequest.setModel("gpt-3.5-turbo");
     titleRequest.setMaxTokens(20);
@@ -434,5 +436,21 @@ public class AssistantService {
   public void deleteAssistant(String assistantId) {
     openAIAssistantService.deleteAssistant(assistantId);
     assistantRepository.deleteById(assistantId);
+  }
+
+  @Transactional
+  public void deleteThread(String threadId) {
+    threadRepository.deleteById(threadId);
+  }
+
+  @Transactional
+  public ThreadTitleDto updateThreadTitle(String threadId, ThreadTitleUpdateRequestDto request) {
+    ThreadEntity threadEntity = threadRepository.findById(threadId)
+        .orElseThrow(() -> new AssistentException("Thread not found"));
+
+    threadEntity.setTitle(request.title());
+    threadRepository.save(threadEntity);
+
+    return new ThreadTitleDto(request.title());
   }
 }

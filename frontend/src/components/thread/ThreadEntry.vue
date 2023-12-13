@@ -16,17 +16,16 @@
 
 <template>
 
-  <a :class="getEntryClass()"
-     class="list-group-item list-group-item-action py-1 px-1 lh-sm"
-     @click="$emit('entrySelected', entry.id)">
+  <div :class="getEntryClass()"
+       class="list-group-item list-group-item-action py-1 px-1 lh-sm">
 
     <div class="row p-0 m-0">
-      <div class="col-10 text-start">
-        <input v-if="isEditMode" v-model="title"/>
-        <h5 v-else class="overflow-hidden">{{ title }}</h5>
-        <p class="small overflow-hidden">{{ formatTimestamp(entry.createdAt) }}</p>
+      <div class="col-10 text-start" @click.prevent="onEntrySelected">
+        <input v-if="isEditMode" v-model="title" class="title-input"/>
+        <p v-else class="text-wrap text-truncate">{{ title }}</p>
+        <!--        <p class="small overflow-hidden">{{ formatTimestamp(entry.createdAt) }}</p>-->
       </div>
-      <div class="col-2 d-inline-flex flex-row-reverse my-2">
+      <div class="col-2 d-inline-flex flex-row-reverse">
         <div v-if="isEditMode || isDeleteMode">
           <i class="bi bi-check" role="button" @click="onClickConfirm"></i>
           <i class="bi bi-x" role="button" @click="onClickCancel"></i>
@@ -37,7 +36,7 @@
         </div>
       </div>
     </div>
-  </a>
+  </div>
 
 </template>
 
@@ -53,8 +52,6 @@ export default {
   },
   data() {
     return {
-      isEditMode: false,
-      isDeleteMode: false,
       title: '',
       oldTitle: '',
     };
@@ -64,6 +61,12 @@ export default {
     return {store};
   },
   computed: {
+    isEditMode() {
+      return this.store.threadEditMode && this.isSelected;
+    },
+    isDeleteMode() {
+      return this.store.threadDeleteMode && this.isSelected;
+    },
     getTitle() {
       return `${this.entry.id} - ${this.entry.title}`;
     },
@@ -84,19 +87,26 @@ export default {
       }
     },
     onClickDelete() {
-      this.isDeleteMode = true;
+      this.store.threadDeleteMode = true;
     },
     onClickEdit() {
-      this.isEditMode = true;
+      this.store.threadEditMode = true;
+    },
+    onEntrySelected() {
+      if (!this.isSelected) {
+        this.store.threadDeleteMode = false;
+        this.store.threadEditMode = false;
+      }
+      this.$emit('entrySelected', this.entry.id);
     },
     async onClickConfirm() {
       if (this.isEditMode) {
         this.oldTitle = this.title;
         this.isEditMode = false;
-        await this.store.updateSessionTitle(this.store.threadId, this.title);
+        await this.store.updateThreadTitle(this.store.threadId, this.title);
       } else if (this.isDeleteMode) {
         this.isDeleteMode = false;
-        await this.store.deleteChatSession(this.store.threadId);
+        await this.store.deleteThread(this.store.threadId);
       }
     },
     onClickCancel() {
@@ -115,6 +125,16 @@ export default {
 <style scoped>
 i {
   float: right;
+}
+
+.title-input {
+  width: 100%;
+  border: none;
+  background-color: transparent;
+  color: white;
+  font-size: 1rem;
+  text-align: left;
+  outline: none;
 }
 
 </style>

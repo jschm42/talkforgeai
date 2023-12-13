@@ -16,5 +16,7 @@
 
 package com.talkforgeai.backend.assistant.dto;
 
-public record ThreadTitleRequestDto(String userMessageContent, String assistantMessageContent) {
+public record ThreadTitleGenerationRequestDto(String userMessageContent,
+                                              String assistantMessageContent) {
+
 }

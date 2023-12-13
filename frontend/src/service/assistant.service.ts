@@ -160,6 +160,20 @@ class AssistantService {
     return result.data;
   }
 
+  async updateThreadTitle(threadId: string, title: string) {
+    console.log('Updating title for thread:', threadId);
+
+    const result = await axios.post(`/api/v1/threads/${threadId}/title`,
+        {title});
+    return result.data;
+  }
+
+  async deleteThread(threadId: string) {
+    console.log('Delete thread:', threadId);
+    const result = await axios.delete(`/api/v1/threads/${threadId}`);
+    return result.data;
+  }
+
   async retrieveThreads(): Promise<Array<Thread>> {
     const result = await axios.get(
         `/api/v1/threads`,
