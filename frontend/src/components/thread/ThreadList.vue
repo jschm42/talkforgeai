@@ -15,7 +15,7 @@
   -->
 
 <template>
-  <div class="full-height vertical-scrollbar shadow">
+  <div class="full-height vertical-scrollbar shadow g-0 m-1">
 
     <div class="row align-items-center">
       <div class="col-lg-2 col-3">

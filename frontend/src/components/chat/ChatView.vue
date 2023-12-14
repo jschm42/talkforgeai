@@ -19,12 +19,12 @@
 
     <div class="row">
       <!-- Sidebar visible on lg and higher screens -->
-      <div class="col-lg-2 d-none d-lg-block sidebar">
+      <div class="col-lg-2 d-none d-lg-block sidebar g-1">
         <!-- Sidebar content -->
-        <div class="row">
+        <div class="row my-2">
           <ChatHeader></ChatHeader>
         </div>
-        <div class="row">
+        <div class="row m-auto">
           <ThreadList></ThreadList>
         </div>
 

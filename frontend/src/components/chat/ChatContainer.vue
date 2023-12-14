@@ -15,7 +15,7 @@
   -->
 
 <template>
-  <div class="d-flex flex-column full-height">
+  <div class="d-flex flex-column full-height gx-0">
     <div ref="entries" class="row vertical-scrollbar no-horizontal-scrollbar mx-0 p-2">
       <ChatMessage v-for="(message, index) in store.threadMessages" ref="chatMessageRef"
                    v-bind:key="index"
