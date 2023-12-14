@@ -15,20 +15,14 @@
   -->
 
 <template>
-  <div class="container">
-    <div class="row">
-      <div class="col-12">
-        <div class="persona-info">
-          <figure class="figure persona-icon">
-            <img v-if="isShowAssistantImage(selectedAssistant)"
-                 :src="imageSrc(selectedAssistant.image_path)" alt="..."
-                 class="figure-img img-fluid rounded">
-            <img v-else src="@/assets/robot.svg" title="Robot">
-            <figcaption class="figure-caption">{{ personaName }}</figcaption>
-          </figure>
-        </div>
-      </div>
-    </div>
+  <div class="persona-info">
+    <figure class="figure persona-icon">
+      <img v-if="isShowAssistantImage(selectedAssistant)"
+           :src="imageSrc(selectedAssistant.image_path)" alt="..."
+           class="figure-img img-fluid rounded">
+      <img v-else src="@/assets/robot.svg" title="Robot">
+      <figcaption class="figure-caption">{{ personaName }}</figcaption>
+    </figure>
   </div>
 
 </template>
@@ -83,31 +77,8 @@ export default {
   margin-right: auto;
 }
 
-.persona-description {
-  margin-left: 10px;
-}
-
-.persona-name {
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: white;
-}
-
-.persona-description {
-  font-size: 0.9em;
-  font-style: italic;
-  color: #cccccc;
-  overflow: hidden;
-  height: 100px;
-}
-
-.back-button {
-  font-size: 2.5rem;
-  color: #6c757d;
-}
-
 .persona-icon {
-  width: 200px;
+  width: auto;
   height: auto;
 
 }

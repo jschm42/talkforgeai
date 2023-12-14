@@ -21,13 +21,12 @@
       <!-- Sidebar visible on lg and higher screens -->
       <div class="col-lg-2 d-none d-lg-block sidebar">
         <!-- Sidebar content -->
-        <!--        <div class="d-flex flex-grow-1 align-items-start">-->
-        <!--          <img alt="Talkforge AI" class="logo" src="@/assets/logo.png" title="Talkforge AI">-->
-        <!--        </div>-->
-        <hr>
-
-        <ChatHeader></ChatHeader>
-        <ThreadList></ThreadList>
+        <div class="row">
+          <ChatHeader></ChatHeader>
+        </div>
+        <div class="row">
+          <ThreadList></ThreadList>
+        </div>
 
         <!-- Add more buttons as needed -->
       </div>

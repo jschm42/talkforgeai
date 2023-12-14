@@ -18,10 +18,10 @@
   <div class="full-height vertical-scrollbar shadow">
 
     <div class="row align-items-center">
-      <div class="col-1">
+      <div class="col-lg-2 col-3">
         <i class="bi bi-box-arrow-left exit-button" role="button" @click.prevent="onClickBack"></i>
       </div>
-      <div class="col-11">
+      <div class="col-lg-10 col-9">
         <button class="col-12" @click.prevent="onNewThread">New Chat</button>
       </div>
     </div>

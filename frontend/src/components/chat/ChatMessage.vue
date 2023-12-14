@@ -38,7 +38,7 @@ export default {
   computed: {
     personaImage() {
       // Find the assistant in the store
-      const assistantId = this.message.assistant_id;
+      const assistantId = this.store.selectedAssistant.id;
       const assistant = this.store.assistantList.find(a => a.id === assistantId);
       if (assistant) {
         return this.store.getAssistantImageUrl(assistant.image_path);
@@ -151,7 +151,7 @@ export default {
 }
 
 .role-assistantEntity {
-//background-color: #000000;
+  //background-color: #000000;
 }
 
 .role-icon {
