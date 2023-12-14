@@ -16,14 +16,14 @@
 
 <template>
   <div class="d-flex flex-column full-height">
-    <div ref="entries" class="row vertical-scrollbar no-horizontal-scrollbar">
+    <div ref="entries" class="row vertical-scrollbar no-horizontal-scrollbar mx-0 p-2">
       <ChatMessage v-for="(message, index) in store.threadMessages" ref="chatMessageRef"
                    v-bind:key="index"
                    :message="message" :messageIndex="index"></ChatMessage>
     </div>
     <!-- Input Section -->
 
-    <div class="row">
+    <div class="row p-2">
       <ChatControl @submit-result-received="submitResultReceived"
                    @chunk-update-received="chunkUpdateReceived"></ChatControl>
     </div>
