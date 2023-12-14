@@ -16,15 +16,14 @@
 
 <template>
   <div class="d-flex flex-column full-height">
-
-    <div ref="entries" class="flex-grow-1 vertical-scrollbar no-horizontal-scrollbar">
+    <div ref="entries" class="row vertical-scrollbar no-horizontal-scrollbar">
       <ChatMessage v-for="(message, index) in store.threadMessages" ref="chatMessageRef"
                    v-bind:key="index"
                    :message="message" :messageIndex="index"></ChatMessage>
     </div>
     <!-- Input Section -->
 
-    <div class="flex-shrink-0">
+    <div class="row">
       <ChatControl @submit-result-received="submitResultReceived"
                    @chunk-update-received="chunkUpdateReceived"></ChatControl>
     </div>
@@ -93,7 +92,13 @@ export default {
 }
 
 .full-height {
-  height: 100vh;
+  height: 92vh;
+}
+
+@media only screen and (min-width: 993px ) {
+  .full-height {
+    height: 100vh;
+  }
 }
 
 </style>

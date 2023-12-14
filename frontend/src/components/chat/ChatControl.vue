@@ -15,7 +15,7 @@
   -->
 
 <template>
-  <div class="p-2 m-1 rounded shadow input-container">
+  <div class="p-2 m-1 rounded shadow">
 
     <div class="row">
       <div class="col-12">

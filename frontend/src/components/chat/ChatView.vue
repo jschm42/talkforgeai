@@ -52,8 +52,9 @@
           </div>
         </div>
 
-
-        <ChatContainer></ChatContainer>
+        <div class="row">
+          <ChatContainer></ChatContainer>
+        </div>
       </div>
 
       <!-- Sidebar for xs to md screens, full screen -->
