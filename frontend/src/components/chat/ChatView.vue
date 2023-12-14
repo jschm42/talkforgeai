@@ -32,7 +32,49 @@
       </div>
       <div class="col-12 col-lg-10">
         <!-- Main Content -->
+        <div class="row toolbar-header p-2 d-lg-none">
+          <div class="d-flex">
+
+            <!--            <img alt="Talkforge AI" class="logo-small d-lg-none"-->
+            <!--                 src="@/assets/logo-notext.png"-->
+            <!--                 title="Talkforge AI">-->
+            <div style="width: 3rem">
+              <ChatHeader :show-name="false"></ChatHeader>
+            </div>
+
+            <h1 class="flex-grow-1 d-lg-none">{{ assistantName }}</h1>
+
+            <!-- Toggler for small screens -->
+            <button class="btn btn-primary d-lg-none" @click="toggleSidebar">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+
+          </div>
+        </div>
+
+
         <ChatContainer></ChatContainer>
+      </div>
+
+      <!-- Sidebar for xs to md screens, full screen -->
+      <div v-if="showSidebar" class="mobile-sidebar d-lg-none p-3">
+        <!-- Sidebar content -->
+        <div class="row">
+          <div class="col-4 m-auto">
+            <ChatHeader :show-name="true"></ChatHeader>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 m-auto">
+            <ThreadList></ThreadList>
+          </div>
+        </div>
+        <!-- Add more buttons as needed -->
+        <button class="btn btn-lg btn-primary" @click="toggleSidebar">
+          <i class="bi bi-x"></i>
+          Close
+        </button>
+
       </div>
 
     </div>
@@ -56,9 +98,19 @@ export default defineComponent({
     return {store, appStore};
   },
   data() {
-    return {};
+    return {
+      showSidebar: false,
+    };
+  },
+  computed: {
+    assistantName() {
+      return this.store.selectedAssistant.name;
+    },
   },
   methods: {
+    toggleSidebar() {
+      this.showSidebar = !this.showSidebar;
+    },
     async fetchData() {
       try {
         await this.store.selectAssistant(this.assistantId);
@@ -83,6 +135,19 @@ pre {
   padding: 1rem;
 }
 
+.mobile-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000000;
+  z-index: 1050; /* Higher than the default navbar z-index to overlay on top */
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+
 .code-word {
   background-color: #f8f9fa;
   border: 1px solid #e9ecef;
@@ -101,6 +166,10 @@ hr {
   color: #ffffff;
 }
 
+
+.logo-small {
+  height: 3rem;
+}
 
 .image-prompt-element {
   background-color: bisque;

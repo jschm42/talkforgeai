@@ -16,13 +16,19 @@
 
 <template>
   <div class="persona-info">
-    <figure class="figure persona-icon">
+    <figure v-if="showName" class="figure persona-icon">
       <img v-if="isShowAssistantImage(selectedAssistant)"
-           :src="imageSrc(selectedAssistant.image_path)" alt="..."
+           :src="imageSrc(selectedAssistant.image_path)" alt="Persona Image"
            class="figure-img img-fluid rounded">
-      <img v-else src="@/assets/robot.svg" title="Robot">
+      <img v-else alt="Robot Image" src="@/assets/robot.svg" title="Robot">
       <figcaption class="figure-caption">{{ personaName }}</figcaption>
     </figure>
+    <div v-else>
+      <img v-if="isShowAssistantImage(selectedAssistant)"
+           :src="imageSrc(selectedAssistant.image_path)" alt="Persona Image"
+           class="figure-img img-fluid rounded">
+      <img v-else alt="Robot Image" src="@/assets/robot.svg" title="Robot">
+    </div>
   </div>
 
 </template>
@@ -34,6 +40,9 @@ import {useChatStore} from '@/store/chat-store';
 export default {
   name: 'ChatHeader',
   components: {},
+  props: {
+    showName: Boolean,
+  },
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
 

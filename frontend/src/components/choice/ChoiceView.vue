@@ -45,7 +45,7 @@
       <!-- Main Content -->
       <div class="col-12 col-lg-10">
 
-        <div class="row toolbar-header p-2">
+        <div class="row toolbar-header p-2 d-lg-none">
           <div class="d-flex">
 
             <img alt="Talkforge AI" class="logo-small d-lg-none"
