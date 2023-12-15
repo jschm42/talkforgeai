@@ -34,14 +34,17 @@
         <!-- Main Content -->
         <div class="row toolbar-header p-2 d-lg-none">
           <div class="d-flex">
-            <div style="width: 3rem">
-              <ChatHeader :show-name="false"></ChatHeader>
+            <div class="btn btn-outline-light d-flex align-items-center fs-3"
+                 @click.prevent="onClickBack">
+              <i class="bi bi-box-arrow-left me-2"></i>
             </div>
 
-            <h1 class="flex-grow-1 d-lg-none">{{ assistantName }}</h1>
+            <div class="flex-grow-1 align-items-center d-lg-none">
+              <div class="assistant-name">{{ assistantName }}</div>
+            </div>
 
             <!-- Toggler for small screens -->
-            <button class="btn btn-primary d-lg-none" @click="toggleSidebar">
+            <button class="btn btn-outline-light d-lg-none" @click="toggleSidebar">
               <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -61,13 +64,13 @@
             <ChatHeader :show-name="true"></ChatHeader>
           </div>
         </div>
-        <div class="row">
+        <div class="row my-2">
           <div class="col">
             <ThreadList></ThreadList>
           </div>
         </div>
         <!-- Add more buttons as needed -->
-        <button class="btn btn-lg btn-primary" @click="toggleSidebar">
+        <button class="btn btn-outline-light" @click="toggleSidebar">
           <i class="bi bi-x"></i>
           Close
         </button>
@@ -105,6 +108,9 @@ export default defineComponent({
     },
   },
   methods: {
+    onClickBack() {
+      this.$router.push('/');
+    },
     toggleSidebar() {
       this.showSidebar = !this.showSidebar;
     },
@@ -163,6 +169,12 @@ hr {
   color: #ffffff;
 }
 
+.assistant-name {
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: #FC0 1px 0 10px;
+}
 
 .logo-small {
   height: 3rem;

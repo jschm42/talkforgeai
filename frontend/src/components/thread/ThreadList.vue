@@ -18,7 +18,7 @@
   <div class="full-height vertical-scrollbar shadow g-0 m-1">
 
     <div class="d-flex flex-row my-2">
-      <div class="btn btn-outline-light d-flex align-items-center me-2"
+      <div class="btn btn-outline-light d-flex align-items-center me-2 d-none d-lg-block"
            @click.prevent="onClickBack">
         <i class="bi bi-box-arrow-left me-2"></i>
         Back

@@ -114,16 +114,14 @@ export default {
 
 <template>
   <div :class="messageClass" class="card m-1 p-1 shadow">
-    <div class="row">
-      <div class="col-md-1">
+    <div class="d-flex flex-row">
+      <div class="">
         <i v-if="isUser" class="fs-1 bi bi-person"></i>
         <img v-else-if="isAssistant && hasProfileImage" :src="personaImage" alt="Assistant"
              class="persona-icon">
-        <!--        <i v-else-if="isFunctionCall" class="fs-1 bi bi-gear"></i>-->
-        <!--        <i v-else-if="isFunctionResponse" class="fs-1 bi bi-arrow-return-left"></i>-->
         <i v-else class="fs-1 bi bi-robot robot-icon"></i>
       </div>
-      <div class="col-md-10">
+      <div class="flex-grow-1">
         <div class="card-body">
           <div v-if="getMessageStatusType() === 'running'" class="spinner-grow text-primary"
                role="status">
@@ -133,7 +131,7 @@ export default {
           <div v-else class="card-text text-start" v-html="getContent()"></div>
         </div>
       </div>
-      <div class="col-md-1 text-end">
+      <div class="text-end">
         <chat-message-text-to-speech v-if="isAssistant" ref="chatMessageAudioPlayerRef"
                                      :message="message"></chat-message-text-to-speech>
       </div>

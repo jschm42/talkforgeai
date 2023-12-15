@@ -55,7 +55,7 @@
             <h1 class="flex-grow-1 d-lg-none">Talkforge AI</h1>
 
             <!-- Toggler for small screens -->
-            <button class="btn btn-primary d-lg-none" @click="toggleSidebar">
+            <button class="btn btn-outline-light d-lg-none" @click="toggleSidebar">
               <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -101,7 +101,7 @@
         </ul>
         <hr>
         <!-- Add more buttons as needed -->
-        <button class="btn btn-lg btn-primary" @click="toggleSidebar">
+        <button class="btn btn-lg btn-outline-light" @click="toggleSidebar">
           <i class="bi bi-x"></i>
           Close
         </button>
