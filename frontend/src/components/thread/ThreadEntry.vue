@@ -17,22 +17,22 @@
 <template>
 
   <div :class="getEntryClass()"
-       class="list-group-item list-group-item-action py-1 px-1 lh-sm">
+       class="list-group-item list-group-item-action lh-sm">
 
-    <div class="row p-0 m-0">
-      <div class="col-10 text-start" @click.prevent="onEntrySelected">
+    <div class="d-flex flex-row text-start p-1">
+      <div class="flex-grow-1 mx-1 text-truncate" role="button" @click.prevent="onEntrySelected">
         <input v-if="isEditMode" v-model="title" class="title-input"/>
-        <p v-else class="text-wrap text-truncate">{{ title }}</p>
+        <p v-else class="text-truncate thread-title">{{ title }}</p>
         <!--        <p class="small overflow-hidden">{{ formatTimestamp(entry.createdAt) }}</p>-->
       </div>
-      <div class="col-2 d-inline-flex flex-row-reverse">
-        <div v-if="isEditMode || isDeleteMode">
+      <div class="flex-shrink-0">
+        <div v-if="isEditMode || isDeleteMode" class="confirm-buttons">
           <i class="bi bi-check" role="button" @click="onClickConfirm"></i>
           <i class="bi bi-x" role="button" @click="onClickCancel"></i>
         </div>
-        <div v-else-if="isSelected">
+        <div v-else-if="isSelected" class="edit-buttons">
+          <i class="bi bi-pencil mx-2" role="button" @click="onClickEdit"></i>
           <i class="bi bi-trash" role="button" @click="onClickDelete"></i>
-          <i class="bi bi-pencil" role="button" @click="onClickEdit"></i>
         </div>
       </div>
     </div>
@@ -100,19 +100,19 @@ export default {
       this.$emit('entrySelected', this.entry.id);
     },
     async onClickConfirm() {
-      if (this.isEditMode) {
+      if (this.store.threadEditMode) {
         this.oldTitle = this.title;
-        this.isEditMode = false;
+        this.store.threadEditMode = false;
         await this.store.updateThreadTitle(this.store.threadId, this.title);
-      } else if (this.isDeleteMode) {
-        this.isDeleteMode = false;
+      } else if (this.store.threadDeleteMode) {
+        this.store.threadDeleteMode = false;
         await this.store.deleteThread(this.store.threadId);
       }
     },
     onClickCancel() {
       this.title = this.oldTitle;
-      this.isEditMode = false;
-      this.isDeleteMode = false;
+      this.store.threadEditMode = false;
+      this.store.threadDeleteMode = false;
     },
   },
   mounted() {
@@ -123,9 +123,6 @@ export default {
 </script>
 
 <style scoped>
-i {
-  float: right;
-}
 
 .title-input {
   width: 100%;
@@ -135,6 +132,25 @@ i {
   font-size: 1rem;
   text-align: left;
   outline: none;
+}
+
+.confirm-buttons {
+  font-size: 1.7rem;
+}
+
+.edit-buttons {
+  font-size: 1.5rem;
+}
+
+.thread-title {
+  font-size: 1rem;
+}
+
+
+@media only screen and (min-width: 768px ) {
+  .edit-buttons {
+    font-size: 1.2rem;
+  }
 }
 
 </style>

@@ -89,6 +89,6 @@ export default {
 .persona-icon {
   width: auto;
   height: auto;
-
+  max-width: 15rem;
 }
 </style>

@@ -17,12 +17,15 @@
 <template>
   <div class="full-height vertical-scrollbar shadow g-0 m-1">
 
-    <div class="row align-items-center">
-      <div class="col-lg-2 col-3">
-        <i class="bi bi-box-arrow-left exit-button" role="button" @click.prevent="onClickBack"></i>
+    <div class="d-flex flex-row my-2">
+      <div class="btn btn-outline-light d-flex align-items-center me-2"
+           @click.prevent="onClickBack">
+        <i class="bi bi-box-arrow-left me-2"></i>
+        Back
       </div>
-      <div class="col-lg-10 col-9">
-        <button class="col-12" @click.prevent="onNewThread">New Chat</button>
+      <div class="btn btn-outline-light d-flex align-items-center" @click.prevent="onNewThread">
+        <i class="bi bi-plus-circle-fill mx-2"></i>
+        New Chat
       </div>
     </div>
 

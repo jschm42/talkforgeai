@@ -19,9 +19,9 @@
 
     <div class="row">
       <!-- Sidebar visible on lg and higher screens -->
-      <div class="col-lg-2 d-none d-lg-block sidebar g-1">
+      <div class="col-lg-3 d-none d-lg-block sidebar g-1">
         <!-- Sidebar content -->
-        <div class="row my-2">
+        <div class="row my-2 m-auto">
           <ChatHeader></ChatHeader>
         </div>
         <div class="row m-auto">
@@ -30,14 +30,10 @@
 
         <!-- Add more buttons as needed -->
       </div>
-      <div class="col-12 col-lg-10">
+      <div class="col-12 col-lg-9">
         <!-- Main Content -->
         <div class="row toolbar-header p-2 d-lg-none">
           <div class="d-flex">
-
-            <!--            <img alt="Talkforge AI" class="logo-small d-lg-none"-->
-            <!--                 src="@/assets/logo-notext.png"-->
-            <!--                 title="Talkforge AI">-->
             <div style="width: 3rem">
               <ChatHeader :show-name="false"></ChatHeader>
             </div>
@@ -61,12 +57,12 @@
       <div v-if="showSidebar" class="mobile-sidebar d-lg-none p-3">
         <!-- Sidebar content -->
         <div class="row">
-          <div class="col-4 m-auto">
+          <div class="col">
             <ChatHeader :show-name="true"></ChatHeader>
           </div>
         </div>
         <div class="row">
-          <div class="col-12 m-auto">
+          <div class="col">
             <ThreadList></ThreadList>
           </div>
         </div>
