@@ -15,15 +15,17 @@
   -->
 
 <template>
-  <div class="d-flex flex-column full-height gx-0">
-    <div ref="entries" class="row vertical-scrollbar no-horizontal-scrollbar mx-0 p-2">
-      <ChatMessage v-for="(message, index) in store.threadMessages" ref="chatMessageRef"
-                   v-bind:key="index"
-                   :message="message" :messageIndex="index"></ChatMessage>
+  <div class="d-flex flex-column chat-container gx-0">
+    <div class="flex-grow-1 vertical-scrollbar no-horizontal-scrollbar ">
+      <div ref="entries" class="mx-0 p-2">
+        <ChatMessage v-for="(message, index) in store.threadMessages" ref="chatMessageRef"
+                     v-bind:key="index"
+                     :message="message" :messageIndex="index"></ChatMessage>
+      </div>
     </div>
     <!-- Input Section -->
 
-    <div class="row p-2">
+    <div class="flex-shrink-0">
       <ChatControl @submit-result-received="submitResultReceived"
                    @chunk-update-received="chunkUpdateReceived"></ChatControl>
     </div>
@@ -91,12 +93,12 @@ export default {
   overflow-x: hidden;
 }
 
-.full-height {
-  height: 92vh;
+.chat-container {
+  height: 93vh;
 }
 
 @media only screen and (min-width: 993px ) {
-  .full-height {
+  .chat-container {
     height: 100vh;
   }
 }

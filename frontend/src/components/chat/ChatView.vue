@@ -30,7 +30,7 @@
 
         <!-- Add more buttons as needed -->
       </div>
-      <div class="col-12 col-lg-9">
+      <div class="col">
         <!-- Main Content -->
         <div class="row toolbar-header p-2 d-lg-none">
           <div class="d-flex">

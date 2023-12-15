@@ -26,7 +26,7 @@
     <div v-else>
       <img v-if="isShowAssistantImage(selectedAssistant)"
            :src="imageSrc(selectedAssistant.image_path)" alt="Persona Image"
-           class="figure-img img-fluid rounded">
+           class="figure-img img-fluid rounded persona-icon">
       <img v-else alt="Robot Image" src="@/assets/robot.svg" title="Robot">
     </div>
   </div>
@@ -87,8 +87,6 @@ export default {
 }
 
 .persona-icon {
-  width: auto;
-  height: auto;
   max-width: 15rem;
 }
 </style>
