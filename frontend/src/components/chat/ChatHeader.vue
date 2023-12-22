@@ -20,14 +20,15 @@
       <img v-if="isShowAssistantImage(selectedAssistant)"
            :src="imageSrc(selectedAssistant.image_path)" alt="Persona Image"
            class="figure-img img-fluid rounded">
-      <img v-else alt="Robot Image" src="@/assets/robot.svg" title="Robot">
+      <img v-else alt="Robot Image" class="robot-icon"
+           src="@/assets/robot.svg" title="Robot">
       <figcaption class="figure-caption">{{ personaName }}</figcaption>
     </figure>
     <div v-else>
       <img v-if="isShowAssistantImage(selectedAssistant)"
            :src="imageSrc(selectedAssistant.image_path)" alt="Persona Image"
-           class="figure-img img-fluid rounded persona-icon">
-      <img v-else alt="Robot Image" src="@/assets/robot.svg" title="Robot">
+           class="img-fluid rounded persona-icon">
+      <img v-else alt="Robot Image" class="robot-icon" src="@/assets/robot.svg" title="Robot">
     </div>
   </div>
 
@@ -82,11 +83,13 @@ export default {
 <style scoped>
 
 .persona-info {
+  max-width: 15rem;
   margin-left: auto;
   margin-right: auto;
 }
 
-.persona-icon {
-  max-width: 15rem;
+.robot-icon {
+  margin: 2rem;
 }
+
 </style>
