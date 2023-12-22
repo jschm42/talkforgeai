@@ -106,11 +106,9 @@ export default defineComponent({
       </div>
     </div>
     <div class="row">
-      <div class="col-5">
-        <button class="btn btn-primary my-2" type="button" @click.prevent="onShowGenerationModal">
-          <i class="bi bi-magic mx-2"></i>Generate
-        </button>
-      </div>
+      <button class="btn btn-primary my-2" type="button" @click.prevent="onShowGenerationModal">
+        <i class="bi bi-magic mx-2"></i>Generate
+      </button>
     </div>
   </div>
 

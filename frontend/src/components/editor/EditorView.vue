@@ -15,7 +15,7 @@
   -->
 
 <template>
-  <div class="container col-lg-5 col-10">
+  <div class="container col-lg-5 col-10 p-2 editor-container">
     <h2>Assistant Editor</h2>
     <form class="form-panel" @submit.prevent="handleSubmit">
 
@@ -188,6 +188,12 @@ export default defineComponent({
 .form-panel {
   color: white;
   text-align: left;
+}
+
+.editor-container {
+  max-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 </style>
