@@ -31,6 +31,7 @@ public record OpenAIChatResponse(String id,
                                  List<ResponseChoice> choices,
                                  ResponseUsage usage) {
 
+  @JsonIgnoreProperties(ignoreUnknown = true)
   public record ResponseChoice(Integer index,
                                OpenAIChatMessage message,
                                @JsonProperty("finish_reason") FinishReason finishReason) {
