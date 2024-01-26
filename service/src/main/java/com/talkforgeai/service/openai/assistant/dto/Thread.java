@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,18 @@
 
 package com.talkforgeai.service.openai.assistant.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Date;
 import java.util.Map;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record Thread(
-        String id,
-        String object,
-        @JsonProperty("created_at")
-        Date createdAt,
-        Map<String, Object> metadata
+    String id,
+    String object,
+    @JsonProperty("created_at")
+    Date createdAt,
+    Map<String, Object> metadata
 ) {
+
 }

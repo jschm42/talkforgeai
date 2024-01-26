@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,31 @@
 
 package com.talkforgeai.service.openai.assistant.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 import java.util.Map;
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record Assistant(
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        String id,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String id,
 
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        String object,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String object,
 
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        @JsonProperty("created_at")
-        String createdAt,
-        String name,
-        String description,
-        String model,
-        String instructions,
-        List<Tool> tools,
-        @JsonProperty("file_ids")
-        List<String> fileIds,
-        Map<String, Object> metadata
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("created_at")
+    String createdAt,
+    String name,
+    String description,
+    String model,
+    String instructions,
+    List<Tool> tools,
+    @JsonProperty("file_ids")
+    List<String> fileIds,
+    Map<String, Object> metadata
 ) {
 
 }

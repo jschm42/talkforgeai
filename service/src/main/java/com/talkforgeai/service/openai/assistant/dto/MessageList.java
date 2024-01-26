@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package com.talkforgeai.service.openai.assistant.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record MessageList(
-        String object,
-        List<Message> data,
-        @JsonProperty("first_id")
-        String firstId,
-        @JsonProperty("last_id")
-        String lastId,
-        @JsonProperty("has_more")
-        boolean hasMore) {
+    String object,
+    List<Message> data,
+    @JsonProperty("first_id")
+    String firstId,
+    @JsonProperty("last_id")
+    String lastId,
+    @JsonProperty("has_more")
+    boolean hasMore) {
 
 }

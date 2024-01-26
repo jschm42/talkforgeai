@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,49 +16,52 @@
 
 package com.talkforgeai.service.openai.assistant.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record Run(
-        String id,
-        String object,
-        @JsonProperty("created_at")
-        long createdAt,
-        @JsonProperty("assistant_id")
-        String assistantId,
-        @JsonProperty("thread_id")
-        String threadId,
-        String status,
-        @JsonProperty("started_at")
-        Date startedAt,
-        @JsonProperty("expires_at")
-        Date expiresAt,
-        @JsonProperty("cancelled_at")
-        Date cancelledAt,
-        @JsonProperty("failed_at")
-        Date failedAt,
-        @JsonProperty("completed_at")
-        Date completedAt,
-        @JsonProperty("last_error")
-        LastError lastError,
-        String model,
-        String instructions,
-        List<ToolRecord> tools,
-        @JsonProperty("file_ids")
-        List<String> fileIds,
-        Map<String, Object> metadata
+    String id,
+    String object,
+    @JsonProperty("created_at")
+    long createdAt,
+    @JsonProperty("assistant_id")
+    String assistantId,
+    @JsonProperty("thread_id")
+    String threadId,
+    String status,
+    @JsonProperty("started_at")
+    Date startedAt,
+    @JsonProperty("expires_at")
+    Date expiresAt,
+    @JsonProperty("cancelled_at")
+    Date cancelledAt,
+    @JsonProperty("failed_at")
+    Date failedAt,
+    @JsonProperty("completed_at")
+    Date completedAt,
+    @JsonProperty("last_error")
+    LastError lastError,
+    String model,
+    String instructions,
+    List<ToolRecord> tools,
+    @JsonProperty("file_ids")
+    List<String> fileIds,
+    Map<String, Object> metadata
 ) {
 
-    public record LastError(String code, String message) {
-    }
+  public record LastError(String code, String message) {
+
+  }
 
 
-    public record ToolRecord(
-            String type
-    ) {
-    }
+  public record ToolRecord(
+      String type
+  ) {
+
+  }
 
 }
