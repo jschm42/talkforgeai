@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 
     <div class="row">
       <!-- Sidebar visible on lg and higher screens -->
-      <div class="col-lg-3 d-none d-lg-block sidebar g-1">
+      <div class="col-lg-3 col-xxl-2 d-none d-lg-block sidebar g-1">
         <!-- Sidebar content -->
         <div class="row my-2 m-auto">
           <ChatHeader></ChatHeader>
