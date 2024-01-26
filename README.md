@@ -2,9 +2,12 @@
 
 ## Overview
 
-TalkforgeAI is an AI-powered chat software that facilitates the creation of personalized chatbots using the OpenAI
-Assistant API. It allows users to tailor the chat experience by creating individual AI profiles, known as Personas, each
-with its own personality profile and avatar image. In addition to text input, prompts can be generated via voice input,
+TalkforgeAI is an AI-powered chat software that facilitates the creation of personalized chatbots
+using the OpenAI
+Assistant API. It allows users to tailor the chat experience by creating individual AI profiles,
+known as Personas, each
+with its own personality profile and avatar image. In addition to text input, prompts can be
+generated via voice input,
 and the AI's responses can be delivered through browser-based or Elevenlabs text-to-speech output.
 
 ### Prerequisites
@@ -20,11 +23,11 @@ and the AI's responses can be delivered through browser-based or Elevenlabs text
 - Generate a profile picture for your chatbot right inside the app.
 - Image generation through DALL-E 3 directly in chat, compatible with both GPT-3.5 and GPT-4 models.
 - Access to all relevant GPT models:
-    - gpt-4
-    - gpt-4-32k
-    - gpt-4-vision-preview
-    - gpt-3.5-turbo
-    - gpt-3.5-turbo-16k
+  - gpt-4
+  - gpt-4-32k
+  - gpt-4-vision-preview
+  - gpt-3.5-turbo
+  - gpt-3.5-turbo-16k
 
 - Creation of PlantUML diagrams, such as class, sequence, or activity diagrams.
 - Graphical enhancement of generated LaTeX code.
@@ -34,12 +37,14 @@ and the AI's responses can be delivered through browser-based or Elevenlabs text
 
 ## Upcoming Features
 
-- Multi-user support with access control for the features of each Persona, allowing for the assignment and sharing of
+- Multi-user support with access control for the features of each Persona, allowing for the
+  assignment and sharing of
   Personas among users.
 - Image interpretation, initially supported by Huggingface models.
 - Reading and evaluating web links.
 - Upload of files to be interpreted by the AI (PDF, TXT, etc.)
-- Memory feature to store critical information in the database and retrieve it as needed, allowing for the persistence
+- Memory feature to store critical information in the database and retrieve it as needed, allowing
+  for the persistence
   of information beyond the maximum token limit.
 - Function support for tasks such as sending emails, querying calendar data, etc.
 
@@ -47,11 +52,13 @@ and the AI's responses can be delivered through browser-based or Elevenlabs text
 
 ### Building the Project
 
-- Ensure Java 19 or higher is installed on your system and the JAVA_HOME environment variable is set correctly.
+- Ensure Java 21 or higher is installed on your system and the JAVA_HOME environment variable is set
+  correctly.
 
 ### Starting the Server
 
-- To run from a JAR file, use the following command with the appropriate API keys and data directory specified:
+- To run from a JAR file, use the following command with the appropriate API keys and data directory
+  specified:
 
       java -jar ./talkforgeai-0.1.0.jar --server.port=8090 --openai.api-key=[your OpenAI API Key] --elevenlabs.api-key=[you Elevenlabs API-Key] --talkforgeai.datadir=[your TalkforgeAI data directory]
 
@@ -60,11 +67,11 @@ and the AI's responses can be delivered through browser-based or Elevenlabs text
       java -jar ./talkforgeai-0.1.0.jar --spring.config.additional-location=./talkforgeai.properties
 
 - Available properties:
-    - server.port: Port to run the server on. Default is 8090.
-    - openai.api-key: OpenAI API key
-    - elevenlabs.api-key: Elevenlabs API key
-    - talkforgeai.datadir: Directory to store data in
-    - logging.level.com.talkforgeai: Log level for TalkforgeAI. Default is INFO.
+  - server.port: Port to run the server on. Default is 8090.
+  - openai.api-key: OpenAI API key
+  - elevenlabs.api-key: Elevenlabs API key
+  - talkforgeai.datadir: Directory to store data in
+  - logging.level.com.talkforgeai: Log level for TalkforgeAI. Default is INFO.
 
 ### Using Docker
 
@@ -86,7 +93,8 @@ and the AI's responses can be delivered through browser-based or Elevenlabs text
 
         mvn clean package
 
-*Note: Replace placeholder text (e.g., [your OpenAI API Key]) with actual API keys and directory paths as required for
+*Note: Replace placeholder text (e.g., [your OpenAI API Key]) with actual API keys and directory
+paths as required for
 your setup.*
 
 ## Contributing
@@ -95,14 +103,17 @@ Contributions are welcome! Please read our contributing guidelines for how to pr
 
 ## License
 
-TalkforgeAI is released under the Apache License 2.0. See the [LICENSE](LICENSE) file for more details.
+TalkforgeAI is released under the Apache License 2.0. See the [LICENSE](LICENSE) file for more
+details.
 
 ## Support
 
-For support and queries, please open an issue on the GitHub repository or contact the maintainers directly.
+For support and queries, please open an issue on the GitHub repository or contact the maintainers
+directly.
 
 ---
 
-This README is a basic guide for getting started with TalkforgeAI. For more detailed documentation, please refer to the
+This README is a basic guide for getting started with TalkforgeAI. For more detailed documentation,
+please refer to the
 project's documentation site.
 
