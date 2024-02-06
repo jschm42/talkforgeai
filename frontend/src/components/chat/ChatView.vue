@@ -116,6 +116,7 @@ export default defineComponent({
     },
     async fetchData() {
       try {
+        await this.store.retrieveAssistants();
         await this.store.selectAssistant(this.assistantId);
         await this.store.retrieveThreads();
       } catch (error) {

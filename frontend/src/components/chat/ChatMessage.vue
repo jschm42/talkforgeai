@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ export default {
   computed: {
     personaImage() {
       // Find the assistant in the store
-      const assistantId = this.store.selectedAssistant.id;
+      const assistantId = this.message.assistant_id;
       const assistant = this.store.assistantList.find(a => a.id === assistantId);
       if (assistant) {
         return this.store.getAssistantImageUrl(assistant.image_path);
@@ -52,7 +52,15 @@ export default {
       };
     },
     hasProfileImage() {
-      return this.store.selectedAssistant.image_path;
+      const assistantId = this.message.assistant_id;
+      console.log('Message', assistantId);
+      console.log('Store', this.store.assistantList);
+      const assistant = this.store.assistantList.find(a => a.id === assistantId);
+      console.log('Assistant:', assistant);
+      if (assistant && assistant.image_path) {
+        return assistant.image_path;
+      }
+      return false;
     },
     isAssistant() {
       return this.message.role === Role.ASSISTANT;
