@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ export default {
 
 <template>
   <div class="card assistant-element">
-    <img v-if="isShowAssistantImage" :alt="assistant.name" :src="imageSrc"
+    <img v-if="isShowAssistantImage" :alt="assistant.name" :src="imageSrc" :title="assistant.name"
          class="persona-icon card-img-top img-fluid p-2" role="button"
          @click.prevent="onPersonaSelected()"/>
     <img v-else :alt="assistant.name" class="robot-icon card-img-top img-fluid p-2"
@@ -81,8 +81,9 @@ export default {
     <i class="bi bi-pencil edit-button rounded-5" role="button"
        @click.prevent="onEditPersona()"></i>
     <div class="card-body" role="button" @click.prevent="onPersonaSelected()">
-      <h5 class="card-title title">{{ assistant.name }}</h5>
-      <div class="card-text description truncate-text"> {{ assistant.description }}
+      <h5 :title="assistant.name" class="card-title title">{{ assistant.name }}</h5>
+      <div :title="assistant.description" class="card-text description truncate-text">
+        {{ assistant.description }}
       </div>
     </div>
   </div>
