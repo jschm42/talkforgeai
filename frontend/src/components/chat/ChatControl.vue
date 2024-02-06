@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -50,14 +50,16 @@ export default {
   },
   getters: {
     isAutoSpeak() {
-      return this.store.chat.autoSpeak;
+      return this.store.autoSpeak;
     },
   },
   methods: {
     submitResultReceived() {
+      console.log('Chat Control - Submit Result Received');
       this.$emit('submitResultReceived');
     },
     chunkUpdateReceived() {
+      console.log('Chat Control - Chunk Update Received');
       this.$emit('chunkUpdateReceived');
     },
   },

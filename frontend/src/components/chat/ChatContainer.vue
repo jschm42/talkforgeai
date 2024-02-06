@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 <template>
   <div class="d-flex flex-column chat-container gx-0">
-    <div class="flex-grow-1 vertical-scrollbar no-horizontal-scrollbar ">
-      <div ref="entries" class="mx-0 p-2">
-        <ChatMessage v-for="(message, index) in store.threadMessages" ref="chatMessageRef"
-                     v-bind:key="index"
-                     :message="message" :messageIndex="index"></ChatMessage>
-      </div>
+    <div ref="entries" class="flex-grow-1 vertical-scrollbar no-horizontal-scrollbar ">
+      <!--      <div class="mx-0 p-2">-->
+      <ChatMessage v-for="(message, index) in store.threadMessages" ref="chatMessageRef"
+                   v-bind:key="index"
+                   :message="message" :messageIndex="index"></ChatMessage>
+      <!--      </div>-->
     </div>
     <!-- Input Section -->
 
@@ -77,8 +77,10 @@ export default {
       }
     },
     chunkUpdateReceived() {
-      // Scroll to bottom
+      console.log('Chunk Update Received!');
+      // Scroll $refs.entries to bottom
       this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
+      //this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
     },
   },
 };

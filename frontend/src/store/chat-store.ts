@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,11 +67,19 @@ export const useChatStore = defineStore('chat', {
       this.selectedAssistant = await assistantService.retrieveAssistant(assistantId);
     },
     async retrieveThreads() {
+      // Make this.threads a list of Thread objects
       this.threads = await assistantService.retrieveThreads();
     },
     async retrieveMessages(threadId: string) {
       const parsedMessageList = await assistantService.retrieveMessages(threadId);
-      this.threadMessages = parsedMessageList.message_list?.data || [];
+      console.log('Parsed message list', parsedMessageList);
+      // Make this.threadMessages a list of ThreadMessage objects
+      const list = parsedMessageList.message_list?.data?.map((message: any) => {
+        return new ThreadMessage(message.id, message.role, message.content[0].text.value,
+            message.assistant_id);
+      });
+      this.threadMessages = list || [];
+
       this.parsedMessages = parsedMessageList.parsed_messages || {};
 
       this.threadMessages.forEach((message) => {
@@ -85,6 +93,8 @@ export const useChatStore = defineStore('chat', {
           }
         }
       });
+
+      console.log('Thread messages after transform!', this.threadMessages);
     },
     async createThreadIfNeeded(): Promise<string> {
       if (!this.threadId) {
@@ -126,7 +136,7 @@ export const useChatStore = defineStore('chat', {
 
       const submitedMessage = await assistantService.submitUserMessage(this.threadId, message);
       this.threadMessages.push(submitedMessage);
-      this.threadMessages.push(new ThreadMessage('', 'assistant', ''));
+      this.threadMessages.push(new ThreadMessage('', 'assistant', '', this.selectedAssistant.id));
 
       this.updateStatus('Thinking...', 'running');
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,10 +42,11 @@ class ThreadMessage {
   content: Array<Content> | null = null;
   metadata: any;
 
-  constructor(id: string, role: 'user' | 'assistant', content: string) {
+  constructor(id: string, role: 'user' | 'assistant', content: string, assistant_id: string) {
     this.id = id;
     this.role = role;
     this.content = [{type: 'text', text: {value: content, annotations: []}}];
+    this.assistant_id = assistant_id;
   }
 }
 
@@ -68,4 +69,11 @@ class ParsedThreadMessage {
 }
 
 export default Thread;
-export {ThreadMessage, Content, TextContent, ParsedThreadMessage, ThreadMessageList, TreadMessageListParsed};
+export {
+  ThreadMessage,
+  Content,
+  TextContent,
+  ParsedThreadMessage,
+  ThreadMessageList,
+  TreadMessageListParsed,
+};

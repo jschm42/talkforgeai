@@ -53,10 +53,7 @@ export default {
     },
     hasProfileImage() {
       const assistantId = this.message.assistant_id;
-      console.log('Message', assistantId);
-      console.log('Store', this.store.assistantList);
       const assistant = this.store.assistantList.find(a => a.id === assistantId);
-      console.log('Assistant:', assistant);
       if (assistant && assistant.image_path) {
         return assistant.image_path;
       }
