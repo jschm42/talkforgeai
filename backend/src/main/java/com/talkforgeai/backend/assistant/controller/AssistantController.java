@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,6 +181,12 @@ public class AssistantController {
   public Run getRun(@PathVariable("threadId") String threadId,
       @PathVariable("runId") String runId) {
     return assistantService.retrieveRun(threadId, runId);
+  }
+
+  @PostMapping("/threads/{threadId}/runs/{runId}/cancel")
+  public Run cancelRun(@PathVariable("threadId") String threadId,
+      @PathVariable("runId") String runId) {
+    return assistantService.cancelRun(threadId, runId);
   }
 
   @PostMapping("/threads/{threadId}/messages/{messageId}/postprocess")

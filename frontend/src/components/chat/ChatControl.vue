@@ -17,9 +17,9 @@
 <template>
   <div class="p-2 m-1 rounded shadow">
 
-    <div class="row">
-      <div class="col-12">
-        <div class="form-check form-switch d-flex switch-panel">
+    <div class="d-flex flex-row">
+      <div class="flex-grow-1">
+        <div class="form-check form-switch d-flex switch-panel mt-3">
           <input id="flexCheckDefault" v-model="localIsAutoSpeak"
                  class="form-check-input" role="switch" type="checkbox">
           <label class="form-check-label mx-2" for="flexCheckDefault">
@@ -27,6 +27,9 @@
           </label>
         </div>
       </div>
+      <button :hidden="isCancelRequestHidden" class="btn btn-outline-warning my-2"
+              @click="onCancelRun()">Cancel request
+      </button>
     </div>
     <div class="row">
       <ChatMessageInput @submit-result-received="submitResultReceived"
@@ -48,9 +51,9 @@ export default {
       isAutoSpeak: Boolean,
     };
   },
-  getters: {
-    isAutoSpeak() {
-      return this.store.autoSpeak;
+  computed: {
+    isCancelRequestHidden() {
+      return this.store.runId === '';
     },
   },
   methods: {
@@ -61,6 +64,10 @@ export default {
     chunkUpdateReceived() {
       console.log('Chat Control - Chunk Update Received');
       this.$emit('chunkUpdateReceived');
+    },
+    onCancelRun() {
+      console.log('Chat Control - Cancel Run');
+      this.store.cancelCurrentRun();
     },
   },
   setup() {

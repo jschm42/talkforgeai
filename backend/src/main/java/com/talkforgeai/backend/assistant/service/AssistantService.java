@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,6 +237,10 @@ public class AssistantService {
 
   public Run retrieveRun(String threadId, String runId) {
     return this.openAIAssistantService.retrieveRun(threadId, runId);
+  }
+
+  public Run cancelRun(String threadId, String runId) {
+    return openAIAssistantService.cancelRun(threadId, runId);
   }
 
   private ThreadDto mapToDto(ThreadEntity threadEntity) {

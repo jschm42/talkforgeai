@@ -36,6 +36,9 @@ export default {
     messageIndex: Number,
   },
   computed: {
+    errorMessage() {
+      return this.store.currentStatusMessage;
+    },
     personaImage() {
       // Find the assistant in the store
       const assistantId = this.message.assistant_id;
@@ -131,8 +134,10 @@ export default {
           <div v-if="getMessageStatusType() === 'running'" class="spinner-grow text-primary"
                role="status">
           </div>
-          <i v-else-if="getMessageStatusType() === 'error'"
-             class="bi bi-exclamation-lg bg-danger"></i>
+          <span v-else-if="getMessageStatusType() === 'error'">
+            <i class="bi bi-exclamation-lg bg-danger"></i>
+            {{ errorMessage }}
+          </span>
           <div v-else class="card-text text-start" v-html="getContent()"></div>
         </div>
       </div>

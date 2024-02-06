@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,6 +168,10 @@ public class OpenAIAssistantService {
     return createRequest("POST", path, body);
   }
 
+  private Request createPostRequest(String path) {
+    return createRequest("POST", path, null);
+  }
+
   private Request createGetRequest(String path) {
     return createRequest("GET", path, null);
   }
@@ -180,7 +184,9 @@ public class OpenAIAssistantService {
     String apiUrl = openAIProperties.apiUrl() + path;
 
     RequestBody requestBody = null;
-    if (body != null) {
+    if (body == null && method.equals("POST")) {
+      requestBody = RequestBody.create("", null);
+    } else if (body != null) {
       requestBody = RequestBody.create(body, JSON);
     }
 
@@ -200,5 +206,10 @@ public class OpenAIAssistantService {
   public void deleteAssistant(String assistantId) {
     Request request = createDeleteRequest("/assistants/" + assistantId);
     executeRequest(request, Void.class);
+  }
+
+  public Run cancelRun(String threadId, String runId) {
+    Request request = createPostRequest("/threads/" + threadId + "/runs/" + runId + "/cancel");
+    return executeRequest(request, Run.class);
   }
 }

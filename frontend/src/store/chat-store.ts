@@ -33,6 +33,7 @@ export const useChatStore = defineStore('chat', {
       threadMessages: [] as Array<ThreadMessage>,
       parsedMessages: {} as any,
       threadId: '',
+      runId: '',
       threads: [] as Array<Thread>,
       threadEditMode: false,
       threadDeleteMode: false,
@@ -72,8 +73,7 @@ export const useChatStore = defineStore('chat', {
     },
     async retrieveMessages(threadId: string) {
       const parsedMessageList = await assistantService.retrieveMessages(threadId);
-      console.log('Parsed message list', parsedMessageList);
-      // Make this.threadMessages a list of ThreadMessage objects
+
       const list = parsedMessageList.message_list?.data?.map((message: any) => {
         return new ThreadMessage(message.id, message.role, message.content[0].text.value,
             message.assistant_id);
@@ -115,13 +115,21 @@ export const useChatStore = defineStore('chat', {
       try {
         const run = await assistantService.runConversation(this.threadId,
             this.selectedAssistant.id);
+        this.runId = run.id;
+
         pollingInterval = setInterval(async () => {
           console.log('Polling for run status');
           const runT = await assistantService.retrieveRun(this.threadId, run.id);
           if (runT.status === 'completed') {
             console.log('Run completed');
             clearInterval(pollingInterval);
+            this.runId = '';
             await this.handleResult();
+          } else if (runT.status === 'cancelled') {
+            console.log('Run cancelled');
+            clearInterval(pollingInterval);
+            this.runId = '';
+            this.updateStatus('Cancelled', 'error');
           }
         }, 2000);
       } catch (e) {
@@ -129,7 +137,11 @@ export const useChatStore = defineStore('chat', {
         if (pollingInterval) clearInterval(pollingInterval);
       }
     },
-
+    async cancelCurrentRun() {
+      if (this.runId.length > 0) {
+        await assistantService.cancelRun(this.threadId, this.runId);
+      }
+    },
     // Usage of the refactored functions
     async submitUserMessage(message: string) {
       await this.createThreadIfNeeded();
