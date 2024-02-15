@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2023 Jean Schmitz.
+  ~ Copyright (c) 2023-2024 Jean Schmitz.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,22 +16,38 @@
   -->
 
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.talkforgeai</groupId>
-        <artifactId>talkforgeai</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
-    </parent>
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.talkforgeai</groupId>
+    <artifactId>talkforgeai</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>service</artifactId>
-    <packaging>jar</packaging>
+  <artifactId>service</artifactId>
+  <packaging>jar</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>net.sourceforge.plantuml</groupId>
-            <artifactId>plantuml</artifactId>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>net.sourceforge.plantuml</groupId>
+      <artifactId>plantuml</artifactId>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/com.theokanning.openai-gpt3-java/client -->
+    <dependency>
+      <groupId>com.theokanning.openai-gpt3-java</groupId>
+      <artifactId>client</artifactId>
+      <version>0.18.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.theokanning.openai-gpt3-java</groupId>
+      <artifactId>service</artifactId>
+      <version>0.18.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.theokanning.openai-gpt3-java</groupId>
+      <artifactId>api</artifactId>
+      <version>0.18.2</version>
+    </dependency>
+  </dependencies>
 </project>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.websocket.dto;
+package com.talkforgeai.service;
 
+import com.talkforgeai.service.properties.OpenAIProperties;
+import com.theokanning.openai.service.OpenAiService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import com.talkforgeai.service.openai.chat.dto.OpenAIChatMessage;
-import java.util.UUID;
+@Configuration
+public class OpenAIConfiguration {
 
-public class WSChatFunctionMessage extends WebsocketMessage {
+  private OpenAIProperties properties;
 
-  OpenAIChatMessage message;
-
-  public WSChatFunctionMessage(UUID sessionId, OpenAIChatMessage message) {
-    super(sessionId, WebsocketMessageType.FUNCTION_CALL);
-    this.message = message;
+  public OpenAIConfiguration(OpenAIProperties properties) {
+    this.properties = properties;
   }
 
-  public OpenAIChatMessage getMessage() {
-    return message;
+  @Bean
+  OpenAiService openAiService() {
+    return new OpenAiService(properties.apiKey());
   }
 
-  public void setMessage(OpenAIChatMessage message) {
-    this.message = message;
-  }
 }

@@ -46,13 +46,13 @@ import com.talkforgeai.service.openai.assistant.dto.PostMessageRequest;
 import com.talkforgeai.service.openai.assistant.dto.Run;
 import com.talkforgeai.service.openai.assistant.dto.RunConversationRequest;
 import com.talkforgeai.service.openai.assistant.dto.Thread;
-import com.talkforgeai.service.openai.chat.OpenAIChatService;
-import com.talkforgeai.service.openai.chat.dto.OpenAIChatMessage;
-import com.talkforgeai.service.openai.chat.dto.OpenAIChatRequest;
-import com.talkforgeai.service.openai.chat.dto.OpenAIChatResponse;
 import com.talkforgeai.service.openai.image.OpenAIImageService;
 import com.talkforgeai.service.openai.image.dto.OpenAIImageRequest;
 import com.talkforgeai.service.openai.image.dto.OpenAIImageResponse;
+import com.theokanning.openai.completion.chat.ChatCompletionRequest;
+import com.theokanning.openai.completion.chat.ChatMessage;
+import com.theokanning.openai.completion.chat.ChatMessageRole;
+import com.theokanning.openai.service.OpenAiService;
 import jakarta.transaction.Transactional;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -69,7 +69,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.imageio.ImageIO;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
@@ -86,7 +85,7 @@ public class AssistantService {
 
   private final OpenAIAssistantService openAIAssistantService;
 
-  private final OpenAIChatService openAIChatService;
+  private final OpenAiService openAIChatService;
   private final OpenAIImageService openAIImageService;
   private final AssistantRepository assistantRepository;
   private final MessageRepository messageRepository;
@@ -99,7 +98,7 @@ public class AssistantService {
   private final AssistantMapper assistantMapper;
 
   public AssistantService(OpenAIAssistantService openAIAssistantService,
-      OpenAIChatService openAIChatService, OpenAIImageService openAIImageService,
+      OpenAiService openAIChatService, OpenAIImageService openAIImageService,
       AssistantRepository assistantRepository, MessageRepository messageRepository,
       ThreadRepository threadRepository, FileStorageService fileStorageService,
       MessageProcessor messageProcessor, AssistantMapper assistantMapper) {
@@ -284,13 +283,27 @@ public class AssistantService {
   @Transactional
   public ThreadTitleDto generateThreadTitle(String threadId,
       ThreadTitleGenerationRequestDto request) {
+
     ThreadEntity threadEntity = threadRepository.findById(threadId)
         .orElseThrow(() -> new AssistentException("Thread not found"));
 
-    OpenAIChatRequest titleRequest = getTitleRequest(request);
+    String content = """
+        Generate a title in less than 6 words for the following message: %s
+        """.formatted(request.userMessageContent());
 
-    OpenAIChatResponse response = openAIChatService.submit(titleRequest);
-    String generatedTitle = response.choices().get(0).message().content();
+    ChatMessage chatMessage = new ChatMessage(ChatMessageRole.USER.value(), content);
+
+    ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest
+        .builder()
+        .model("gpt-3.5-turbo")
+        .messages(List.of(chatMessage))
+        .maxTokens(256)
+        .build();
+
+    ChatMessage responseMessage = openAIChatService.createChatCompletion(chatCompletionRequest)
+        .getChoices().get(0).getMessage();
+
+    String generatedTitle = responseMessage.getContent();
 
     String parsedTitle = generatedTitle.replaceAll("\"", "");
     threadEntity.setTitle(parsedTitle);
@@ -298,23 +311,6 @@ public class AssistantService {
 
     return new ThreadTitleDto(generatedTitle);
   }
-
-  @NotNull
-  private OpenAIChatRequest getTitleRequest(ThreadTitleGenerationRequestDto request) {
-    OpenAIChatRequest titleRequest = new OpenAIChatRequest();
-    titleRequest.setModel("gpt-3.5-turbo");
-    titleRequest.setMaxTokens(20);
-    titleRequest.setTemperature(0.5);
-
-    String content = """
-        Generate a title in less than 6 words for the following message: %s
-        """.formatted(request.userMessageContent());
-
-    OpenAIChatMessage titleMessage = new OpenAIChatMessage(OpenAIChatMessage.Role.USER, content);
-    titleRequest.setMessages(List.of(titleMessage));
-    return titleRequest;
-  }
-
 
   public ThreadDto retrieveThread(String threadId) {
     return threadRepository.findById(threadId)
