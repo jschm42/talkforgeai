@@ -73,9 +73,10 @@ export default {
       this.prompt = '';
     },
 
-    onReceiveWhisperText(text) {
+    async onReceiveWhisperText(text) {
       console.log('onReceiveWhisperText: ', text);
       this.prompt = text;
+      await this.submit();
     },
   },
 };

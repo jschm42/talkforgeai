@@ -35,9 +35,6 @@ import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
-import com.talkforgeai.service.openai.image.OpenAIImageService;
-import com.talkforgeai.service.openai.image.dto.OpenAIImageRequest;
-import com.talkforgeai.service.openai.image.dto.OpenAIImageResponse;
 import com.theokanning.openai.ListSearchParameters;
 import com.theokanning.openai.OpenAiResponse;
 import com.theokanning.openai.assistants.Assistant;
@@ -46,6 +43,8 @@ import com.theokanning.openai.assistants.ModifyAssistantRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
+import com.theokanning.openai.image.CreateImageRequest;
+import com.theokanning.openai.image.ImageResult;
 import com.theokanning.openai.messages.Message;
 import com.theokanning.openai.messages.MessageRequest;
 import com.theokanning.openai.model.Model;
@@ -86,8 +85,6 @@ public class AssistantService {
   public static final Logger LOGGER = LoggerFactory.getLogger(AssistantService.class);
 
   private final OpenAiService openAiService;
-
-  private final OpenAIImageService openAIImageService;
   private final AssistantRepository assistantRepository;
   private final MessageRepository messageRepository;
   private final ThreadRepository threadRepository;
@@ -99,12 +96,11 @@ public class AssistantService {
   private final AssistantMapper assistantMapper;
 
   public AssistantService(OpenAiService openAiService,
-      OpenAiService openAIChatService, OpenAIImageService openAIImageService,
+      OpenAiService openAIChatService,
       AssistantRepository assistantRepository, MessageRepository messageRepository,
       ThreadRepository threadRepository, FileStorageService fileStorageService,
       MessageProcessor messageProcessor, AssistantMapper assistantMapper) {
     this.openAiService = openAiService;
-    this.openAIImageService = openAIImageService;
     this.assistantRepository = assistantRepository;
     this.messageRepository = messageRepository;
     this.threadRepository = threadRepository;
@@ -356,10 +352,16 @@ public class AssistantService {
   }
 
   public GenerateImageResponse generateImage(String prompt) throws IOException {
-    OpenAIImageRequest request = new OpenAIImageRequest(prompt, 1, "1024x1024");
-    OpenAIImageResponse response = openAIImageService.submit(request);
+    CreateImageRequest request = new CreateImageRequest();
+    request.setPrompt(prompt);
+    request.setN(1);
+    request.setSize("1024x1024");
+    request.setModel("dall-e-3");
+    request.setStyle("natural");
 
-    return new GenerateImageResponse(downloadImage(response.data().get(0).url()));
+    ImageResult image = openAiService.createImage(request);
+
+    return new GenerateImageResponse(downloadImage(image.getData().get(0).getUrl()));
   }
 
   private String downloadImage(String imageUrl) throws IOException {

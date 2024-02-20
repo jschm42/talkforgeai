@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package com.talkforgeai.backend.transformers;
 
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
-import com.talkforgeai.service.openai.image.OpenAIImageService;
-import com.talkforgeai.service.openai.image.dto.OpenAIImageRequest;
-import com.talkforgeai.service.openai.image.dto.OpenAIImageResponse;
+import com.theokanning.openai.image.CreateImageRequest;
+import com.theokanning.openai.image.ImageResult;
+import com.theokanning.openai.service.OpenAiService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -39,7 +39,7 @@ public class ImageDownloadTransformer implements Transformer {
   public static final Logger LOGGER = LoggerFactory.getLogger(ImageDownloadTransformer.class);
   private static final Pattern UrlRegEx = Pattern.compile(
       "<image-prompt>[\\n]?([\\s\\S]*?)[\\n]?</image-prompt>", Pattern.MULTILINE);
-  private final OpenAIImageService service;
+  private final OpenAiService service;
   String template = """
       %s
       <div class="card shadow">
@@ -50,7 +50,7 @@ public class ImageDownloadTransformer implements Transformer {
       %s
       """;
 
-  public ImageDownloadTransformer(OpenAIImageService service) {
+  public ImageDownloadTransformer(OpenAiService service) {
     this.service = service;
   }
 
@@ -61,10 +61,18 @@ public class ImageDownloadTransformer implements Transformer {
     while (matcher.find()) {
       String fullTag = matcher.group(0);
       String prompt = matcher.group(1);
-      OpenAIImageResponse imageResult = service.submit(new OpenAIImageRequest(prompt));
+
+      CreateImageRequest request = new CreateImageRequest();
+      request.setPrompt(prompt);
+      request.setN(1);
+      request.setSize("1024x1024");
+      request.setModel("dall-e-3");
+      request.setStyle("natural");
+
+      ImageResult image = service.createImage(request);
       try {
         String localFilePath = downloadImage(
-            imageResult.data().get(0).url(),
+            image.getData().get(0).getUrl(),
             context.messageId(),
             context.threadDirectory()
         );

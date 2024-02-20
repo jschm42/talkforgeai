@@ -28,7 +28,6 @@ import com.talkforgeai.backend.assistant.dto.ThreadTitleGenerationRequestDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleUpdateRequestDto;
 import com.talkforgeai.backend.assistant.service.AssistantService;
 import com.talkforgeai.backend.storage.FileStorageService;
-import com.talkforgeai.service.openai.exception.OpenAIException;
 import com.theokanning.openai.ListSearchParameters;
 import com.theokanning.openai.ListSearchParameters.Order;
 import com.theokanning.openai.messages.Message;
@@ -103,7 +102,7 @@ public class AssistantController {
   public ResponseEntity<String> syncAssistants() {
     try {
       assistantService.syncAssistants();
-    } catch (OpenAIException e) {
+    } catch (RuntimeException e) {
       LOGGER.error("Error syncing assistants.", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(e.getMessage());

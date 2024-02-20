@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
   -->
 
 <template>
-  <i :class="{'bi-mic-fill': !isRecording, 'bi-record-circle': isRecording}" class="bi record-button" role="button"
+  <i :class="{'bi-mic-fill': !isRecording, 'bi-record-circle': isRecording}"
+     class="bi record-button" role="button"
      @mousedown="startRecording"
      @mouseup="stopRecording"></i>
 </template>
@@ -83,7 +84,8 @@ export default {
             },
           });
 
-          this.text = response.data.text;
+          console.log('Response: ', response);
+          this.text = response.data;
           this.$emit('onReceiveText', this.text);
         } catch (e) {
           console.error('Failed to send audio file: ', e);

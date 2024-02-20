@@ -16,13 +16,26 @@
 
 package com.talkforgeai.service;
 
+import static com.theokanning.openai.service.OpenAiService.defaultClient;
+import static com.theokanning.openai.service.OpenAiService.defaultObjectMapper;
+import static com.theokanning.openai.service.OpenAiService.defaultRetrofit;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkforgeai.service.properties.OpenAIProperties;
+import com.theokanning.openai.client.OpenAiApi;
 import com.theokanning.openai.service.OpenAiService;
+import java.time.Duration;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import retrofit2.Retrofit;
 
 @Configuration
 public class OpenAIConfiguration {
+
+  public static final int TIMEOUT_MS = 1000 * 60 * 5;
 
   private OpenAIProperties properties;
 
@@ -32,7 +45,15 @@ public class OpenAIConfiguration {
 
   @Bean
   OpenAiService openAiService() {
-    return new OpenAiService(properties.apiKey());
+    ObjectMapper mapper = defaultObjectMapper();
+    OkHttpClient client = defaultClient(properties.apiKey(), Duration.ofMinutes(5))
+        .newBuilder()
+        .addInterceptor(new HttpLoggingInterceptor().setLevel(Level.BODY))
+        .build();
+
+    Retrofit retrofit = defaultRetrofit(client, mapper);
+    OpenAiApi api = retrofit.create(OpenAiApi.class);
+    return new OpenAiService(api);
   }
 
 }

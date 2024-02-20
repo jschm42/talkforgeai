@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package com.talkforgeai.backend.transformers;
 
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
-import com.talkforgeai.service.openai.image.OpenAIImageService;
 import com.talkforgeai.service.plantuml.PlantUMLService;
+import com.theokanning.openai.service.OpenAiService;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -30,19 +30,21 @@ import org.springframework.stereotype.Component;
 public class MessageProcessor {
 
   private final FileStorageService fileStorageService;
+  private final OpenAiService openAiService;
 
   Logger logger = LoggerFactory.getLogger(MessageProcessor.class);
   List<Transformer> transformers = new ArrayList<>();
 
-  public MessageProcessor(OpenAIImageService imageService, FileStorageService fileStorageService,
-      PlantUMLService plantUMLService) {
+  public MessageProcessor(FileStorageService fileStorageService,
+      PlantUMLService plantUMLService, OpenAiService openAiService) {
     this.fileStorageService = fileStorageService;
+    this.openAiService = openAiService;
 
     transformers.add(new LaTeXTransformer());
     transformers.add(new PlantUMLTransformer(plantUMLService));
     transformers.add(new CodeBlockTransformer());
     transformers.add(new NewLineTransformer());
-    transformers.add(new ImageDownloadTransformer(imageService));
+    transformers.add(new ImageDownloadTransformer(openAiService));
   }
 
   public String transform(String content, String threadId, String messageId) {

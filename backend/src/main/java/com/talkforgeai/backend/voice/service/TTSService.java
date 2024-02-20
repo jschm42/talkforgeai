@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,14 @@ import com.talkforgeai.service.elevenlabs.dto.ElevenLabsRequest;
 import com.talkforgeai.service.elevenlabs.dto.ElevenLabsVoicesResponse;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TTSService {
+
+  public static final Logger LOGGER = LoggerFactory.getLogger(TTSService.class);
 
   private final ElevenLabsService elevenLabsService;
   private final AssistantService assistantService;
