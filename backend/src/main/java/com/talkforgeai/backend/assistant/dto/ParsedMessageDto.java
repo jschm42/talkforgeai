@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,28 @@
 package com.talkforgeai.backend.assistant.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.talkforgeai.service.openai.assistant.dto.Message;
+import com.theokanning.openai.messages.Message;
 
 public class ParsedMessageDto {
-    @JsonProperty("parsed_content")
-    String parsedContent;
 
-    Message message;
+  @JsonProperty("parsed_content")
+  String parsedContent;
 
-    public String getParsedContent() {
-        return parsedContent;
-    }
+  Message message;
 
-    public void setParsedContent(String parsedContent) {
-        this.parsedContent = parsedContent;
-    }
+  public String getParsedContent() {
+    return parsedContent;
+  }
 
-    public Message getMessage() {
-        return message;
-    }
+  public void setParsedContent(String parsedContent) {
+    this.parsedContent = parsedContent;
+  }
 
-    public void setMessage(Message message) {
-        this.message = message;
-    }
+  public Message getMessage() {
+    return message;
+  }
+
+  public void setMessage(Message message) {
+    this.message = message;
+  }
 }

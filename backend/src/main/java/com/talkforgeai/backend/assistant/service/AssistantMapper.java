@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import static java.util.Objects.requireNonNullElse;
 import com.talkforgeai.backend.assistant.domain.AssistantEntity;
 import com.talkforgeai.backend.assistant.domain.AssistantPropertyValue;
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
-import com.talkforgeai.service.openai.assistant.dto.Assistant;
+import com.theokanning.openai.assistants.Assistant;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,16 +34,16 @@ public class AssistantMapper {
 
   AssistantDto mapAssistantDto(Assistant assistant, AssistantEntity assistantEntity) {
     return new AssistantDto(
-        assistant.id(),
-        assistant.object(),
-        assistant.createdAt(),
-        assistant.name(),
-        assistant.description(),
-        assistant.model(),
-        assistant.instructions(),
-        assistant.tools(),
-        assistant.fileIds(),
-        assistant.metadata(),
+        assistant.getId(),
+        assistant.getObject(),
+        assistant.getCreatedAt(),
+        assistant.getName(),
+        assistant.getDescription(),
+        assistant.getModel(),
+        assistant.getInstructions(),
+        assistant.getTools(),
+        assistant.getFileIds(),
+        assistant.getMetadata(),
         assistantEntity.getImagePath(),
         mapAssistantProperties(assistantEntity.getProperties())
     );

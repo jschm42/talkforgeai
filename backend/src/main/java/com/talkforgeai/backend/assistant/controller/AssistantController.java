@@ -28,12 +28,13 @@ import com.talkforgeai.backend.assistant.dto.ThreadTitleGenerationRequestDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleUpdateRequestDto;
 import com.talkforgeai.backend.assistant.service.AssistantService;
 import com.talkforgeai.backend.storage.FileStorageService;
-import com.talkforgeai.service.openai.assistant.dto.ListRequest;
-import com.talkforgeai.service.openai.assistant.dto.Message;
-import com.talkforgeai.service.openai.assistant.dto.PostMessageRequest;
-import com.talkforgeai.service.openai.assistant.dto.Run;
-import com.talkforgeai.service.openai.assistant.dto.RunConversationRequest;
 import com.talkforgeai.service.openai.exception.OpenAIException;
+import com.theokanning.openai.ListSearchParameters;
+import com.theokanning.openai.ListSearchParameters.Order;
+import com.theokanning.openai.messages.Message;
+import com.theokanning.openai.messages.MessageRequest;
+import com.theokanning.openai.runs.Run;
+import com.theokanning.openai.runs.RunCreateRequest;
 import jakarta.websocket.server.PathParam;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -86,7 +87,11 @@ public class AssistantController {
   @GetMapping("/assistants")
   public List<AssistantDto> listAssistants(@PathParam("limit") Integer limit,
       @PathParam("order") String order) {
-    return assistantService.listAssistants(new ListRequest(limit, order));
+    ListSearchParameters listRequest = ListSearchParameters.builder()
+        .limit(limit)
+        .order(Order.valueOf(order))
+        .build();
+    return assistantService.listAssistants(listRequest);
   }
 
   @DeleteMapping("/assistants/{assistantId}")
@@ -101,7 +106,7 @@ public class AssistantController {
     } catch (OpenAIException e) {
       LOGGER.error("Error syncing assistants.", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(e.getErrorDetail().message());
+          .body(e.getMessage());
     }
     return ResponseEntity.ok().build();
   }
@@ -161,19 +166,24 @@ public class AssistantController {
 
   @PostMapping("/threads/{threadId}/messages")
   public Message postMessage(@PathVariable("threadId") String threadId,
-      @RequestBody PostMessageRequest postMessageRequest) {
-    return assistantService.postMessage(threadId, postMessageRequest);
+      @RequestBody MessageRequest messageRequest) {
+    return assistantService.postMessage(threadId, messageRequest);
   }
 
   @GetMapping("/threads/{threadId}/messages")
   public MessageListParsedDto listMessages(@PathVariable("threadId") String threadId,
       @PathParam("limit") Integer limit, @PathParam("order") String order) {
-    return assistantService.listMessages(threadId, new ListRequest(limit, order));
+
+    ListSearchParameters listRequest = ListSearchParameters.builder()
+        .limit(limit)
+        .order(Order.valueOf(order))
+        .build();
+    return assistantService.listMessages(threadId, listRequest);
   }
 
   @PostMapping("/threads/{threadId}/runs")
   public Run runConversation(@PathVariable("threadId") String threadId,
-      @RequestBody RunConversationRequest runConversationRequest) {
+      @RequestBody RunCreateRequest runConversationRequest) {
     return assistantService.runConversation(threadId, runConversationRequest);
   }
 

@@ -23,6 +23,11 @@ import Thread, {
 } from '@/store/to/thread';
 import Assistant from '@/store/to/assistant';
 
+enum Order {
+  ASCENDING = 'ASCENDING',
+  DESCENDING = 'DESCENDING',
+}
+
 class AssistantService {
 
   async retrieveGPTModels() {
@@ -38,7 +43,11 @@ class AssistantService {
 
   async retrieveAssistants(): Promise<Array<Assistant>> {
     console.log('Retrieving assistants');
-    const result = await axios.get('/api/v1/assistants');
+    const result = await axios.get('/api/v1/assistants', {
+      params: {
+        order: Order.ASCENDING,
+      },
+    });
     return result.data;
   }
 
@@ -99,8 +108,10 @@ class AssistantService {
   }
 
   async runConversation(threadId: string, assistantId: string): Promise<Run> {
-    const result = await axios.post(`/api/v1/threads/${threadId}/runs`,
-        {assistant_id: assistantId});
+    const result = await axios.post(
+        `/api/v1/threads/${threadId}/runs`,
+        {assistantId},
+    );
     return result.data;
   }
 
@@ -115,7 +126,7 @@ class AssistantService {
         {
           params: {
             limit: 1,
-            order: 'desc',
+            order: Order.DESCENDING,
           },
         },
     );
@@ -133,7 +144,7 @@ class AssistantService {
         `/api/v1/threads/${threadId}/messages`,
         {
           params: {
-            order: 'asc',
+            order: Order.ASCENDING,
           },
         },
     );
