@@ -43,12 +43,11 @@
 <script>
 import {useChatStore} from '@/store/chat-store';
 import {format} from 'date-fns';
-import Thread from '@/store/to/thread';
 
 export default {
   name: 'ThreadEntry',
   props: {
-    entry: Thread,
+    entry: Object,
   },
   data() {
     return {

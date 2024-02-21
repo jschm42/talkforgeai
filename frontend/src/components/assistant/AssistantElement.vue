@@ -17,7 +17,6 @@
 <script>
 
 import {useChatStore} from '@/store/chat-store';
-import Assistant from '@/store/to/assistant';
 
 export default {
   name: 'AssistantElement',
@@ -32,7 +31,7 @@ export default {
     };
   },
   props: {
-    assistant: Assistant,
+    assistant: Object,
   },
   computed: {
     imageSrc() {
@@ -62,9 +61,6 @@ export default {
       console.log('onMouseLeave');
       this.showTooltip = false;
     },
-  },
-  mounted() {
-    console.log('AssistantElement.mounted: ', this.assistant);
   },
 };
 </script>

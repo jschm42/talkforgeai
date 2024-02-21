@@ -20,7 +20,6 @@ import TtsService from '@/service/tts.service';
 import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
 import HtmlToTextService from '@/service/html-to-text.service';
-import {ThreadMessage} from '@/store/to/thread';
 import AssistantProperties, {TTSType} from '@/service/assistant.properties';
 
 const ttsService = new TtsService();
@@ -38,7 +37,7 @@ export default defineComponent({
     };
   },
   props: {
-    message: ThreadMessage,
+    message: Object,
   },
   computed: {
     getTTSType() {

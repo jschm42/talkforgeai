@@ -18,7 +18,6 @@
 
 import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
-import {ThreadMessage} from '@/store/to/thread';
 import ChatMessageTextToSpeech from '@/components/chat/ChatMessageTextToSpeech.vue';
 
 export default {
@@ -32,7 +31,7 @@ export default {
     return {};
   },
   props: {
-    message: ThreadMessage,
+    message: Object,
     messageIndex: Number,
   },
   computed: {
