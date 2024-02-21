@@ -20,13 +20,16 @@
     <div class="d-flex flex-row">
       <div class="flex-grow-1">
         <div class="form-check form-switch d-flex switch-panel mt-3">
-          <input id="flexCheckDefault" v-model="this.store.isAutoSpeak"
+          <input id="flexCheckDefault" v-model="this.chatStore.isAutoSpeak"
                  class="form-check-input" role="switch" type="checkbox">
           <label class="form-check-label mx-2" for="flexCheckDefault">
             Auto speak
           </label>
         </div>
       </div>
+      <button :hidden="isRegenerateRequestHidden" class="btn btn-outline-warning my-2"
+              @click="onRegenerateRun()">Regenerate request
+      </button>
       <button :hidden="isCancelRequestHidden" class="btn btn-outline-warning my-2"
               @click="onCancelRun()">Cancel request
       </button>
@@ -41,6 +44,7 @@
 <script>
 import {useChatStore} from '@/store/chat-store';
 import ChatMessageInput from '@/components/chat/ChatMessageInput.vue';
+import {useAppStore} from '@/store/app-store';
 
 export default {
   name: 'ChatControl',
@@ -50,7 +54,10 @@ export default {
   },
   computed: {
     isCancelRequestHidden() {
-      return this.store.runId === '';
+      return this.chatStore.runId === '';
+    },
+    isRegenerateRequestHidden() {
+      return !this.appStore.hasErrorState();
     },
   },
   methods: {
@@ -64,13 +71,29 @@ export default {
     },
     onCancelRun() {
       console.log('Chat Control - Cancel Run');
-      this.store.cancelCurrentRun();
+      try {
+        this.chatStore.cancelCurrentRun();
+      } catch (error) {
+        this.appStore.handleError(error);
+        this.chatStore.updateStatus('Error: ' + error, 'error');
+      }
+    },
+    async onRegenerateRun() {
+      console.log('Chat Control - Regenerate Run');
+      this.appStore.resetErrorState();
+      try {
+        await this.chatStore.regenerateCurrentRun();
+      } catch (error) {
+        this.appStore.handleError(error);
+        this.chatStore.updateStatus('Error: ' + error, 'error');
+      }
     },
   },
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
+    const chatStore = useChatStore(); // Call useMyStore() inside the setup function
+    const appStore = useAppStore();
 
-    return {store};
+    return {chatStore, appStore};
   },
 };
 </script>

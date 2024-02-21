@@ -219,6 +219,10 @@ public class AssistantService {
 
   public Run runConversation(String threadId, RunCreateRequest runCreateRequest) {
 
+    if (true) {
+      throw new IllegalArgumentException("Test exception!");
+    }
+
     return this.openAiService.createRun(threadId, runCreateRequest);
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,18 @@ import ErrorMessage from '@/store/to/error-message';
 export const useAppStore = defineStore('app', {
   state: () => {
     return {
+      isErrorState: false,
       errors: [] as Array<ErrorMessage>,
     };
   },
   actions: {
+    hasErrorState() {
+      return this.isErrorState;
+    },
+    resetErrorState() {
+      this.isErrorState = false;
+      this.errors = [];
+    },
     hasErrors() {
       return this.errors.length > 0;
     },
@@ -32,6 +40,7 @@ export const useAppStore = defineStore('app', {
       error.id = new Date().getTime().toString();
       error.message = errorMessage;
       this.errors.push(error);
+      this.isErrorState = true;
     },
     clearErrors() {
       this.errors = [];

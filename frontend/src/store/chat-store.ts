@@ -115,46 +115,52 @@ export const useChatStore = defineStore('chat', {
     },
     async runConversationAndHandleResults() {
       let pollingInterval: undefined | number = undefined;
-      try {
-        const run = await assistantService.runConversation(this.threadId,
-            this.selectedAssistant.id);
-        this.runId = run.id;
+      // try {
+      const run = await assistantService.runConversation(this.threadId,
+          this.selectedAssistant.id);
+      this.runId = run.id;
 
-        // Use a promise to handle the polling logic
-        await new Promise((resolve, reject) => {
-          pollingInterval = setInterval(async () => {
-            try {
-              console.log('Polling for run status');
-              const runT = await assistantService.retrieveRun(this.threadId, run.id);
-              if (runT.status === 'completed') {
-                console.log('Run completed');
-                clearInterval(pollingInterval);
-                this.runId = '';
-                await this.handleResult();
-                resolve('completed'); // Resolve the promise when completed
-              } else if (runT.status === 'cancelled') {
-                console.log('Run cancelled');
-                clearInterval(pollingInterval);
-                this.runId = '';
-                this.updateStatus('Cancelled', 'error');
-                resolve('cancelled'); // Resolve the promise when cancelled
-              }
-            } catch (error) {
-              console.error('Error during polling', error);
+      // Use a promise to handle the polling logic
+      await new Promise((resolve, reject) => {
+        pollingInterval = setInterval(async () => {
+          try {
+            console.log('Polling for run status');
+            const runT = await assistantService.retrieveRun(this.threadId, run.id);
+            if (runT.status === 'completed') {
+              console.log('Run completed');
               clearInterval(pollingInterval);
-              reject(error); // Reject the promise on error
+              this.runId = '';
+              await this.handleResult();
+              resolve('completed'); // Resolve the promise when completed
+            } else if (runT.status === 'cancelled') {
+              console.log('Run cancelled');
+              clearInterval(pollingInterval);
+              this.runId = '';
+              this.updateStatus('Cancelled', 'error');
+              resolve('cancelled'); // Resolve the promise when cancelled
             }
-          }, 2000);
-        });
-      } catch (e) {
-        console.error('Error while handling result', e);
-        if (pollingInterval) clearInterval(pollingInterval);
-      }
+          } catch (error) {
+            console.error('Error during polling', error);
+            clearInterval(pollingInterval);
+            reject(error); // Reject the promise on error
+          }
+        }, 2000);
+      });
+      // } catch (e) {
+      //   console.error('Error while handling result', e);
+      //   if (pollingInterval) clearInterval(pollingInterval);
+      // }
     },
     async cancelCurrentRun() {
       if (this.runId.length > 0) {
         await assistantService.cancelRun(this.threadId, this.runId);
       }
+    },
+    async regenerateCurrentRun() {
+      //await assistantService.regenerateRun(this.threadId, this.runId);
+
+      this.updateStatus('Thinking...', 'running');
+      await this.runConversationAndHandleResults();
     },
     // Usage of the refactored functions
     async submitUserMessage(message: string) {

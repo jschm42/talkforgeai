@@ -208,6 +208,10 @@ class AssistantService {
     return axios.post(`/api/v1/threads/${threadId}/runs/${id}/cancel`);
   }
 
+  async regenerateRun(threadId: any, id: any) {
+    return axios.post(`/api/v1/threads/${threadId}/runs/${id}/regenerate`);
+  }
+
   private async retrieveThread(threadId: string) {
     const result = await axios.get(
         `/api/v1/threads/${threadId}`,
