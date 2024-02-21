@@ -96,7 +96,6 @@ public class AssistantService {
   private final AssistantMapper assistantMapper;
 
   public AssistantService(OpenAiService openAiService,
-      OpenAiService openAIChatService,
       AssistantRepository assistantRepository, MessageRepository messageRepository,
       ThreadRepository threadRepository, FileStorageService fileStorageService,
       MessageProcessor messageProcessor, AssistantMapper assistantMapper) {
@@ -252,6 +251,7 @@ public class AssistantService {
 
   @Transactional
   public ParsedMessageDto postProcessMessage(String threadId, String messageId) {
+    LOGGER.info("Post processing message: {}", messageId);
     Message message = this.openAiService.retrieveMessage(threadId, messageId);
     Optional<MessageEntity> messageEntity = messageRepository.findById(messageId);
 

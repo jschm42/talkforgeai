@@ -29,21 +29,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class MessageProcessor {
 
+  public static final Logger LOGGER = LoggerFactory.getLogger(MessageProcessor.class);
   private final FileStorageService fileStorageService;
-  private final OpenAiService openAiService;
-
-  Logger logger = LoggerFactory.getLogger(MessageProcessor.class);
   List<Transformer> transformers = new ArrayList<>();
 
   public MessageProcessor(FileStorageService fileStorageService,
       PlantUMLService plantUMLService, OpenAiService openAiService) {
     this.fileStorageService = fileStorageService;
-    this.openAiService = openAiService;
 
     transformers.add(new LaTeXTransformer());
     transformers.add(new PlantUMLTransformer(plantUMLService));
     transformers.add(new CodeBlockTransformer());
+    transformers.add(new CodePhraseTransformer());
+    transformers.add(new MarkdownHeaderTransformer());
+    transformers.add(new MarkdownListTransformer());
     transformers.add(new NewLineTransformer());
+
     transformers.add(new ImageDownloadTransformer(openAiService));
   }
 
@@ -62,11 +63,11 @@ public class MessageProcessor {
     );
 
     for (Transformer t : transformers) {
-      logger.info("Transforming with " + t.getClass().getName() + "...");
+      LOGGER.info("Transforming with {}...", t.getClass().getName());
       processedContent = t.process(processedContent, context);
     }
 
-    logger.info("Transformation done.");
+    LOGGER.info("Transformation done.");
     return processedContent;
   }
 
