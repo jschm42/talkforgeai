@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,11 +52,11 @@ class TtsService {
     }
   }
 
-  async speakElevenlabs(text: string, assistant: Assistant) {
+  async speakElevenlabs(text: string, assistantId: string) {
     try {
       const result = await axios.post(
           `/api/v1/tts/stream`,
-          {text, assistantId: assistant.id},
+          {text, assistantId},
           {
             timeout: 50000,
             headers: {

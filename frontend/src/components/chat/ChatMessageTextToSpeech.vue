@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -45,7 +45,8 @@ export default defineComponent({
       return this.store.selectedAssistant.properties[AssistantProperties.TTS_TYPE];
     },
     isDisabled() {
-      return this.store.selectedAssistant.properties[AssistantProperties.TTS_TYPE] === TTSType.DISABLED;
+      return this.store.selectedAssistant.properties[AssistantProperties.TTS_TYPE] ===
+          TTSType.DISABLED;
     },
   },
   beforeUnmount() {
@@ -78,7 +79,7 @@ export default defineComponent({
     },
     async speakElevenlabs(plainText) {
       try {
-        const audioBlob = await ttsService.speakElevenlabs(plainText, this.store.selectedAssistant);
+        const audioBlob = await ttsService.speakElevenlabs(plainText, this.message.assistant_id);
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.addEventListener('ended', () => {
@@ -96,7 +97,8 @@ export default defineComponent({
     async speakSpeechApi(plainText) {
       console.log('Speaking using SpeechAPI...');
       this.audioState = AudioState.Playing;
-      await ttsService.speakSpeechAPI(plainText, this.store.selectedAssistant);
+      const assistant = this.store.getAssistantById(this.message.assistant_id);
+      await ttsService.speakSpeechAPI(plainText, assistant);
       console.log('Stopped...');
       this.audioState = AudioState.Stopped;
     },
@@ -113,13 +115,16 @@ const AudioState = {
 </script>
 
 <template>
-  <i v-if="audioState === 'stopped'" :hidden="isDisabled" class="bi bi-play-circle message-icon play-icon"
+  <i v-if="audioState === 'stopped'" :hidden="isDisabled"
+     class="bi bi-play-circle message-icon play-icon"
      role="button" @click="playAudio"></i>
 
-  <i v-if="audioState === 'playing'" :hidden="isDisabled" class="bi bi-stop-circle message-icon play-icon"
+  <i v-if="audioState === 'playing'" :hidden="isDisabled"
+     class="bi bi-stop-circle message-icon play-icon"
      role="button" @click="stopAudio"></i>
 
-  <div v-if="audioState === 'loading'" :hidden="isDisabled" class="spinner-border spinner-border-sm loading-icon"
+  <div v-if="audioState === 'loading'" :hidden="isDisabled"
+       class="spinner-border spinner-border-sm loading-icon"
        role="status">
     <span class="visually-hidden">Loading...</span>
   </div>

@@ -71,6 +71,9 @@ export const useChatStore = defineStore('chat', {
       // Make this.threads a list of Thread objects
       this.threads = await assistantService.retrieveThreads();
     },
+    getAssistantById(assistantId: string) {
+      return this.assistantList.find((assistant) => assistant.id === assistantId);
+    },
     async retrieveMessages(threadId: string) {
       const parsedMessageList = await assistantService.retrieveMessages(threadId);
 
