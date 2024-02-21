@@ -20,7 +20,7 @@
     <div class="d-flex flex-row">
       <div class="flex-grow-1">
         <div class="form-check form-switch d-flex switch-panel mt-3">
-          <input id="flexCheckDefault" v-model="localIsAutoSpeak"
+          <input id="flexCheckDefault" v-model="this.store.isAutoSpeak"
                  class="form-check-input" role="switch" type="checkbox">
           <label class="form-check-label mx-2" for="flexCheckDefault">
             Auto speak
@@ -40,16 +40,13 @@
 
 <script>
 import {useChatStore} from '@/store/chat-store';
-import {ref, watch} from 'vue';
 import ChatMessageInput from '@/components/chat/ChatMessageInput.vue';
 
 export default {
   name: 'ChatControl',
   components: {ChatMessageInput},
   data() {
-    return {
-      isAutoSpeak: Boolean,
-    };
+    return {};
   },
   computed: {
     isCancelRequestHidden() {
@@ -72,13 +69,8 @@ export default {
   },
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
-    const localIsAutoSpeak = ref(store.isAutoSpeak);
 
-    watch(() => store.isAutoSpeak, (newValue) => {
-      localIsAutoSpeak.value = newValue;
-    });
-
-    return {store, localIsAutoSpeak};
+    return {store};
   },
 };
 </script>

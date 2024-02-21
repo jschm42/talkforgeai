@@ -95,7 +95,7 @@ export default defineComponent({
       }
     },
     async speakSpeechApi(plainText) {
-      console.log('Speaking using SpeechAPI...');
+      console.log(`Speaking using SpeechAPI: '${plainText}'`);
       this.audioState = AudioState.Playing;
       const assistant = this.store.getAssistantById(this.message.assistant_id);
       await ttsService.speakSpeechAPI(plainText, assistant);

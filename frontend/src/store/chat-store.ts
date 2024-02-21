@@ -120,21 +120,32 @@ export const useChatStore = defineStore('chat', {
             this.selectedAssistant.id);
         this.runId = run.id;
 
-        pollingInterval = setInterval(async () => {
-          console.log('Polling for run status');
-          const runT = await assistantService.retrieveRun(this.threadId, run.id);
-          if (runT.status === 'completed') {
-            console.log('Run completed');
-            clearInterval(pollingInterval);
-            this.runId = '';
-            await this.handleResult();
-          } else if (runT.status === 'cancelled') {
-            console.log('Run cancelled');
-            clearInterval(pollingInterval);
-            this.runId = '';
-            this.updateStatus('Cancelled', 'error');
-          }
-        }, 2000);
+        // Use a promise to handle the polling logic
+        await new Promise((resolve, reject) => {
+          pollingInterval = setInterval(async () => {
+            try {
+              console.log('Polling for run status');
+              const runT = await assistantService.retrieveRun(this.threadId, run.id);
+              if (runT.status === 'completed') {
+                console.log('Run completed');
+                clearInterval(pollingInterval);
+                this.runId = '';
+                await this.handleResult();
+                resolve('completed'); // Resolve the promise when completed
+              } else if (runT.status === 'cancelled') {
+                console.log('Run cancelled');
+                clearInterval(pollingInterval);
+                this.runId = '';
+                this.updateStatus('Cancelled', 'error');
+                resolve('cancelled'); // Resolve the promise when cancelled
+              }
+            } catch (error) {
+              console.error('Error during polling', error);
+              clearInterval(pollingInterval);
+              reject(error); // Reject the promise on error
+            }
+          }, 2000);
+        });
       } catch (e) {
         console.error('Error while handling result', e);
         if (pollingInterval) clearInterval(pollingInterval);
