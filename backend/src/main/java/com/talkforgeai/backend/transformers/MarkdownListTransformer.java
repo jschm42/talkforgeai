@@ -17,33 +17,79 @@
 package com.talkforgeai.backend.transformers;
 
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MarkdownListTransformer implements Transformer {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(MarkdownListTransformer.class);
+  final Pattern headerRegEx = Pattern.compile("^(.*) \\*\\*(.*):\\*\\*(.*?)$");
+
+  public String convertToHtmlList(String text) {
+    StringBuilder htmlBuilder = new StringBuilder();
+    String[] lines = text.split("\n");
+    boolean isListOpen = false;
+    boolean isSubList = false;
+
+    for (String line : lines) {
+      // Check if the line is a list header
+      // A list header is a line that starts with some text, followed by "**" e.g. "2. **", or "- **"
+      Matcher matcher = headerRegEx.matcher(line.trim());
+
+      if (matcher.find()) {
+        String headerPrefix = matcher.group(1);
+        String headerTitle = matcher.group(2).trim();
+        String headerContent = matcher.group(3);
+
+        if (!isListOpen) {
+          htmlBuilder.append("<ul>");
+          isListOpen = true;
+        } else if (isSubList) {
+          htmlBuilder.append("</ul></li>"); // Close previous sublist
+          isSubList = false;
+        }
+        //String header = line.substring(line.indexOf("**") + 2, line.lastIndexOf("**")).trim();
+        htmlBuilder.append("<li>").append("<strong>").append(headerTitle)
+            .append(":</strong>").append(headerContent);
+      }
+      // Check if the line is a list item
+      else if (line.trim().startsWith("- ")) {
+        if (!isSubList && isListOpen) {
+          htmlBuilder.append("<ul>");
+          isSubList = true;
+        }
+        String item = line.trim().substring(2);
+        htmlBuilder.append("<li>").append(item).append("</li>");
+      }
+      // Handle non-list text
+      else {
+        if (isSubList) {
+          htmlBuilder.append("</ul></li>");
+          isSubList = false;
+        }
+        if (isListOpen) {
+          htmlBuilder.append("</ul>\n");
+          isListOpen = false;
+        }
+        htmlBuilder.append(line).append("\n");
+      }
+    }
+    // Close any open tags at the end of the input
+    if (isSubList) {
+      htmlBuilder.append("</ul></li>");
+    }
+    if (isListOpen) {
+      htmlBuilder.append("</ul>");
+    }
+
+    return htmlBuilder.toString();
+  }
 
   @Override
   public String process(String content, TransformerContext context) {
-    /**
-     * Transforms markdown code blocks into HTML code blocks.
-     *
-     * Before:
-     * \n\n- **Physical Health:**\n
-     * - **Regular Exercise:** Aim for at least 30 minutes of moderate exercise most days of the week. This can include walking, cycling, or even short breaks for stretching or yoga during your coding sessions.\n
-     * - **Healthy Eating:** Focus on a balanced diet rich in fruits, vegetables, whole grains, and lean proteins. Remember to hydrate well.\n
-     * - **Adequate Sleep:** Ensure 7-9 hours of quality sleep each night to help your body and mind recover and rejuvenate.\n\n
-     *
-     * After:
-     * <li><strong>Physical Health:</strong></li>
-     * <ul><strong>Regular Exercise:</strong> Aim for at least 30 minutes of moderate exercise most days of the week. This can include walking, cycling, or even short breaks for stretching or yoga during your coding sessions.</ul>
-     * <ul><strong>Healthy Eating:</strong> Focus on a balanced diet rich in fruits, vegetables, whole grains, and lean proteins. Remember to hydrate well.</ul>
-     * <ul><strong>Adequate Sleep:</strong> Ensure 7-9 hours of quality sleep each night to help your body and mind recover and rejuvenate.</ul>
-     * </li>
-     */
-
-    return content;
+    return convertToHtmlList(content);
   }
 
 

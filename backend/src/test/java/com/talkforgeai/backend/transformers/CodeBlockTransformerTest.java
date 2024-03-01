@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,89 +16,75 @@
 
 package com.talkforgeai.backend.transformers;
 
-import com.talkforgeai.backend.transformers.dto.TransformerContext;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.nio.file.Path;
+public class CodeBlockTransformerTest extends AbstractTransformerTest {
 
-public class CodeBlockTransformerTest {
-    TransformerContext context;
+  @Test
+  public void codeBlockWithLangGetsTransformed() {
+    String content = "Here's an example of how to use the \"Arrays.sort()\" method:\n" +
+        "\n" +
+        "```java\n" +
+        "int[] numbers = { 5, 3, 9, 1, 7 };\n" +
+        "Arrays.sort(numbers);\n" +
+        "```\n" +
+        "\n" +
+        "<smiley>";
 
-    @BeforeEach
-    public void before() {
-        context = new TransformerContext(
-                "thread_Ddf483dKe",
-                "message_283Eeu3",
-                Path.of("/temp/assistants"),
-                Path.of("/temp/threads")
-        );
-    }
+    String expected = """
+        Here's an example of how to use the "Arrays.sort()" method:
+                        
+        <!-- start no-lb -->
+        <pre>
+          <code class="language-java">int[] numbers = { 5, 3, 9, 1, 7 };
+        Arrays.sort(numbers);
+        </code>
+        </pre>
+        <!-- end no-lb -->
+                        
+                        
+        <smiley>""";
 
-    @Test
-    public void codeBlockWithLangGetsTransformed() {
-        String content = "Here's an example of how to use the \"Arrays.sort()\" method:\n" +
-                "\n" +
-                "```java\n" +
-                "int[] numbers = { 5, 3, 9, 1, 7 };\n" +
-                "Arrays.sort(numbers);\n" +
-                "```\n" +
-                "\n" +
-                "<smiley>";
+    CodeBlockTransformer transformer = new CodeBlockTransformer();
 
-        String expected = """
-                Here's an example of how to use the "Arrays.sort()" method:
-                                
-                <!-- start no-lb -->
-                <pre>
-                  <code class="language-java">int[] numbers = { 5, 3, 9, 1, 7 };
-                Arrays.sort(numbers);
-                </code>
-                </pre>
-                <!-- end no-lb -->
-                                
-                                
-                <smiley>""";
+    String processed = transformer.process(content, context);
 
-        CodeBlockTransformer transformer = new CodeBlockTransformer();
+    Assertions.assertEquals(expected, processed);
 
-        String processed = transformer.process(content, context);
+  }
 
-        Assertions.assertEquals(expected, processed);
+  @Test
+  public void codeBlockWithoutLangGetsTransformed() {
+    String content = "Here's an example of how to use the \"Arrays.sort()\" method:\n" +
+        "\n" +
+        "```\n" +
+        "int[] numbers = { 5, 3, 9, 1, 7 };\n" +
+        "Arrays.sort(numbers);\n" +
+        "```\n" +
+        "\n" +
+        "<smiley>";
 
-    }
+    String expected = """
+        Here's an example of how to use the "Arrays.sort()" method:
+                        
+        <!-- start no-lb -->
+        <pre>
+          <code >int[] numbers = { 5, 3, 9, 1, 7 };
+        Arrays.sort(numbers);
+        </code>
+        </pre>
+        <!-- end no-lb -->
+                        
+                        
+        <smiley>""";
 
-    @Test
-    public void codeBlockWithoutLangGetsTransformed() {
-        String content = "Here's an example of how to use the \"Arrays.sort()\" method:\n" +
-                "\n" +
-                "```\n" +
-                "int[] numbers = { 5, 3, 9, 1, 7 };\n" +
-                "Arrays.sort(numbers);\n" +
-                "```\n" +
-                "\n" +
-                "<smiley>";
+    CodeBlockTransformer transformer = new CodeBlockTransformer();
 
-        String expected = """
-                Here's an example of how to use the "Arrays.sort()" method:
-                                
-                <!-- start no-lb -->
-                <pre>
-                  <code >int[] numbers = { 5, 3, 9, 1, 7 };
-                Arrays.sort(numbers);
-                </code>
-                </pre>
-                <!-- end no-lb -->
-                                
-                                
-                <smiley>""";
+    String processed = transformer.process(content, context);
 
-        CodeBlockTransformer transformer = new CodeBlockTransformer();
+    Assertions.assertEquals(expected, processed);
 
-        String processed = transformer.process(content, context);
+  }
 
-        Assertions.assertEquals(expected, processed);
-
-    }
 }

@@ -37,11 +37,12 @@ public class MessageProcessor {
       PlantUMLService plantUMLService, OpenAiService openAiService) {
     this.fileStorageService = fileStorageService;
 
+    transformers.add(new HtmlEncoderTransformer());
     transformers.add(new LaTeXTransformer());
     transformers.add(new PlantUMLTransformer(plantUMLService));
     transformers.add(new CodeBlockTransformer());
     transformers.add(new CodePhraseTransformer());
-    transformers.add(new MarkdownHeaderTransformer());
+//    transformers.add(new MarkdownHeaderTransformer());
     transformers.add(new MarkdownListTransformer());
     transformers.add(new NewLineTransformer());
 

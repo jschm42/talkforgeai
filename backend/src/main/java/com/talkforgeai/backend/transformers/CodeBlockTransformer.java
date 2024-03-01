@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,48 +17,49 @@
 package com.talkforgeai.backend.transformers;
 
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class CodeBlockTransformer implements Transformer {
-    public static final Logger LOGGER = LoggerFactory.getLogger(CodeBlockTransformer.class);
 
-    @Override
-    public String process(String content, TransformerContext context) {
-        String regex = "```(.*)\n([\\s\\S]*?)```";
+  public static final Logger LOGGER = LoggerFactory.getLogger(CodeBlockTransformer.class);
 
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(content);
+  @Override
+  public String process(String content, TransformerContext context) {
+    String regex = "```(.*)\n([\\s\\S]*?)```";
 
-        while (matcher.find()) {
-            String lang = matcher.group(1);
-            String processed = getProcessedContent(matcher, lang);
+    Pattern pattern = Pattern.compile(regex);
+    Matcher matcher = pattern.matcher(content);
 
-            content = content.replace(matcher.group(), processed);
-            LOGGER.debug("Replaced: {}", content);
-        }
+    while (matcher.find()) {
+      String lang = matcher.group(1);
+      String processed = getProcessedContent(matcher, lang);
 
-        return content;
+      content = content.replace(matcher.group(), processed);
+      LOGGER.debug("Replaced: {}", content);
     }
 
-    private String getProcessedContent(Matcher matcher, String lang) {
-        String code = matcher.group(2);
+    return content;
+  }
 
-        String langClass = "";
-        if (lang != null && !lang.isEmpty()) {
-            langClass = """
-                    class="language-%s\"""".formatted(lang);
-        }
+  private String getProcessedContent(Matcher matcher, String lang) {
+    String code = matcher.group(2);
 
-        return """
-                %s
-                <pre>
-                  <code %s>%s</code>
-                </pre>
-                %s
-                """.formatted(NO_LB_MARKER_START, langClass, code, NO_LB_MARKER_END);
+    String langClass = "";
+    if (lang != null && !lang.isEmpty()) {
+      langClass = """
+          class="language-%s"
+          """.formatted(lang);
     }
+
+    return """
+        %s
+        <pre>
+          <code %s>%s</code>
+        </pre>
+        %s
+        """.formatted(NO_LB_MARKER_START, langClass, code, NO_LB_MARKER_END);
+  }
 }
