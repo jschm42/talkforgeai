@@ -17,6 +17,7 @@
 package com.talkforgeai.backend.transformers;
 
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,23 +25,13 @@ public class MarkdownHeaderTransformer implements Transformer {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(MarkdownHeaderTransformer.class);
 
+  private final Pattern regExH2 = Pattern.compile("### (.*)\n");
+  private final Pattern regExH1 = Pattern.compile("### (.*)\\n");
+
   @Override
   public String process(String content, TransformerContext context) {
-    /**
-     * Transforms markdown code blocks into HTML code blocks.
-     *
-     * Before:
-     * ### Key Points:
-     *
-     * After:
-     * <h3>Key Points:</h3>
-     */
-
-    String regexH2 = "#### (.*)\\n";
-    String regexH3 = "### (.*)\\n";
-
-    content = content.replaceAll(regexH2, "<h2>$1</h2>");
-    content = content.replaceAll(regexH3, "<h3>$1</h3>");
+    content = regExH2.matcher(content).replaceAll("<h2>$1</h2>");
+    content = regExH1.matcher(content).replaceAll("<h1>$1</h1>");
 
     return content;
   }

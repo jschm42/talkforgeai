@@ -42,7 +42,7 @@ public class MessageProcessor {
     transformers.add(new PlantUMLTransformer(plantUMLService));
     transformers.add(new CodeBlockTransformer());
     transformers.add(new CodePhraseTransformer());
-//    transformers.add(new MarkdownHeaderTransformer());
+    transformers.add(new MarkdownHeaderTransformer());
     transformers.add(new MarkdownListTransformer());
     transformers.add(new NewLineTransformer());
 

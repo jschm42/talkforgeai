@@ -36,6 +36,8 @@
 import {useChatStore} from '@/store/chat-store';
 import {useAppStore} from '@/store/app-store';
 import WhisperComponent from '@/components/common/WhisperComponent.vue';
+import {nextTick} from 'vue';
+import hljs from 'highlight.js';
 
 export default {
   name: 'ChatMessageInput',
@@ -65,6 +67,8 @@ export default {
         this.appStore.handleError(error);
         this.chatStore.updateStatus('Error: ' + error, 'error');
       } finally {
+        await nextTick();
+        hljs.highlightAll();
         this.isInputLocked = false;
       }
 

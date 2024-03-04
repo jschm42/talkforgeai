@@ -17,6 +17,7 @@
 package com.talkforgeai.backend.transformers;
 
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,11 +25,10 @@ public class CodePhraseTransformer implements Transformer {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(CodePhraseTransformer.class);
 
+  private final Pattern regEx = Pattern.compile("`(.*?)`");
+
   @Override
   public String process(String content, TransformerContext context) {
-    // Transform `code` into <code>code</code>
-    String regex = "`(.*?)`";
-    content = content.replaceAll(regex, "<code>$1</code>");
-    return content;
+    return regEx.matcher(content).replaceAll("<code>$1</code>");
   }
 }

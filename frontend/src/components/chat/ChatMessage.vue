@@ -94,13 +94,6 @@ export default {
       await this.$refs.chatMessageAudioPlayerRef.playAudio();
     },
     getContent() {
-      // if (this.message.function_call) {
-      //   const func = this.message.function_call;
-      //   const argumentsHighlighted = hljs.highlight(func.arguments, {language: 'json'}).value;
-      //
-      //   return `<strong>${func.name}(<p>${argumentsHighlighted}</p>)</strong>`;
-      // }
-
       return this.message.content[0].text.value;
     },
     getMessageStatus() {

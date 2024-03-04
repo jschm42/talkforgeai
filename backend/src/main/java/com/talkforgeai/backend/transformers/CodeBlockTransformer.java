@@ -26,12 +26,11 @@ public class CodeBlockTransformer implements Transformer {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(CodeBlockTransformer.class);
 
+  Pattern regEx = Pattern.compile("```(.*)\n([\\s\\S]*?)```");
+
   @Override
   public String process(String content, TransformerContext context) {
-    String regex = "```(.*)\n([\\s\\S]*?)```";
-
-    Pattern pattern = Pattern.compile(regex);
-    Matcher matcher = pattern.matcher(content);
+    Matcher matcher = regEx.matcher(content);
 
     while (matcher.find()) {
       String lang = matcher.group(1);
@@ -45,7 +44,7 @@ public class CodeBlockTransformer implements Transformer {
   }
 
   private String getProcessedContent(Matcher matcher, String lang) {
-    String code = matcher.group(2);
+    String code = matcher.group(2).trim();
 
     String langClass = "";
     if (lang != null && !lang.isEmpty()) {

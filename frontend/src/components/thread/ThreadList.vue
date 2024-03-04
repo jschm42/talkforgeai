@@ -45,6 +45,8 @@
 import {useChatStore} from '@/store/chat-store';
 import ThreadEntry from '@/components/thread/ThreadEntry.vue';
 import {useAppStore} from '@/store/app-store';
+import hljs from 'highlight.js';
+import {nextTick} from 'vue';
 
 export default {
   name: 'ThreadList',
@@ -71,6 +73,8 @@ export default {
         if (this.store.threadId !== threadId) {
           this.store.threadId = threadId;
           await this.store.retrieveMessages(threadId);
+          await nextTick();
+          hljs.highlightAll();
         }
       } catch (error) {
         this.appStore.handleError(error);
