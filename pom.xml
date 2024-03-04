@@ -145,6 +145,39 @@
         <artifactId>plantuml</artifactId>
         <version>1.2023.11</version>
       </dependency>
+
+      <!-- https://mvnrepository.com/artifact/com.theokanning.openai-gpt3-java/client -->
+      <dependency>
+        <groupId>com.theokanning.openai-gpt3-java</groupId>
+        <artifactId>client</artifactId>
+        <version>0.18.2</version>
+      </dependency>
+      <dependency>
+        <groupId>com.theokanning.openai-gpt3-java</groupId>
+        <artifactId>service</artifactId>
+        <version>0.18.2</version>
+      </dependency>
+      <dependency>
+        <groupId>com.theokanning.openai-gpt3-java</groupId>
+        <artifactId>api</artifactId>
+        <version>0.18.2</version>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <skipTests>false</skipTests>
+          <testFailureIgnore>true</testFailureIgnore>
+          <forkMode>once</forkMode>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

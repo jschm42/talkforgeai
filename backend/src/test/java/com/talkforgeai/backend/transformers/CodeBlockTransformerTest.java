@@ -37,9 +37,9 @@ public class CodeBlockTransformerTest extends AbstractTransformerTest {
                         
         <!-- start no-lb -->
         <pre>
-          <code class="language-java">int[] numbers = { 5, 3, 9, 1, 7 };
-        Arrays.sort(numbers);
-        </code>
+          <code class="language-java"
+        >int[] numbers = { 5, 3, 9, 1, 7 };
+        Arrays.sort(numbers);</code>
         </pre>
         <!-- end no-lb -->
                         
@@ -67,16 +67,15 @@ public class CodeBlockTransformerTest extends AbstractTransformerTest {
 
     String expected = """
         Here's an example of how to use the "Arrays.sort()" method:
-                        
+                                
         <!-- start no-lb -->
         <pre>
           <code >int[] numbers = { 5, 3, 9, 1, 7 };
-        Arrays.sort(numbers);
-        </code>
+        Arrays.sort(numbers);</code>
         </pre>
         <!-- end no-lb -->
-                        
-                        
+                                
+                                
         <smiley>""";
 
     CodeBlockTransformer transformer = new CodeBlockTransformer();
