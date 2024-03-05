@@ -44,6 +44,7 @@ public class MessageProcessor {
     transformers.add(new CodePhraseTransformer());
     transformers.add(new MarkdownHeaderTransformer());
     transformers.add(new MarkdownListTransformer());
+    transformers.add(new MarkdownTextTransformer());
     transformers.add(new NewLineTransformer());
 
     transformers.add(new ImageDownloadTransformer(openAiService));
