@@ -15,29 +15,31 @@
   -->
 
 <template>
-  <div class="full-height vertical-scrollbar shadow g-0 m-1">
-
-    <div class="d-flex flex-row my-2">
-      <div class="btn btn-outline-light d-flex align-items-center me-2 d-none d-lg-block"
-           @click.prevent="onClickBack">
-        <i class="bi bi-box-arrow-left me-2"></i>
-        Back
-      </div>
-      <div class="btn btn-outline-light d-flex align-items-center" @click.prevent="onNewThread">
-        <i class="bi bi-plus-circle-fill mx-2"></i>
-        New Chat
-      </div>
+  <v-toolbar>
+    <div class="btn btn-outline-light d-flex align-items-center me-2 d-none d-lg-block"
+         @click.prevent="onClickBack">
+      <i class="bi bi-box-arrow-left me-2"></i>
+      Back
     </div>
 
-    <div class="list-group list-group-flush border-bottom">
+    <v-spacer></v-spacer>
 
-      <div v-for="entry in allSessionEntries" :key="entry.id">
-        <ThreadEntry :entry="entry" @entrySelected="onEntrySelected"/>
-      </div>
-
+    <div class="btn btn-outline-light d-flex align-items-center" @click.prevent="onNewThread">
+      <i class="bi bi-plus-circle-fill mx-2"></i>
+      New Chat
     </div>
+  </v-toolbar>
 
-  </div>
+  <v-container class="scrollable-container">
+    <v-row>
+      <div class="list-group list-group-flush border-bottom">
+        <div v-for="entry in allSessionEntries" :key="entry.id">
+          <ThreadEntry :entry="entry" @entrySelected="onEntrySelected"/>
+        </div>
+
+      </div>
+    </v-row>
+  </v-container>
 </template>
 
 
@@ -97,5 +99,10 @@ export default {
 .exit-button {
   font-size: 2em;
   color: white;
+}
+
+.scrollable-container {
+  overflow-y: auto;
+  height: 50vh; /* Adjust this value according to your needs */
 }
 </style>

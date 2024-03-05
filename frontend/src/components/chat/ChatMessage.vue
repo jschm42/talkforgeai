@@ -18,11 +18,10 @@
 
 import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
-import ChatMessageTextToSpeech from '@/components/chat/ChatMessageTextToSpeech.vue';
 
 export default {
   name: 'ChatMessage',
-  components: {ChatMessageTextToSpeech},
+  components: {},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
     return {store};
@@ -113,6 +112,7 @@ export default {
 </script>
 
 <template>
+  <!--
   <div :class="messageClass" class="card m-1 p-1 shadow">
     <div class="d-flex flex-row">
       <div class="">
@@ -142,6 +142,49 @@ export default {
 
     </footer>
   </div>
+  -->
+  <v-container class="message-container">
+    <v-row dense>
+      <v-col cols="12">
+        <v-card
+            :loading="getMessageStatusType() === 'running'"
+            class="p-1"
+        >
+          <div class="d-flex flex-no-wrap justify-space-between">
+
+
+            <i v-if="isUser" class="fs-1 bi bi-person"></i>
+            <v-avatar v-else-if="isAssistant && hasProfileImage"
+                      :image="personaImage"
+                      class="ma-3"
+                      size="80"
+            >
+            </v-avatar>
+            <i v-else class="fs-1 bi bi-robot robot-icon"></i>
+
+            <div>
+              <span v-if="getMessageStatusType() === 'error'">
+                <i class="bi bi-exclamation-lg bg-danger"></i>
+                  {{ errorMessage }}
+              </span>
+              <v-card-text v-else v-html="getContent()"></v-card-text>
+
+              <v-card-actions>
+                <v-btn
+                    class="ms-2"
+                    size="small"
+                    variant="outlined"
+                >
+                  START RADIO
+                </v-btn>
+              </v-card-actions>
+            </div>
+
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 
 </template>
 
@@ -181,6 +224,10 @@ footer {
 
 .robot-icon {
   color: darksalmon;
+}
+
+.message-container {
+  max-width: 100%;
 }
 
 </style>
