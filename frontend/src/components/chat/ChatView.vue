@@ -20,14 +20,32 @@
     <div class="row">
       <!-- Sidebar visible on lg and higher screens -->
       <div class="col-lg-3 col-xxl-2 d-none d-lg-block sidebar g-1">
-        <!-- Sidebar content -->
-        <div class="row my-2 m-auto">
-          <ChatHeader></ChatHeader>
-        </div>
-        <div class="row m-auto">
-          <ThreadList></ThreadList>
-        </div>
+        <div class="d-flex flex-column py-3" style="height: 100vh">
+          <!-- Sidebar content -->
+          <div class="flex-shrink-0">
+            <ChatHeader></ChatHeader>
+          </div>
+          <div class="flex-shrink-0 m-1">
+            <v-toolbar>
+              <div class="btn btn-outline-light d-flex align-items-center me-2 d-none d-lg-block"
+                   @click.prevent="onClickBack">
+                <i class="bi bi-box-arrow-left me-2"></i>
+                Back
+              </div>
 
+              <v-spacer></v-spacer>
+
+              <div class="btn btn-outline-light d-flex align-items-center"
+                   @click.prevent="onNewThread">
+                <i class="bi bi-plus-circle-fill mx-2"></i>
+                New Chat
+              </div>
+            </v-toolbar>
+          </div>
+          <div class="flex-grow-1 scrollable-container">
+            <ThreadList></ThreadList>
+          </div>
+        </div>
         <!-- Add more buttons as needed -->
       </div>
       <div class="col">
@@ -62,6 +80,25 @@
         <div class="row">
           <div class="col">
             <ChatHeader :show-name="true"></ChatHeader>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <v-toolbar>
+              <div class="btn btn-outline-light d-flex align-items-center me-2 d-none d-lg-block"
+                   @click.prevent="onClickBack">
+                <i class="bi bi-box-arrow-left me-2"></i>
+                Back
+              </div>
+
+              <v-spacer></v-spacer>
+
+              <div class="btn btn-outline-light d-flex align-items-center"
+                   @click.prevent="onNewThread">
+                <i class="bi bi-plus-circle-fill mx-2"></i>
+                New Chat
+              </div>
+            </v-toolbar>
           </div>
         </div>
         <div class="row my-2">
@@ -108,6 +145,9 @@ export default defineComponent({
     },
   },
   methods: {
+    onNewThread() {
+      this.store.newThread();
+    },
     onClickBack() {
       this.$router.push('/');
     },
@@ -189,6 +229,11 @@ hr {
   min-width: 110px;
   min-height: 23px;
   padding: 3px;
+}
+
+.scrollable-container {
+  overflow-y: auto;
+  height: 0vh; /* Adjust this value according to your needs */
 }
 
 </style>

@@ -15,40 +15,30 @@
   -->
 
 <template>
-  <v-toolbar>
-    <div class="btn btn-outline-light d-flex align-items-center me-2 d-none d-lg-block"
-         @click.prevent="onClickBack">
-      <i class="bi bi-box-arrow-left me-2"></i>
-      Back
+  <div class="list-group list-group-flush border-bottom">
+    <div v-for="entry in allSessionEntries" :key="entry.id">
+      <ThreadEntry :entry="entry" @entrySelected="onEntrySelected"/>
     </div>
+  </div>
 
-    <v-spacer></v-spacer>
+  <!--      <v-virtual-scroll :items="allSessionEntries">-->
+  <!--        <template v-slot:default="{ item }">-->
+  <!--          <v-list-item>-->
+  <!--            <ThreadEntry :entry="item" @entrySelected="onEntrySelected"/>-->
+  <!--          </v-list-item>-->
 
-    <div class="btn btn-outline-light d-flex align-items-center" @click.prevent="onNewThread">
-      <i class="bi bi-plus-circle-fill mx-2"></i>
-      New Chat
-    </div>
-  </v-toolbar>
+  <!--        </template>-->
+  <!--      </v-virtual-scroll>-->
 
-  <v-container class="scrollable-container">
-    <v-row>
-      <div class="list-group list-group-flush border-bottom">
-        <div v-for="entry in allSessionEntries" :key="entry.id">
-          <ThreadEntry :entry="entry" @entrySelected="onEntrySelected"/>
-        </div>
-
-      </div>
-    </v-row>
-  </v-container>
 </template>
 
 
 <script>
 import {useChatStore} from '@/store/chat-store';
-import ThreadEntry from '@/components/thread/ThreadEntry.vue';
 import {useAppStore} from '@/store/app-store';
 import hljs from 'highlight.js';
 import {nextTick} from 'vue';
+import ThreadEntry from '@/components/thread/ThreadEntry.vue';
 
 export default {
   name: 'ThreadList',
@@ -82,9 +72,7 @@ export default {
         this.appStore.handleError(error);
       }
     },
-    onNewThread() {
-      this.store.newThread();
-    },
+
     onClickBack() {
       this.$router.push('/');
     },
@@ -96,6 +84,24 @@ export default {
 </script>
 
 <style scoped>
+.vertical-scrollbar {
+  overflow-y: auto;
+}
+
+.no-horizontal-scrollbar {
+  overflow-x: hidden;
+}
+
+.chat-container {
+  height: 93vh;
+}
+
+@media only screen and (min-width: 993px ) {
+  .chat-container {
+    height: 100vh;
+  }
+}
+
 .exit-button {
   font-size: 2em;
   color: white;
