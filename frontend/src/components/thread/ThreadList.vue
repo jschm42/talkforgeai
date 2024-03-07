@@ -20,16 +20,6 @@
       <ThreadEntry :entry="entry" @entrySelected="onEntrySelected"/>
     </div>
   </div>
-
-  <!--      <v-virtual-scroll :items="allSessionEntries">-->
-  <!--        <template v-slot:default="{ item }">-->
-  <!--          <v-list-item>-->
-  <!--            <ThreadEntry :entry="item" @entrySelected="onEntrySelected"/>-->
-  <!--          </v-list-item>-->
-
-  <!--        </template>-->
-  <!--      </v-virtual-scroll>-->
-
 </template>
 
 

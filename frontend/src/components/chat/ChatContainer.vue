@@ -17,11 +17,9 @@
 <template>
   <div class="d-flex flex-column chat-container gx-0">
     <div ref="entries" class="flex-grow-1 vertical-scrollbar no-horizontal-scrollbar ">
-      <!--      <div class="mx-0 p-2">-->
       <ChatMessage v-for="(message, index) in store.threadMessages" ref="chatMessageRef"
                    v-bind:key="index"
                    :message="message" :messageIndex="index"></ChatMessage>
-      <!--      </div>-->
     </div>
     <!-- Input Section -->
 
