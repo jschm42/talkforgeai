@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -15,23 +15,14 @@
   -->
 
 <template>
-  <div class="persona-info">
-    <figure v-if="showName" class="figure persona-icon">
-      <img v-if="isShowAssistantImage(selectedAssistant)"
-           :src="imageSrc(selectedAssistant.image_path)" alt="Persona Image"
-           class="figure-img img-fluid rounded">
-      <img v-else alt="Robot Image" class="robot-icon"
-           src="@/assets/robot.svg" title="Robot">
-      <figcaption class="figure-caption">{{ personaName }}</figcaption>
-    </figure>
-    <div v-else>
-      <img v-if="isShowAssistantImage(selectedAssistant)"
-           :src="imageSrc(selectedAssistant.image_path)" alt="Persona Image"
-           class="img-fluid rounded persona-icon">
-      <img v-else alt="Robot Image" class="robot-icon" src="@/assets/robot.svg" title="Robot">
-    </div>
-  </div>
-
+  <v-img v-if="isShowAssistantImage(selectedAssistant)"
+         :src="imageSrc(selectedAssistant.image_path)"
+         alt="Persona Image"
+         class="mx-auto"
+         max-width="500"
+  >
+  </v-img>
+  <img v-else alt="Robot" class="robot-icon" src="@/assets/robot.svg">
 </template>
 
 <script>
@@ -59,9 +50,6 @@ export default {
     personaDescription() {
       return `${this.store.selectedAssistant.description}`;
     },
-    isDisabled() {
-      return !this.store.chat.configHeaderEnabled;
-    },
     personaList() {
       return this.store.personaList;
     },
@@ -81,12 +69,6 @@ export default {
 </script>
 
 <style scoped>
-
-.persona-info {
-  max-width: 15rem;
-  margin-left: auto;
-  margin-right: auto;
-}
 
 .robot-icon {
   margin: 2rem;

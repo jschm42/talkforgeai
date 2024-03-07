@@ -20,12 +20,12 @@
     <div class="row">
       <!-- Sidebar visible on lg and higher screens -->
       <div class="col-lg-3 col-xxl-2 d-none d-lg-block sidebar g-1">
-        <div class="d-flex flex-column py-3" style="height: 100vh">
+        <div class="d-flex flex-column" style="height: 100vh">
           <!-- Sidebar content -->
           <div class="flex-shrink-0">
             <ChatHeader></ChatHeader>
           </div>
-          <div class="flex-shrink-0 m-1">
+          <div class="flex-shrink-0 my-1">
             <v-toolbar>
               <div class="btn btn-outline-light d-flex align-items-center me-2 d-none d-lg-block"
                    @click.prevent="onClickBack">
@@ -156,7 +156,10 @@ export default defineComponent({
     },
     async fetchData() {
       try {
-        await this.store.retrieveAssistants();
+        this.store.selectedAssistant.image_path = '';
+        if (this.store.assistantList.length === 0) {
+          await this.store.retrieveAssistants();
+        }
         await this.store.selectAssistant(this.assistantId);
         await this.store.retrieveThreads();
       } catch (error) {

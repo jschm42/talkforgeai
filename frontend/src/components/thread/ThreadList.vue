@@ -74,31 +74,10 @@ export default {
 </script>
 
 <style scoped>
-.vertical-scrollbar {
-  overflow-y: auto;
-}
-
-.no-horizontal-scrollbar {
-  overflow-x: hidden;
-}
-
-.chat-container {
-  height: 93vh;
-}
-
 @media only screen and (min-width: 993px ) {
   .chat-container {
     height: 100vh;
   }
 }
 
-.exit-button {
-  font-size: 2em;
-  color: white;
-}
-
-.scrollable-container {
-  overflow-y: auto;
-  height: 50vh; /* Adjust this value according to your needs */
-}
 </style>
