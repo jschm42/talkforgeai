@@ -15,14 +15,14 @@
   -->
 
 <template>
-  <v-layout class="rounded rounded-md">
+  <v-app>
     <v-container fluid>
 
       <v-row>
         <!-- Sidebar visible on lg and higher screens -->
-        <v-col class="d-none d-lg-block sidebar g-1" cols="3" md="3" sm="4" xl="2">
+        <v-col class="d-none d-md-block sidebar" cols="3" md="3" sm="4" xl="2">
 
-          <v-container style="height: 97vh; display: flex; flex-direction: column">
+          <v-container class="d-flex flex-column nav-container">
             <v-row class="flex-grow-0">
               <!-- Row 1 with flex-grow 1 -->
               <v-col>
@@ -32,19 +32,13 @@
             <v-row class="flex-grow-0">
               <!-- Row 2 with flex-grow 2 -->
               <v-col>
-                <v-btn @click.prevent="onClickBack">
-                  Test
+                <v-btn class="mx-2" prepend-icon="mdi-arrow-left-bold-box-outline"
+                       @click.prevent="onClickBack">
+                  Back
                 </v-btn>
-
-                <v-toolbar>
-                  <v-btn icon="mdi-close-circle" size="medium" @click.prevent="onClickBack">
-                    Test
-                  </v-btn>
-
-                  <!--                <v-btn icon="mdi-heart" @click.prevent="onNewThread">-->
-                  <!--                </v-btn>-->
-
-                </v-toolbar>
+                <v-btn prepend-icon="mdi-heart" @click.prevent="onNewThread">
+                  New Chat
+                </v-btn>
               </v-col>
             </v-row>
             <v-row class="flex-grow-1 scrollable-container">
@@ -57,31 +51,26 @@
 
           <!-- Add more buttons as needed -->
         </v-col>
-        <div class="col">
+        <v-col>
           <!-- Main Content -->
-          <div class="row toolbar-header p-2 d-lg-none">
-            <div class="d-flex">
-              <div class="btn btn-outline-light d-flex align-items-center fs-3"
-                   @click.prevent="onClickBack">
-                <i class="bi bi-box-arrow-left me-2"></i>
-              </div>
+          <v-row class="toolbar-header p-2 d-lg-none">
+            <v-col class="d-flex">
+              <v-toolbar
+                  dark
+                  image="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
+                  prominent
+              >
+                <v-btn prepend-icon="mdi-arrow-left-bold-box-outline" @click.prevent="onClickBack">
+                </v-btn>
+                <v-toolbar-title>{{ assistantName }}</v-toolbar-title>
+                <v-app-bar-nav-icon @click="toggleSidebar"></v-app-bar-nav-icon>
+              </v-toolbar>
 
-              <div class="flex-grow-1 align-items-center d-lg-none">
-                <div class="assistant-name">{{ assistantName }}</div>
-              </div>
+            </v-col>
+          </v-row>
 
-              <!-- Toggler for small screens -->
-              <button class="btn btn-outline-light d-lg-none" @click="toggleSidebar">
-                <span class="navbar-toggler-icon"></span>
-              </button>
-
-            </div>
-          </div>
-
-          <div class="row">
-            <ChatContainer></ChatContainer>
-          </div>
-        </div>
+          <ChatContainer></ChatContainer>
+        </v-col>
 
         <!-- Sidebar for xs to md screens, full screen -->
         <div v-if="showSidebar" class="mobile-sidebar d-lg-none p-3">
@@ -125,7 +114,7 @@
 
       </v-row>
     </v-container>
-  </v-layout>
+  </v-app>
 </template>
 
 <script lang="ts">
@@ -230,23 +219,13 @@ hr {
   text-shadow: #FC0 1px 0 10px;
 }
 
-.logo-small {
-  height: 3rem;
-}
-
-.image-prompt-element {
-  background-color: bisque;
-  border-color: black;
-  border-radius: 5px;
-  box-shadow: 3px 3px 2px 1px rgba(50, 50, 50, .2);
-  min-width: 110px;
-  min-height: 23px;
-  padding: 3px;
-}
-
 .scrollable-container {
   overflow-y: auto;
   height: 0vh; /* Adjust this value according to your needs */
+}
+
+.nav-container {
+  height: 97vh;
 }
 
 </style>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,15 @@
 const talkforgeaiServerPort = process.env.TALKFORGEAI_SERVER_PORT || 8090;
 
 const {defineConfig} = require('@vue/cli-service');
+const {VuetifyPlugin} = require('webpack-plugin-vuetify');
 module.exports = defineConfig({
   runtimeCompiler: true,
   transpileDependencies: true,
+  configureWebpack: {
+    plugins: [
+      new VuetifyPlugin({autoImport: true}),
+    ],
+  },
   chainWebpack: config => {
     config.module.rule('vue').use('vue-loader').tap(options => ({
       ...options,

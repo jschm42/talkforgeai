@@ -99,7 +99,7 @@ export default {
 
 @media only screen and (min-width: 993px ) {
   .chat-container {
-    height: 100vh;
+    height: 98vh;
   }
 }
 
