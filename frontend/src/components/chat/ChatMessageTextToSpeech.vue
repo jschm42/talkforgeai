@@ -114,28 +114,13 @@ const AudioState = {
 </script>
 
 <template>
-  <i v-if="audioState === 'stopped'" :hidden="isDisabled"
-     class="bi bi-play-circle message-icon play-icon"
-     role="button" @click="playAudio"></i>
-
-  <i v-if="audioState === 'playing'" :hidden="isDisabled"
-     class="bi bi-stop-circle message-icon play-icon"
-     role="button" @click="stopAudio"></i>
-
-  <div v-if="audioState === 'loading'" :hidden="isDisabled"
-       class="spinner-border spinner-border-sm loading-icon"
-       role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>
+  <v-btn v-if="audioState === 'stopped'" :hidden="isDisabled" class="fs-4" icon="mdi-play-circle"
+         @click="playAudio"></v-btn>
+  <v-btn v-if="audioState === 'playing'" :hidden="isDisabled" class="fs-4" icon="mdi-stop-circle"
+         @click="stopAudio"></v-btn>
+  <v-progress-circular v-if="audioState === 'loading'" :hidden="isDisabled" color="primary"
+                       indeterminate></v-progress-circular>
 </template>
 
 <style scoped>
-.play-icon {
-  font-size: 2em;
-}
-
-.loading-icon {
-  width: 2em;
-  height: 2em;
-}
 </style>

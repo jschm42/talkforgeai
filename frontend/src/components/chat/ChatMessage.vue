@@ -18,10 +18,11 @@
 
 import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
+import ChatMessageTextToSpeech from '@/components/chat/ChatMessageTextToSpeech.vue';
 
 export default {
   name: 'ChatMessage',
-  components: {},
+  components: {ChatMessageTextToSpeech},
   setup() {
     const store = useChatStore(); // Call useMyStore() inside the setup function
     return {store};
@@ -152,35 +153,27 @@ export default {
         >
           <div class="d-flex flex-no-wrap justify-space-between">
 
-
-            <i v-if="isUser" class="fs-1 bi bi-person"></i>
+            <v-avatar v-if="isUser" class="fs-1" icon="mdi-account" size="100"></v-avatar>
             <v-avatar v-else-if="isAssistant && hasProfileImage"
                       :image="personaImage"
                       class="ma-3"
                       size="80"
             >
             </v-avatar>
-            <i v-else class="fs-1 bi bi-robot robot-icon"></i>
 
-            <div>
-              <span v-if="getMessageStatusType() === 'error'">
-                <i class="bi bi-exclamation-lg bg-danger"></i>
-                  {{ errorMessage }}
-              </span>
-              <v-card-text v-else v-html="getContent()"></v-card-text>
+            <v-avatar v-else class="fs-1" icon="mdi-robot" size="100">
+            </v-avatar>
 
-              <v-card-actions>
-                <v-btn
-                    class="ms-2"
-                    size="small"
-                    variant="outlined"
-                >
-                  START RADIO
-                </v-btn>
-              </v-card-actions>
-            </div>
-
+            <v-card-text v-if="getMessageStatusType() === 'error'">
+              <i class="bi bi-exclamation-lg bg-danger"></i>
+              {{ errorMessage }}
+            </v-card-text>
+            <v-card-text v-else v-html="getContent()"></v-card-text>
           </div>
+
+          <v-card-actions>
+            <chat-message-text-to-speech :message="message"></chat-message-text-to-speech>
+          </v-card-actions>
         </v-card>
       </v-col>
     </v-row>
