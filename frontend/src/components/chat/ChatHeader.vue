@@ -23,7 +23,9 @@
          max-width="500"
   >
   </v-img>
-  <img v-else alt="Robot" class="robot-icon" src="@/assets/robot.svg">
+  <v-img v-else alt="Robot" class="mx-auto" max-height="200"
+         max-width="500" src="@/assets/robot.svg"></v-img>
+
 </template>
 
 <script>
@@ -70,9 +72,4 @@ export default {
 </script>
 
 <style scoped>
-
-.robot-icon {
-  margin: 2rem;
-}
-
 </style>
