@@ -15,11 +15,9 @@
   -->
 
 <template>
-  <v-app>
-    <router-view/>
+  <router-view/>
 
-    <error-alerts></error-alerts>
-  </v-app>
+  <error-alerts></error-alerts>
 </template>
 
 <style>

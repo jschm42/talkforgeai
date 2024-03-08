@@ -15,107 +15,117 @@
   -->
 
 <template>
-  <div class="container-fluid">
+  <v-layout class="rounded rounded-md">
+    <v-container fluid>
 
-    <div class="row">
-      <!-- Sidebar visible on lg and higher screens -->
-      <div class="col-lg-3 col-xxl-2 d-none d-lg-block sidebar g-1">
-        <div class="d-flex flex-column" style="height: 100vh">
+      <v-row>
+        <!-- Sidebar visible on lg and higher screens -->
+        <v-col class="d-none d-lg-block sidebar g-1" cols="3" md="3" sm="4" xl="2">
+
+          <v-container style="height: 97vh; display: flex; flex-direction: column">
+            <v-row class="flex-grow-0">
+              <!-- Row 1 with flex-grow 1 -->
+              <v-col>
+                <ChatHeader></ChatHeader>
+              </v-col>
+            </v-row>
+            <v-row class="flex-grow-0">
+              <!-- Row 2 with flex-grow 2 -->
+              <v-col>
+                <v-btn @click.prevent="onClickBack">
+                  Test
+                </v-btn>
+
+                <v-toolbar>
+                  <v-btn icon="mdi-close-circle" size="medium" @click.prevent="onClickBack">
+                    Test
+                  </v-btn>
+
+                  <!--                <v-btn icon="mdi-heart" @click.prevent="onNewThread">-->
+                  <!--                </v-btn>-->
+
+                </v-toolbar>
+              </v-col>
+            </v-row>
+            <v-row class="flex-grow-1 scrollable-container">
+              <!-- Row 3 with flex-grow 3 -->
+              <v-col>
+                <ThreadList></ThreadList>
+              </v-col>
+            </v-row>
+          </v-container>
+
+          <!-- Add more buttons as needed -->
+        </v-col>
+        <div class="col">
+          <!-- Main Content -->
+          <div class="row toolbar-header p-2 d-lg-none">
+            <div class="d-flex">
+              <div class="btn btn-outline-light d-flex align-items-center fs-3"
+                   @click.prevent="onClickBack">
+                <i class="bi bi-box-arrow-left me-2"></i>
+              </div>
+
+              <div class="flex-grow-1 align-items-center d-lg-none">
+                <div class="assistant-name">{{ assistantName }}</div>
+              </div>
+
+              <!-- Toggler for small screens -->
+              <button class="btn btn-outline-light d-lg-none" @click="toggleSidebar">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+
+            </div>
+          </div>
+
+          <div class="row">
+            <ChatContainer></ChatContainer>
+          </div>
+        </div>
+
+        <!-- Sidebar for xs to md screens, full screen -->
+        <div v-if="showSidebar" class="mobile-sidebar d-lg-none p-3">
           <!-- Sidebar content -->
-          <div class="flex-shrink-0">
-            <ChatHeader></ChatHeader>
-          </div>
-          <div class="flex-shrink-0 my-1">
-            <v-toolbar>
-              <div class="btn btn-outline-light d-flex align-items-center me-2 d-none d-lg-block"
-                   @click.prevent="onClickBack">
-                <i class="bi bi-box-arrow-left me-2"></i>
-                Back
-              </div>
-
-              <v-spacer></v-spacer>
-
-              <div class="btn btn-outline-light d-flex align-items-center"
-                   @click.prevent="onNewThread">
-                <i class="bi bi-plus-circle-fill mx-2"></i>
-                New Chat
-              </div>
-            </v-toolbar>
-          </div>
-          <div class="flex-grow-1 scrollable-container">
-            <ThreadList></ThreadList>
-          </div>
-        </div>
-        <!-- Add more buttons as needed -->
-      </div>
-      <div class="col">
-        <!-- Main Content -->
-        <div class="row toolbar-header p-2 d-lg-none">
-          <div class="d-flex">
-            <div class="btn btn-outline-light d-flex align-items-center fs-3"
-                 @click.prevent="onClickBack">
-              <i class="bi bi-box-arrow-left me-2"></i>
+          <div class="row">
+            <div class="col">
+              <ChatHeader :show-name="true"></ChatHeader>
             </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <v-toolbar>
+                <div class="btn btn-outline-light d-flex align-items-center me-2 d-none d-lg-block"
+                     @click.prevent="onClickBack">
+                  <i class="bi bi-box-arrow-left me-2"></i>
+                  Back
+                </div>
 
-            <div class="flex-grow-1 align-items-center d-lg-none">
-              <div class="assistant-name">{{ assistantName }}</div>
+                <v-spacer></v-spacer>
+
+                <div class="btn btn-outline-light d-flex align-items-center"
+                     @click.prevent="onNewThread">
+                  <i class="bi bi-plus-circle-fill mx-2"></i>
+                  New Chat
+                </div>
+              </v-toolbar>
             </div>
-
-            <!-- Toggler for small screens -->
-            <button class="btn btn-outline-light d-lg-none" @click="toggleSidebar">
-              <span class="navbar-toggler-icon"></span>
-            </button>
-
           </div>
-        </div>
-
-        <div class="row">
-          <ChatContainer></ChatContainer>
-        </div>
-      </div>
-
-      <!-- Sidebar for xs to md screens, full screen -->
-      <div v-if="showSidebar" class="mobile-sidebar d-lg-none p-3">
-        <!-- Sidebar content -->
-        <div class="row">
-          <div class="col">
-            <ChatHeader :show-name="true"></ChatHeader>
+          <div class="row my-2">
+            <div class="col">
+              <ThreadList></ThreadList>
+            </div>
           </div>
+          <!-- Add more buttons as needed -->
+          <button class="btn btn-outline-light" @click="toggleSidebar">
+            <i class="bi bi-x"></i>
+            Close
+          </button>
+
         </div>
-        <div class="row">
-          <div class="col">
-            <v-toolbar>
-              <div class="btn btn-outline-light d-flex align-items-center me-2 d-none d-lg-block"
-                   @click.prevent="onClickBack">
-                <i class="bi bi-box-arrow-left me-2"></i>
-                Back
-              </div>
 
-              <v-spacer></v-spacer>
-
-              <div class="btn btn-outline-light d-flex align-items-center"
-                   @click.prevent="onNewThread">
-                <i class="bi bi-plus-circle-fill mx-2"></i>
-                New Chat
-              </div>
-            </v-toolbar>
-          </div>
-        </div>
-        <div class="row my-2">
-          <div class="col">
-            <ThreadList></ThreadList>
-          </div>
-        </div>
-        <!-- Add more buttons as needed -->
-        <button class="btn btn-outline-light" @click="toggleSidebar">
-          <i class="bi bi-x"></i>
-          Close
-        </button>
-
-      </div>
-
-    </div>
-  </div>
+      </v-row>
+    </v-container>
+  </v-layout>
 </template>
 
 <script lang="ts">

@@ -19,6 +19,7 @@
          :src="imageSrc(selectedAssistant.image_path)"
          alt="Persona Image"
          class="mx-auto"
+         max-height="200"
          max-width="500"
   >
   </v-img>

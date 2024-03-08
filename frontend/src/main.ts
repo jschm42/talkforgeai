@@ -18,8 +18,8 @@ import {createApp} from 'vue';
 import router from './router';
 import {useStore} from '@/store';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.min.css';
-import 'bootstrap';
+// import 'bootstrap-icons/font/bootstrap-icons.min.css';
+// import 'bootstrap';
 import 'highlight.js/styles/atom-one-dark.css';
 
 import '@/custom/LaTeXComponent.js';
@@ -27,10 +27,18 @@ import App from '@/components/App.vue';
 import {createVuetify} from 'vuetify';
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
+import {aliases, fa} from 'vuetify/iconsets/fa';
 
 const vuetify = createVuetify({
   theme: {
     defaultTheme: 'dark',
+  },
+  icons: {
+    defaultSet: 'fa',
+    aliases,
+    sets: {
+      fa,
+    },
   },
   components,
   directives,
