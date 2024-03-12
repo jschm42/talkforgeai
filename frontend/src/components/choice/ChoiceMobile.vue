@@ -16,7 +16,24 @@
 
 <template>
   <v-app>
-   
+    <v-app-bar>
+      <v-toolbar dark>
+        <img alt="Talkforge AI" class="logo-small" src="@/assets/logo-notext.png">
+        <v-toolbar-title>Talkforge AI</v-toolbar-title>
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn icon="mdi-dots-vertical" v-bind="props"></v-btn>
+          </template>
+
+          <v-list>
+            <v-list-item @click="onCreateNewPersona">
+              <v-list-item-title>Create persona</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-toolbar>
+    </v-app-bar>
+
     <v-main>
       <!-- Main Content -->
       <div class="col-12 col-lg-10">
@@ -36,6 +53,7 @@
 
 
       </div>
+
     </v-main>
 
   </v-app>
@@ -66,9 +84,6 @@ export default defineComponent({
     },
   },
   methods: {
-    toggleSidebar() {
-      this.showSidebar = !this.showSidebar;
-    },
     isShowAssistantImage(assistant) {
       return !!assistant.image_path;
     },
@@ -100,19 +115,6 @@ h1 {
 
 .logo-small {
   height: 3rem;
-}
-
-/* Ensure sidebar is hidden on small screens and full screen when shown */
-.mobile-sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #000000;
-  z-index: 1050; /* Higher than the default navbar z-index to overlay on top */
-  overflow-y: auto;
-  padding: 1rem;
 }
 
 hr {
