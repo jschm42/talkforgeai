@@ -16,50 +16,76 @@
 
 <template>
   <v-app>
-    <component :is="currentViewComponent"></component>
+   
+    <v-main>
+      <!-- Main Content -->
+      <div class="col-12 col-lg-10">
+
+        <!-- Your main content goes here -->
+        <div class="row">
+
+          <div class="container" style="overflow: auto; height: 90vh">
+            <div class="d-flex flex-wrap flex-row">
+              <div v-for="assistant in assistantList"
+                   :key="assistant.id" class="d-flex flex-column m-1 assistant-element">
+                <assistant-element :assistant="assistant"></assistant-element>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </v-main>
 
   </v-app>
 </template>
 
 <script>
-import {computed, onMounted} from 'vue';
-import {useAppStore} from '@/store/app-store';
+import {defineComponent} from 'vue';
 import {useChatStore} from '@/store/chat-store';
-import {useDisplay} from 'vuetify';
-import ChoiceMobile from '@/components/choice/ChoiceMobile.vue';
-import ChoiceDesktop from '@/components/choice/ChoiceDesktop.vue';
+import {useAppStore} from '@/store/app-store';
+import AssistantElement from '@/components/assistant/AssistantElement.vue';
 
-export default {
-  components: {ChoiceDesktop, ChoiceMobile},
+export default defineComponent({
+  components: {AssistantElement},
   setup() {
-    const {mobile} = useDisplay();
+    const store = useChatStore(); // Call useMyStore() inside the setup function
     const appStore = useAppStore();
-    const chatStore = useChatStore();
-
-    const currentViewComponent = computed(() => {
-      // You can adjust the breakpoint here according to your needs
-
-      const isMobile = mobile.value;
-
-      console.log('DISPLAY: ', isMobile,
-          isMobile ? 'ChoiceMobile' : 'ChoiceDesktop');
-      return isMobile ? 'ChoiceMobile' : 'ChoiceDesktop';
-    });
-
-    onMounted(async () => {
-      try {
-        await chatStore.syncAssistants();
-      } catch (error) {
-        appStore.handleError(error);
-      }
-    });
-
+    return {store, appStore};
+  },
+  data() {
     return {
-      currentViewComponent,
+      showSidebar: false,
+      isEntrySelected: false,
     };
   },
-};
+  computed: {
+    assistantList() {
+      return this.store.assistantList;
+    },
+  },
+  methods: {
+    toggleSidebar() {
+      this.showSidebar = !this.showSidebar;
+    },
+    isShowAssistantImage(assistant) {
+      return !!assistant.image_path;
+    },
 
+    onCreateNewPersona() {
+      this.$router.push({name: 'persona-create'});
+    },
+
+  },
+  async mounted() {
+    try {
+      await this.store.syncAssistants();
+    } catch (error) {
+      this.appStore.handleError(error);
+    }
+  },
+});
 </script>
 
 <style scoped>
