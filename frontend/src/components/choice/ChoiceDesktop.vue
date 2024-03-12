@@ -44,7 +44,7 @@
         <div class="container" style="overflow: auto; height: 90vh">
           <div class="d-flex flex-wrap flex-row">
             <div v-for="assistant in assistantList"
-                 :key="assistant.id" class="d-flex flex-column m-1 assistant-element">
+                 :key="assistant.id" class="d-flex flex-column m-1">
               <assistant-element :assistant="assistant"></assistant-element>
             </div>
           </div>
