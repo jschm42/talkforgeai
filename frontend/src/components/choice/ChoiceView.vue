@@ -17,7 +17,6 @@
 <template>
   <v-app>
     <component :is="currentViewComponent"></component>
-
   </v-app>
 </template>
 
@@ -63,57 +62,5 @@ export default {
 </script>
 
 <style scoped>
-.logo {
-  height: 10rem;
-  margin: 1rem auto;
-}
-
-h1 {
-  color: #cccccc;
-}
-
-.logo-small {
-  height: 3rem;
-}
-
-/* Ensure sidebar is hidden on small screens and full screen when shown */
-.mobile-sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #000000;
-  z-index: 1050; /* Higher than the default navbar z-index to overlay on top */
-  overflow-y: auto;
-  padding: 1rem;
-}
-
-hr {
-  color: #ffffff;
-}
-
-ul {
-  font-size: 1.5rem;
-}
-
-.assistant-element {
-  width: 8rem;
-  height: 16rem;
-}
-
-@media only screen and (min-width: 768px ) {
-  .assistant-element {
-    width: 15rem;
-    height: 21rem;
-  }
-}
-
-@media only screen and (min-width: 375px) {
-  .assistant-element {
-    width: 11rem;
-    height: 19rem;
-  }
-}
 
 </style>

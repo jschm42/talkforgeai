@@ -15,48 +15,46 @@
   -->
 
 <template>
-  <v-app>
-    <v-app-bar>
-      <v-toolbar dark>
-        <img alt="Talkforge AI" class="logo-small" src="@/assets/logo-notext.png">
-        <v-toolbar-title>Talkforge AI</v-toolbar-title>
-        <v-menu>
-          <template v-slot:activator="{ props }">
-            <v-btn icon="mdi-dots-vertical" v-bind="props"></v-btn>
-          </template>
+  <v-app-bar>
+    <v-toolbar dark>
+      <img alt="Talkforge AI" class="logo-small" src="@/assets/logo-notext.png">
+      <v-toolbar-title>Talkforge AI</v-toolbar-title>
+      <v-menu>
+        <template v-slot:activator="{ props }">
+          <v-btn icon="mdi-dots-vertical" v-bind="props"></v-btn>
+        </template>
 
-          <v-list>
-            <v-list-item @click="onCreateNewPersona">
-              <v-list-item-title>Create persona</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </v-toolbar>
-    </v-app-bar>
+        <v-list>
+          <v-list-item @click="onCreateNewPersona">
+            <v-list-item-title>Create persona</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </v-toolbar>
+  </v-app-bar>
 
-    <v-main>
-      <!-- Main Content -->
-      <div class="col-12 col-lg-10">
+  <v-main>
+    <!-- Main Content -->
+    <div class="col-12 col-lg-10">
 
-        <!-- Your main content goes here -->
-        <div class="row">
+      <!-- Your main content goes here -->
+      <div class="row">
 
-          <div class="container" style="overflow: auto; height: 90vh">
-            <div class="d-flex flex-wrap flex-row">
-              <div v-for="assistant in assistantList"
-                   :key="assistant.id" class="d-flex flex-column m-1 assistant-element">
-                <assistant-element :assistant="assistant"></assistant-element>
-              </div>
+        <div class="container" style="overflow: auto; height: 90vh">
+          <div class="d-flex flex-wrap flex-row">
+            <div v-for="assistant in assistantList"
+                 :key="assistant.id" class="d-flex flex-column m-1 assistant-element">
+              <assistant-element :assistant="assistant"></assistant-element>
             </div>
           </div>
         </div>
-
-
       </div>
 
-    </v-main>
 
-  </v-app>
+    </div>
+
+  </v-main>
+
 </template>
 
 <script>

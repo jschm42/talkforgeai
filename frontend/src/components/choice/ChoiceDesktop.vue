@@ -15,48 +15,45 @@
   -->
 
 <template>
-  <v-app>
-    <v-navigation-drawer absolute permanent>
-      <v-list-item>
-        <div class="d-flex flex-grow-1 align-items-start">
-          <img alt="Talkforge AI" class="logo" src="@/assets/logo.png"
-               title="Talkforge AI">
-        </div>
+  <v-navigation-drawer absolute permanent>
+    <v-list-item>
+      <div class="d-flex flex-grow-1 align-items-start">
+        <img alt="Talkforge AI" class="logo" src="@/assets/logo.png"
+             title="Talkforge AI">
+      </div>
+    </v-list-item>
+    <!--      <v-divider></v-divider>-->
+    <v-list density="comfortable" lines="false" nav>
+      <v-list-subheader>Main Desktop</v-list-subheader>
+      <v-list-item color="primary" title="Create Persona" variant="elevated"
+                   @click.prevent="onCreateNewPersona">
+        <template v-slot:prepend>
+          <v-icon icon="mdi-plus-thick"></v-icon>
+        </template>
       </v-list-item>
-      <!--      <v-divider></v-divider>-->
-      <v-list density="comfortable" lines="false" nav>
-        <v-list-subheader>Main Desktop</v-list-subheader>
-        <v-list-item color="primary" title="Create Persona" variant="elevated"
-                     @click.prevent="onCreateNewPersona">
-          <template v-slot:prepend>
-            <v-icon icon="mdi-plus-thick"></v-icon>
-          </template>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
+    </v-list>
+  </v-navigation-drawer>
 
-    <v-main>
-      <!-- Main Content -->
-      <div class="col-12 col-lg-10">
+  <v-main>
+    <!-- Main Content -->
+    <div class="col-12 col-lg-10">
 
-        <!-- Your main content goes here -->
-        <div class="row">
+      <!-- Your main content goes here -->
+      <div class="row">
 
-          <div class="container" style="overflow: auto; height: 90vh">
-            <div class="d-flex flex-wrap flex-row">
-              <div v-for="assistant in assistantList"
-                   :key="assistant.id" class="d-flex flex-column m-1 assistant-element">
-                <assistant-element :assistant="assistant"></assistant-element>
-              </div>
+        <div class="container" style="overflow: auto; height: 90vh">
+          <div class="d-flex flex-wrap flex-row">
+            <div v-for="assistant in assistantList"
+                 :key="assistant.id" class="d-flex flex-column m-1 assistant-element">
+              <assistant-element :assistant="assistant"></assistant-element>
             </div>
           </div>
         </div>
-
-
       </div>
-    </v-main>
 
-  </v-app>
+
+    </div>
+  </v-main>
 </template>
 
 <script>
