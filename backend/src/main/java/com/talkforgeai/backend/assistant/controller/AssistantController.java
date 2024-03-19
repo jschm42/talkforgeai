@@ -186,6 +186,13 @@ public class AssistantController {
     return assistantService.runConversation(threadId, runConversationRequest);
   }
 
+  @PostMapping("/threads/{threadId}/runs/stream")
+  public Run streamRunConversation(@PathVariable("threadId") String threadId,
+      @RequestBody RunCreateRequest runConversationRequest) {
+    return assistantService.runConversation(threadId, runConversationRequest);
+  }
+
+
   @GetMapping("/threads/{threadId}/runs/{runId}")
   public Run getRun(@PathVariable("threadId") String threadId,
       @PathVariable("runId") String runId) {

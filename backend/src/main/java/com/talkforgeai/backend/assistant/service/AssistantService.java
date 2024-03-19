@@ -35,6 +35,9 @@ import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
+import com.talkforgeai.service.openai.StreamService;
+import com.talkforgeai.service.openai.dto.OpenAIChatStreamResponse.StreamResponseChoice;
+import com.talkforgeai.service.openai.dto.StreamRunCreateRequest;
 import com.theokanning.openai.ListSearchParameters;
 import com.theokanning.openai.OpenAiResponse;
 import com.theokanning.openai.assistants.Assistant;
@@ -75,9 +78,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
 
 @Service
 public class AssistantService {
@@ -85,6 +90,8 @@ public class AssistantService {
   public static final Logger LOGGER = LoggerFactory.getLogger(AssistantService.class);
 
   private final OpenAiService openAiService;
+
+  private final StreamService streamService;
   private final AssistantRepository assistantRepository;
   private final MessageRepository messageRepository;
   private final ThreadRepository threadRepository;
@@ -95,11 +102,12 @@ public class AssistantService {
 
   private final AssistantMapper assistantMapper;
 
-  public AssistantService(OpenAiService openAiService,
+  public AssistantService(OpenAiService openAiService, StreamService streamService,
       AssistantRepository assistantRepository, MessageRepository messageRepository,
       ThreadRepository threadRepository, FileStorageService fileStorageService,
       MessageProcessor messageProcessor, AssistantMapper assistantMapper) {
     this.openAiService = openAiService;
+    this.streamService = streamService;
     this.assistantRepository = assistantRepository;
     this.messageRepository = messageRepository;
     this.threadRepository = threadRepository;
@@ -218,6 +226,11 @@ public class AssistantService {
 
   public Run runConversation(String threadId, RunCreateRequest runCreateRequest) {
     return this.openAiService.createRun(threadId, runCreateRequest);
+  }
+
+  public Flux<ServerSentEvent<StreamResponseChoice>> streamRunConversation(String threadId,
+      StreamRunCreateRequest runCreateRequest) {
+    return this.streamService.stream(runCreateRequest);
   }
 
   public MessageListParsedDto listMessages(String threadId,
