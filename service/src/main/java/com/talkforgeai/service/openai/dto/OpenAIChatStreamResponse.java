@@ -16,37 +16,36 @@
 
 package com.talkforgeai.service.openai.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
-import com.theokanning.openai.messages.Message;
-import java.util.Date;
 import java.util.List;
 
 public record OpenAIChatStreamResponse(String id,
                                        String object,
-                                       Date created,
-                                       String model,
-                                       List<StreamResponseChoice> choices,
-                                       ResponseUsage usage) {
+                                       StreamResponseDelta delta) {
 
-  public record StreamResponseChoice(Integer index,
-                                     Message delta,
-                                     @JsonProperty("finish_reason") FinishReason finishReason) {
+  public record StreamResponseDelta(String role,
+                                    List<StreamResponseContent> content,
+                                    @JsonProperty("file_ids")
+                                    List<String> fileIds) {
 
-    public enum FinishReason {
-      STOP("stop"),
-      FUNCTION_CALL("function_call");
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record StreamResponseContent(Integer index,
+                                        String type,
+                                        ContentText text,
+                                        @JsonProperty("image_file")
+                                        ContentImage imageFile
+    ) {
 
-      final String value;
+      public record ContentText(String value,
+                                List<String> annotations) {
 
-      FinishReason(String value) {
-        this.value = value;
       }
 
-      @JsonValue
-      public String getValue() {
-        return value;
+      public record ContentImage(@JsonProperty("file_id") String fileId) {
+
       }
+
     }
 
   }

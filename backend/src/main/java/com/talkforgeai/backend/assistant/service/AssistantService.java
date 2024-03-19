@@ -36,8 +36,7 @@ import com.talkforgeai.backend.assistant.repository.ThreadRepository;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
 import com.talkforgeai.service.openai.StreamService;
-import com.talkforgeai.service.openai.dto.OpenAIChatStreamResponse.StreamResponseChoice;
-import com.talkforgeai.service.openai.dto.StreamRunCreateRequest;
+import com.talkforgeai.service.openai.dto.OpenAIChatStreamResponse;
 import com.theokanning.openai.ListSearchParameters;
 import com.theokanning.openai.OpenAiResponse;
 import com.theokanning.openai.assistants.Assistant;
@@ -228,9 +227,9 @@ public class AssistantService {
     return this.openAiService.createRun(threadId, runCreateRequest);
   }
 
-  public Flux<ServerSentEvent<StreamResponseChoice>> streamRunConversation(String threadId,
-      StreamRunCreateRequest runCreateRequest) {
-    return this.streamService.stream(runCreateRequest);
+  public Flux<ServerSentEvent<OpenAIChatStreamResponse>> streamRunConversation(String threadId,
+      RunCreateRequest runCreateRequest) {
+    return this.streamService.stream(threadId, runCreateRequest);
   }
 
   public MessageListParsedDto listMessages(String threadId,

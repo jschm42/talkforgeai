@@ -28,6 +28,7 @@ import com.talkforgeai.backend.assistant.dto.ThreadTitleGenerationRequestDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleUpdateRequestDto;
 import com.talkforgeai.backend.assistant.service.AssistantService;
 import com.talkforgeai.backend.storage.FileStorageService;
+import com.talkforgeai.service.openai.dto.OpenAIChatStreamResponse;
 import com.theokanning.openai.ListSearchParameters;
 import com.theokanning.openai.ListSearchParameters.Order;
 import com.theokanning.openai.messages.Message;
@@ -45,6 +46,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,6 +58,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -187,11 +190,11 @@ public class AssistantController {
   }
 
   @PostMapping("/threads/{threadId}/runs/stream")
-  public Run streamRunConversation(@PathVariable("threadId") String threadId,
+  public Flux<ServerSentEvent<OpenAIChatStreamResponse>> runStreamConversation(
+      @PathVariable("threadId") String threadId,
       @RequestBody RunCreateRequest runConversationRequest) {
-    return assistantService.runConversation(threadId, runConversationRequest);
+    return assistantService.streamRunConversation(threadId, runConversationRequest);
   }
-
 
   @GetMapping("/threads/{threadId}/runs/{runId}")
   public Run getRun(@PathVariable("threadId") String threadId,

@@ -16,11 +16,25 @@
 
 package com.talkforgeai.service.openai.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.theokanning.openai.runs.RunCreateRequest;
 
 public class StreamRunCreateRequest extends RunCreateRequest {
 
+
+  //  private String assistantId;
   private boolean stream;
+
+  @JsonProperty("assistant_id")
+  @Override
+  public String getAssistantId() {
+    return super.getAssistantId();
+  }
+//
+//  @Override
+//  public void setAssistantId(String assistantId) {
+//    this.assistantId = assistantId;
+//  }
 
   public boolean isStream() {
     return stream;
