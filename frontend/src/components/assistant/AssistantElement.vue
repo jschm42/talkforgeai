@@ -66,81 +66,37 @@ export default {
 </script>
 
 <template>
-  <div class="card assistant-element">
-    <img v-if="isShowAssistantImage" :alt="assistant.name" :src="imageSrc" :title="assistant.name"
-         class="persona-icon card-img-top img-fluid p-2" role="button"
-         @click.prevent="onPersonaSelected()"/>
-    <img v-else :alt="assistant.name" class="robot-icon card-img-top img-fluid p-2"
-         src="@/assets/robot.svg"
-         title="Robot"
-         @click.prevent="onPersonaSelected()">
-    <i class="bi bi-pencil edit-button rounded-5" role="button"
-       @click.prevent="onEditPersona()"></i>
-    <div class="card-body" role="button" @click.prevent="onPersonaSelected()">
-      <h5 :title="assistant.name" class="card-title title">{{ assistant.name }}</h5>
-      <div :title="assistant.description" class="card-text description truncate-text">
+  <v-card class="mx-auto" height="280" variant="elevated" width="200">
+    <div role="button" @click="onPersonaSelected">
+      <v-avatar :image="imageSrc" size="120">
+      </v-avatar>
+      <v-card-title>{{ assistant.name }}</v-card-title>
+      <v-card-text class="description">
         {{ assistant.description }}
-      </div>
+      </v-card-text>
     </div>
-  </div>
+
+    <v-card-actions>
+      <v-btn color="orange" @click="onEditPersona()">
+        Edit
+      </v-btn>
+    </v-card-actions>
+
+  </v-card>
 
 </template>
 
 <style scoped>
 
-.assistant-element {
-  background-color: #303030;
-}
-
-
-.robot-icon {
-  color: #cccccc;
-}
-
-.edit-button {
-  position: absolute;
-  top: 0.1rem;
-  right: 0.1rem;
-  padding: 0.5rem;
-  color: #cccccc;
-  font-size: 1.3rem;
-  background-color: rgba(20, 20, 20, 0.7);
-}
-
-.truncate-text {
+.description {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.persona-icon {
-  height: auto;
-}
-
-.description {
-  font-size: 0.8rem;
-  color: #cccccc;
-}
-
-
-@media only screen and (min-width: 768px ) {
-  .description {
-    font-size: 1rem;
-  }
-}
-
-.title {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #cccccc;
-}
-
-@media only screen and (min-width: 768px ) {
-  .title {
-    font-size: 1.1rem;
-  }
+  word-wrap: break-word;
+  margin: 0;
+  height: 3.75rem;
 }
 
 </style>

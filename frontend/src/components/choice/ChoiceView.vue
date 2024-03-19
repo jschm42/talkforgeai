@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -15,201 +15,52 @@
   -->
 
 <template>
-  <div class="container-fluid">
-    <div class="row">
-
-      <!-- Sidebar visible on lg and higher screens -->
-      <div class="col-lg-2 d-none d-lg-block sidebar">
-        <!-- Sidebar content -->
-        <div class="d-flex flex-grow-1 align-items-start">
-          <img alt="Talkforge AI" class="logo" src="@/assets/logo.png" title="Talkforge AI">
-        </div>
-        <hr>
-        <ul class="nav nav-pills flex-column align-items-start">
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#" @click.prevent="onCreateNewPersona">
-              <i class="bi bi-plus-circle-fill"></i>
-              Create
-            </a>
-          </li>
-          <!--          <li class="nav-item">-->
-          <!--            <a class="nav-link text-white" href="#">-->
-          <!--              <i class="bi bi-gear-fill"></i>-->
-          <!--              Settings-->
-          <!--            </a>-->
-          <!--          </li>-->
-        </ul>
-        <!-- Add more buttons as needed -->
-      </div>
-
-      <!-- Main Content -->
-      <div class="col-12 col-lg-10">
-
-        <div class="row toolbar-header p-2 d-lg-none">
-          <div class="d-flex">
-
-            <img alt="Talkforge AI" class="logo-small d-lg-none"
-                 src="@/assets/logo-notext.png"
-                 title="Talkforge AI">
-
-            <h1 class="flex-grow-1 d-lg-none">Talkforge AI</h1>
-
-            <!-- Toggler for small screens -->
-            <button class="btn btn-outline-light d-lg-none" @click="toggleSidebar">
-              <span class="navbar-toggler-icon"></span>
-            </button>
-
-          </div>
-        </div>
-
-        <!-- Your main content goes here -->
-        <div class="row">
-
-          <div class="container" style="overflow: auto; height: 90vh">
-            <div class="d-flex flex-wrap flex-row">
-              <div v-for="assistant in assistantList"
-                   :key="assistant.id" class="d-flex flex-column m-1 assistant-element">
-                <assistant-element :assistant="assistant"></assistant-element>
-              </div>
-            </div>
-          </div>
-
-
-        </div>
-
-
-      </div>
-
-      <!-- Sidebar for xs to md screens, full screen -->
-      <div v-if="showSidebar" class="mobile-sidebar d-lg-none">
-        <!-- Sidebar content -->
-        <img alt="Talkforge AI" class="logo" src="@/assets/logo.png" title="Talkforge AI">
-        <hr>
-        <ul class="nav nav-pills flex-column align-items-start">
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#" @click.prevent="onCreateNewPersona">
-              <i class="bi bi-plus-circle-fill"></i>
-              Create
-            </a>
-          </li>
-          <!--          <li class="nav-item">-->
-          <!--            <a class="nav-link text-white" href="#">-->
-          <!--              <i class="bi bi-gear-fill"></i>-->
-          <!--              Settings-->
-          <!--            </a>-->
-          <!--          </li>-->
-        </ul>
-        <hr>
-        <!-- Add more buttons as needed -->
-        <button class="btn btn-lg btn-outline-light" @click="toggleSidebar">
-          <i class="bi bi-x"></i>
-          Close
-        </button>
-      </div>
-
-    </div>
-  </div>
+  <v-app>
+    <component :is="currentViewComponent"></component>
+  </v-app>
 </template>
 
 <script>
-import {defineComponent} from 'vue';
-import {useChatStore} from '@/store/chat-store';
+import {computed, onMounted} from 'vue';
 import {useAppStore} from '@/store/app-store';
-import AssistantElement from '@/components/assistant/AssistantElement.vue';
+import {useChatStore} from '@/store/chat-store';
+import {useDisplay} from 'vuetify';
+import ChoiceMobile from '@/components/choice/ChoiceMobile.vue';
+import ChoiceDesktop from '@/components/choice/ChoiceDesktop.vue';
 
-export default defineComponent({
-  components: {AssistantElement},
+export default {
+  components: {ChoiceDesktop, ChoiceMobile},
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
+    const {mobile} = useDisplay();
     const appStore = useAppStore();
-    return {store, appStore};
-  },
-  data() {
+    const chatStore = useChatStore();
+
+    const currentViewComponent = computed(() => {
+      // You can adjust the breakpoint here according to your needs
+
+      const isMobile = mobile.value;
+
+      console.log('DISPLAY: ', isMobile,
+          isMobile ? 'ChoiceMobile' : 'ChoiceDesktop');
+      return isMobile ? 'ChoiceMobile' : 'ChoiceDesktop';
+    });
+
+    onMounted(async () => {
+      try {
+        await chatStore.syncAssistants();
+      } catch (error) {
+        appStore.handleError(error);
+      }
+    });
+
     return {
-      showSidebar: false,
-      isEntrySelected: false,
+      currentViewComponent,
     };
   },
-  computed: {
-    assistantList() {
-      return this.store.assistantList;
-    },
-  },
-  methods: {
-    toggleSidebar() {
-      this.showSidebar = !this.showSidebar;
-    },
-    isShowAssistantImage(assistant) {
-      return !!assistant.image_path;
-    },
+};
 
-    onCreateNewPersona() {
-      this.$router.push({name: 'persona-create'});
-    },
-
-  },
-  async mounted() {
-    try {
-      await this.store.syncAssistants();
-    } catch (error) {
-      this.appStore.handleError(error);
-    }
-  },
-});
 </script>
 
 <style scoped>
-.logo {
-  height: 10rem;
-  margin: 1rem auto;
-}
-
-h1 {
-  color: #cccccc;
-}
-
-.logo-small {
-  height: 3rem;
-}
-
-/* Ensure sidebar is hidden on small screens and full screen when shown */
-.mobile-sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #000000;
-  z-index: 1050; /* Higher than the default navbar z-index to overlay on top */
-  overflow-y: auto;
-  padding: 1rem;
-}
-
-hr {
-  color: #ffffff;
-}
-
-ul {
-  font-size: 1.5rem;
-}
-
-.assistant-element {
-  width: 8rem;
-  height: 16rem;
-}
-
-@media only screen and (min-width: 768px ) {
-  .assistant-element {
-    width: 15rem;
-    height: 21rem;
-  }
-}
-
-@media only screen and (min-width: 375px) {
-  .assistant-element {
-    width: 11rem;
-    height: 19rem;
-  }
-}
 
 </style>

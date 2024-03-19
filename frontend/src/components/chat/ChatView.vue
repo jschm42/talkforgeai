@@ -32,11 +32,11 @@
             <v-row class="flex-grow-0">
               <!-- Row 2 with flex-grow 2 -->
               <v-col>
-                <v-btn class="mx-2" prepend-icon="mdi-arrow-left-bold-box-outline"
+                <v-btn class="mx-2" prepend-icon="mdi-keyboard-backspace"
                        @click.prevent="onClickBack">
                   Back
                 </v-btn>
-                <v-btn prepend-icon="mdi-heart" @click.prevent="onNewThread">
+                <v-btn prepend-icon="mdi-plus-thick" @click.prevent="onNewThread">
                   New Chat
                 </v-btn>
               </v-col>
