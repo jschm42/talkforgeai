@@ -87,11 +87,16 @@ class AssistantStreamService {
     const processedMessage = await this.postprocessLastMessage(threadId);
 
     console.log('--> processedMessage', processedMessage);
+    const message = processedMessage.message;
+    const messageId = message?.id ?? '';
+    const assistantId = message?.assistant_id ?? '';
 
     if (processedMessage?.parsed_content) {
       const codeContent = highlightingService.replaceCodeContent(processedMessage.parsed_content);
 
-      const newMessage = new ThreadMessage('', 'assistant', codeContent, '');
+      const newMessage
+          = new ThreadMessage(messageId, 'assistant', codeContent, assistantId);
+      newMessage.thread_id = threadId;
 
       store.threadMessages.pop();
       store.threadMessages.push(newMessage);
