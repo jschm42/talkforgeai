@@ -268,7 +268,6 @@ public class AssistantService {
     OpenAiResponse<Message> lastMessage = this.openAiService.listMessages(threadId,
         new ListSearchParameters(1, Order.DESCENDING, null, null));
 
-    //Message message = this.openAiService.retrieveMessage(threadId, messageId);
     Message message = lastMessage.data.get(0);
     Optional<MessageEntity> messageEntity = messageRepository.findById(message.getId());
 

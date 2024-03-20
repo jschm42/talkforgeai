@@ -75,10 +75,11 @@ export default {
       }
     },
     chunkUpdateReceived() {
-      console.log('Chunk Update Received!');
-      // Scroll $refs.entries to bottom
-      this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
-      //this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
+      console.log('Chunk Update Received - Scrolling to bottom of chat entries');
+      
+      this.$nextTick(() => {
+        this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
+      });
     },
   },
 };

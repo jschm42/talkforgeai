@@ -61,7 +61,8 @@ export default {
       this.chatStore.currentStatusMessage = 'Thinking...';
       try {
         this.$emit('chunkUpdateReceived');
-        await this.chatStore.submitUserMessage(this.prompt);
+        await this.chatStore.submitUserMessage(this.prompt,
+            () => this.$emit('chunkUpdateReceived'));
         this.$emit('chunkUpdateReceived');
       } catch (error) {
         this.appStore.handleError(error);

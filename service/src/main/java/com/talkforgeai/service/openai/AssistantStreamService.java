@@ -92,7 +92,6 @@ public class AssistantStreamService {
                 clientResponse.bodyToMono(String.class)
                     .flatMap(errorBody -> {
                       LOGGER.error("Error from OpenAI: {}", errorBody);
-                      // Here, you can parse the errorBody into a more detailed error message or object if needed
                       return Mono.error(new OpenAIException("Received error from OpenAI"));
                     })
         ).bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {

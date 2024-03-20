@@ -82,7 +82,7 @@ export default {
       console.log('Chat Control - Regenerate Run');
       this.appStore.resetErrorState();
       try {
-        await this.chatStore.regenerateCurrentRun();
+        await this.chatStore.regenerateCurrentRun(() => this.$emit('chunkUpdateReceived'));
       } catch (error) {
         this.appStore.handleError(error);
         this.chatStore.updateStatus('Error: ' + error, 'error');

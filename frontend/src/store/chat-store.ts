@@ -131,11 +131,10 @@ export const useChatStore = defineStore('chat', {
         }
       }
     },
-    async runStreamAndHandleResults() {
+    async runStreamAndHandleResults(chunkUpdateCallback: () => void) {
       console.log('Running stream and handling results');
-      await assistantStreamService.streamRun(this.selectedAssistant.id, this.threadId, () => {
-        console.log('Chunk update callback');
-      });
+      await assistantStreamService.streamRun(this.selectedAssistant.id, this.threadId,
+          chunkUpdateCallback);
 
       // Get text content of last user message
       const lastUserMessageContent = this.getThreadMessageTextContent(this.getLastUserMessage());
@@ -152,14 +151,14 @@ export const useChatStore = defineStore('chat', {
         await assistantService.cancelRun(this.threadId, this.runId);
       }
     },
-    async regenerateCurrentRun() {
+    async regenerateCurrentRun(chunkUpdateCallback: () => void) {
       //await assistantService.regenerateRun(this.threadId, this.runId);
 
       this.updateStatus('Thinking...', 'running');
-      await this.runStreamAndHandleResults();
+      await this.runStreamAndHandleResults(chunkUpdateCallback);
     },
     // Usage of the refactored functions
-    async submitUserMessage(message: string) {
+    async submitUserMessage(message: string, chunkUpdateCallback: () => void) {
       await this.createThreadIfNeeded();
 
       const submitedMessage = await assistantService.submitUserMessage(this.threadId, message);
@@ -168,7 +167,7 @@ export const useChatStore = defineStore('chat', {
 
       this.updateStatus('Thinking...', 'running');
 
-      await this.runStreamAndHandleResults();
+      await this.runStreamAndHandleResults(chunkUpdateCallback);
     },
     getThreadMessageTextContent(threadMessage: ThreadMessage | undefined): string {
       if (!threadMessage) return '';
