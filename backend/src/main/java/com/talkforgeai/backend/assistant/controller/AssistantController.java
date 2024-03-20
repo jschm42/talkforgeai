@@ -28,7 +28,6 @@ import com.talkforgeai.backend.assistant.dto.ThreadTitleGenerationRequestDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleUpdateRequestDto;
 import com.talkforgeai.backend.assistant.service.AssistantService;
 import com.talkforgeai.backend.storage.FileStorageService;
-import com.talkforgeai.service.openai.dto.StreamResponse;
 import com.theokanning.openai.ListSearchParameters;
 import com.theokanning.openai.ListSearchParameters.Order;
 import com.theokanning.openai.messages.Message;
@@ -190,7 +189,7 @@ public class AssistantController {
   }
 
   @PostMapping("/threads/{threadId}/runs/stream")
-  public Flux<ServerSentEvent<StreamResponse>> runStreamConversation(
+  public Flux<ServerSentEvent<String>> runStreamConversation(
       @PathVariable("threadId") String threadId,
       @RequestBody RunCreateRequest runConversationRequest) {
     return assistantService.streamRunConversation(threadId, runConversationRequest);

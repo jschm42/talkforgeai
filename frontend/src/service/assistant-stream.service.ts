@@ -37,41 +37,36 @@ class AssistantStreamService {
         {maxWait: DEBOUNCE_MAXWAIT});
 
     const store = useChatStore();
-    const isFunctionCall = false;
 
     chunkUpdateCallback();
 
     const response = await this.fetchSSE(assistantId, threadId);
     const reader = response.body?.getReader();
-
     if (!reader) return;
 
     const decoder = new TextDecoder('utf-8');
     let partial = '';
 
     let isReading = true;
-
     while (isReading) {
       const chunk = await reader.read();
-      //const {done, value} = await reader.read();
 
       const chunkValue = decoder.decode(chunk.value, {stream: true});
-      console.log('--> chunk', chunkValue);
 
       if (chunk.done) {
-        const lastMessage = store.threadMessages[store.threadMessages.length - 1];
-        console.log('--> lastMessage', lastMessage);
+        console.log('--> done');
         await this.postStreamProcessing(store, threadId);
         store.removeStatus();
         isReading = false;
       } else {
         partial += chunkValue;
         const parts = partial.split('\n');
-        partial = parts.pop() || '';
+        partial = parts.pop() ?? '';
         this._buffer = '';
         for (const part of parts) {
           if (part.startsWith('data:')) {
             const data = part.substring(5);
+            console.log('--> data', data);
             this.processData(data, store, debouncedUpdateCallback);
             await this.sleep(DELAY_TIME);
           } else if (part.startsWith('event:')) {
@@ -86,7 +81,6 @@ class AssistantStreamService {
   async postStreamProcessing(store: any, threadId: string) {
     const processedMessage = await this.postprocessLastMessage(threadId);
 
-    console.log('--> processedMessage', processedMessage);
     const message = processedMessage.message;
     const messageId = message?.id ?? '';
     const assistantId = message?.assistant_id ?? '';
@@ -125,30 +119,18 @@ class AssistantStreamService {
   }
 
   private processData(data: string, store: any, debouncedUpdateCallback: () => void) {
-    console.log('--> data', data);
     if (!this.hasJSONData(data)) return;
 
     const content = JSON.parse(data)['delta']['content'];
-    console.log('--> content', content);
     const lastMessage = store.threadMessages[store.threadMessages.length - 1];
 
     if (content.length > 0 && content[0].type === 'text') {
       const textContent = content[0].text.value;
-      console.log('--> content.text', textContent);
       let newContent = this.escapeHtml(textContent);
       newContent = newContent.replaceAll(/\n/g, '<br/>');
       lastMessage.content[0].text.value += newContent;
-      //lastMessage.content += newContent;
       debouncedUpdateCallback();
     }
-
-    // if (chatChoice.delta.function_call?.arguments) {
-    //   if (!lastMessage?.function_call) {
-    //     lastMessage.function_call = new FunctionCall();
-    //   }
-    //   lastMessage.function_call.name = chatChoice.delta.function_call.name;
-    //   lastMessage.function_call.arguments += chatChoice.delta.function_call.arguments;
-    // }
   }
 
   private hasJSONData(data: string): boolean {

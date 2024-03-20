@@ -16,18 +16,10 @@
 
 package com.talkforgeai.service.openai;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.talkforgeai.service.openai.dto.StreamResponse;
-import com.talkforgeai.service.openai.dto.StreamResponse.StreamResponseDelta;
-import com.talkforgeai.service.openai.dto.StreamResponse.StreamResponseDelta.StreamResponseContent;
-import com.talkforgeai.service.openai.dto.StreamResponse.StreamResponseDelta.StreamResponseContent.ContentText;
 import com.talkforgeai.service.openai.dto.StreamRunCreateRequest;
 import com.talkforgeai.service.openai.exception.OpenAIException;
 import com.talkforgeai.service.properties.OpenAIProperties;
 import com.theokanning.openai.runs.RunCreateRequest;
-import java.util.ArrayList;
-import java.util.List;
 import okhttp3.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +42,6 @@ public class AssistantStreamService {
   private final OpenAIProperties openAIProperties;
 
   private final WebClient webClient;
-  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Value("${server.servlet.async.timeout:10000}")
   private long asyncTimeout;
@@ -61,7 +52,7 @@ public class AssistantStreamService {
     this.webClient = webClientBuilder.build();
   }
 
-  public Flux<ServerSentEvent<StreamResponse>> stream(
+  public Flux<ServerSentEvent<String>> stream(
       String threadId,
       RunCreateRequest request) {
     LOGGER.info("Setting async timeout to {}", asyncTimeout);
@@ -74,8 +65,7 @@ public class AssistantStreamService {
     streamRunCreateRequest.setTools(request.getTools());
     streamRunCreateRequest.setStream(true);
 
-    //String uri = openAIProperties.chatUrl();
-    String uri = "https://api.openai.com/v1/threads/" + threadId + "/runs";
+    String uri = openAIProperties.apiUrl() + "/threads/" + threadId + "/runs";
     HttpHeaders headers = new HttpHeaders();
 
     if (openAIProperties.usePostman()) {
@@ -91,53 +81,32 @@ public class AssistantStreamService {
 
     return webClient.post()
         .uri(uri)
-        .headers(httpHeaders -> {
-          httpHeaders.addAll(headers);
-        })
+        .headers(httpHeaders -> httpHeaders.addAll(headers))
         .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
         .accept(org.springframework.http.MediaType.TEXT_EVENT_STREAM)
         .bodyValue(streamRunCreateRequest)
         .retrieve()
         .onStatus(
             HttpStatusCode::is4xxClientError,
-            clientResponse -> {
-              return clientResponse.bodyToMono(String.class)
-                  .flatMap(errorBody -> {
-                    LOGGER.error("Error from OpenAI: {}", errorBody);
-                    // Here, you can parse the errorBody into a more detailed error message or object if needed
-                    return Mono.error(new OpenAIException("Received error from OpenAI"));
-                  });
-            }
+            clientResponse ->
+                clientResponse.bodyToMono(String.class)
+                    .flatMap(errorBody -> {
+                      LOGGER.error("Error from OpenAI: {}", errorBody);
+                      // Here, you can parse the errorBody into a more detailed error message or object if needed
+                      return Mono.error(new OpenAIException("Received error from OpenAI"));
+                    })
         ).bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {
         })
         .mapNotNull(sseEvent -> {
           LOGGER.info("SSEEvent received: {}", sseEvent);
 
-          if (sseEvent.event() != null && sseEvent.event().equals("thread.message.delta")) {
-            try {
-              StreamResponse streamResponse = objectMapper.readValue(sseEvent.data(),
-                  StreamResponse.class);
+          ServerSentEvent<String> responseSseEvent = createResponseSseEvent(sseEvent);
 
-              LOGGER.info("Sending event '{}': {}", sseEvent.event(), streamResponse);
-
-              return ServerSentEvent.builder(streamResponse)
-                  .event(sseEvent.event())
-                  .build();
-
-            } catch (JsonProcessingException e) {
-              throw new RuntimeException(e);
-            }
-
+          if (responseSseEvent != null) {
+            LOGGER.info("Sending event '{}'", responseSseEvent.event());
           }
 
-          ContentText contentText = new ContentText("No content", new ArrayList<>());
-          StreamResponseContent content = new StreamResponseContent(0, "text", contentText, null);
-          StreamResponseDelta delta = new StreamResponseDelta(List.of(content));
-          LOGGER.info("Sending event '{}': {}", sseEvent.event(), delta);
-
-          return ServerSentEvent.builder(new StreamResponse("0", null, delta))
-              .event(sseEvent.event())
-              .build();
+          return responseSseEvent;
         })
         .doOnError(throwable -> {
           if (throwable instanceof OpenAIException oe) {
@@ -146,10 +115,20 @@ public class AssistantStreamService {
             LOGGER.error("Error while streaming.", throwable);
           }
         })
-        .doOnComplete(() -> {
-          LOGGER.info("Stream completed.");
-        });
+        .doOnComplete(() ->
+            LOGGER.info("Stream completed.")
+        );
   }
 
+  private ServerSentEvent<String> createResponseSseEvent(ServerSentEvent<String> sseEvent) {
+    if (sseEvent.event() != null) {
+      return switch (sseEvent.event()) {
+        case "thread.message.delta", "done" -> sseEvent;
+        default -> null;
+      };
+    }
+
+    return null;
+  }
 
 }

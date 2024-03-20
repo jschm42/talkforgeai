@@ -115,48 +115,37 @@ export const useChatStore = defineStore('chat', {
       this.threadEditMode = false;
       this.threadDeleteMode = false;
     },
+    getLastUserMessage() {
+      // Find the last user message in this.threadMessages array by iterating in reverse
+      for (let i = this.threadMessages.length - 1; i >= 0; i--) {
+        if (this.threadMessages[i].role === 'user') {
+          return this.threadMessages[i];
+        }
+      }
+    },
+    getLastAssistantMessage() {
+      // Find the last assistant message in this.threadMessages array by iterating in reverse
+      for (let i = this.threadMessages.length - 1; i >= 0; i--) {
+        if (this.threadMessages[i].role === 'assistant') {
+          return this.threadMessages[i];
+        }
+      }
+    },
     async runStreamAndHandleResults() {
+      console.log('Running stream and handling results');
       await assistantStreamService.streamRun(this.selectedAssistant.id, this.threadId, () => {
         console.log('Chunk update callback');
       });
-    },
-    async runConversationAndHandleResults() {
-      let pollingInterval: undefined | number = undefined;
-      // try {
-      const run = await assistantService.runConversation(this.threadId,
-          this.selectedAssistant.id);
-      this.runId = run.id;
 
-      // Use a promise to handle the polling logic
-      await new Promise((resolve, reject) => {
-        pollingInterval = setInterval(async () => {
-          try {
-            console.log('Polling for run status');
-            const runT = await assistantService.retrieveRun(this.threadId, run.id);
-            if (runT.status === 'completed') {
-              console.log('Run completed');
-              clearInterval(pollingInterval);
-              this.runId = '';
-              await this.handleResult();
-              resolve('completed'); // Resolve the promise when completed
-            } else if (runT.status === 'cancelled') {
-              console.log('Run cancelled');
-              clearInterval(pollingInterval);
-              this.runId = '';
-              this.updateStatus('Cancelled', 'error');
-              resolve('cancelled'); // Resolve the promise when cancelled
-            }
-          } catch (error) {
-            console.error('Error during polling', error);
-            clearInterval(pollingInterval);
-            reject(error); // Reject the promise on error
-          }
-        }, 2000);
-      });
-      // } catch (e) {
-      //   console.error('Error while handling result', e);
-      //   if (pollingInterval) clearInterval(pollingInterval);
-      // }
+      // Get text content of last user message
+      const lastUserMessageContent = this.getThreadMessageTextContent(this.getLastUserMessage());
+      const lastAssistantMessageContent = this.getThreadMessageTextContent(
+          this.getLastAssistantMessage());
+
+      await this.generateThreadTitle(this.threadId, lastUserMessageContent,
+          lastAssistantMessageContent);
+
+      this.updateStatus('', '');
     },
     async cancelCurrentRun() {
       if (this.runId.length > 0) {
@@ -167,7 +156,7 @@ export const useChatStore = defineStore('chat', {
       //await assistantService.regenerateRun(this.threadId, this.runId);
 
       this.updateStatus('Thinking...', 'running');
-      await this.runConversationAndHandleResults();
+      await this.runStreamAndHandleResults();
     },
     // Usage of the refactored functions
     async submitUserMessage(message: string) {
@@ -179,10 +168,11 @@ export const useChatStore = defineStore('chat', {
 
       this.updateStatus('Thinking...', 'running');
 
-      //await this.runConversationAndHandleResults();
       await this.runStreamAndHandleResults();
     },
-    getThreadMessageTextContent(threadMessage: ThreadMessage) {
+    getThreadMessageTextContent(threadMessage: ThreadMessage | undefined): string {
+      if (!threadMessage) return '';
+
       if (threadMessage.content && threadMessage.content.length > 0 &&
           threadMessage.content[0].text) {
         return threadMessage.content[0].text.value || '';
