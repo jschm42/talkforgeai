@@ -94,8 +94,7 @@ class AssistantStreamService {
     if (processedMessage?.parsed_content) {
       const codeContent = highlightingService.replaceCodeContent(processedMessage.parsed_content);
 
-      const newMessage
-          = new ThreadMessage(messageId, 'assistant', codeContent, assistantId);
+      const newMessage = new ThreadMessage(messageId, 'assistant', codeContent, assistantId);
       newMessage.thread_id = threadId;
 
       store.threadMessages.pop();
