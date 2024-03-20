@@ -18,7 +18,7 @@ import {useChatStore} from '@/store/chat-store';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
 import HighlightingService from '@/service/highlighting.service';
-import {ParsedThreadMessage} from '@/store/to/thread';
+import {ParsedThreadMessage, ThreadMessage} from '@/store/to/thread';
 
 const highlightingService = new HighlightingService();
 
@@ -31,6 +31,8 @@ class AssistantStreamService {
 
   async streamRun(
       assistantId: string, threadId: string, chunkUpdateCallback: () => void) {
+    console.log('*** streamRun ', assistantId, threadId);
+
     const debouncedUpdateCallback = debounce(chunkUpdateCallback, DEBOUNCE_TIME,
         {maxWait: DEBOUNCE_MAXWAIT});
 
@@ -59,7 +61,7 @@ class AssistantStreamService {
       if (chunk.done) {
         const lastMessage = store.threadMessages[store.threadMessages.length - 1];
         console.log('--> lastMessage', lastMessage);
-        await this.postStreamProcessing(store, threadId, chunkValue);
+        await this.postStreamProcessing(store, threadId);
         store.removeStatus();
         isReading = false;
       } else {
@@ -81,22 +83,25 @@ class AssistantStreamService {
     }
   }
 
-  async postStreamProcessing(store: any, threadId: string, messageId: string) {
-    const processedMessage = await this.postprocessMessage(threadId, messageId);
+  async postStreamProcessing(store: any, threadId: string) {
+    const processedMessage = await this.postprocessLastMessage(threadId);
 
     console.log('--> processedMessage', processedMessage);
 
-    // if (processedMessage) {
-    //   const codeContent = highlightingService.replaceCodeContent(processedMessage.parsed_content);
-    // }
+    if (processedMessage?.parsed_content) {
+      const codeContent = highlightingService.replaceCodeContent(processedMessage.parsed_content);
 
-    store.threadMessages.pop();
-    store.threadMessages.push(processedMessage);
+      const newMessage = new ThreadMessage('', 'assistant', codeContent, '');
+
+      store.threadMessages.pop();
+      store.threadMessages.push(newMessage);
+    }
+
   }
 
-  async postprocessMessage(threadId: string, messageId: string): Promise<ParsedThreadMessage> {
+  async postprocessLastMessage(threadId: string): Promise<ParsedThreadMessage> {
     const result = await axios.post(
-        `/api/v1/threads/${threadId}/messages/${messageId}/postprocess`,
+        `/api/v1/threads/${threadId}/messages/last/postprocess`,
         {},
     );
     return result.data;

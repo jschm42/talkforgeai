@@ -38,6 +38,7 @@ import com.talkforgeai.backend.transformers.MessageProcessor;
 import com.talkforgeai.service.openai.AssistantStreamService;
 import com.talkforgeai.service.openai.dto.StreamResponse;
 import com.theokanning.openai.ListSearchParameters;
+import com.theokanning.openai.ListSearchParameters.Order;
 import com.theokanning.openai.OpenAiResponse;
 import com.theokanning.openai.assistants.Assistant;
 import com.theokanning.openai.assistants.AssistantRequest;
@@ -263,10 +264,14 @@ public class AssistantService {
   }
 
   @Transactional
-  public ParsedMessageDto postProcessMessage(String threadId, String messageId) {
-    LOGGER.info("Post processing message: {}", messageId);
-    Message message = this.openAiService.retrieveMessage(threadId, messageId);
-    Optional<MessageEntity> messageEntity = messageRepository.findById(messageId);
+  public ParsedMessageDto postProcessLastMessage(String threadId) {
+    LOGGER.info("Post processing last message: {}", threadId);
+    OpenAiResponse<Message> lastMessage = this.openAiService.listMessages(threadId,
+        new ListSearchParameters(1, Order.DESCENDING, null, null));
+
+    //Message message = this.openAiService.retrieveMessage(threadId, messageId);
+    Message message = lastMessage.data.get(0);
+    Optional<MessageEntity> messageEntity = messageRepository.findById(message.getId());
 
     MessageEntity newMessageEntity = null;
     if (messageEntity.isPresent()) {
@@ -279,7 +284,7 @@ public class AssistantService {
 
     String transformed = messageProcessor.transform(
         message.getContent().get(0).getText().getValue(),
-        threadId, messageId);
+        threadId, message.getId());
     newMessageEntity.setParsedContent(transformed);
 
     messageRepository.save(newMessageEntity);

@@ -208,10 +208,9 @@ public class AssistantController {
     return assistantService.cancelRun(threadId, runId);
   }
 
-  @PostMapping("/threads/{threadId}/messages/{messageId}/postprocess")
-  public ParsedMessageDto postProcessMessage(@PathVariable("threadId") String threadId,
-      @PathVariable("messageId") String messageId) {
-    return assistantService.postProcessMessage(threadId, messageId);
+  @PostMapping("/threads/{threadId}/messages/last/postprocess")
+  public ParsedMessageDto postProcessMessage(@PathVariable("threadId") String threadId) {
+    return assistantService.postProcessLastMessage(threadId);
   }
 
 
