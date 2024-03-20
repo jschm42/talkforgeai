@@ -35,8 +35,8 @@ import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
-import com.talkforgeai.service.openai.StreamService;
-import com.talkforgeai.service.openai.dto.OpenAIChatStreamResponse;
+import com.talkforgeai.service.openai.AssistantStreamService;
+import com.talkforgeai.service.openai.dto.StreamResponse;
 import com.theokanning.openai.ListSearchParameters;
 import com.theokanning.openai.OpenAiResponse;
 import com.theokanning.openai.assistants.Assistant;
@@ -90,7 +90,7 @@ public class AssistantService {
 
   private final OpenAiService openAiService;
 
-  private final StreamService streamService;
+  private final AssistantStreamService assistantStreamService;
   private final AssistantRepository assistantRepository;
   private final MessageRepository messageRepository;
   private final ThreadRepository threadRepository;
@@ -101,12 +101,13 @@ public class AssistantService {
 
   private final AssistantMapper assistantMapper;
 
-  public AssistantService(OpenAiService openAiService, StreamService streamService,
+  public AssistantService(OpenAiService openAiService,
+      AssistantStreamService assistantStreamService,
       AssistantRepository assistantRepository, MessageRepository messageRepository,
       ThreadRepository threadRepository, FileStorageService fileStorageService,
       MessageProcessor messageProcessor, AssistantMapper assistantMapper) {
     this.openAiService = openAiService;
-    this.streamService = streamService;
+    this.assistantStreamService = assistantStreamService;
     this.assistantRepository = assistantRepository;
     this.messageRepository = messageRepository;
     this.threadRepository = threadRepository;
@@ -227,9 +228,9 @@ public class AssistantService {
     return this.openAiService.createRun(threadId, runCreateRequest);
   }
 
-  public Flux<ServerSentEvent<OpenAIChatStreamResponse>> streamRunConversation(String threadId,
+  public Flux<ServerSentEvent<StreamResponse>> streamRunConversation(String threadId,
       RunCreateRequest runCreateRequest) {
-    return this.streamService.stream(threadId, runCreateRequest);
+    return this.assistantStreamService.stream(threadId, runCreateRequest);
   }
 
   public MessageListParsedDto listMessages(String threadId,

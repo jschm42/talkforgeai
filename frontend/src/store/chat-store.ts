@@ -20,9 +20,11 @@ import AssistantService from '@/service/assistant.service';
 import Thread, {ThreadMessage} from '@/store/to/thread';
 import Assistant from '@/store/to/assistant';
 import AssistantProperties, {TTSType} from '@/service/assistant.properties';
+import AssistantStreamService from '@/service/assistant-stream.service';
 
 const highlightingService = new HighlightingService();
 const assistantService = new AssistantService();
+const assistantStreamService = new AssistantStreamService();
 
 export const useChatStore = defineStore('chat', {
   state: () => {
@@ -113,6 +115,11 @@ export const useChatStore = defineStore('chat', {
       this.threadEditMode = false;
       this.threadDeleteMode = false;
     },
+    async runStreamAndHandleResults() {
+      await assistantStreamService.streamRun(this.selectedAssistant.id, this.threadId, () => {
+        console.log('Chunk update callback');
+      });
+    },
     async runConversationAndHandleResults() {
       let pollingInterval: undefined | number = undefined;
       // try {
@@ -172,7 +179,8 @@ export const useChatStore = defineStore('chat', {
 
       this.updateStatus('Thinking...', 'running');
 
-      await this.runConversationAndHandleResults();
+      //await this.runConversationAndHandleResults();
+      await this.runStreamAndHandleResults();
     },
     getThreadMessageTextContent(threadMessage: ThreadMessage) {
       if (threadMessage.content && threadMessage.content.length > 0 &&

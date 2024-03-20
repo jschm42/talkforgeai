@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import ChatMessage, {FunctionCall} from '@/store/to/chat-message';
 import {useChatStore} from '@/store/chat-store';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
 import HighlightingService from '@/service/highlighting.service';
+import {ParsedThreadMessage} from '@/store/to/thread';
 
 const highlightingService = new HighlightingService();
 
@@ -50,36 +50,56 @@ class AssistantStreamService {
     let isReading = true;
 
     while (isReading) {
-      const {done, value} = await reader.read();
+      const chunk = await reader.read();
+      //const {done, value} = await reader.read();
 
-      if (done) {
-        await this.postStreamProcessing(store, threadId, isFunctionCall);
+      const chunkValue = decoder.decode(chunk.value, {stream: true});
+      console.log('--> chunk', chunkValue);
+
+      if (chunk.done) {
+        const lastMessage = store.threadMessages[store.threadMessages.length - 1];
+        console.log('--> lastMessage', lastMessage);
+        await this.postStreamProcessing(store, threadId, chunkValue);
         store.removeStatus();
         isReading = false;
-      } else if (value) {
-        const chunk = decoder.decode(value, {stream: true});
-        partial += chunk;
+      } else {
+        partial += chunkValue;
         const parts = partial.split('\n');
         partial = parts.pop() || '';
         this._buffer = '';
         for (const part of parts) {
-          if (!part.startsWith('data:')) continue;
-          const data = part.substring(5);
-          this.processData(data, store, debouncedUpdateCallback);
-          await this.sleep(DELAY_TIME);
+          if (part.startsWith('data:')) {
+            const data = part.substring(5);
+            this.processData(data, store, debouncedUpdateCallback);
+            await this.sleep(DELAY_TIME);
+          } else if (part.startsWith('event:')) {
+            const event = part.substring(6);
+            console.log('--> event', event);
+          }
         }
       }
     }
   }
 
-  async postStreamProcessing(store: any, sessionId: string, isFunctionCall: boolean) {
-    if (!isFunctionCall) {
-      const processedMessage = await this.postProcessLastMessage(sessionId);
-      processedMessage.content = highlightingService.replaceCodeContent(processedMessage.content);
+  async postStreamProcessing(store: any, threadId: string, messageId: string) {
+    const processedMessage = await this.postprocessMessage(threadId, messageId);
 
-      store.messages.pop();
-      store.messages.push(processedMessage);
-    }
+    console.log('--> processedMessage', processedMessage);
+
+    // if (processedMessage) {
+    //   const codeContent = highlightingService.replaceCodeContent(processedMessage.parsed_content);
+    // }
+
+    store.threadMessages.pop();
+    store.threadMessages.push(processedMessage);
+  }
+
+  async postprocessMessage(threadId: string, messageId: string): Promise<ParsedThreadMessage> {
+    const result = await axios.post(
+        `/api/v1/threads/${threadId}/messages/${messageId}/postprocess`,
+        {},
+    );
+    return result.data;
   }
 
   private escapeHtml(html: string): string {
@@ -96,44 +116,38 @@ class AssistantStreamService {
   }
 
   private processData(data: string, store: any, debouncedUpdateCallback: () => void) {
+    console.log('--> data', data);
     if (!this.hasJSONData(data)) return;
 
-    const chatChoice = JSON.parse(data);
-    const lastMessage = store.messages[store.messages.length - 1];
+    const content = JSON.parse(data)['delta']['content'];
+    console.log('--> content', content);
+    const lastMessage = store.threadMessages[store.threadMessages.length - 1];
 
-    if (!chatChoice?.delta) return;
-
-    if (chatChoice.delta.content) {
-      let newContent = this.escapeHtml(chatChoice.delta.content);
+    if (content.length > 0 && content[0].type === 'text') {
+      const textContent = content[0].text.value;
+      console.log('--> content.text', textContent);
+      let newContent = this.escapeHtml(textContent);
       newContent = newContent.replaceAll(/\n/g, '<br/>');
-      lastMessage.content += newContent;
+      lastMessage.content[0].text.value += newContent;
+      //lastMessage.content += newContent;
       debouncedUpdateCallback();
     }
 
-    if (chatChoice.delta.function_call?.arguments) {
-      if (!lastMessage?.function_call) {
-        lastMessage.function_call = new FunctionCall();
-      }
-      lastMessage.function_call.name = chatChoice.delta.function_call.name;
-      lastMessage.function_call.arguments += chatChoice.delta.function_call.arguments;
-    }
+    // if (chatChoice.delta.function_call?.arguments) {
+    //   if (!lastMessage?.function_call) {
+    //     lastMessage.function_call = new FunctionCall();
+    //   }
+    //   lastMessage.function_call.name = chatChoice.delta.function_call.name;
+    //   lastMessage.function_call.arguments += chatChoice.delta.function_call.arguments;
+    // }
   }
 
   private hasJSONData(data: string): boolean {
     return data.indexOf('{') != -1;
   }
 
-  private async postProcessLastMessage(sessionId: string): Promise<ChatMessage> {
-    try {
-      const result = await axios.get(`/api/v1/session/${sessionId}/postprocess/last`);
-      return result.data;
-    } catch (error) {
-      throw new Error('Error reading session entry:  ' + error);
-    }
-  }
-
   private async fetchSSE(assistantId: string, threadId: string): Promise<Response> {
-    return await fetch('/api/v1/chat/stream', {
+    return await fetch(`/api/v1/threads/${threadId}/runs/stream`, {
       method: 'POST',
       cache: 'no-cache',
       keepalive: true,
@@ -143,7 +157,6 @@ class AssistantStreamService {
       },
       body: JSON.stringify({
         assistantId,
-        threadId,
       }),
     });
   }

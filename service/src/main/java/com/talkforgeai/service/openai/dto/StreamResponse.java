@@ -20,14 +20,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
-public record OpenAIChatStreamResponse(String id,
-                                       String object,
-                                       StreamResponseDelta delta) {
+public record StreamResponse(String id,
+                             String object,
+                             StreamResponseDelta delta) {
 
-  public record StreamResponseDelta(String role,
-                                    List<StreamResponseContent> content,
-                                    @JsonProperty("file_ids")
-                                    List<String> fileIds) {
+  public record StreamResponseDelta(List<StreamResponseContent> content) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record StreamResponseContent(Integer index,
