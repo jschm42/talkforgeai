@@ -17,7 +17,7 @@
 import {defineStore} from 'pinia';
 import Thread, {ThreadMessage} from '@/store/to/thread';
 import Assistant from '@/store/to/assistant';
-import AssistantProperties, {TTSType} from '@/service/assistant.properties';
+import AssistantProperties, {TTSType} from '@/const/assistant.properties';
 
 export const useChatStore = defineStore('chat', {
   state: () => {

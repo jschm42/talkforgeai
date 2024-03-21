@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import hljs from 'highlight.js';
 import ChatMessage from '@/store/to/chat-message';
+import hljs from 'highlight.js';
 
-class HighlightingService {
+const CODE_REGEX = /(<code class="(.*)">)([\s\S]*?)(<\/code>)/g;
 
-  highlightCodeInChatMessage(message: Array<ChatMessage>) {
+export function useHighlighting() {
+  const highlightCodeInChatMessage = (message: Array<ChatMessage>) => {
     message.forEach(m => {
-      m.content = this.replaceCodeContent(m.content);
+      m.content = replaceCodeContent(m.content);
     });
-  }
+  };
 
-  replaceCodeContent(originalString: string) {
+  const replaceCodeContent = (originalString: string) => {
     // Use a regular expression to find the code tag and its content.
-    const regex = /(<code class="(.*)">)([\s\S]*?)(<\/code>)/g;
 
     let newContent = originalString;
     let match;
-    while ((match = regex.exec(originalString)) !== null) {
+    while ((match = CODE_REGEX.exec(originalString)) !== null) {
       let lang = match[2];
       if (lang && lang.startsWith('language-')) {
         lang = lang.substring(9);
@@ -49,8 +49,7 @@ class HighlightingService {
     }
 
     return newContent;
-  }
+  };
 
+  return {highlightCodeInChatMessage, replaceCodeContent};
 }
-
-export default HighlightingService;

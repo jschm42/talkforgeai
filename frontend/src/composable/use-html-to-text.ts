@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 import {convert} from 'html-to-text';
 
-class HtmlToTextService {
-  removeHtml(htmlContent: string): string {
-    // See https://github.com/html-to-text/node-html-to-text/blob/master/packages/html-to-text/README.md
+export function useHtmlToText() {
+  const removeHtml = (htmlContent: string): string => {
     const options = {
       decodeEntities: false,
       wordwrap: null,
@@ -29,7 +28,7 @@ class HtmlToTextService {
     };
 
     return convert(htmlContent, options);
-  }
-}
+  };
 
-export default HtmlToTextService;
+  return {removeHtml};
+}

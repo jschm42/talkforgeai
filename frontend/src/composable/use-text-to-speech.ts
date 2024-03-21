@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Jean Schmitz.
+ * Copyright (c) 2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import axios from 'axios';
-import AssistantProperties from '@/service/assistant.properties';
 import Assistant from '@/store/to/assistant';
+import AssistantProperties from '@/const/assistant.properties';
+import axios from 'axios';
 
-class TtsService {
+export function useTextToSpeech() {
 
-  async getElevenlabsVoices() {
+  const getElevenlabsVoices = async () => {
     try {
       const result = await axios.get(
           `/api/v1/tts/voices`,
@@ -34,9 +34,9 @@ class TtsService {
     } catch (error) {
       console.error('Error submitting prompt: ', error);
     }
-  }
+  };
 
-  async getElevenlabsModels() {
+  const getElevenlabsModels = async () => {
     try {
       const result = await axios.get(
           `/api/v1/tts/models`,
@@ -50,9 +50,9 @@ class TtsService {
     } catch (error) {
       console.error('Error submitting prompt: ', error);
     }
-  }
+  };
 
-  async speakElevenlabs(text: string, assistantId: string) {
+  const speakElevenlabs = async (text: string, assistantId: string) => {
     try {
       const result = await axios.post(
           `/api/v1/tts/stream`,
@@ -69,9 +69,9 @@ class TtsService {
       console.error('Error submitting prompt: ', error);
     }
     return null;
-  }
+  };
 
-  async speakSpeechAPI(text: string, assistant: Assistant) {
+  const speakSpeechAPI = async (text: string, assistant: Assistant) => {
     return new Promise((resolve) => {
       const msg = new SpeechSynthesisUtterance();
       msg.text = text;
@@ -89,7 +89,7 @@ class TtsService {
 
       window.speechSynthesis.speak(msg);
     });
-  }
-}
+  };
 
-export default TtsService;
+  return {speakElevenlabs, speakSpeechAPI, getElevenlabsVoices, getElevenlabsModels};
+}

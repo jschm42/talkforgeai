@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
+/**
+ * This module provides a set of functions to manage and interact with chat assistants.
+ * It includes functions to handle streaming, synchronization, selection, retrieval, deletion, and creation of assistants.
+ * It also includes functions to manage threads and messages, including retrieval, creation, deletion, and updating.
+ * Additionally, it provides utility functions for handling assistant images and prompts.
+ *
+ * @module useAssistants
+ */
 import debounce from 'lodash/debounce';
 import {useChatStore} from '@/store/chat-store';
-import HighlightingService from '@/service/highlighting.service';
 import {onMounted, onUnmounted} from 'vue';
 import {ParsedThreadMessage, ThreadMessage} from '@/store/to/thread';
 import axios from 'axios';
 import Assistant from '@/store/to/assistant';
-
-const highlightingService = new HighlightingService();
+import {useHighlighting} from '@/composable/use-highligthing';
 
 const DELAY_TIME = 20;
 const DEBOUNCE_TIME = 200;
@@ -35,6 +41,7 @@ enum Order {
 
 export function useAssistants() {
   const chatStore = useChatStore();
+  const {replaceCodeContent} = useHighlighting();
 
   onMounted(() => {
 
@@ -67,7 +74,6 @@ export function useAssistants() {
       const chunkValue = decoder.decode(chunk.value, {stream: true});
 
       if (chunk.done) {
-        console.log('--> done');
         await postStreamProcessing(chatStore, threadId);
         chatStore.removeStatus();
         isReading = false;
@@ -130,7 +136,7 @@ export function useAssistants() {
     const assistantId = message?.assistant_id ?? '';
 
     if (processedMessage?.parsed_content) {
-      const codeContent = highlightingService.replaceCodeContent(processedMessage.parsed_content);
+      const codeContent = replaceCodeContent(processedMessage.parsed_content);
 
       const newMessage = new ThreadMessage(messageId, 'assistant', codeContent, assistantId);
       newMessage.thread_id = threadId;
@@ -260,8 +266,6 @@ export function useAssistants() {
     return axios.post(`/api/v1/threads/${threadId}/runs/${id}/regenerate`);
   };
 
-  // From store ******
-
   const getAssistantById = (assistantId: string) => {
     return chatStore.assistantList.find((assistant) => assistant.id === assistantId);
   };
@@ -296,7 +300,7 @@ export function useAssistants() {
       const parsedContent = chatStore.parsedMessages[message.id];
 
       if (parsedContent && message.content?.[0]?.text) {
-        const replacedContent = highlightingService.replaceCodeContent(parsedContent);
+        const replacedContent = replaceCodeContent(parsedContent);
 
         if (replacedContent) {
           message.content[0].text.value = replacedContent;
@@ -348,8 +352,7 @@ export function useAssistants() {
     const response = result.data;
     console.log('Response: ', response);
 
-    if (response.message_list && response.message_list.data && response.message_list.data.length >
-        0) {
+    if (response?.message_list.data && response.message_list.data.length > 0) {
       return response.message_list.data[0];
     }
   };
@@ -365,8 +368,7 @@ export function useAssistants() {
         const content = parsedThreadMessage.parsed_content;
 
         if (content) {
-          const highlightedContent = highlightingService.replaceCodeContent(content);
-          threadMessage.content[0].text.value = highlightedContent;
+          threadMessage.content[0].text.value = replaceCodeContent(content);
 
           // Get text content of last user message
           const lastUserMessage = chatStore.threadMessages[chatStore.threadMessages.length - 2];

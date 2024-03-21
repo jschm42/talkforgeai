@@ -16,22 +16,21 @@
 
 <script>
 import {defineComponent} from 'vue';
-import TtsService from '@/service/tts.service';
 import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
-import HtmlToTextService from '@/service/html-to-text.service';
-import AssistantProperties, {TTSType} from '@/service/assistant.properties';
+import AssistantProperties, {TTSType} from '@/const/assistant.properties';
 import {useAssistants} from '@/composable/use-assistants';
-
-const ttsService = new TtsService();
-const htmlToTextService = new HtmlToTextService();
+import {useHtmlToText} from '@/composable/use-html-to-text';
+import {useTextToSpeech} from '@/composable/use-text-to-speech';
 
 export default defineComponent({
   name: 'ChatMessageTextToSpeech',
   setup() {
     const chatStore = useChatStore(); // Call useMyStore() inside the setup function
     const assistants = useAssistants();
-    return {chatStore, assistants};
+    const htmlToText = useHtmlToText();
+    const textToSpeech = useTextToSpeech();
+    return {chatStore, assistants, htmlToText, textToSpeech};
   },
   data() {
     return {
@@ -69,7 +68,7 @@ export default defineComponent({
         return;
       }
 
-      const plainText = htmlToTextService.removeHtml(this.message.content[0].text.value);
+      const plainText = this.htmlToText.removeHtml(this.message.content[0].text.value);
       this.audioState = AudioState.Loading;
 
       if (this.getTTSType === TTSType.SPEECHAPI) {
@@ -80,7 +79,8 @@ export default defineComponent({
     },
     async speakElevenlabs(plainText) {
       try {
-        const audioBlob = await ttsService.speakElevenlabs(plainText, this.message.assistant_id);
+        const audioBlob = await this.textToSpeech.speakElevenlabs(plainText,
+            this.message.assistant_id);
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.addEventListener('ended', () => {
@@ -99,7 +99,7 @@ export default defineComponent({
       console.log(`Speaking using SpeechAPI: '${plainText}'`);
       this.audioState = AudioState.Playing;
       const assistant = this.assistants.getAssistantById(this.message.assistant_id);
-      await ttsService.speakSpeechAPI(plainText, assistant);
+      await this.textToSpeech.speakSpeechAPI(plainText, assistant);
       console.log('Stopped...');
       this.audioState = AudioState.Stopped;
     },
@@ -123,6 +123,3 @@ const AudioState = {
   <v-progress-circular v-if="audioState === 'loading'" :hidden="isDisabled" color="primary"
                        indeterminate></v-progress-circular>
 </template>
-
-<style scoped>
-</style>

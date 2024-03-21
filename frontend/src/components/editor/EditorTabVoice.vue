@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -18,11 +18,9 @@
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
-import TtsService from '@/service/tts.service';
-import AssistantProperties, {TTSType} from '@/service/assistant.properties';
 import {useAppStore} from '@/store/app-store';
-
-const ttsService = new TtsService();
+import AssistantProperties, {TTSType} from '@/const/assistant.properties';
+import {useTextToSpeech} from '@/composable/use-text-to-speech';
 
 export default defineComponent({
   name: 'PersonaTabVoice',
@@ -36,8 +34,9 @@ export default defineComponent({
   setup() {
     const {assistantForm} = storeToRefs(usePersonaFormStore());
     const appStore = useAppStore();
+    const textToSpeech = useTextToSpeech();
 
-    return {assistantForm, appStore};
+    return {assistantForm, appStore, textToSpeech};
   },
   computed: {
     TTSType() {
@@ -77,12 +76,12 @@ export default defineComponent({
   },
   async mounted() {
     try {
-      const elevenLabsVoices = await ttsService.getElevenlabsVoices();
+      const elevenLabsVoices = await this.textToSpeech.getElevenlabsVoices();
       this.elevenLabsVoices = elevenLabsVoices['voices'];
       console.log('this.elevenLabsVoices', this.elevenLabsVoices);
       this.updateVoiceIdSelection();
 
-      this.elevenLabsModels = await ttsService.getElevenlabsModels();
+      this.elevenLabsModels = await this.textToSpeech.getElevenlabsModels();
       console.log('this.elevenLabsModels', this.elevenLabsModels);
       this.populateVoices();
     } catch (error) {
@@ -188,17 +187,3 @@ export default defineComponent({
 
   </div>
 </template>
-
-<style scoped>
-.placeholder-image {
-  font-size: 7em;
-  width: 200px;
-  height: 200px;
-}
-
-.thumbnail-image {
-  width: 200px;
-  height: 200px;
-}
-
-</style>

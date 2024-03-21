@@ -18,7 +18,7 @@
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
-import AssistantProperties from '@/service/assistant.properties';
+import AssistantProperties from '@/const/assistant.properties';
 import {useAppStore} from '@/store/app-store';
 import {useAssistants} from '@/composable/use-assistants';
 
