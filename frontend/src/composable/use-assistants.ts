@@ -276,6 +276,18 @@ export function useAssistants() {
     return result.data;
   };
 
+  const modifyAssistant = async (assistantId: string, assistant: Assistant) => {
+    console.log('Modify assistant with id:', assistantId);
+    const result = await axios.post(`/api/v1/assistants/${assistantId}`, assistant);
+    return result.data;
+  };
+
+  const createAssistant = async (assistant: Assistant) => {
+    console.log('Create assistant.');
+    const result = await axios.post(`/api/v1/assistants`, assistant);
+    return result.data;
+  };
+
   const retrieveMessages = async (threadId: string) => {
     const result = await axios.get(
         `/api/v1/threads/${threadId}/messages`,
@@ -479,6 +491,8 @@ export function useAssistants() {
     selectAssistant,
     retrieveAssistant,
     retrieveAssistants,
+    modifyAssistant,
+    createAssistant,
     deleteAssistant,
     retrieveThreads,
     getAssistantById,
