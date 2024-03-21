@@ -15,30 +15,21 @@
   -->
 
 <template>
-  <div class="p-2 m-1 rounded shadow">
-
-    <div class="d-flex flex-row">
-      <div class="flex-grow-1">
-        <div class="form-check form-switch d-flex switch-panel mt-3">
-          <input id="flexCheckDefault" v-model="this.chatStore.isAutoSpeak"
-                 class="form-check-input" role="switch" type="checkbox">
-          <label class="form-check-label mx-2" for="flexCheckDefault">
-            Auto speak
-          </label>
-        </div>
-      </div>
-      <button :hidden="isRegenerateRequestHidden" class="btn btn-outline-warning my-2"
-              @click="onRegenerateRun()">Regenerate request
-      </button>
-      <button :hidden="isCancelRequestHidden" class="btn btn-outline-warning my-2"
-              @click="onCancelRun()">Cancel request
-      </button>
-    </div>
-    <div class="row">
-      <ChatMessageInput @submit-result-received="submitResultReceived"
-                        @chunk-update-received="chunkUpdateReceived"></ChatMessageInput>
-    </div>
-  </div>
+  <v-card>
+    <v-card-actions>
+      <v-checkbox v-model="this.chatStore.isAutoSpeak" label="Auto speak"></v-checkbox>
+      <v-btn :hidden="isRegenerateRequestHidden"
+             @click="onRegenerateRun()">Regenerate request
+      </v-btn>
+      <v-btn :hidden="isCancelRequestHidden" @click="onCancelRun()">Cancel request</v-btn>
+    </v-card-actions>
+    <v-row>
+      <v-col>
+        <ChatMessageInput @submit-result-received="submitResultReceived"
+                          @chunk-update-received="chunkUpdateReceived"></ChatMessageInput>
+      </v-col>
+    </v-row>
+  </v-card>
 </template>
 
 <script>
@@ -100,9 +91,3 @@ export default {
 };
 </script>
 
-<style scoped>
-.switch-panel {
-  color: white;
-  margin-bottom: 5px;
-}
-</style>

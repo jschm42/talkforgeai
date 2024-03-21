@@ -60,39 +60,47 @@ export function useAssistants() {
 
     chunkUpdateCallback();
 
-    const response = await fetchSSE(assistantId, threadId);
-    const reader = response.body?.getReader();
-    if (!reader) return;
+    chatStore.runId = '';
+    try {
+      const response = await fetchSSE(assistantId, threadId);
+      const reader = response.body?.getReader();
+      if (!reader) return;
 
-    const decoder = new TextDecoder('utf-8');
-    let partial = '';
+      const decoder = new TextDecoder('utf-8');
+      let partial = '';
 
-    let isReading = true;
-    while (isReading) {
-      const chunk = await reader.read();
+      let isReading = true;
+      while (isReading) {
+        const chunk = await reader.read();
 
-      const chunkValue = decoder.decode(chunk.value, {stream: true});
+        const chunkValue = decoder.decode(chunk.value, {stream: true});
 
-      if (chunk.done) {
-        await postStreamProcessing(chatStore, threadId);
-        chatStore.removeStatus();
-        isReading = false;
-      } else {
-        partial += chunkValue;
-        const parts = partial.split('\n');
-        partial = parts.pop() ?? '';
-        for (const part of parts) {
-          if (part.startsWith('data:')) {
-            const data = part.substring(5);
-            console.log('--> data', data);
-            processData(data, chatStore, debouncedUpdateCallback);
-            await sleep(DELAY_TIME);
-          } else if (part.startsWith('event:')) {
-            const event = part.substring(6);
-            console.log('--> event', event);
+        if (chunk.done) {
+          await postStreamProcessing(threadId);
+          chatStore.removeStatus();
+          isReading = false;
+        } else {
+          partial += chunkValue;
+          const parts = partial.split('\n');
+          partial = parts.pop() ?? '';
+
+          let currentEvent = '';
+          for (const part of parts) {
+            if (part.startsWith('event:')) {
+              currentEvent = part.substring(6);
+              console.log('--> event', currentEvent);
+            } else if (part.startsWith('data:')) {
+              const data = part.substring(5);
+              console.log('--> data', data);
+              processData(data, currentEvent, debouncedUpdateCallback);
+              currentEvent = '';
+              await sleep(DELAY_TIME);
+            }
           }
         }
       }
+    } finally {
+      chatStore.runId = '';
     }
   };
 
@@ -128,7 +136,7 @@ export function useAssistants() {
     return html.replace(/[<>]/g, (tag: string) => tagsToReplace[tag] || tag);
   };
 
-  const postStreamProcessing = async (store: any, threadId: string) => {
+  const postStreamProcessing = async (threadId: string) => {
     const processedMessage = await postprocessLastMessage(threadId);
 
     const message = processedMessage.message;
@@ -141,8 +149,8 @@ export function useAssistants() {
       const newMessage = new ThreadMessage(messageId, 'assistant', codeContent, assistantId);
       newMessage.thread_id = threadId;
 
-      store.threadMessages.pop();
-      store.threadMessages.push(newMessage);
+      chatStore.threadMessages.pop();
+      chatStore.threadMessages.push(newMessage);
     }
 
   };
@@ -155,18 +163,38 @@ export function useAssistants() {
     return result.data;
   };
 
-  const processData = (data: string, store: any, debouncedUpdateCallback: () => void) => {
+  const processData = (data: string, event: string, debouncedUpdateCallback: () => void) => {
     if (!hasJSONData(data)) return;
 
+    switch (event) {
+      case 'thread.message.delta':
+        processDeltaEvent(data);
+        break;
+      case 'thread.run.created':
+        processRunCreatedEvent(data);
+        break;
+    }
+
+    debouncedUpdateCallback();
+  };
+
+  const processRunCreatedEvent = (data: string) => {
+    console.log('## processRunCreatedEvent', data);
+    chatStore.runId = JSON.parse(data)['id'];
+  };
+
+  const processDeltaEvent = (data: string) => {
+    console.log('## processDeltaEvent', data);
     const content = JSON.parse(data)['delta']['content'];
-    const lastMessage = store.threadMessages[store.threadMessages.length - 1];
+    const lastMessage = chatStore.getLastMessage();
+
+    if (!lastMessage?.content?.[0]?.text) return;
 
     if (content.length > 0 && content[0].type === 'text') {
       const textContent = content[0].text.value;
       let newContent = escapeHtml(textContent);
       newContent = newContent.replaceAll(/\n/g, '<br/>');
       lastMessage.content[0].text.value += newContent;
-      debouncedUpdateCallback();
     }
   };
 

@@ -75,6 +75,9 @@ export const useChatStore = defineStore('chat', {
         }
       }
     },
+    getLastMessage(): ThreadMessage {
+      return this.threadMessages[this.threadMessages.length - 1];
+    },
     toggleAutoSpeak() {
       this.isAutoSpeak = !this.isAutoSpeak;
     },

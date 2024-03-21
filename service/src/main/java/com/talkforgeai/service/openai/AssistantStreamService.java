@@ -122,7 +122,7 @@ public class AssistantStreamService {
   private ServerSentEvent<String> createResponseSseEvent(ServerSentEvent<String> sseEvent) {
     if (sseEvent.event() != null) {
       return switch (sseEvent.event()) {
-        case "thread.message.delta", "done" -> sseEvent;
+        case "thread.run.created", "thread.message.delta", "done" -> sseEvent;
         default -> null;
       };
     }
