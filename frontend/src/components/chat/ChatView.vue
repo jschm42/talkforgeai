@@ -124,14 +124,16 @@ import {useAppStore} from '@/store/app-store';
 import ChatHeader from '@/components/chat/ChatHeader.vue';
 import ChatContainer from '@/components/chat/ChatContainer.vue';
 import ThreadList from '@/components/thread/ThreadList.vue';
+import {useAssistants} from '@/composable/use-assistants';
 
 export default defineComponent({
   components: {ThreadList, ChatHeader, ChatContainer},
   props: ['assistantId'],
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
+    const chatStore = useChatStore(); // Call useMyStore() inside the setup function
+    const assistants = useAssistants();
     const appStore = useAppStore();
-    return {store, appStore};
+    return {chatStore, appStore, assistants};
   },
   data() {
     return {
@@ -140,12 +142,12 @@ export default defineComponent({
   },
   computed: {
     assistantName() {
-      return this.store.selectedAssistant.name;
+      return this.chatStore.selectedAssistant.name;
     },
   },
   methods: {
     onNewThread() {
-      this.store.newThread();
+      this.assistants.newThread();
     },
     onClickBack() {
       this.$router.push('/');
@@ -155,12 +157,12 @@ export default defineComponent({
     },
     async fetchData() {
       try {
-        this.store.selectedAssistant.image_path = '';
-        if (this.store.assistantList.length === 0) {
-          await this.store.retrieveAssistants();
+        this.chatStore.selectedAssistant.image_path = '';
+        if (this.chatStore.assistantList.length === 0) {
+          await this.assistants.retrieveAssistants();
         }
-        await this.store.selectAssistant(this.assistantId);
-        await this.store.retrieveThreads();
+        await this.assistants.selectAssistant(this.assistantId);
+        await this.assistants.retrieveThreads();
       } catch (error) {
         this.appStore.handleError(error);
       }

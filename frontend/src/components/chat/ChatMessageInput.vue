@@ -38,6 +38,7 @@ import {useAppStore} from '@/store/app-store';
 import WhisperComponent from '@/components/common/WhisperComponent.vue';
 import {nextTick} from 'vue';
 import hljs from 'highlight.js';
+import {useAssistants} from '@/composable/use-assistants';
 
 export default {
   name: 'ChatMessageInput',
@@ -45,8 +46,9 @@ export default {
   setup() {
     const chatStore = useChatStore(); // Call useMyStore() inside the setup function
     const appStore = useAppStore();
+    const assistants = useAssistants();
 
-    return {chatStore, appStore};
+    return {chatStore, appStore, assistants};
   },
   data() {
     return {
@@ -58,10 +60,10 @@ export default {
     async submit() {
       this.isInputLocked = true;
 
-      this.chatStore.currentStatusMessage = 'Thinking...';
+      this.chatStore.updateStatus('Thinking...', 'info');
       try {
         this.$emit('chunkUpdateReceived');
-        await this.chatStore.submitUserMessage(this.prompt,
+        await this.assistants.submitUserMessage(this.prompt,
             () => this.$emit('chunkUpdateReceived'));
         this.$emit('chunkUpdateReceived');
       } catch (error) {

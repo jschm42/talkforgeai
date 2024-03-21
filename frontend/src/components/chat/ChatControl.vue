@@ -45,6 +45,7 @@
 import {useChatStore} from '@/store/chat-store';
 import ChatMessageInput from '@/components/chat/ChatMessageInput.vue';
 import {useAppStore} from '@/store/app-store';
+import {useAssistants} from '@/composable/use-assistants';
 
 export default {
   name: 'ChatControl',
@@ -72,7 +73,7 @@ export default {
     onCancelRun() {
       console.log('Chat Control - Cancel Run');
       try {
-        this.chatStore.cancelCurrentRun();
+        this.assistants.cancelCurrentRun();
       } catch (error) {
         this.appStore.handleError(error);
         this.chatStore.updateStatus('Error: ' + error, 'error');
@@ -82,7 +83,7 @@ export default {
       console.log('Chat Control - Regenerate Run');
       this.appStore.resetErrorState();
       try {
-        await this.chatStore.regenerateCurrentRun(() => this.$emit('chunkUpdateReceived'));
+        await this.assistants.regenerateCurrentRun(() => this.$emit('chunkUpdateReceived'));
       } catch (error) {
         this.appStore.handleError(error);
         this.chatStore.updateStatus('Error: ' + error, 'error');
@@ -92,8 +93,9 @@ export default {
   setup() {
     const chatStore = useChatStore(); // Call useMyStore() inside the setup function
     const appStore = useAppStore();
+    const assistants = useAssistants();
 
-    return {chatStore, appStore};
+    return {chatStore, appStore, assistants};
   },
 };
 </script>

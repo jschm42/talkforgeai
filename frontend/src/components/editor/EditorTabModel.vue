@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -19,10 +19,8 @@ import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
 import AssistantProperties from '@/service/assistant.properties';
-import AssistantService from '@/service/assistant.service';
 import {useAppStore} from '@/store/app-store';
-
-const assistantService = new AssistantService();
+import {useAssistants} from '@/composable/use-assistants';
 
 export default defineComponent({
   name: 'PersonaTabModel',
@@ -38,14 +36,15 @@ export default defineComponent({
   },
   setup() {
     const {assistantForm} = storeToRefs(usePersonaFormStore());
+    const assistants = useAssistants();
     const appStore = useAppStore();
 
-    return {assistantForm, appStore};
+    return {assistantForm, appStore, assistants};
   },
   methods: {},
   async mounted() {
     try {
-      this.chatGptModels = await assistantService.retrieveGPTModels();
+      this.chatGptModels = await this.assistants.retrieveGPTModels();
       if (!this.assistantForm.model) {
         this.assistantForm.model = this.chatGptModels[0];
       }
@@ -141,15 +140,4 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.placeholder-image {
-  font-size: 7em;
-  width: 200px;
-  height: 200px;
-}
-
-.thumbnail-image {
-  width: 200px;
-  height: 200px;
-}
-
 </style>

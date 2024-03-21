@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -28,17 +28,11 @@
 
 <script>
 
-import {useChatStore} from '@/store/chat-store';
 import Assistant from '@/store/to/assistant';
 import AssistantProperties, {TTSType} from '@/service/assistant.properties';
 
 export default {
   name: 'PersonaCompactInfo',
-  setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
-
-    return {store};
-  },
   data() {
     return {
       allowedKeys: [],

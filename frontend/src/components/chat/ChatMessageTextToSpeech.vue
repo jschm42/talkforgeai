@@ -21,6 +21,7 @@ import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
 import HtmlToTextService from '@/service/html-to-text.service';
 import AssistantProperties, {TTSType} from '@/service/assistant.properties';
+import {useAssistants} from '@/composable/use-assistants';
 
 const ttsService = new TtsService();
 const htmlToTextService = new HtmlToTextService();
@@ -28,8 +29,9 @@ const htmlToTextService = new HtmlToTextService();
 export default defineComponent({
   name: 'ChatMessageTextToSpeech',
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
-    return {store};
+    const chatStore = useChatStore(); // Call useMyStore() inside the setup function
+    const assistants = useAssistants();
+    return {chatStore, assistants};
   },
   data() {
     return {
@@ -41,10 +43,10 @@ export default defineComponent({
   },
   computed: {
     getTTSType() {
-      return this.store.selectedAssistant.properties[AssistantProperties.TTS_TYPE];
+      return this.chatStore.selectedAssistant.properties[AssistantProperties.TTS_TYPE];
     },
     isDisabled() {
-      return this.store.selectedAssistant.properties[AssistantProperties.TTS_TYPE] ===
+      return this.chatStore.selectedAssistant.properties[AssistantProperties.TTS_TYPE] ===
           TTSType.DISABLED;
     },
   },
@@ -96,7 +98,7 @@ export default defineComponent({
     async speakSpeechApi(plainText) {
       console.log(`Speaking using SpeechAPI: '${plainText}'`);
       this.audioState = AudioState.Playing;
-      const assistant = this.store.getAssistantById(this.message.assistant_id);
+      const assistant = this.assistants.getAssistantById(this.message.assistant_id);
       await ttsService.speakSpeechAPI(plainText, assistant);
       console.log('Stopped...');
       this.audioState = AudioState.Stopped;

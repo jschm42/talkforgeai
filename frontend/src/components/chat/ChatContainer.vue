@@ -17,7 +17,7 @@
 <template>
   <div class="d-flex flex-column chat-container gx-0">
     <div ref="entries" class="flex-grow-1 vertical-scrollbar no-horizontal-scrollbar ">
-      <ChatMessage v-for="(message, index) in store.threadMessages" ref="chatMessageRef"
+      <ChatMessage v-for="(message, index) in chatStore.threadMessages" ref="chatMessageRef"
                    v-bind:key="index"
                    :message="message" :messageIndex="index"></ChatMessage>
     </div>
@@ -39,10 +39,10 @@ import {useAppStore} from '@/store/app-store';
 export default {
   name: 'ChatContainer',
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
+    const chatStore = useChatStore(); // Call useMyStore() inside the setup function
     const appStore = useAppStore();
     return {
-      store, appStore,
+      chatStore, appStore,
     };
   },
   data() {
@@ -56,7 +56,7 @@ export default {
     async submitResultReceived() {
       console.log('Submit Result Received');
 
-      if (this.store.isAutoSpeak) {
+      if (this.chatStore.isAutoSpeak) {
         const lastChatMessage = this.$refs.chatMessageRef.slice(-1)[0];
         console.log('Auto speaking last Chat-Message:');
         await lastChatMessage.playAudio();
@@ -76,7 +76,7 @@ export default {
     },
     chunkUpdateReceived() {
       console.log('Chunk Update Received - Scrolling to bottom of chat entries');
-      
+
       this.$nextTick(() => {
         this.$refs.entries.scrollTop = this.$refs.entries.scrollHeight;
       });

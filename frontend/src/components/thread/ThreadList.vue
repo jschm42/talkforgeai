@@ -29,15 +29,17 @@ import {useAppStore} from '@/store/app-store';
 import hljs from 'highlight.js';
 import {nextTick} from 'vue';
 import ThreadEntry from '@/components/thread/ThreadEntry.vue';
+import {useAssistants} from '@/composable/use-assistants';
 
 export default {
   name: 'ThreadList',
   components: {ThreadEntry},
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
+    const chatStore = useChatStore(); // Call useMyStore() inside the setup function
     const appStore = useAppStore();
+    const assistants = useAssistants();
 
-    return {store, appStore};
+    return {chatStore, appStore, assistants};
   },
   data() {
     return {
@@ -46,15 +48,15 @@ export default {
   },
   computed: {
     allSessionEntries() {
-      return this.store.threads;
+      return this.chatStore.threads;
     },
   },
   methods: {
     async onEntrySelected(threadId) {
       try {
-        if (this.store.threadId !== threadId) {
-          this.store.threadId = threadId;
-          await this.store.retrieveMessages(threadId);
+        if (this.chatStore.threadId !== threadId) {
+          this.chatStore.threadId = threadId;
+          await this.assistants.retrieveMessages(threadId);
           await nextTick();
           hljs.highlightAll();
         }

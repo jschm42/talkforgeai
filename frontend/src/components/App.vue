@@ -58,11 +58,11 @@ export default {
   name: 'ChatContainer',
   components: {ErrorAlerts},
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
+    const chatStore = useChatStore(); // Call useMyStore() inside the setup function
     const personaStore = usePersonaFormStore();
 
     return {
-      store,
+      chatStore,
       personaStore,
     };
   },

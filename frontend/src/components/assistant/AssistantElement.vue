@@ -17,13 +17,15 @@
 <script>
 
 import {useChatStore} from '@/store/chat-store';
+import {useAssistants} from '@/composable/use-assistants';
 
 export default {
   name: 'AssistantElement',
   components: {},
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
-    return {store};
+    const chatStore = useChatStore(); // Call useMyStore() inside the setup function
+    const assistants = useAssistants();
+    return {chatStore, assistants};
   },
   data() {
     return {
@@ -35,7 +37,7 @@ export default {
   },
   computed: {
     imageSrc() {
-      return this.store.getAssistantImageUrl(this.assistant.image_path);
+      return this.assistants.getAssistantImageUrl(this.assistant.image_path);
     },
     isShowAssistantImage() {
       return !!this.assistant.image_path;
@@ -47,7 +49,7 @@ export default {
   methods: {
     onPersonaSelected() {
       console.log('PersonaChoiceView.onPersonaSelected: ' + this.assistant.id,
-          this.store.assistantList);
+          this.chatStore.assistantList);
       this.$router.push({name: 'chat', params: {assistantId: this.assistant.id}});
     },
     onEditPersona() {

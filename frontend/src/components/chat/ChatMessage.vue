@@ -19,13 +19,15 @@
 import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
 import ChatMessageTextToSpeech from '@/components/chat/ChatMessageTextToSpeech.vue';
+import {useAssistants} from '@/composable/use-assistants';
 
 export default {
   name: 'ChatMessage',
   components: {ChatMessageTextToSpeech},
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
-    return {store};
+    const chatStore = useChatStore(); // Call useMyStore() inside the setup function
+    const assistants = useAssistants();
+    return {chatStore, assistants};
   },
   data() {
     return {};
@@ -36,14 +38,14 @@ export default {
   },
   computed: {
     errorMessage() {
-      return this.store.currentStatusMessage;
+      return this.chatStore.currentStatusMessage;
     },
     personaImage() {
       // Find the assistant in the store
       const assistantId = this.message.assistant_id;
-      const assistant = this.store.assistantList.find(a => a.id === assistantId);
+      const assistant = this.chatStore.assistantList.find(a => a.id === assistantId);
       if (assistant) {
-        return this.store.getAssistantImageUrl(assistant.image_path);
+        return this.assistants.getAssistantImageUrl(assistant.image_path);
       }
       return '';
     },
@@ -55,8 +57,8 @@ export default {
     },
     hasProfileImage() {
       const assistantId = this.message.assistant_id;
-      const assistant = this.store.assistantList.find(a => a.id === assistantId);
-      if (assistant && assistant.image_path) {
+      const assistant = this.chatStore.assistantList.find(a => a.id === assistantId);
+      if (assistant?.image_path) {
         return assistant.image_path;
       }
       return false;
@@ -83,10 +85,10 @@ export default {
       };
     },
     statusMessage() {
-      return this.store.currentStatusMessage;
+      return this.chatStore.currentStatusMessage;
     },
     statusMessageType() {
-      return this.store.currentStatusMessageType;
+      return this.chatStore.currentStatusMessageType;
     },
   },
   methods: {
@@ -97,13 +99,13 @@ export default {
       return this.message.content[0].text.value;
     },
     getMessageStatus() {
-      if (this.messageIndex === this.store.maxMessageIndex) {
+      if (this.messageIndex === this.chatStore.maxMessageIndex) {
         return this.statusMessage;
       }
       return '';
     },
     getMessageStatusType() {
-      if (this.messageIndex === this.store.maxMessageIndex) {
+      if (this.messageIndex === this.chatStore.maxMessageIndex) {
         return this.statusMessageType;
       }
       return '';
@@ -113,37 +115,6 @@ export default {
 </script>
 
 <template>
-  <!--
-  <div :class="messageClass" class="card m-1 p-1 shadow">
-    <div class="d-flex flex-row">
-      <div class="">
-        <i v-if="isUser" class="fs-1 bi bi-person"></i>
-        <img v-else-if="isAssistant && hasProfileImage" :src="personaImage" alt="Assistant"
-             class="persona-icon">
-        <i v-else class="fs-1 bi bi-robot robot-icon"></i>
-      </div>
-      <div class="flex-grow-1">
-        <div class="card-body">
-          <div v-if="getMessageStatusType() === 'running'" class="spinner-grow text-primary"
-               role="status">
-          </div>
-          <span v-else-if="getMessageStatusType() === 'error'">
-            <i class="bi bi-exclamation-lg bg-danger"></i>
-            {{ errorMessage }}
-          </span>
-          <div v-else class="card-text text-start" v-html="getContent()"></div>
-        </div>
-      </div>
-      <div class="text-end">
-        <chat-message-text-to-speech v-if="isAssistant" ref="chatMessageAudioPlayerRef"
-                                     :message="message"></chat-message-text-to-speech>
-      </div>
-    </div>
-    <footer>
-
-    </footer>
-  </div>
-  -->
   <v-container class="message-container">
     <v-row dense>
       <v-col cols="12">
@@ -171,8 +142,9 @@ export default {
             <v-card-text v-else v-html="getContent()"></v-card-text>
           </div>
 
-          <v-card-actions>
-            <chat-message-text-to-speech :message="message"></chat-message-text-to-speech>
+          <v-card-actions v-if="isAssistant">
+            <chat-message-text-to-speech ref="chatMessageAudioPlayerRef"
+                                         :message="message"></chat-message-text-to-speech>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -182,41 +154,8 @@ export default {
 </template>
 
 <style scoped>
-.role-user {
-  background-color: #2c3e50;
-}
-
-.role-assistantEntity {
-  //background-color: #000000;
-}
-
-.role-icon {
-  font-size: 2em;
-}
-
-.persona-icon {
-  width: 64px;
-  height: 64px;
-}
-
-.message-icon {
-  font-size: 1.5em;
-}
-
-.code-word {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 0.25rem;
-  /*font-family: "Source Code Pro", monospace;*/
-  font-family: 'Courier New', monospace
-}
-
 footer {
   font-style: italic;
-}
-
-.robot-icon {
-  color: darksalmon;
 }
 
 .message-container {

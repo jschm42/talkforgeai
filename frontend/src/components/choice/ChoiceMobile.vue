@@ -62,13 +62,15 @@ import {defineComponent} from 'vue';
 import {useChatStore} from '@/store/chat-store';
 import {useAppStore} from '@/store/app-store';
 import AssistantElement from '@/components/assistant/AssistantElement.vue';
+import {useAssistants} from '@/composable/use-assistants';
 
 export default defineComponent({
   components: {AssistantElement},
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
+    const chatStore = useChatStore(); // Call useMyStore() inside the setup function
     const appStore = useAppStore();
-    return {store, appStore};
+    const assistants = useAssistants();
+    return {chatStore, appStore, assistants};
   },
   data() {
     return {
@@ -78,7 +80,7 @@ export default defineComponent({
   },
   computed: {
     assistantList() {
-      return this.store.assistantList;
+      return this.chatStore.assistantList;
     },
   },
   methods: {
@@ -93,7 +95,7 @@ export default defineComponent({
   },
   async mounted() {
     try {
-      await this.store.syncAssistants();
+      await this.assistants.syncAssistants();
     } catch (error) {
       this.appStore.handleError(error);
     }

@@ -23,17 +23,17 @@
 <script>
 import {computed, onMounted} from 'vue';
 import {useAppStore} from '@/store/app-store';
-import {useChatStore} from '@/store/chat-store';
 import {useDisplay} from 'vuetify';
 import ChoiceMobile from '@/components/choice/ChoiceMobile.vue';
 import ChoiceDesktop from '@/components/choice/ChoiceDesktop.vue';
+import {useAssistants} from '@/composable/use-assistants';
 
 export default {
   components: {ChoiceDesktop, ChoiceMobile},
   setup() {
     const {mobile} = useDisplay();
     const appStore = useAppStore();
-    const chatStore = useChatStore();
+    const assistants = useAssistants();
 
     const currentViewComponent = computed(() => {
       // You can adjust the breakpoint here according to your needs
@@ -47,7 +47,7 @@ export default {
 
     onMounted(async () => {
       try {
-        await chatStore.syncAssistants();
+        await assistants.syncAssistants();
       } catch (error) {
         appStore.handleError(error);
       }

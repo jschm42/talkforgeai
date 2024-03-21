@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -18,11 +18,9 @@
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
 import {usePersonaFormStore} from '@/store/persona-form-store';
-import AssistantService from '@/service/assistant.service';
 import {useChatStore} from '@/store/chat-store';
 import {useAppStore} from '@/store/app-store';
-
-const assistantService = new AssistantService();
+import {useAssistants} from '@/composable/use-assistants';
 
 export default defineComponent({
   name: 'PersonaTabProfile',
@@ -34,22 +32,23 @@ export default defineComponent({
     };
   },
   setup() {
-    const store = useChatStore();
+    const chatStore = useChatStore();
     const appStore = useAppStore();
+    const assistants = useAssistants();
     const {assistantForm} = storeToRefs(usePersonaFormStore());
 
-    return {assistantForm, store, appStore};
+    return {assistantForm, chatStore, appStore, assistants};
   },
   methods: {
     getImageUrl(fileName) {
-      return this.store.getAssistantImageUrl(fileName);
+      return this.assistants.getAssistantImageUrl(fileName);
     },
     async onFileSelected(event) {
       const selectedFile = event.target.files[0];
       console.log('Selected file:', selectedFile);
 
       try {
-        const uploadedFileName = await assistantService.uploadAssistantImage(selectedFile);
+        const uploadedFileName = await this.assistants.uploadAssistantImage(selectedFile);
         if (uploadedFileName) {
           console.log('Uploaded file:', uploadedFileName.data);
           this.$refs.fileInput.textContent = uploadedFileName.data.filename;
@@ -63,12 +62,12 @@ export default defineComponent({
       this.$refs.fileInput.click();
     },
     getAltImageText() {
-      return this.personaForm.image_path;
+      return this.assistantForm.image_path;
     },
     async onGenerateImage() {
       this.isGenerationRunning = true;
       try {
-        const imageResponse = await assistantService.generateAssistantImage(
+        const imageResponse = await this.assistants.generateAssistantImage(
             this.imageGenerationPrompt);
         console.log('Image response: ', imageResponse);
         this.assistantForm.image_path = imageResponse.data.fileName;

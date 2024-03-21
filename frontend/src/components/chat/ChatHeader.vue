@@ -31,6 +31,7 @@
 <script>
 
 import {useChatStore} from '@/store/chat-store';
+import {useAssistants} from '@/composable/use-assistants';
 
 export default {
   name: 'ChatHeader',
@@ -39,30 +40,31 @@ export default {
     showName: Boolean,
   },
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
+    const chatStore = useChatStore(); // Call useMyStore() inside the setup function
+    const assistants = useAssistants();
 
-    return {store};
+    return {chatStore, assistants};
   },
   data() {
     return {};
   },
   computed: {
     personaName() {
-      return `${this.store.selectedAssistant.name}`;
+      return `${this.chatStore.selectedAssistant.name}`;
     },
     personaDescription() {
-      return `${this.store.selectedAssistant.description}`;
+      return `${this.chatStore.selectedAssistant.description}`;
     },
     personaList() {
-      return this.store.personaList;
+      return this.chatStore.personaList;
     },
     selectedAssistant() {
-      return this.store.selectedAssistant;
+      return this.chatStore.selectedAssistant;
     },
   },
   methods: {
     imageSrc(imagePath) {
-      return this.store.getAssistantImageUrl(imagePath);
+      return this.assistants.getAssistantImageUrl(imagePath);
     },
     isShowAssistantImage(assistant) {
       return !!assistant.image_path;
@@ -70,6 +72,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-</style>

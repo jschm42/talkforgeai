@@ -23,7 +23,6 @@
       <div class="flex-grow-1 mx-1 text-truncate" role="button" @click.prevent="onEntrySelected">
         <input v-if="isEditMode" v-model="title" class="title-input"/>
         <p v-else class="text-truncate thread-title">{{ title }}</p>
-        <!--        <p class="small overflow-hidden">{{ formatTimestamp(entry.createdAt) }}</p>-->
       </div>
       <div class="flex-shrink-0">
         <div v-if="isEditMode || isDeleteMode" class="confirm-buttons">
@@ -43,6 +42,7 @@
 <script>
 import {useChatStore} from '@/store/chat-store';
 import {format} from 'date-fns';
+import {useAssistants} from '@/composable/use-assistants';
 
 export default {
   name: 'ThreadEntry',
@@ -56,26 +56,27 @@ export default {
     };
   },
   setup() {
-    const store = useChatStore(); // Call useMyStore() inside the setup function
-    return {store};
+    const chatStore = useChatStore(); // Call useMyStore() inside the setup function
+    const assistants = useAssistants();
+    return {chatStore, assistants};
   },
   computed: {
     isEditMode() {
-      return this.store.threadEditMode && this.isSelected;
+      return this.chatStore.threadEditMode && this.isSelected;
     },
     isDeleteMode() {
-      return this.store.threadDeleteMode && this.isSelected;
+      return this.chatStore.threadDeleteMode && this.isSelected;
     },
     getTitle() {
       return `${this.entry.id} - ${this.entry.title}`;
     },
     isSelected() {
-      return this.entry.id === this.store.threadId;
+      return this.entry.id === this.chatStore.threadId;
     },
   },
   methods: {
     getEntryClass() {
-      if (this.entry.id === this.store.threadId) {
+      if (this.entry.id === this.chatStore.threadId) {
         return 'bg-primary';
       }
       return '';
@@ -86,32 +87,32 @@ export default {
       }
     },
     onClickDelete() {
-      this.store.threadDeleteMode = true;
+      this.chatStore.threadDeleteMode = true;
     },
     onClickEdit() {
-      this.store.threadEditMode = true;
+      this.chatStore.threadEditMode = true;
     },
     onEntrySelected() {
       if (!this.isSelected) {
-        this.store.threadDeleteMode = false;
-        this.store.threadEditMode = false;
+        this.chatStore.threadDeleteMode = false;
+        this.chatStore.threadEditMode = false;
       }
       this.$emit('entrySelected', this.entry.id);
     },
     async onClickConfirm() {
-      if (this.store.threadEditMode) {
+      if (this.chatStore.threadEditMode) {
         this.oldTitle = this.title;
-        this.store.threadEditMode = false;
-        await this.store.updateThreadTitle(this.store.threadId, this.title);
-      } else if (this.store.threadDeleteMode) {
-        this.store.threadDeleteMode = false;
-        await this.store.deleteThread(this.store.threadId);
+        this.chatStore.threadEditMode = false;
+        await this.assistants.updateThreadTitle(this.chatStore.threadId, this.title);
+      } else if (this.chatStore.threadDeleteMode) {
+        this.chatStore.threadDeleteMode = false;
+        await this.assistants.deleteThread(this.chatStore.threadId);
       }
     },
     onClickCancel() {
       this.title = this.oldTitle;
-      this.store.threadEditMode = false;
-      this.store.threadDeleteMode = false;
+      this.chatStore.threadEditMode = false;
+      this.chatStore.threadDeleteMode = false;
     },
   },
   mounted() {

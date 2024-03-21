@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -95,15 +95,13 @@
 import {defineComponent} from 'vue';
 import {usePersonaFormStore} from '@/store/persona-form-store';
 import Assistant from '@/store/to/assistant';
-import AssistantService from '@/service/assistant.service';
 import {useAppStore} from '@/store/app-store';
 import EditorTabFeatures from '@/components/editor/EditorTabFeatures.vue';
 import EditorTabVoice from '@/components/editor/EditorTabVoice.vue';
 import EditorTabModel from '@/components/editor/EditorTabModel.vue';
 import EditorTabProfile from '@/components/editor/EditorTabProfile.vue';
 import QuestionModal from '@/components/common/QuestionModal.vue';
-
-const assistantService = new AssistantService();
+import {useAssistants} from '@/composable/use-assistants';
 
 export default defineComponent({
   components: {
@@ -116,7 +114,8 @@ export default defineComponent({
   setup() {
     const store = usePersonaFormStore(); // Call useMyStore() inside the setup function
     const appStore = useAppStore();
-    return {store, appStore};
+    const assistants = useAssistants();
+    return {store, appStore, assistants};
   },
   data() {
     return {
@@ -141,9 +140,9 @@ export default defineComponent({
 
       try {
         if (this.assistantId) {
-          await assistantService.modifyAssistant(this.assistantId, assistant);
+          await this.assistants.modifyAssistant(this.assistantId, assistant);
         } else {
-          await assistantService.createAssistant(assistant);
+          await this.assistants.createAssistant(assistant);
         }
 
         this.$router.push({name: 'persona-choice'});
@@ -161,7 +160,7 @@ export default defineComponent({
       this.showModal = false;
       if (answer) {
         try {
-          assistantService.deleteAssistant(this.assistantId).then(() => {
+          this.assistants.deleteAssistant(this.assistantId).then(() => {
             this.$router.push({name: 'persona-choice'});
           });
         } catch (error) {
@@ -174,7 +173,7 @@ export default defineComponent({
     this.store.resetPersonaEditForm();
     if (this.assistantId) {
       try {
-        const assistant = await assistantService.retrieveAssistant(this.assistantId);
+        const assistant = await this.assistants.retrieveAssistant(this.assistantId);
         this.store.setPersonaEditForm(assistant);
       } catch (error) {
         this.appStore.handleError(error);
