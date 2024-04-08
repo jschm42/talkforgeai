@@ -22,6 +22,7 @@ import AssistantProperties, {TTSType} from '@/const/assistant.properties';
 import {useAssistants} from '@/composable/use-assistants';
 import {useHtmlToText} from '@/composable/use-html-to-text';
 import {useTextToSpeech} from '@/composable/use-text-to-speech';
+import ChatMessage from '@/store/to/chat-message';
 
 export default defineComponent({
   name: 'ChatMessageTextToSpeech',
@@ -38,10 +39,11 @@ export default defineComponent({
     };
   },
   props: {
-    message: Object,
+    message: ChatMessage,
   },
   computed: {
     getTTSType() {
+
       return this.chatStore.selectedAssistant.properties[AssistantProperties.TTS_TYPE];
     },
     isDisabled() {
