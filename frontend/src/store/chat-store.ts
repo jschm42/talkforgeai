@@ -17,41 +17,51 @@
 import {defineStore} from 'pinia';
 import Thread, {ThreadMessage} from '@/store/to/thread';
 import Assistant from '@/store/to/assistant';
-import AssistantProperties, {TTSType} from '@/const/assistant.properties';
 
 export const useChatStore = defineStore('chat', {
   state: () => {
     return {
-      isAutoSpeak: false,
-      currentStatusMessage: '',
-      currentStatusMessageType: '',
-      threadMessages: [] as Array<ThreadMessage>,
-      parsedMessages: {} as any,
-      threadId: '',
-      runId: '',
-      threads: [] as Array<Thread>,
-      threadEditMode: false,
-      threadDeleteMode: false,
-      selectedAssistant: {} as Assistant,
-      assistantList: [] as Array<Assistant>,
+      isAutoSpeak: false, // Flag to indicate if auto speak is enabled
+      currentStatusMessage: '', // Current status message
+      currentStatusMessageType: '', // Type of the current status message
+      threadMessages: [] as Array<ThreadMessage>, // Array of thread messages
+      parsedMessages: {} as any, // Object of parsed messages
+      threadId: '', // Current thread ID
+      runId: '', // Current run ID
+      threads: [] as Array<Thread>, // Array of threads
+      threadEditMode: false, // Flag to indicate if thread edit mode is enabled
+      threadDeleteMode: false, // Flag to indicate if thread delete mode is enabled
+      selectedAssistant: {} as Assistant, // Selected assistant
+      assistantList: [] as Array<Assistant>, // Array of assistants
     };
   },
   getters: {
-    isTTSEnabled(): boolean {
-      return this.selectedAssistant?.properties?.[AssistantProperties.TTS_TYPE] !==
-          TTSType.DISABLED;
-    },
+    /**
+     * Get the auto speak state.
+     * @returns {boolean} - The auto speak state.
+     */
     autoSpeak(): boolean {
       return this.isAutoSpeak;
     },
+    /**
+     * Check if the thread is empty.
+     * @returns {boolean} - True if the thread is empty, false otherwise.
+     */
     isEmptyThread(): boolean {
       return this.threadMessages.length == 0;
     },
+    /**
+     * Get the maximum message index.
+     * @returns {number} - The maximum message index.
+     */
     maxMessageIndex(): number {
       return this.threadMessages.length - 1;
     },
   },
   actions: {
+    /**
+     * Create a new thread.
+     */
     async newThread() {
       this.threadId = '';
       this.threadMessages = [];
@@ -59,15 +69,22 @@ export const useChatStore = defineStore('chat', {
       this.threadEditMode = false;
       this.threadDeleteMode = false;
     },
-    getLastUserMessage() {
-      // Find the last user message in this.threadMessages array by iterating in reverse
+    /**
+     * Get the last user message.
+     * @returns {ThreadMessage | undefined} - The last user message or undefined if not found.
+     */
+    getLastUserMessage(): ThreadMessage | undefined {
       for (let i = this.threadMessages.length - 1; i >= 0; i--) {
         if (this.threadMessages[i].role === 'user') {
           return this.threadMessages[i];
         }
       }
     },
-    getLastAssistantMessage() {
+    /**
+     * Get the last assistant message.
+     * @returns {ThreadMessage | undefined} - The last assistant message or undefined if not found.
+     */
+    getLastAssistantMessage(): ThreadMessage | undefined {
       // Find the last assistant message in this.threadMessages array by iterating in reverse
       for (let i = this.threadMessages.length - 1; i >= 0; i--) {
         if (this.threadMessages[i].role === 'assistant') {
@@ -75,16 +92,31 @@ export const useChatStore = defineStore('chat', {
         }
       }
     },
+    /**
+     * Get the last message.
+     * @returns {ThreadMessage} - The last message.
+     */
     getLastMessage(): ThreadMessage {
       return this.threadMessages[this.threadMessages.length - 1];
     },
+    /**
+     * Toggle the auto speak state.
+     */
     toggleAutoSpeak() {
       this.isAutoSpeak = !this.isAutoSpeak;
     },
+    /**
+     * Update the status.
+     * @param {string} message - The status message.
+     * @param {string} type - The status type.
+     */
     updateStatus(message: string, type = '') {
       this.currentStatusMessage = message;
       this.currentStatusMessageType = type;
     },
+    /**
+     * Remove the status.
+     */
     removeStatus() {
       this.currentStatusMessage = '';
       this.currentStatusMessageType = '';

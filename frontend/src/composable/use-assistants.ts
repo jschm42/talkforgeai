@@ -340,7 +340,7 @@ export function useAssistants() {
       const parsedContent = chatStore.parsedMessages[message.id];
 
       if (parsedContent && message.content?.[0]?.text) {
-        const replacedContent = replaceCodeContent(parsedContent);
+        const replacedContent = replaceCodeContent(parsedContent.parsed_content);
 
         if (replacedContent) {
           message.content[0].text.value = replacedContent;

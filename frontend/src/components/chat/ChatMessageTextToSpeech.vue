@@ -22,7 +22,7 @@ import AssistantProperties, {TTSType} from '@/const/assistant.properties';
 import {useAssistants} from '@/composable/use-assistants';
 import {useHtmlToText} from '@/composable/use-html-to-text';
 import {useTextToSpeech} from '@/composable/use-text-to-speech';
-import ChatMessage from '@/store/to/chat-message';
+import {ThreadMessage} from '@/store/to/thread';
 
 export default defineComponent({
   name: 'ChatMessageTextToSpeech',
@@ -39,16 +39,15 @@ export default defineComponent({
     };
   },
   props: {
-    message: ChatMessage,
+    message: ThreadMessage,
   },
   computed: {
-    getTTSType() {
-
-      return this.chatStore.selectedAssistant.properties[AssistantProperties.TTS_TYPE];
+    ttsType() {
+      let assistant = this.assistants.getAssistantById(this.message.assistant_id);
+      return assistant.properties[AssistantProperties.TTS_TYPE];
     },
     isDisabled() {
-      return this.chatStore.selectedAssistant.properties[AssistantProperties.TTS_TYPE] ===
-          TTSType.DISABLED;
+      return this.ttsType === TTSType.DISABLED;
     },
   },
   beforeUnmount() {
@@ -58,7 +57,7 @@ export default defineComponent({
     stopAudio() {
       console.log('Audio stopped');
 
-      if (this.getTTSType === TTSType.SPEECHAPI) {
+      if (this.ttsType === TTSType.SPEECHAPI) {
         window.speechSynthesis.cancel();
       }
 
@@ -73,7 +72,7 @@ export default defineComponent({
       const plainText = this.htmlToText.removeHtml(this.message.content[0].text.value);
       this.audioState = AudioState.Loading;
 
-      if (this.getTTSType === TTSType.SPEECHAPI) {
+      if (this.ttsType === TTSType.SPEECHAPI) {
         await this.speakSpeechApi(plainText);
       } else {
         await this.speakElevenlabs(plainText);

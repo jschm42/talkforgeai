@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-import ChatMessage from '@/store/to/chat-message';
 import hljs from 'highlight.js';
 
 const CODE_REGEX = /(<code class="(.*)">)([\s\S]*?)(<\/code>)/g;
 
 export function useHighlighting() {
-  const highlightCodeInChatMessage = (message: Array<ChatMessage>) => {
-    message.forEach(m => {
-      m.content = replaceCodeContent(m.content);
-    });
-  };
 
   const replaceCodeContent = (originalString: string) => {
     // Use a regular expression to find the code tag and its content.
@@ -51,5 +45,5 @@ export function useHighlighting() {
     return newContent;
   };
 
-  return {highlightCodeInChatMessage, replaceCodeContent};
+  return {replaceCodeContent};
 }
