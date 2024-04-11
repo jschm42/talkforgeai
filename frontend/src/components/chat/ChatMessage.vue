@@ -20,6 +20,7 @@ import {useChatStore} from '@/store/chat-store';
 import Role from '@/store/to/role';
 import ChatMessageTextToSpeech from '@/components/chat/ChatMessageTextToSpeech.vue';
 import {useAssistants} from '@/composable/use-assistants';
+import {ThreadMessage} from '@/store/to/thread';
 
 export default {
   name: 'ChatMessage',
@@ -33,7 +34,7 @@ export default {
     return {};
   },
   props: {
-    message: Object,
+    message: ThreadMessage,
     messageIndex: Number,
   },
   computed: {
@@ -96,6 +97,9 @@ export default {
       await this.$refs.chatMessageAudioPlayerRef.playAudio();
     },
     getContent() {
+      if (this.chatStore.parsedMessages[this.message.id] !== undefined) {
+        return this.chatStore.parsedMessages[this.message.id];
+      }
       return this.message.content[0].text.value;
     },
     getMessageStatus() {

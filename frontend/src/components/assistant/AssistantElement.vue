@@ -18,6 +18,7 @@
 
 import {useChatStore} from '@/store/chat-store';
 import {useAssistants} from '@/composable/use-assistants';
+import Assistant from '@/store/to/assistant';
 
 export default {
   name: 'AssistantElement',
@@ -33,11 +34,14 @@ export default {
     };
   },
   props: {
-    assistant: Object,
+    assistant: Assistant,
   },
   computed: {
     imageSrc() {
-      return this.assistants.getAssistantImageUrl(this.assistant.image_path);
+      if (this.assistant.image_path) {
+        return this.assistants.getAssistantImageUrl(this.assistant.image_path);
+      }
+      return '';
     },
     isShowAssistantImage() {
       return !!this.assistant.image_path;
@@ -70,8 +74,11 @@ export default {
 <template>
   <v-card class="mx-auto" height="280" variant="elevated" width="200">
     <div role="button" @click="onPersonaSelected">
-      <v-avatar :image="imageSrc" size="120">
+      <v-avatar v-if="imageSrc !== ''" :image="imageSrc" size="120">
       </v-avatar>
+      <v-img v-else alt="Robot" class="mx-auto" max-height="120"
+             max-width="200" src="@/assets/robot.svg"></v-img>
+
       <v-card-title>{{ assistant.name }}</v-card-title>
       <v-card-text class="description">
         {{ assistant.description }}

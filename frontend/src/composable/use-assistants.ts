@@ -53,7 +53,6 @@ export function useAssistants() {
 
   const streamRun = async (
       assistantId: string, threadId: string, chunkUpdateCallback: () => void) => {
-    console.log('*** streamRun ', assistantId, threadId);
 
     const debouncedUpdateCallback = debounce(chunkUpdateCallback, DEBOUNCE_TIME,
         {maxWait: DEBOUNCE_MAXWAIT});
@@ -88,10 +87,8 @@ export function useAssistants() {
           for (const part of parts) {
             if (part.startsWith('event:')) {
               currentEvent = part.substring(6);
-              console.log('--> event', currentEvent);
             } else if (part.startsWith('data:')) {
               const data = part.substring(5);
-              console.log('--> data', data);
               processData(data, currentEvent, debouncedUpdateCallback);
               currentEvent = '';
               await sleep(DELAY_TIME);
@@ -458,6 +455,7 @@ export function useAssistants() {
   const deleteThread = async (threadId: string) => {
     console.log('Delete thread:', threadId);
     await axios.delete(`/api/v1/threads/${threadId}`);
+    chatStore.newThread();
     await retrieveThreads();
   };
 

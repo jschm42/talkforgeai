@@ -95,13 +95,6 @@ export default defineComponent({
     },
 
   },
-  async mounted() {
-    try {
-      await this.assistants.syncAssistants();
-    } catch (error) {
-      this.appStore.handleError(error);
-    }
-  },
 });
 </script>
 

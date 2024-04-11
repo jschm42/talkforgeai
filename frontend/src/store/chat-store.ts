@@ -121,6 +121,7 @@ export const useChatStore = defineStore('chat', {
       this.currentStatusMessage = '';
       this.currentStatusMessageType = '';
     },
+
   },
 
 });

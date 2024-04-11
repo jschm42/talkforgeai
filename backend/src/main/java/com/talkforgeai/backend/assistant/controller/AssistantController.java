@@ -54,7 +54,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
@@ -229,20 +228,17 @@ public class AssistantController {
   }
 
   @DeleteMapping("/threads/{threadId}")
-  @ResponseBody
   public void deleteThread(@PathVariable("threadId") String threadId) {
     assistantService.deleteThread(threadId);
   }
 
   @PostMapping("/threads/{threadId}/title")
-  @ResponseBody
   public ThreadTitleDto updateThreadTitle(@PathVariable("threadId") String threadId,
       @RequestBody ThreadTitleUpdateRequestDto request) {
     return assistantService.updateThreadTitle(threadId, request);
   }
 
   @PostMapping("/threads/{threadId}/title/generate")
-  @ResponseBody
   public ThreadTitleDto generateThreadTitle(@PathVariable("threadId") String threadId,
       @RequestBody ThreadTitleGenerationRequestDto request) {
     return assistantService.generateThreadTitle(threadId, request);

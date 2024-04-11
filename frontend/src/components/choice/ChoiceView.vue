@@ -39,9 +39,6 @@ export default {
       // You can adjust the breakpoint here according to your needs
 
       const isMobile = mobile.value;
-
-      console.log('DISPLAY: ', isMobile,
-          isMobile ? 'ChoiceMobile' : 'ChoiceDesktop');
       return isMobile ? 'ChoiceMobile' : 'ChoiceDesktop';
     });
 

@@ -43,7 +43,7 @@ public class MessageProcessor {
     transformers.add(new CodeBlockTransformer());
     transformers.add(new CodePhraseTransformer());
     transformers.add(new MarkdownHeaderTransformer());
-    transformers.add(new MarkdownListTransformer());
+//    transformers.add(new MarkdownListTransformer());
     transformers.add(new MarkdownTextTransformer());
     transformers.add(new NewLineTransformer());
 
