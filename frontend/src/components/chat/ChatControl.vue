@@ -15,21 +15,31 @@
   -->
 
 <template>
-  <v-card>
-    <v-card-actions>
-      <v-checkbox v-model="this.chatStore.isAutoSpeak" label="Auto speak"></v-checkbox>
-      <v-btn :hidden="isRegenerateRequestHidden"
-             @click="onRegenerateRun()">Regenerate request
-      </v-btn>
-      <v-btn :hidden="isCancelRequestHidden" @click="onCancelRun()">Cancel request</v-btn>
-    </v-card-actions>
-    <v-row>
+  <v-container class="mx-0" style="width: 100%">
+    <v-row class="flex-nowrap">
+      <v-col class="flex-grow-1">
+        <v-checkbox v-model="this.chatStore.isAutoSpeak" hide-details
+                    label="Auto speak"></v-checkbox>
+      </v-col>
+      <v-col class="flex-grow-0 align-self-center">
+        <v-btn :hidden="isRegenerateRequestHidden" prepend-icon="mdi mdi-repeat"
+               @click="onRegenerateRun()">Regenerate
+        </v-btn>
+      </v-col>
+      <v-col class="flex-grow-0 align-self-center">
+        <v-btn :hidden="isCancelRequestHidden" prepend-icon="mdi mdi-cancel" @click="onCancelRun()">
+          Cancel
+          request
+        </v-btn>
+      </v-col>
+    </v-row>
+    <v-row class="my-0">
       <v-col>
         <ChatMessageInput @submit-result-received="submitResultReceived"
                           @chunk-update-received="chunkUpdateReceived"></ChatMessageInput>
       </v-col>
     </v-row>
-  </v-card>
+  </v-container>
 </template>
 
 <script>
