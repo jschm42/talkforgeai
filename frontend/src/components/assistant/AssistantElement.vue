@@ -86,7 +86,8 @@ export default {
     </div>
 
     <v-card-actions>
-      <v-btn color="orange" @click="onEditPersona()">
+      <v-btn color="orange" prepend-icon="mdi mdi-pencil" title="Edit assistant"
+             @click="onEditPersona()">
         Edit
       </v-btn>
     </v-card-actions>

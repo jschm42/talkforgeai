@@ -78,6 +78,19 @@ export default defineComponent({
         this.isGenerationRunning = false;
       }
     },
+    async onAutoGenerateImage() {
+      this.isGenerationRunning = true;
+      try {
+        const prompt = 'Profile picture of: ' + this.assistantForm.name;
+        const imageResponse = await this.assistants.generateAssistantImage(prompt);
+        this.assistantForm.image_path = imageResponse.data.fileName;
+        this.showModal = false;
+        this.isGenerationRunning = false;
+      } catch (error) {
+        this.appStore.handleError(error);
+        this.isGenerationRunning = false;
+      }
+    },
     onShowGenerationModal() {
       this.showModal = true;
     },
@@ -99,38 +112,53 @@ export default defineComponent({
              :title="assistantForm.image_path"
              class="img-thumbnail thumbnail-image"
              role="button" @click="triggerFileInput"/>
-        <input id="personaImage" ref="fileInput" class=" col-10 form-control" style="display: none"
-               type="file"
-               @change="onFileSelected">
+        <input id="personaImage" ref="fileInput" :disabled="isGenerationRunning"
+               class=" col-10 form-control"
+               style="display: none"
+               type="file" @change="onFileSelected">
       </div>
     </div>
     <div class="row">
-      <button class="btn btn-primary my-2" type="button" @click.prevent="onShowGenerationModal">
-        <i class="bi bi-magic mx-2"></i>Generate
-      </button>
+      <div class="col">
+        <button :disabled="isGenerationRunning" class="btn btn-primary my-2" type="button"
+                @click.prevent="onShowGenerationModal">
+          <i class="mdi mdi-text mx-2"></i>Generate with prompt...
+        </button>
+        <button :disabled="isGenerationRunning" class="btn btn-primary mx-2" type="button"
+                @click.prevent="onAutoGenerateImage">
+          <span v-if="!isGenerationRunning"><i
+              class="mdi mdi-auto-fix mx-2"></i>Auto Generate</span>
+          <span v-if="isGenerationRunning"><span aria-hidden="true"
+                                                 class="spinner-border spinner-border-sm mx-2"
+                                                 role="status"></span>Auto Generate</span>
+        </button>
+      </div>
     </div>
   </div>
 
   <div class="mb-3">
     <label class="form-label" for="personaName">Name</label>
-    <input id="personaName" v-model="assistantForm.name" class="form-control" maxlength="32"
-           required
-           type="text">
+    <input id="personaName" v-model="assistantForm.name" :disabled="isGenerationRunning"
+           class="form-control"
+           maxlength="32"
+           required type="text">
   </div>
   <div class="mb-3">
     <label class="form-label" for="personaDescription">Description (will not be used in generation
       requests)</label>
-    <textarea id="personaDescription" v-model="assistantForm.description" class="form-control"
-              maxlength="256"
-              rows="2"></textarea>
+    <textarea id="personaDescription" v-model="assistantForm.description"
+              :disabled="isGenerationRunning"
+              class="form-control"
+              maxlength="256" rows="2"></textarea>
   </div>
   <div class="mb-3">
     <label class="form-label" for="personaPersonality">Describe the persona's character traits. How
       would you prefer it
       to respond?</label>
-    <textarea id="personaPersonality" v-model="assistantForm.instructions" class="form-control"
-              maxlength="16384"
-              rows="5"></textarea>
+    <textarea id="personaPersonality" v-model="assistantForm.instructions"
+              :disabled="isGenerationRunning"
+              class="form-control"
+              maxlength="16384" rows="5"></textarea>
   </div>
 
   <!-- The Modal -->
