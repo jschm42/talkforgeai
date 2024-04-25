@@ -52,7 +52,7 @@ export function useAssistants() {
   });
 
   const streamRun = async (
-      assistantId: string, threadId: string, chunkUpdateCallback: () => void) => {
+      assistantId: string, threadId: string, message: string, chunkUpdateCallback: () => void) => {
 
     const debouncedUpdateCallback = debounce(chunkUpdateCallback, DEBOUNCE_TIME,
         {maxWait: DEBOUNCE_MAXWAIT});
@@ -61,7 +61,7 @@ export function useAssistants() {
 
     chatStore.runId = '';
     try {
-      const response = await fetchSSE(assistantId, threadId);
+      const response = await fetchSSE(assistantId, threadId, message);
       const reader = response.body?.getReader();
       if (!reader) return;
 
@@ -71,7 +71,6 @@ export function useAssistants() {
       let isReading = true;
       while (isReading) {
         const chunk = await reader.read();
-
         const chunkValue = decoder.decode(chunk.value, {stream: true});
 
         if (chunk.done) {
@@ -105,7 +104,7 @@ export function useAssistants() {
     return new Promise((resolve) => setTimeout(resolve, delay));
   };
 
-  const fetchSSE = async (assistantId: string, threadId: string) => {
+  const fetchSSE = async (assistantId: string, threadId: string, message: string) => {
     return await fetch(`/api/v1/threads/${threadId}/runs/stream`, {
       method: 'POST',
       cache: 'no-cache',
@@ -116,6 +115,7 @@ export function useAssistants() {
       },
       body: JSON.stringify({
         assistantId,
+        message,
       }),
     });
   };
@@ -138,13 +138,13 @@ export function useAssistants() {
 
     const message = processedMessage.message;
     const messageId = message?.id ?? '';
-    const assistantId = message?.assistant_id ?? '';
+    const assistantId = message?.assistantId ?? '';
 
-    if (processedMessage?.parsed_content) {
-      const codeContent = replaceCodeContent(processedMessage.parsed_content);
+    if (processedMessage?.parsedContent) {
+      const codeContent = replaceCodeContent(processedMessage.parsedContent);
 
       const newMessage = new ThreadMessage(messageId, 'assistant', codeContent, assistantId);
-      newMessage.thread_id = threadId;
+      newMessage.threadId = threadId;
 
       chatStore.threadMessages.pop();
       chatStore.threadMessages.push(newMessage);
@@ -161,7 +161,8 @@ export function useAssistants() {
   };
 
   const processData = (data: string, event: string, debouncedUpdateCallback: () => void) => {
-    if (!hasJSONData(data)) return;
+    console.log('PROCESS event=' + event + ': ', data);
+    //if (!hasJSONData(data)) return;
 
     switch (event) {
       case 'thread.message.delta':
@@ -180,18 +181,31 @@ export function useAssistants() {
     chatStore.runId = JSON.parse(data)['id'];
   };
 
+  // const processDeltaEvent = (data: string) => {
+  //   console.log('## processDeltaEvent', data);
+  //   const content = JSON.parse(data)['delta']['content'];
+  //   const lastMessage = chatStore.getLastMessage();
+  //
+  //   if (!lastMessage?.content?.[0]?.text) return;
+  //
+  //   if (content.length > 0 && content[0].type === 'text') {
+  //     const textContent = content[0].text.value;
+  //     let newContent = escapeHtml(textContent);
+  //     newContent = newContent.replaceAll(/\n/g, '<br/>');
+  //     lastMessage.content[0].text.value += newContent;
+  //   }
+  // };
+  //
   const processDeltaEvent = (data: string) => {
     console.log('## processDeltaEvent', data);
-    const content = JSON.parse(data)['delta']['content'];
     const lastMessage = chatStore.getLastMessage();
 
-    if (!lastMessage?.content?.[0]?.text) return;
+    if (!lastMessage?.content) return;
 
-    if (content.length > 0 && content[0].type === 'text') {
-      const textContent = content[0].text.value;
-      let newContent = escapeHtml(textContent);
+    if (data.length > 0) {
+      let newContent = escapeHtml(data);
       newContent = newContent.replaceAll(/\n/g, '<br/>');
-      lastMessage.content[0].text.value += newContent;
+      lastMessage.content += newContent;
     }
   };
 
@@ -201,11 +215,12 @@ export function useAssistants() {
     return result.data;
   };
 
-  const syncAssistants = async () => {
-    console.log('Syncing assistants');
-    await axios.post('/api/v1/assistants/sync');
-    await retrieveAssistants();
-  };
+  // const syncAssistants = async () => {
+  //   console.log('Syncing assistants');
+  //   await axios.post('/api/v1/assistants/sync');
+  //   await retrieveAssistants();
+  // };
+
   const retrieveAssistants = async () => {
     console.log('Retrieving assistants');
     const result = await axios.get('/api/v1/assistants', {
@@ -253,8 +268,8 @@ export function useAssistants() {
     if (!threadMessage) return '';
 
     if (threadMessage.content && threadMessage.content.length > 0 &&
-        threadMessage.content[0].text) {
-      return threadMessage.content[0].text.value ?? '';
+        threadMessage.content) {
+      return threadMessage.content ?? '';
     }
     return '';
   };
@@ -325,22 +340,22 @@ export function useAssistants() {
 
     const parsedMessageList = result.data;
 
-    const list = parsedMessageList.message_list?.data?.map((message: any) => {
-      return new ThreadMessage(message.id, message.role, message.content[0].text.value,
-          message.assistant_id);
+    const list = parsedMessageList.messageList?.map((message: any) => {
+      return new ThreadMessage(message.id, message.role, message.parsedContent,
+          message.assistantId);
     });
     chatStore.threadMessages = list || [];
 
-    chatStore.parsedMessages = parsedMessageList.parsed_messages || {};
+    chatStore.parsedMessages = parsedMessageList.parsedMessages || {};
 
     chatStore.threadMessages.forEach((message) => {
       const parsedContent = chatStore.parsedMessages[message.id];
 
-      if (parsedContent && message.content?.[0]?.text) {
+      if (parsedContent && message.content) {
         const replacedContent = replaceCodeContent(parsedContent.parsed_content);
 
         if (replacedContent) {
-          message.content[0].text.value = replacedContent;
+          message.content = replacedContent;
         }
       }
     });
@@ -360,9 +375,9 @@ export function useAssistants() {
     chatStore.newThread();
   };
 
-  const runStreamAndHandleResults = async (chunkUpdateCallback: () => void) => {
+  const runStreamAndHandleResults = async (message: string, chunkUpdateCallback: () => void) => {
     console.log('Running stream and handling results');
-    await streamRun(chatStore.selectedAssistant.id, chatStore.threadId,
+    await streamRun(chatStore.selectedAssistant.id, chatStore.threadId, message,
         chunkUpdateCallback);
 
     // Get text content of last user message
@@ -389,8 +404,8 @@ export function useAssistants() {
     const response = result.data;
     console.log('Response: ', response);
 
-    if (response?.message_list.data && response.message_list.data.length > 0) {
-      return response.message_list.data[0];
+    if (response?.messageList.data && response.messageList.data.length > 0) {
+      return response.messageList.data[0];
     }
   };
 
@@ -401,11 +416,11 @@ export function useAssistants() {
           threadMessage.id);
 
       if (threadMessage.content && threadMessage.content.length > 0 &&
-          threadMessage.content[0].text) {
-        const content = parsedThreadMessage.parsed_content;
+          threadMessage.content) {
+        const content = parsedThreadMessage.parsedContent;
 
         if (content) {
-          threadMessage.content[0].text.value = replaceCodeContent(content);
+          threadMessage.content = replaceCodeContent(content);
 
           // Get text content of last user message
           const lastUserMessage = chatStore.threadMessages[chatStore.threadMessages.length - 2];
@@ -481,7 +496,7 @@ export function useAssistants() {
     await regenerateRun(chatStore.threadId, chatStore.runId);
 
     chatStore.updateStatus('Thinking...', 'running');
-    await runStreamAndHandleResults(chunkUpdateCallback);
+    // await runStreamAndHandleResults(chunkUpdateCallback);
   };
 
   const submitUserMessage = async (content: string, chunkUpdateCallback: () => void) => {
@@ -489,19 +504,20 @@ export function useAssistants() {
 
     await createThreadIfNeeded();
 
-    const result = await axios.post(
-        `/api/v1/threads/${chatStore.threadId}/messages`,
-        {content, role: 'user'},
-    );
-    const submitedMessage = result.data;
+    // const result = await axios.post(
+    //     //     `/api/v1/threads/${chatStore.threadId}/messages`,
+    //     //     {content, role: 'user'},
+    //     // );
+    //     // const submitedMessage = result.data;
 
-    chatStore.threadMessages.push(submitedMessage);
+    chatStore.threadMessages.push(
+        new ThreadMessage('', 'user', content, chatStore.selectedAssistant.id));
     chatStore.threadMessages.push(
         new ThreadMessage('', 'assistant', '', chatStore.selectedAssistant.id));
 
     chatStore.updateStatus('Thinking...', 'running');
 
-    await runStreamAndHandleResults(chunkUpdateCallback);
+    await runStreamAndHandleResults(content, chunkUpdateCallback);
   };
 
   const runConversation = async () => {
@@ -513,7 +529,6 @@ export function useAssistants() {
 
   return {
     streamRun,
-    syncAssistants,
     selectAssistant,
     retrieveAssistant,
     retrieveAssistants,

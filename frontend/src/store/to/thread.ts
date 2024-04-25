@@ -17,36 +17,22 @@
 class Thread {
   id = '';
   title = '';
-  created_at: Date | null = null;
-  metadata: any;
-}
-
-class Content {
-  type = '';
-  text: TextContent | null = null;
-}
-
-class TextContent {
-  value: string | null | undefined;
-  annotations: [] | null = null;
+  createdAt: Date | null = null;
 }
 
 class ThreadMessage {
   id = '';
-  created_at: Date | null = null;
-  thread_id: string | null = null;
-  file_ids: [] | null = null;
-  assistant_id: string | null = null;
-  run_id: string | null = null;
+  createdAt: Date | null = null;
+  threadId: string | null = null;
+  assistantId: string | null = null;
   role: 'user' | 'assistant' | undefined;
-  content: Array<Content> | null = null;
-  metadata: any;
+  content: string | null = null;
 
-  constructor(id: string, role: 'user' | 'assistant', content: string, assistant_id: string) {
+  constructor(id: string, role: 'user' | 'assistant', content: string, assistantId: string) {
     this.id = id;
     this.role = role;
-    this.content = [{type: 'text', text: {value: content, annotations: []}}];
-    this.assistant_id = assistant_id;
+    this.content = content;
+    this.assistantId = assistantId;
   }
 }
 
@@ -59,20 +45,18 @@ class ThreadMessageList {
 }
 
 class TreadMessageListParsed {
-  message_list: ThreadMessageList | null = null;
-  parsed_messages: Array<ParsedThreadMessage> | null = null;
+  messageList: ThreadMessageList | null = null;
+  parsedMessages: Array<ParsedThreadMessage> | null = null;
 }
 
 class ParsedThreadMessage {
-  parsed_content: string | null = null;
+  parsedContent: string | null = null;
   message: ThreadMessage | null = null;
 }
 
 export default Thread;
 export {
   ThreadMessage,
-  Content,
-  TextContent,
   ParsedThreadMessage,
   ThreadMessageList,
   TreadMessageListParsed,

@@ -157,7 +157,7 @@ export default defineComponent({
     },
     async fetchData() {
       try {
-        this.chatStore.selectedAssistant.image_path = '';
+        this.chatStore.selectedAssistant.imagePath = '';
         if (this.chatStore.assistantList.length === 0) {
           await this.assistants.retrieveAssistants();
         }

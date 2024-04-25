@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,17 @@
 package com.talkforgeai.backend.assistant.repository;
 
 import com.talkforgeai.backend.assistant.domain.MessageEntity;
+import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MessageRepository extends JpaRepository<MessageEntity, String> {
+
+  List<MessageEntity> findByThreadId(String threadId, Sort pageable);
+
+  Page<MessageEntity> findByThreadId(String threadId, Pageable pageable);
 }

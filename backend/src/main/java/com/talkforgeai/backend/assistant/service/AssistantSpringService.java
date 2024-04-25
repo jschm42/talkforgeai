@@ -17,11 +17,11 @@
 package com.talkforgeai.backend.assistant.service;
 
 import com.talkforgeai.backend.assistant.domain.AssistantEntity;
-import com.talkforgeai.backend.assistant.domain.AssistantPropertyValue;
 import com.talkforgeai.backend.assistant.domain.MessageEntity;
 import com.talkforgeai.backend.assistant.domain.ThreadEntity;
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
 import com.talkforgeai.backend.assistant.dto.GenerateImageResponse;
+import com.talkforgeai.backend.assistant.dto.MessageDto;
 import com.talkforgeai.backend.assistant.dto.MessageListParsedDto;
 import com.talkforgeai.backend.assistant.dto.ParsedMessageDto;
 import com.talkforgeai.backend.assistant.dto.ProfileImageUploadResponse;
@@ -35,26 +35,14 @@ import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
-import com.talkforgeai.service.openai.AssistantStreamService;
 import com.theokanning.openai.ListSearchParameters;
-import com.theokanning.openai.ListSearchParameters.Order;
-import com.theokanning.openai.OpenAiResponse;
-import com.theokanning.openai.assistants.Assistant;
-import com.theokanning.openai.assistants.AssistantRequest;
-import com.theokanning.openai.assistants.ModifyAssistantRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.image.CreateImageRequest;
 import com.theokanning.openai.image.ImageResult;
-import com.theokanning.openai.messages.Message;
-import com.theokanning.openai.messages.MessageRequest;
 import com.theokanning.openai.model.Model;
-import com.theokanning.openai.runs.Run;
-import com.theokanning.openai.runs.RunCreateRequest;
 import com.theokanning.openai.service.OpenAiService;
-import com.theokanning.openai.threads.Thread;
-import com.theokanning.openai.threads.ThreadRequest;
 import jakarta.transaction.Transactional;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -63,8 +51,6 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -74,23 +60,32 @@ import java.util.UUID;
 import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.ChatResponse;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.openai.OpenAiChatClient;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 @Service
-public class AssistantService {
+public class AssistantSpringService {
 
-  public static final Logger LOGGER = LoggerFactory.getLogger(AssistantService.class);
+  public static final Logger LOGGER = LoggerFactory.getLogger(AssistantSpringService.class);
 
   private final OpenAiService openAiService;
 
-  private final AssistantStreamService assistantStreamService;
+  private final OpenAiChatClient chatClient;
+
   private final AssistantRepository assistantRepository;
   private final MessageRepository messageRepository;
   private final ThreadRepository threadRepository;
@@ -101,194 +96,180 @@ public class AssistantService {
 
   private final AssistantMapper assistantMapper;
 
-  public AssistantService(OpenAiService openAiService,
-      AssistantStreamService assistantStreamService,
+  private final UniqueIdGenerator uniqueIdGenerator;
+
+  public AssistantSpringService(OpenAiService openAiService, OpenAiChatClient chatClient,
       AssistantRepository assistantRepository, MessageRepository messageRepository,
       ThreadRepository threadRepository, FileStorageService fileStorageService,
-      MessageProcessor messageProcessor, AssistantMapper assistantMapper) {
+      MessageProcessor messageProcessor, AssistantMapper assistantMapper,
+      UniqueIdGenerator uniqueIdGenerator) {
     this.openAiService = openAiService;
-    this.assistantStreamService = assistantStreamService;
+    this.chatClient = chatClient;
     this.assistantRepository = assistantRepository;
     this.messageRepository = messageRepository;
     this.threadRepository = threadRepository;
     this.fileStorageService = fileStorageService;
     this.messageProcessor = messageProcessor;
     this.assistantMapper = assistantMapper;
+    this.uniqueIdGenerator = uniqueIdGenerator;
   }
 
   public AssistantDto retrieveAssistant(String assistantId) {
-    Assistant assistant = this.openAiService.retrieveAssistant(assistantId);
+    AssistantEntity assistant = assistantRepository.findById(assistantId)
+        .orElseThrow(() -> new AssistentException("Assistant not found"));
 
     if (assistant != null) {
       Optional<AssistantEntity> assistantEntity = assistantRepository.findById(assistant.getId());
 
       if (assistantEntity.isPresent()) {
-        return assistantMapper.mapAssistantDto(assistant, assistantEntity.get());
+        return assistantMapper.toDto(assistantEntity.get());
       }
     }
 
     return null;
   }
 
-  public List<AssistantDto> listAssistants(ListSearchParameters listAssistantsRequest) {
+  public List<AssistantDto> listAssistants(Integer limit, String order) {
+    List<AssistantEntity> assistants = assistantRepository.findAll();
 
-    OpenAiResponse<Assistant> assistantOpenAiResponse = this.openAiService.listAssistants(
-        listAssistantsRequest);
-
-    List<AssistantDto> assistantDtoList = new ArrayList<>();
-
-    assistantOpenAiResponse.data.forEach(assistant -> {
-      Optional<AssistantEntity> assistantEntity = assistantRepository.findById(assistant.getId());
-
-      assistantEntity.ifPresent(entity -> {
-        AssistantDto assistantDto = assistantMapper.mapAssistantDto(
-            assistant,
-            entity
-        );
-
-        assistantDtoList.add(assistantDto);
-
-      });
-    });
-
-    return assistantDtoList;
-  }
-
-  @Transactional
-  public void syncAssistants() {
-    ListSearchParameters searchParameters = new ListSearchParameters();
-    OpenAiResponse<Assistant> assistantList = this.openAiService.listAssistants(
-        searchParameters);
-    List<AssistantEntity> assistantEntities = assistantRepository.findAll();
-
-    // Create
-    assistantList.data.forEach(assistant -> {
-      LOGGER.info("Syncing assistant: {}", assistant.getId());
-
-      Optional<AssistantEntity> assistantEntity = assistantEntities.stream()
-          .filter(entity -> entity.getId().equals(assistant.getId()))
-          .findFirst();
-
-      if (assistantEntity.isEmpty()) {
-        LOGGER.info("New assistant detected. Creating entity: {}", assistant.getId());
-
-        AssistantEntity entity = new AssistantEntity();
-        entity.setId(assistant.getId());
-
-        // Map persona.properties() to Map<String, PersonaPropertyValue>
-        Arrays.stream(AssistantProperties.values()).forEach(p -> {
-          AssistantPropertyValue propertyValue = new AssistantPropertyValue();
-          String value = p.getDefaultValue();
-          propertyValue.setPropertyValue(value);
-          entity.getProperties().put(p.getKey(), propertyValue);
-        });
-
-        assistantRepository.save(entity);
-      }
-    });
-
-    // Delete
-    assistantEntities.forEach(entity -> {
-      Optional<Assistant> assistant = assistantList.data.stream()
-          .filter(a -> a.getId().equals(entity.getId()))
-          .findFirst();
-
-      if (assistant.isEmpty()) {
-        LOGGER.info("Assistant not found. Deleting entity: {}", entity.getId());
-        assistantRepository.delete(entity);
-      }
-    });
+    return assistants.stream()
+        .map(assistantMapper::toDto)
+        .toList();
   }
 
   @Transactional
   public ThreadDto createThread() {
-    ThreadRequest threadRequest = new ThreadRequest();
-    Thread thread = this.openAiService.createThread(threadRequest);
-
     ThreadEntity threadEntity = new ThreadEntity();
-    threadEntity.setId(thread.getId());
+    threadEntity.setId(uniqueIdGenerator.generateThreadId());
     threadEntity.setTitle("<no title>");
-    threadEntity.setCreatedAt(new Date(thread.getCreatedAt()));
+    threadEntity.setCreatedAt(new Date());
     threadRepository.save(threadEntity);
 
-    return mapToDto(threadEntity);
+    return assistantMapper.toDto(threadEntity);
   }
 
   public List<ThreadDto> retrieveThreads() {
     return this.threadRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream()
-        .map(this::mapToDto)
+        .map(assistantMapper::toDto)
         .toList();
   }
 
-  public Message postMessage(String threadId, MessageRequest messageRequest) {
-    return this.openAiService.createMessage(threadId, messageRequest);
+  public Flux<ServerSentEvent<String>> streamRunConversation(String assistantId, String threadId,
+      String message) {
+    ChatOptions options = OpenAiChatOptions.builder()
+        .withModel("gpt-4-turbo")
+        .build();
+
+    Prompt prompt = new Prompt(new UserMessage(message), options);
+    Flux<ChatResponse> stream = this.chatClient.stream(prompt);
+
+    StringBuilder assistantMessageContent = new StringBuilder();
+
+    return stream
+        .mapNotNull(chatResponse -> {
+          LOGGER.info("SSEEvent received: {}", chatResponse);
+
+          assistantMessageContent.append(chatResponse.getResult().getOutput().getContent());
+
+          ServerSentEvent<String> responseSseEvent = createResponseSseEvent(chatResponse);
+
+          if (responseSseEvent != null) {
+            LOGGER.info("Sending event '{}'", responseSseEvent.event());
+          }
+
+          return responseSseEvent;
+        })
+        .doOnNext(chatResponse -> {
+          LOGGER.info("doOnNext response: {}", chatResponse);
+        })
+        .publishOn(Schedulers.boundedElastic()).doOnComplete(() -> {
+          LOGGER.info("doOnComplete. message={}", assistantMessageContent);
+
+          ThreadEntity threadEntity = threadRepository.findById(threadId)
+              .orElseThrow(() -> new AssistentException("Thread not found"));
+          AssistantEntity assistantEntity = assistantRepository.findById(assistantId)
+              .orElseThrow(() -> new AssistentException("Assistant not found"));
+
+          MessageEntity messageEntity = new MessageEntity();
+          messageEntity.setId(uniqueIdGenerator.generateMessageId());
+          messageEntity.setThread(threadEntity);
+          messageEntity.setAssistant(assistantEntity);
+          messageEntity.setRawContent(assistantMessageContent.toString());
+
+          LOGGER.info("Saving raw message: {}", messageEntity.getRawContent());
+          messageRepository.save(messageEntity);
+        }).doOnError(throwable -> {
+          LOGGER.error("doOnError: {}", throwable.getMessage());
+        });
   }
 
-  public Run runConversation(String threadId, RunCreateRequest runCreateRequest) {
-    return this.openAiService.createRun(threadId, runCreateRequest);
-  }
+  private ServerSentEvent<String> createResponseSseEvent(ChatResponse chatResponse) {
+    String finishReason = chatResponse.getResult().getMetadata().getFinishReason();
 
-  public Flux<ServerSentEvent<String>> streamRunConversation(String threadId,
-      RunCreateRequest runCreateRequest) {
-    return this.assistantStreamService.stream(threadId, runCreateRequest);
+    ServerSentEvent<String> event = null;
+
+    if ("STOP".equals(finishReason)) {
+      event = ServerSentEvent.<String>builder()
+          .event("done")
+          .build();
+    } else {
+      event = ServerSentEvent.<String>builder()
+          .event("thread.message.delta")
+          .data(chatResponse.getResult().getOutput().getContent())
+          .build();
+    }
+
+    return event;
   }
 
   public MessageListParsedDto listMessages(String threadId,
       ListSearchParameters listSearchParameters) {
 
-    OpenAiResponse<Message> messageList = this.openAiService.listMessages(threadId,
-        listSearchParameters);
+    List<MessageEntity> messageEntities = messageRepository.findByThreadId(threadId,
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    List<MessageDto> messageDtos = messageEntities.stream()
+        .map(assistantMapper::toDto)
+        .toList();
+
     Map<String, String> parsedMessages = new HashMap<>();
+    messageDtos.forEach(message -> parsedMessages.put(message.id(), message.parsedContent()));
 
-    messageList.data.forEach(message -> {
-      Optional<MessageEntity> messageEntity = messageRepository.findById(message.getId());
-      messageEntity.ifPresent(
-          entity -> parsedMessages.put(message.getId(), entity.getParsedContent()));
-    });
-
-    return new MessageListParsedDto(messageList, parsedMessages);
-  }
-
-  public Run retrieveRun(String threadId, String runId) {
-    return this.openAiService.retrieveRun(threadId, runId);
-  }
-
-  public Run cancelRun(String threadId, String runId) {
-    return openAiService.cancelRun(threadId, runId);
-  }
-
-  private ThreadDto mapToDto(ThreadEntity threadEntity) {
-    return new ThreadDto(threadEntity.getId(), threadEntity.getTitle(),
-        threadEntity.getCreatedAt());
+    return new MessageListParsedDto(messageDtos, parsedMessages);
   }
 
   @Transactional
   public ParsedMessageDto postProcessLastMessage(String threadId) {
     LOGGER.info("Post processing last message: {}", threadId);
-    OpenAiResponse<Message> lastMessage = this.openAiService.listMessages(threadId,
-        new ListSearchParameters(1, Order.DESCENDING, null, null));
 
-    Message message = lastMessage.data.get(0);
-    Optional<MessageEntity> messageEntity = messageRepository.findById(message.getId());
+    List<MessageEntity> lastMessage = messageRepository.findByThreadId(
+        threadId,
+        PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createdAt"))
+    ).getContent();
 
-    MessageEntity newMessageEntity = null;
-    if (messageEntity.isPresent()) {
-      newMessageEntity = messageEntity.get();
+    if (lastMessage.isEmpty()) {
+      throw new AssistentException("No messages found for thread: " + threadId);
+    }
+
+    MessageEntity messageToProcess = lastMessage.getFirst();
+
+    MessageEntity newMessageEntity;
+    if (!lastMessage.isEmpty()) {
+      newMessageEntity = messageToProcess;
     } else {
       newMessageEntity = new MessageEntity();
-      newMessageEntity.setId(message.getId());
+      newMessageEntity.setId(messageToProcess.getId());
       newMessageEntity.setParsedContent("");
     }
 
     String transformed = messageProcessor.transform(
-        message.getContent().get(0).getText().getValue(),
-        threadId, message.getId());
+        messageToProcess.getRawContent(),
+        threadId, messageToProcess.getId());
     newMessageEntity.setParsedContent(transformed);
 
     messageRepository.save(newMessageEntity);
 
     ParsedMessageDto parsedMessageDto = new ParsedMessageDto();
-    parsedMessageDto.setMessage(message);
+    parsedMessageDto.setMessage(assistantMapper.toDto(newMessageEntity));
     parsedMessageDto.setParsedContent(transformed);
 
     return parsedMessageDto;
@@ -334,36 +315,26 @@ public class AssistantService {
 
   public ThreadDto retrieveThread(String threadId) {
     return threadRepository.findById(threadId)
-        .map(this::mapToDto)
+        .map(assistantMapper::toDto)
         .orElseThrow(() -> new AssistentException("Thread not found"));
   }
 
   @Transactional
   public void modifyAssistant(String assistantId, AssistantDto modifiedAssistant) {
-    Assistant assistant = openAiService.retrieveAssistant(assistantId);
-
-    if (assistant == null) {
-      throw new AssistentException("Assistant not found");
-    }
-
     AssistantEntity assistantEntity = assistantRepository.findById(assistantId)
         .orElseThrow(() -> new AssistentException("Assistant entity not found"));
 
-    assistantEntity.setImagePath(modifiedAssistant.imagePath());
-    assistantEntity.setProperties(assistantMapper.mapProperties(modifiedAssistant.properties()));
+    AssistantEntity modifiedEntity = new AssistantEntity();
+    modifiedEntity.setId(assistantEntity.getId());
+    modifiedEntity.setName(modifiedAssistant.name());
+    modifiedEntity.setDescription(modifiedAssistant.description());
+    modifiedEntity.setModel(modifiedAssistant.model());
+    modifiedEntity.setInstructions(modifiedAssistant.instructions());
+    modifiedEntity.setImagePath(modifiedAssistant.imagePath());
+    modifiedEntity.setSystem(modifiedAssistant.system());
+    modifiedEntity.setProperties(assistantMapper.mapProperties(modifiedAssistant.properties()));
 
-    assistantRepository.save(assistantEntity);
-
-    ModifyAssistantRequest modifyAssistantRequest = new ModifyAssistantRequest();
-    modifyAssistantRequest.setName(modifiedAssistant.name());
-    modifyAssistantRequest.setDescription(modifiedAssistant.description());
-    modifyAssistantRequest.setModel(modifiedAssistant.model());
-    modifyAssistantRequest.setInstructions(modifiedAssistant.instructions());
-    modifyAssistantRequest.setTools(modifiedAssistant.tools());
-    modifyAssistantRequest.setFileIds(modifiedAssistant.fileIds());
-    modifyAssistantRequest.setMetadata(modifiedAssistant.metadata());
-
-    openAiService.modifyAssistant(assistantId, modifyAssistantRequest);
+    assistantRepository.save(modifiedEntity);
   }
 
   public GenerateImageResponse generateImage(String prompt) throws IOException {
@@ -443,28 +414,11 @@ public class AssistantService {
     }
   }
 
-
   @Transactional
-  public AssistantDto createAssistant(AssistantDto modifiedAssistant) {
-    AssistantRequest assistantRequest = new AssistantRequest();
-    assistantRequest.setName(modifiedAssistant.name());
-    assistantRequest.setDescription(modifiedAssistant.description());
-    assistantRequest.setModel(modifiedAssistant.model());
-    assistantRequest.setInstructions(modifiedAssistant.instructions());
-    assistantRequest.setTools(modifiedAssistant.tools());
-    assistantRequest.setFileIds(modifiedAssistant.fileIds());
-    assistantRequest.setMetadata(modifiedAssistant.metadata());
-
-    Assistant newAssistant = openAiService.createAssistant(assistantRequest);
-
-    AssistantEntity assistantEntity = new AssistantEntity();
-    assistantEntity.setId(newAssistant.getId());
-    assistantEntity.setImagePath(modifiedAssistant.imagePath());
-    assistantEntity.setProperties(assistantMapper.mapProperties(modifiedAssistant.properties()));
-
-    assistantRepository.save(assistantEntity);
-
-    return assistantMapper.mapAssistantDto(newAssistant, assistantEntity);
+  public AssistantDto createAssistant(AssistantDto assistant) {
+    AssistantEntity assistantEntity = assistantMapper.toEntity(assistant);
+    assistantEntity.setId(uniqueIdGenerator.generateAssistantId());
+    return assistantMapper.toDto(assistantRepository.save(assistantEntity));
   }
 
   public List<String> retrieveModels() {
@@ -476,7 +430,6 @@ public class AssistantService {
 
   @Transactional
   public void deleteAssistant(String assistantId) {
-    openAiService.deleteAssistant(assistantId);
     assistantRepository.deleteById(assistantId);
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package com.talkforgeai.backend.assistant.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Date;
 
-public record ThreadDto(String id, String title, @JsonProperty("created_at") Date createdAt) {
+public record ThreadDto(String id,
+                        String title,
+                        Date createdAt) {
+
 }

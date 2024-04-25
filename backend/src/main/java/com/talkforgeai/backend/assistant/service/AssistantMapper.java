@@ -21,8 +21,11 @@ import static java.util.Objects.requireNonNullElse;
 
 import com.talkforgeai.backend.assistant.domain.AssistantEntity;
 import com.talkforgeai.backend.assistant.domain.AssistantPropertyValue;
+import com.talkforgeai.backend.assistant.domain.MessageEntity;
+import com.talkforgeai.backend.assistant.domain.ThreadEntity;
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
-import com.theokanning.openai.assistants.Assistant;
+import com.talkforgeai.backend.assistant.dto.MessageDto;
+import com.talkforgeai.backend.assistant.dto.ThreadDto;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,38 +34,34 @@ import org.springframework.stereotype.Component;
 @Component
 public class AssistantMapper {
 
-
-  AssistantDto mapAssistantDto(Assistant assistant, AssistantEntity assistantEntity) {
+  AssistantDto toDto(AssistantEntity assistantEntity) {
     return new AssistantDto(
-        assistant.getId(),
-        assistant.getObject(),
-        assistant.getCreatedAt(),
-        assistant.getName(),
-        assistant.getDescription(),
-        assistant.getModel(),
-        assistant.getInstructions(),
-        assistant.getTools(),
-        assistant.getFileIds(),
-        assistant.getMetadata(),
+        assistantEntity.getId(),
+        assistantEntity.getCreatedAt(),
+        assistantEntity.getName(),
+        assistantEntity.getDescription(),
+        assistantEntity.getSystem(),
+        assistantEntity.getModel(),
+        assistantEntity.getInstructions(),
         assistantEntity.getImagePath(),
         mapAssistantProperties(assistantEntity.getProperties())
     );
   }
 
-  Assistant mapAssistant(AssistantDto dto) {
-    return new Assistant(
-        dto.id(),
-        dto.object(),
-        dto.createdAt(),
-        dto.name(),
-        dto.description(),
-        dto.model(),
-        dto.instructions(),
-        dto.tools(),
-        dto.fileIds(),
-        dto.metadata()
-    );
+  AssistantEntity toEntity(AssistantDto assistantDto) {
+    AssistantEntity entity = new AssistantEntity();
+    entity.setId(assistantDto.id());
+    entity.setCreatedAt(assistantDto.createdAt());
+    entity.setName(assistantDto.name());
+    entity.setDescription(assistantDto.description());
+    entity.setModel(assistantDto.model());
+    entity.setInstructions(assistantDto.instructions());
+    entity.setImagePath(assistantDto.imagePath());
+    entity.setSystem(assistantDto.system());
+    entity.setProperties(mapProperties(assistantDto.properties()));
+    return entity;
   }
+
 
   public Map<String, String> mapAssistantProperties(
       Map<String, AssistantPropertyValue> properties) {
@@ -92,5 +91,33 @@ public class AssistantMapper {
     });
 
     return mappedProperties;
+  }
+
+
+  public ThreadDto toDto(ThreadEntity threadEntity) {
+    return new ThreadDto(threadEntity.getId(), threadEntity.getTitle(),
+        threadEntity.getCreatedAt());
+  }
+
+  public ThreadEntity toEntity(ThreadDto threadDto) {
+    ThreadEntity entity = new ThreadEntity();
+    entity.setId(threadDto.id());
+    entity.setTitle(threadDto.title());
+    entity.setCreatedAt(threadDto.createdAt());
+    return entity;
+  }
+
+  public MessageDto toDto(MessageEntity messageEntity) {
+    return new MessageDto(messageEntity.getId(), messageEntity.getRawContent(),
+        messageEntity.getParsedContent(), messageEntity.getCreatedAt(),
+        messageEntity.getAssistant().getId(), messageEntity.getThread().getId());
+  }
+
+  public MessageEntity toEntity(MessageDto messageDto) {
+    MessageEntity entity = new MessageEntity();
+    entity.setId(messageDto.id());
+    entity.setRawContent(messageDto.rawContent());
+    entity.setParsedContent(messageDto.parsedContent());
+    return entity;
   }
 }

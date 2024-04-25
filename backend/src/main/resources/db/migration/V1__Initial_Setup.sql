@@ -16,8 +16,14 @@
 
 create table assistant
 (
-  id         varchar(50) not null primary key,
-  image_path varchar(100)
+  id           varchar(50) not null primary key,
+  image_path   varchar(100),
+  name         varchar(50),
+  description  varchar(200),
+  system       varchar(20),
+  model        varchar(30),
+  instructions CLOB,
+  created_at   timestamp
 );
 
 create table assistant_properties
@@ -31,13 +37,21 @@ create table assistant_properties
 create table thread
 (
   id         varchar(50) not null primary key,
-  created_at timestamp,
-  title      varchar(50)
+  title      varchar(50),
+  created_at timestamp
 );
 
 create table message
 (
   id             varchar(50) not null primary key,
-  parsed_content CLOB
+  raw_content    CLOB,
+  parsed_content CLOB,
+  created_at     timestamp,
+  thread_id      varchar(50) not null,
+  assistant_id   varchar(50) not null,
+  foreign key (thread_id) references thread (id),
+  foreign key (assistant_id) references assistant (id)
 );
 
+create index idx_message_thread_id on message (thread_id);
+create index idx_message_assistant_id on message (assistant_id);

@@ -52,7 +52,7 @@ export default defineComponent({
         if (uploadedFileName) {
           console.log('Uploaded file:', uploadedFileName.data);
           this.$refs.fileInput.textContent = uploadedFileName.data.filename;
-          this.assistantForm.image_path = uploadedFileName.data.filename;
+          this.assistantForm.imagePath = uploadedFileName.data.filename;
         }
       } catch (error) {
         this.appStore.handleError(error);
@@ -62,7 +62,7 @@ export default defineComponent({
       this.$refs.fileInput.click();
     },
     getAltImageText() {
-      return this.assistantForm.image_path;
+      return this.assistantForm.imagePath;
     },
     async onGenerateImage() {
       this.isGenerationRunning = true;
@@ -70,7 +70,7 @@ export default defineComponent({
         const imageResponse = await this.assistants.generateAssistantImage(
             this.imageGenerationPrompt);
         console.log('Image response: ', imageResponse);
-        this.assistantForm.image_path = imageResponse.data.fileName;
+        this.assistantForm.imagePath = imageResponse.data.fileName;
         this.showModal = false;
         this.isGenerationRunning = false;
       } catch (error) {
@@ -83,7 +83,7 @@ export default defineComponent({
       try {
         const prompt = 'Profile picture of: ' + this.assistantForm.name;
         const imageResponse = await this.assistants.generateAssistantImage(prompt);
-        this.assistantForm.image_path = imageResponse.data.fileName;
+        this.assistantForm.imagePath = imageResponse.data.fileName;
         this.showModal = false;
         this.isGenerationRunning = false;
       } catch (error) {
@@ -102,14 +102,14 @@ export default defineComponent({
   <div class="mb-3">
     <div class="row">
       <div class="col-4">
-        <div v-if="!assistantForm.image_path"
+        <div v-if="!assistantForm.imagePath"
              class="placeholder-image img-thumbnail d-flex justify-content-center align-items-center"
              role="button"
              @click="triggerFileInput">
           <i class="bi bi-person"></i>
         </div>
-        <img v-else :alt="assistantForm.imagePath" :src="getImageUrl(assistantForm.image_path)"
-             :title="assistantForm.image_path"
+        <img v-else :alt="assistantForm.imagePath" :src="getImageUrl(assistantForm.imagePath)"
+             :title="assistantForm.imagePath"
              class="img-thumbnail thumbnail-image"
              role="button" @click="triggerFileInput"/>
         <input id="personaImage" ref="fileInput" :disabled="isGenerationRunning"

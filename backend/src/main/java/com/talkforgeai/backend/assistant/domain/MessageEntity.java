@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,87 @@
 
 package com.talkforgeai.backend.assistant.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.util.Date;
 
 @Entity
 @Table(name = "message")
 public class MessageEntity {
 
-    @Id
-    @Column(name = "id", length = 50)
-    private String id;
+  @Id
+  @Column(name = "id", length = 50)
+  private String id;
+  @Lob
+  @Column(name = "raw_content")
+  private String rawContent;
+  @Lob
+  @Column(name = "parsed_content")
+  private String parsedContent;
+  @Column(name = "created_at")
+  private Date createdAt;
 
-    @Lob
-    @Column(name = "parsed_content")
-    private String parsedContent;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "thread_id", nullable = false)
+  private ThreadEntity thread;
 
-    // Standard getters and setters
-    public String getId() {
-        return id;
-    }
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "assistant_id", nullable = false)
+  private AssistantEntity assistant;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  // Standard getters and setters
+  public String getId() {
+    return id;
+  }
 
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public String getParsedContent() {
-        return parsedContent;
-    }
+  public String getRawContent() {
+    return rawContent;
+  }
 
-    public void setParsedContent(String parsedContent) {
-        this.parsedContent = parsedContent;
-    }
+  public void setRawContent(String rawContent) {
+    this.rawContent = rawContent;
+  }
+
+  public String getParsedContent() {
+    return parsedContent;
+  }
+
+  public void setParsedContent(String parsedContent) {
+    this.parsedContent = parsedContent;
+  }
+
+  public Date getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(Date createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public ThreadEntity getThread() {
+    return thread;
+  }
+
+  public void setThread(ThreadEntity thread) {
+    this.thread = thread;
+  }
+
+  public AssistantEntity getAssistant() {
+    return assistant;
+  }
+
+  public void setAssistant(AssistantEntity assistant) {
+    this.assistant = assistant;
+  }
 
 }

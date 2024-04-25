@@ -17,6 +17,7 @@
 package com.talkforgeai.backend.assistant.controller;
 
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
+import com.talkforgeai.backend.assistant.dto.ChatCompletionSpringRequest;
 import com.talkforgeai.backend.assistant.dto.GenerateImageRequest;
 import com.talkforgeai.backend.assistant.dto.GenerateImageResponse;
 import com.talkforgeai.backend.assistant.dto.MessageListParsedDto;
@@ -26,14 +27,10 @@ import com.talkforgeai.backend.assistant.dto.ThreadDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleGenerationRequestDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleUpdateRequestDto;
-import com.talkforgeai.backend.assistant.service.AssistantService;
+import com.talkforgeai.backend.assistant.service.AssistantSpringService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.theokanning.openai.ListSearchParameters;
 import com.theokanning.openai.ListSearchParameters.Order;
-import com.theokanning.openai.messages.Message;
-import com.theokanning.openai.messages.MessageRequest;
-import com.theokanning.openai.runs.Run;
-import com.theokanning.openai.runs.RunCreateRequest;
 import jakarta.websocket.server.PathParam;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -60,15 +57,15 @@ import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/api/v1")
-public class AssistantController {
+public class AssistantSpringController {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AssistantController.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(AssistantSpringController.class);
 
-  private final AssistantService assistantService;
+  private final AssistantSpringService assistantService;
 
   private final FileStorageService fileStorageService;
 
-  public AssistantController(AssistantService assistantService,
+  public AssistantSpringController(AssistantSpringService assistantService,
       FileStorageService fileStorageService) {
     this.assistantService = assistantService;
     this.fileStorageService = fileStorageService;
@@ -87,28 +84,12 @@ public class AssistantController {
   @GetMapping("/assistants")
   public List<AssistantDto> listAssistants(@PathParam("limit") Integer limit,
       @PathParam("order") String order) {
-    ListSearchParameters listRequest = ListSearchParameters.builder()
-        .limit(limit)
-        .order(Order.valueOf(order))
-        .build();
-    return assistantService.listAssistants(listRequest);
+    return assistantService.listAssistants(limit, order);
   }
 
   @DeleteMapping("/assistants/{assistantId}")
   public void deleteAssistant(@PathVariable("assistantId") String assistantId) {
     assistantService.deleteAssistant(assistantId);
-  }
-
-  @PostMapping("/assistants/sync")
-  public ResponseEntity<String> syncAssistants() {
-    try {
-      assistantService.syncAssistants();
-    } catch (RuntimeException e) {
-      LOGGER.error("Error syncing assistants.", e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(e.getMessage());
-    }
-    return ResponseEntity.ok().build();
   }
 
   @PostMapping("/assistants/{assistantId}")
@@ -118,8 +99,8 @@ public class AssistantController {
   }
 
   @PostMapping("/assistants")
-  public AssistantDto createAssistant(@RequestBody AssistantDto modifiedAssistant) {
-    return assistantService.createAssistant(modifiedAssistant);
+  public AssistantDto createAssistant(@RequestBody AssistantDto assistant) {
+    return assistantService.createAssistant(assistant);
   }
 
   @GetMapping("/assistants/images/{imageFile}")
@@ -139,7 +120,7 @@ public class AssistantController {
   }
 
   @PostMapping("/assistants/images/upload")
-  public ProfileImageUploadResponse singleFileUpload(@RequestParam("file") MultipartFile file) {
+  public ProfileImageUploadResponse singleImageUpload(@RequestParam("file") MultipartFile file) {
     return assistantService.uploadImage(file);
   }
 
@@ -164,12 +145,6 @@ public class AssistantController {
     return assistantService.retrieveThread(threadId);
   }
 
-  @PostMapping("/threads/{threadId}/messages")
-  public Message postMessage(@PathVariable("threadId") String threadId,
-      @RequestBody MessageRequest messageRequest) {
-    return assistantService.postMessage(threadId, messageRequest);
-  }
-
   @GetMapping("/threads/{threadId}/messages")
   public MessageListParsedDto listMessages(@PathVariable("threadId") String threadId,
       @PathParam("limit") Integer limit, @PathParam("order") String order) {
@@ -181,29 +156,13 @@ public class AssistantController {
     return assistantService.listMessages(threadId, listRequest);
   }
 
-  @PostMapping("/threads/{threadId}/runs")
-  public Run runConversation(@PathVariable("threadId") String threadId,
-      @RequestBody RunCreateRequest runConversationRequest) {
-    return assistantService.runConversation(threadId, runConversationRequest);
-  }
 
   @PostMapping("/threads/{threadId}/runs/stream")
   public Flux<ServerSentEvent<String>> runStreamConversation(
       @PathVariable("threadId") String threadId,
-      @RequestBody RunCreateRequest runConversationRequest) {
-    return assistantService.streamRunConversation(threadId, runConversationRequest);
-  }
-
-  @GetMapping("/threads/{threadId}/runs/{runId}")
-  public Run getRun(@PathVariable("threadId") String threadId,
-      @PathVariable("runId") String runId) {
-    return assistantService.retrieveRun(threadId, runId);
-  }
-
-  @PostMapping("/threads/{threadId}/runs/{runId}/cancel")
-  public Run cancelRun(@PathVariable("threadId") String threadId,
-      @PathVariable("runId") String runId) {
-    return assistantService.cancelRun(threadId, runId);
+      @RequestBody ChatCompletionSpringRequest request) {
+    return assistantService.streamRunConversation(request.assistantId(), threadId,
+        request.message());
   }
 
   @PostMapping("/threads/{threadId}/messages/last/postprocess")

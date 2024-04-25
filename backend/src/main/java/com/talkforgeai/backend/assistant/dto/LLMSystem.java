@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Jean Schmitz.
+ * Copyright (c) 2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,7 @@
 
 package com.talkforgeai.backend.assistant.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import java.util.Date;
-import java.util.Map;
-
-public record AssistantDto(
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    String id,
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    Date createdAt,
-    String name,
-    String description,
-    String system,
-    String model,
-    String instructions,
-    String imagePath,
-    Map<String, String> properties) {
-
+public enum LLMSystem {
+  OPENAI,
+  MISTRAL
 }

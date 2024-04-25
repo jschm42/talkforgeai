@@ -21,7 +21,7 @@ class Assistant {
   name = '';
   description = '';
   model = '';
-  image_path = '';
+  imagePath = '';
   properties = {...AssistantPropertiesDefault};
 }
 

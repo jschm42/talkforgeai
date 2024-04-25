@@ -57,10 +57,10 @@ export default {
       };
     },
     hasProfileImage() {
-      const assistantId = this.message.assistant_id;
+      const assistantId = this.message.assistantId;
       const assistant = this.chatStore.assistantList.find(a => a.id === assistantId);
-      if (assistant?.image_path) {
-        return assistant.image_path;
+      if (assistant?.imagePath) {
+        return assistant.imagePath;
       }
       return false;
     },
@@ -100,7 +100,7 @@ export default {
       if (this.chatStore.parsedMessages[this.message.id] !== undefined) {
         return this.chatStore.parsedMessages[this.message.id];
       }
-      return this.message.content[0].text.value;
+      return this.message.content;
     },
     getMessageStatus() {
       if (this.messageIndex === this.chatStore.maxMessageIndex) {

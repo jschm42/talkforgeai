@@ -16,15 +16,11 @@
 
 package com.talkforgeai.backend.assistant.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.theokanning.openai.messages.Message;
-
 public class ParsedMessageDto {
 
-  @JsonProperty("parsed_content")
   String parsedContent;
 
-  Message message;
+  MessageDto message;
 
   public String getParsedContent() {
     return parsedContent;
@@ -34,11 +30,11 @@ public class ParsedMessageDto {
     this.parsedContent = parsedContent;
   }
 
-  public Message getMessage() {
+  public MessageDto getMessage() {
     return message;
   }
 
-  public void setMessage(Message message) {
+  public void setMessage(MessageDto message) {
     this.message = message;
   }
 }

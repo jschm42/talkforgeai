@@ -18,7 +18,7 @@ package com.talkforgeai.backend.voice.service;
 
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
 import com.talkforgeai.backend.assistant.service.AssistantProperties;
-import com.talkforgeai.backend.assistant.service.AssistantService;
+import com.talkforgeai.backend.assistant.service.AssistantSpringService;
 import com.talkforgeai.backend.voice.dto.TTSRequest;
 import com.talkforgeai.service.elevenlabs.ElevenLabsService;
 import com.talkforgeai.service.elevenlabs.dto.ElevenLabsModel;
@@ -36,9 +36,9 @@ public class TTSService {
   public static final Logger LOGGER = LoggerFactory.getLogger(TTSService.class);
 
   private final ElevenLabsService elevenLabsService;
-  private final AssistantService assistantService;
+  private final AssistantSpringService assistantService;
 
-  public TTSService(ElevenLabsService elevenLabsService, AssistantService assistantService) {
+  public TTSService(ElevenLabsService elevenLabsService, AssistantSpringService assistantService) {
     this.assistantService = assistantService;
     this.elevenLabsService = elevenLabsService;
   }

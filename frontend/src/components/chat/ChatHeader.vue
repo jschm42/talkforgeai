@@ -16,7 +16,7 @@
 
 <template>
   <v-img v-if="isShowAssistantImage(selectedAssistant)"
-         :src="imageSrc(selectedAssistant.image_path)"
+         :src="imageSrc(selectedAssistant.imagePath)"
          alt="Persona Image"
          class="mx-auto"
          max-height="200"
@@ -67,7 +67,7 @@ export default {
       return this.assistants.getAssistantImageUrl(imagePath);
     },
     isShowAssistantImage(assistant) {
-      return !!assistant.image_path;
+      return !!assistant.imagePath;
     },
   },
 };

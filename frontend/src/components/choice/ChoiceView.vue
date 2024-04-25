@@ -44,7 +44,7 @@ export default {
 
     onMounted(async () => {
       try {
-        await assistants.syncAssistants();
+        await assistants.retrieveAssistants();
       } catch (error) {
         appStore.handleError(error);
       }

@@ -16,13 +16,11 @@
 
 package com.talkforgeai.backend.assistant.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.theokanning.openai.OpenAiResponse;
-import com.theokanning.openai.messages.Message;
+import java.util.List;
 import java.util.Map;
 
 public record MessageListParsedDto(
-    @JsonProperty("message_list") OpenAiResponse<Message> messageList,
-    @JsonProperty("parsed_messages") Map<String, String> parsedMessages) {
+    List<MessageDto> messageList,
+    Map<String, String> parsedMessages) {
 
 }

@@ -38,13 +38,13 @@ export default {
   },
   computed: {
     imageSrc() {
-      if (this.assistant.image_path) {
-        return this.assistants.getAssistantImageUrl(this.assistant.image_path);
+      if (this.assistant.imagePath) {
+        return this.assistants.getAssistantImageUrl(this.assistant.imagePath);
       }
       return '';
     },
     isShowAssistantImage() {
-      return !!this.assistant.image_path;
+      return !!this.assistant.imagePath;
     },
     hasDescription() {
       return !!this.assistant.description;

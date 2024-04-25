@@ -43,8 +43,11 @@ export default defineComponent({
   },
   computed: {
     ttsType() {
-      let assistant = this.assistants.getAssistantById(this.message.assistant_id);
-      return assistant.properties[AssistantProperties.TTS_TYPE];
+      let assistant = this.assistants.getAssistantById(this.message.assistantId);
+      if (assistant) {
+        return assistant.properties[AssistantProperties.TTS_TYPE];
+      }
+      return TTSType.DISABLED;
     },
     isDisabled() {
       return this.ttsType === TTSType.DISABLED;
@@ -69,7 +72,7 @@ export default defineComponent({
         return;
       }
 
-      const plainText = this.htmlToText.removeHtml(this.message.content[0].text.value);
+      const plainText = this.htmlToText.removeHtml(this.message.content);
       this.audioState = AudioState.Loading;
 
       if (this.ttsType === TTSType.SPEECHAPI) {
@@ -81,7 +84,7 @@ export default defineComponent({
     async speakElevenlabs(plainText) {
       try {
         const audioBlob = await this.textToSpeech.speakElevenlabs(plainText,
-            this.message.assistant_id);
+            this.message.assistantId);
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.addEventListener('ended', () => {
@@ -99,7 +102,7 @@ export default defineComponent({
     async speakSpeechApi(plainText) {
       console.log(`Speaking using SpeechAPI: '${plainText}'`);
       this.audioState = AudioState.Playing;
-      const assistant = this.assistants.getAssistantById(this.message.assistant_id);
+      const assistant = this.assistants.getAssistantById(this.message.assistantId);
       await this.textToSpeech.speakSpeechAPI(plainText, assistant);
       console.log('Stopped...');
       this.audioState = AudioState.Stopped;
