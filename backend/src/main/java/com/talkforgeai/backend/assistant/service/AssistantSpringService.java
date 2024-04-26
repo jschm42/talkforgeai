@@ -171,14 +171,13 @@ public class AssistantSpringService {
         .subscribeOn(Schedulers.boundedElastic())  // Subscribe on separate thread pool
         .subscribe();  // Subscribe to start execution
 
-    Mono<MessageEntity> pastMessages = Mono.fromRunnable(
-        () -> messageRepository.findByThreadId(threadId, Sort.by(Direction.ASC, "createdAt")));
+    Mono<List<MessageEntity>> pastMessages = Mono.fromCallable(
+            () -> messageRepository.findByThreadId(threadId, Sort.by(Direction.ASC, "createdAt")))
+        .subscribeOn(Schedulers.boundedElastic());
 
     StringBuilder assistantMessageContent = new StringBuilder();
 
     return Flux.from(pastMessages)
-        .collectList()
-        .flux()
         .flatMap(list -> {
           List<Message> promptMessageList = list.stream()
               .map(m -> {
