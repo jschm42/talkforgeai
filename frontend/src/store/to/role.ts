@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 enum Role {
-  USER = 'user',
-  SYSTEM = 'system',
-  ASSISTANT = 'assistant'
+  USER = 'USER',
+  SYSTEM = 'SYSTEM',
+  ASSISTANT = 'ASSISTANT'
 }
 
 export default Role;

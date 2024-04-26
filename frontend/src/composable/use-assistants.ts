@@ -29,6 +29,7 @@ import {ParsedThreadMessage, ThreadMessage} from '@/store/to/thread';
 import axios from 'axios';
 import Assistant from '@/store/to/assistant';
 import {useHighlighting} from '@/composable/use-highligthing';
+import Role from '@/store/to/role';
 
 const DELAY_TIME = 20;
 const DEBOUNCE_TIME = 200;
@@ -144,7 +145,7 @@ export function useAssistants() {
     if (processedMessage?.parsedContent) {
       const codeContent = replaceCodeContent(processedMessage.parsedContent);
 
-      const newMessage = new ThreadMessage(messageId, 'assistant', codeContent, assistantId);
+      const newMessage = new ThreadMessage(messageId, Role.ASSISTANT, codeContent, assistantId);
       newMessage.threadId = threadId;
 
       chatStore.threadMessages.pop();
@@ -495,9 +496,9 @@ export function useAssistants() {
     //     // const submitedMessage = result.data;
 
     chatStore.threadMessages.push(
-        new ThreadMessage('', 'user', content, chatStore.selectedAssistant.id));
+        new ThreadMessage('', Role.USER, content, chatStore.selectedAssistant.id));
     chatStore.threadMessages.push(
-        new ThreadMessage('', 'assistant', '', chatStore.selectedAssistant.id));
+        new ThreadMessage('', Role.ASSISTANT, '', chatStore.selectedAssistant.id));
 
     chatStore.updateStatus('Thinking...', 'running');
 

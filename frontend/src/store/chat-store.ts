@@ -17,6 +17,7 @@
 import {defineStore} from 'pinia';
 import Thread, {ThreadMessage} from '@/store/to/thread';
 import Assistant from '@/store/to/assistant';
+import Role from '@/store/to/role';
 
 export const useChatStore = defineStore('chat', {
   state: () => {
@@ -75,7 +76,7 @@ export const useChatStore = defineStore('chat', {
      */
     getLastUserMessage(): ThreadMessage | undefined {
       for (let i = this.threadMessages.length - 1; i >= 0; i--) {
-        if (this.threadMessages[i].role === 'user') {
+        if (this.threadMessages[i].role === Role.USER) {
           return this.threadMessages[i];
         }
       }
@@ -87,7 +88,7 @@ export const useChatStore = defineStore('chat', {
     getLastAssistantMessage(): ThreadMessage | undefined {
       // Find the last assistant message in this.threadMessages array by iterating in reverse
       for (let i = this.threadMessages.length - 1; i >= 0; i--) {
-        if (this.threadMessages[i].role === 'assistant') {
+        if (this.threadMessages[i].role === Role.ASSISTANT) {
           return this.threadMessages[i];
         }
       }

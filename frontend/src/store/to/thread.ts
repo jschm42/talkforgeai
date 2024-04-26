@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import Role from '@/store/to/role';
+
 class Thread {
   id = '';
   title = '';
@@ -25,10 +27,10 @@ class ThreadMessage {
   createdAt: Date | null = null;
   threadId: string | null = null;
   assistantId: string | null = null;
-  role: 'user' | 'assistant' | undefined;
+  role: Role | undefined;
   content: string | null = null;
 
-  constructor(id: string, role: 'user' | 'assistant', content: string, assistantId: string) {
+  constructor(id: string, role: Role, content: string, assistantId: string) {
     this.id = id;
     this.role = role;
     this.content = content;

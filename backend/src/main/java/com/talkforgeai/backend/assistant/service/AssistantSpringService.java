@@ -167,7 +167,7 @@ public class AssistantSpringService {
         .build();
 
     Mono.fromRunnable(() -> saveNewMessage(assistantId, threadId, MessageType.USER,
-            message))  // Wrap blocking call
+            message, message))  // Wrap blocking call
         .subscribeOn(Schedulers.boundedElastic())  // Subscribe on separate thread pool
         .subscribe();  // Subscribe to start execution
 
@@ -214,7 +214,7 @@ public class AssistantSpringService {
           LOGGER.info("doOnComplete. message={}", assistantMessageContent);
 
           Mono.fromRunnable(() -> saveNewMessage(assistantId, threadId, MessageType.ASSISTANT,
-                  assistantMessageContent.toString()))  // Wrap blocking call
+                  assistantMessageContent.toString(), null))  // Wrap blocking call
               .subscribeOn(Schedulers.boundedElastic())  // Subscribe on separate thread pool
               .subscribe();  // Subscribe to start execution
         })
@@ -248,7 +248,7 @@ public class AssistantSpringService {
       ListSearchParameters listSearchParameters) {
 
     List<MessageEntity> messageEntities = messageRepository.findByThreadId(threadId,
-        Sort.by(Sort.Direction.DESC, "createdAt"));
+        Sort.by(Direction.ASC, "createdAt"));
     List<MessageDto> messageDtos = messageEntities.stream()
         .map(assistantMapper::toDto)
         .toList();
@@ -472,9 +472,14 @@ public class AssistantSpringService {
   }
 
   private MessageEntity saveNewMessage(String assistantId, String threadId, MessageType role,
-      String content) {
+      String rawContent) {
+    return saveNewMessage(assistantId, threadId, role, rawContent);
+  }
+
+  private MessageEntity saveNewMessage(String assistantId, String threadId, MessageType role,
+      String rawContent, String parsedContent) {
     LOGGER.debug("Saving new message with role={}, assistantId={}, threadId={}: {}", assistantId,
-        threadId, role, content);
+        threadId, role, rawContent);
 
     ThreadEntity threadEntity = threadRepository.findById(threadId)
         .orElseThrow(() -> new AssistentException("Thread not found"));
@@ -485,7 +490,8 @@ public class AssistantSpringService {
     messageEntity.setId(uniqueIdGenerator.generateMessageId());
     messageEntity.setThread(threadEntity);
     messageEntity.setAssistant(assistantEntity);
-    messageEntity.setRawContent(content);
+    messageEntity.setRawContent(rawContent);
+    messageEntity.setParsedContent(parsedContent);
     messageEntity.setRole(role.getValue());
     messageEntity.setCreatedAt(new Date());
 
