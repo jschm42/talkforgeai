@@ -163,7 +163,7 @@ public class AssistantSpringService {
   public Flux<ServerSentEvent<String>> streamRunConversation(String assistantId, String threadId,
       String message) {
     ChatOptions options = OpenAiChatOptions.builder()
-        .withModel("gpt-4-turbo")
+        .withModel("gpt-3.5-turbo")
         .build();
 
     Mono.fromRunnable(() -> saveNewMessage(assistantId, threadId, MessageType.USER,
