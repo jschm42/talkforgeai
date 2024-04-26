@@ -174,17 +174,6 @@ public class AssistantSpringService {
     Mono<MessageEntity> pastMessages = Mono.fromRunnable(
         () -> messageRepository.findByThreadId(threadId, Sort.by(Direction.ASC, "createdAt")));
 
-//    Flux<Message> promptMessageList = pastMessages.map(m -> {
-//      if (m.getRole().equals(MessageType.USER.getValue())) {
-//        return (Message) new UserMessage(m.getRawContent());
-//      } else if (m.getRole().equals(MessageType.ASSISTANT.getValue())) {
-//        return (Message) new AssistantMessage(m.getRawContent());
-//      }
-//      throw new AssistentException("Unknown message type: " + m.getRole());
-//    });
-
-//    Prompt prompt = new Prompt(promptMessageList.collectList().block(), options);
-
     StringBuilder assistantMessageContent = new StringBuilder();
 
     return Flux.from(pastMessages)
@@ -233,36 +222,6 @@ public class AssistantSpringService {
         .doOnError(throwable -> {
           LOGGER.error("doOnError: {}", throwable.getMessage());
         });
-
-//    Flux<ChatResponse> stream = this.chatClient.stream(prompt);
-//
-//    return stream
-//        .mapNotNull(chatResponse -> {
-//          LOGGER.info("SSEEvent received: {}", chatResponse);
-//
-//          assistantMessageContent.append(chatResponse.getResult().getOutput().getContent());
-//
-//          ServerSentEvent<String> responseSseEvent = createResponseSseEvent(chatResponse);
-//
-//          if (responseSseEvent != null) {
-//            LOGGER.info("Sending event '{}'", responseSseEvent.event());
-//          }
-//
-//          return responseSseEvent;
-//        })
-//        .doOnNext(chatResponse -> {
-//          LOGGER.info("doOnNext response: {}", chatResponse);
-//        })
-//        .doOnComplete(() -> {
-//          LOGGER.info("doOnComplete. message={}", assistantMessageContent);
-//
-//          Mono.fromRunnable(() -> saveNewMessage(assistantId, threadId, MessageType.ASSISTANT,
-//                  assistantMessageContent.toString()))  // Wrap blocking call
-//              .subscribeOn(Schedulers.boundedElastic())  // Subscribe on separate thread pool
-//              .subscribe();  // Subscribe to start execution
-//        }).doOnError(throwable -> {
-//          LOGGER.error("doOnError: {}", throwable.getMessage());
-//        });
   }
 
   private ServerSentEvent<String> createResponseSseEvent(ChatResponse chatResponse) {

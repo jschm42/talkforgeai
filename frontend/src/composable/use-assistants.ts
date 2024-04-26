@@ -200,8 +200,6 @@ export function useAssistants() {
     console.log('## processDeltaEvent', data);
     const lastMessage = chatStore.getLastMessage();
 
-    if (!lastMessage?.content) return;
-
     if (data.length > 0) {
       let newContent = escapeHtml(data);
       newContent = newContent.replaceAll(/\n/g, '<br/>');
