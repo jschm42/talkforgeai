@@ -72,6 +72,7 @@ export function useAssistants() {
       while (isReading) {
         const chunk = await reader.read();
         const chunkValue = decoder.decode(chunk.value, {stream: true});
+        console.log('CHUNK: ', chunkValue);
 
         if (chunk.done) {
           await postStreamProcessing(threadId);
@@ -181,28 +182,13 @@ export function useAssistants() {
     chatStore.runId = JSON.parse(data)['id'];
   };
 
-  // const processDeltaEvent = (data: string) => {
-  //   console.log('## processDeltaEvent', data);
-  //   const content = JSON.parse(data)['delta']['content'];
-  //   const lastMessage = chatStore.getLastMessage();
-  //
-  //   if (!lastMessage?.content?.[0]?.text) return;
-  //
-  //   if (content.length > 0 && content[0].type === 'text') {
-  //     const textContent = content[0].text.value;
-  //     let newContent = escapeHtml(textContent);
-  //     newContent = newContent.replaceAll(/\n/g, '<br/>');
-  //     lastMessage.content[0].text.value += newContent;
-  //   }
-  // };
-  //
   const processDeltaEvent = (data: string) => {
     console.log('## processDeltaEvent', data);
     const lastMessage = chatStore.getLastMessage();
 
     if (data.length > 0) {
       let newContent = escapeHtml(data);
-      newContent = newContent.replaceAll(/\n/g, '<br/>');
+      newContent = newContent.replaceAll(/\\n/g, '<br/>');
       lastMessage.content += newContent;
     }
   };

@@ -196,7 +196,7 @@ public class AssistantSpringService {
           return chatClient.stream(new Prompt(finalPromptMessageList, options));
         })
         .mapNotNull(chatResponse -> {
-          LOGGER.info("SSEEvent received: {}", chatResponse);
+          LOGGER.info("ChatResponse received: {}", chatResponse.getResult().getOutput());
 
           assistantMessageContent.append(chatResponse.getResult().getOutput().getContent());
 
@@ -233,9 +233,11 @@ public class AssistantSpringService {
           .event("done")
           .build();
     } else {
+      String content = chatResponse.getResult().getOutput().getContent();
+      content = content.replace("\n", "\\n");
       event = ServerSentEvent.<String>builder()
           .event("thread.message.delta")
-          .data(chatResponse.getResult().getOutput().getContent())
+          .data(content)
           .build();
     }
 
@@ -326,7 +328,7 @@ public class AssistantSpringService {
 
     String generatedTitle = responseMessage.getContent();
 
-    String parsedTitle = generatedTitle.replaceAll("\"", "");
+    String parsedTitle = generatedTitle.replace("\"", "");
     threadEntity.setTitle(parsedTitle);
     threadRepository.save(threadEntity);
 
