@@ -196,9 +196,12 @@ public class AssistantSpringService {
           return chatClient.stream(new Prompt(finalPromptMessageList, options));
         })
         .mapNotNull(chatResponse -> {
-          LOGGER.info("ChatResponse received: {}", chatResponse.getResult().getOutput());
+          String content = chatResponse.getResult().getOutput().getContent();
+          LOGGER.info("ChatResponse received: {}", content);
 
-          assistantMessageContent.append(chatResponse.getResult().getOutput().getContent());
+          if (content != null) {
+            assistantMessageContent.append(chatResponse.getResult().getOutput().getContent());
+          }
 
           ServerSentEvent<String> responseSseEvent = createResponseSseEvent(chatResponse);
 

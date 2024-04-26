@@ -73,13 +73,13 @@ export function useAssistants() {
       while (isReading) {
         const chunk = await reader.read();
         const chunkValue = decoder.decode(chunk.value, {stream: true});
-        console.log('CHUNK: ', chunkValue);
 
         if (chunk.done) {
           await postStreamProcessing(threadId);
           chatStore.removeStatus();
           isReading = false;
         } else {
+          console.log('Chunk value: ', chunkValue);
           partial += chunkValue;
           const parts = partial.split('\n');
           partial = parts.pop() ?? '';
@@ -164,23 +164,14 @@ export function useAssistants() {
 
   const processData = (data: string, event: string, debouncedUpdateCallback: () => void) => {
     console.log('PROCESS event=' + event + ': ', data);
-    //if (!hasJSONData(data)) return;
 
     switch (event) {
       case 'thread.message.delta':
         processDeltaEvent(data);
         break;
-      case 'thread.run.created':
-        processRunCreatedEvent(data);
-        break;
     }
 
     debouncedUpdateCallback();
-  };
-
-  const processRunCreatedEvent = (data: string) => {
-    console.log('## processRunCreatedEvent', data);
-    chatStore.runId = JSON.parse(data)['id'];
   };
 
   const processDeltaEvent = (data: string) => {
@@ -199,12 +190,6 @@ export function useAssistants() {
     const result = await axios.get('/api/v1/assistants/models');
     return result.data;
   };
-
-  // const syncAssistants = async () => {
-  //   console.log('Syncing assistants');
-  //   await axios.post('/api/v1/assistants/sync');
-  //   await retrieveAssistants();
-  // };
 
   const retrieveAssistants = async () => {
     console.log('Retrieving assistants');
@@ -488,12 +473,6 @@ export function useAssistants() {
     console.log('');
 
     await createThreadIfNeeded();
-
-    // const result = await axios.post(
-    //     //     `/api/v1/threads/${chatStore.threadId}/messages`,
-    //     //     {content, role: 'user'},
-    //     // );
-    //     // const submitedMessage = result.data;
 
     chatStore.threadMessages.push(
         new ThreadMessage('', Role.USER, content, chatStore.selectedAssistant.id));
