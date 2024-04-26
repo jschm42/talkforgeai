@@ -33,19 +33,20 @@ public class MessageEntity {
   @Id
   @Column(name = "id", length = 50)
   private String id;
+
   @Lob
   @Column(name = "raw_content")
   private String rawContent;
+
   @Lob
   @Column(name = "parsed_content")
   private String parsedContent;
+  private String role;
   @Column(name = "created_at")
   private Date createdAt;
-
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "thread_id", nullable = false)
   private ThreadEntity thread;
-
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "assistant_id", nullable = false)
   private AssistantEntity assistant;
@@ -97,6 +98,14 @@ public class MessageEntity {
 
   public void setAssistant(AssistantEntity assistant) {
     this.assistant = assistant;
+  }
+
+  public String getRole() {
+    return role;
+  }
+
+  public void setRole(String role) {
+    this.role = role;
   }
 
 }

@@ -46,6 +46,7 @@ create table message
   id             varchar(50) not null primary key,
   raw_content    CLOB,
   parsed_content CLOB,
+  role           varchar(10),
   created_at     timestamp,
   thread_id      varchar(50) not null,
   assistant_id   varchar(50) not null,

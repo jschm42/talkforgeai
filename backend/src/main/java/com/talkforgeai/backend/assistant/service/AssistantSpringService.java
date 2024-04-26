@@ -51,6 +51,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +62,9 @@ import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.ChatResponse;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -70,11 +74,13 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 @Service
@@ -160,12 +166,47 @@ public class AssistantSpringService {
         .withModel("gpt-4-turbo")
         .build();
 
-    Prompt prompt = new Prompt(new UserMessage(message), options);
-    Flux<ChatResponse> stream = this.chatClient.stream(prompt);
+    Mono.fromRunnable(() -> saveNewMessage(assistantId, threadId, MessageType.USER,
+            message))  // Wrap blocking call
+        .subscribeOn(Schedulers.boundedElastic())  // Subscribe on separate thread pool
+        .subscribe();  // Subscribe to start execution
+
+    Mono<MessageEntity> pastMessages = Mono.fromRunnable(
+        () -> messageRepository.findByThreadId(threadId, Sort.by(Direction.ASC, "createdAt")));
+
+//    Flux<Message> promptMessageList = pastMessages.map(m -> {
+//      if (m.getRole().equals(MessageType.USER.getValue())) {
+//        return (Message) new UserMessage(m.getRawContent());
+//      } else if (m.getRole().equals(MessageType.ASSISTANT.getValue())) {
+//        return (Message) new AssistantMessage(m.getRawContent());
+//      }
+//      throw new AssistentException("Unknown message type: " + m.getRole());
+//    });
+
+//    Prompt prompt = new Prompt(promptMessageList.collectList().block(), options);
 
     StringBuilder assistantMessageContent = new StringBuilder();
 
-    return stream
+    return Flux.from(pastMessages)
+        .collectList()
+        .flux()
+        .flatMap(list -> {
+          List<Message> promptMessageList = list.stream()
+              .map(m -> {
+                if (m.getRole().equals(MessageType.USER.getValue())) {
+                  return (Message) new UserMessage(m.getRawContent());
+                } else if (m.getRole().equals(MessageType.ASSISTANT.getValue())) {
+                  return (Message) new AssistantMessage(m.getRawContent());
+                }
+                throw new AssistentException("Unknown message type: " + m.getRole());
+              })
+              .toList();
+
+          List<Message> finalPromptMessageList = new ArrayList<>(promptMessageList);
+          finalPromptMessageList.add(new UserMessage(message));
+
+          return chatClient.stream(new Prompt(finalPromptMessageList, options));
+        })
         .mapNotNull(chatResponse -> {
           LOGGER.info("SSEEvent received: {}", chatResponse);
 
@@ -178,29 +219,50 @@ public class AssistantSpringService {
           }
 
           return responseSseEvent;
-        })
-        .doOnNext(chatResponse -> {
+        }).doOnNext(chatResponse -> {
           LOGGER.info("doOnNext response: {}", chatResponse);
         })
-        .publishOn(Schedulers.boundedElastic()).doOnComplete(() -> {
+        .doOnComplete(() -> {
           LOGGER.info("doOnComplete. message={}", assistantMessageContent);
 
-          ThreadEntity threadEntity = threadRepository.findById(threadId)
-              .orElseThrow(() -> new AssistentException("Thread not found"));
-          AssistantEntity assistantEntity = assistantRepository.findById(assistantId)
-              .orElseThrow(() -> new AssistentException("Assistant not found"));
-
-          MessageEntity messageEntity = new MessageEntity();
-          messageEntity.setId(uniqueIdGenerator.generateMessageId());
-          messageEntity.setThread(threadEntity);
-          messageEntity.setAssistant(assistantEntity);
-          messageEntity.setRawContent(assistantMessageContent.toString());
-
-          LOGGER.info("Saving raw message: {}", messageEntity.getRawContent());
-          messageRepository.save(messageEntity);
-        }).doOnError(throwable -> {
+          Mono.fromRunnable(() -> saveNewMessage(assistantId, threadId, MessageType.ASSISTANT,
+                  assistantMessageContent.toString()))  // Wrap blocking call
+              .subscribeOn(Schedulers.boundedElastic())  // Subscribe on separate thread pool
+              .subscribe();  // Subscribe to start execution
+        })
+        .doOnError(throwable -> {
           LOGGER.error("doOnError: {}", throwable.getMessage());
         });
+
+//    Flux<ChatResponse> stream = this.chatClient.stream(prompt);
+//
+//    return stream
+//        .mapNotNull(chatResponse -> {
+//          LOGGER.info("SSEEvent received: {}", chatResponse);
+//
+//          assistantMessageContent.append(chatResponse.getResult().getOutput().getContent());
+//
+//          ServerSentEvent<String> responseSseEvent = createResponseSseEvent(chatResponse);
+//
+//          if (responseSseEvent != null) {
+//            LOGGER.info("Sending event '{}'", responseSseEvent.event());
+//          }
+//
+//          return responseSseEvent;
+//        })
+//        .doOnNext(chatResponse -> {
+//          LOGGER.info("doOnNext response: {}", chatResponse);
+//        })
+//        .doOnComplete(() -> {
+//          LOGGER.info("doOnComplete. message={}", assistantMessageContent);
+//
+//          Mono.fromRunnable(() -> saveNewMessage(assistantId, threadId, MessageType.ASSISTANT,
+//                  assistantMessageContent.toString()))  // Wrap blocking call
+//              .subscribeOn(Schedulers.boundedElastic())  // Subscribe on separate thread pool
+//              .subscribe();  // Subscribe to start execution
+//        }).doOnError(throwable -> {
+//          LOGGER.error("doOnError: {}", throwable.getMessage());
+//        });
   }
 
   private ServerSentEvent<String> createResponseSseEvent(ChatResponse chatResponse) {
@@ -350,6 +412,42 @@ public class AssistantSpringService {
     return new GenerateImageResponse(downloadImage(image.getData().get(0).getUrl()));
   }
 
+
+  @Transactional
+  public AssistantDto createAssistant(AssistantDto assistant) {
+    AssistantEntity assistantEntity = assistantMapper.toEntity(assistant);
+    assistantEntity.setId(uniqueIdGenerator.generateAssistantId());
+    return assistantMapper.toDto(assistantRepository.save(assistantEntity));
+  }
+
+  public List<String> retrieveModels() {
+    return openAiService.listModels().stream()
+        .map(Model::getId)
+        .filter(id -> id.startsWith("gpt") && !id.contains("instruct"))
+        .toList();
+  }
+
+  @Transactional
+  public void deleteAssistant(String assistantId) {
+    assistantRepository.deleteById(assistantId);
+  }
+
+  @Transactional
+  public void deleteThread(String threadId) {
+    threadRepository.deleteById(threadId);
+  }
+
+  @Transactional
+  public ThreadTitleDto updateThreadTitle(String threadId, ThreadTitleUpdateRequestDto request) {
+    ThreadEntity threadEntity = threadRepository.findById(threadId)
+        .orElseThrow(() -> new AssistentException("Thread not found"));
+
+    threadEntity.setTitle(request.title());
+    threadRepository.save(threadEntity);
+
+    return new ThreadTitleDto(request.title());
+  }
+
   private String downloadImage(String imageUrl) throws IOException {
     String fileName = UUID.randomUUID() + "_image.png";
     Path subDirectoryPath = fileStorageService.getAssistantsDirectory();
@@ -377,7 +475,6 @@ public class AssistantSpringService {
 
     return fileName;
   }
-
 
   public ProfileImageUploadResponse uploadImage(MultipartFile file) {
     if (file.isEmpty()) {
@@ -414,38 +511,25 @@ public class AssistantSpringService {
     }
   }
 
-  @Transactional
-  public AssistantDto createAssistant(AssistantDto assistant) {
-    AssistantEntity assistantEntity = assistantMapper.toEntity(assistant);
-    assistantEntity.setId(uniqueIdGenerator.generateAssistantId());
-    return assistantMapper.toDto(assistantRepository.save(assistantEntity));
-  }
+  private MessageEntity saveNewMessage(String assistantId, String threadId, MessageType role,
+      String content) {
+    LOGGER.debug("Saving new message with role={}, assistantId={}, threadId={}: {}", assistantId,
+        threadId, role, content);
 
-  public List<String> retrieveModels() {
-    return openAiService.listModels().stream()
-        .map(Model::getId)
-        .filter(id -> id.startsWith("gpt") && !id.contains("instruct"))
-        .toList();
-  }
-
-  @Transactional
-  public void deleteAssistant(String assistantId) {
-    assistantRepository.deleteById(assistantId);
-  }
-
-  @Transactional
-  public void deleteThread(String threadId) {
-    threadRepository.deleteById(threadId);
-  }
-
-  @Transactional
-  public ThreadTitleDto updateThreadTitle(String threadId, ThreadTitleUpdateRequestDto request) {
     ThreadEntity threadEntity = threadRepository.findById(threadId)
         .orElseThrow(() -> new AssistentException("Thread not found"));
+    AssistantEntity assistantEntity = assistantRepository.findById(assistantId)
+        .orElseThrow(() -> new AssistentException("Assistant not found"));
 
-    threadEntity.setTitle(request.title());
-    threadRepository.save(threadEntity);
+    MessageEntity messageEntity = new MessageEntity();
+    messageEntity.setId(uniqueIdGenerator.generateMessageId());
+    messageEntity.setThread(threadEntity);
+    messageEntity.setAssistant(assistantEntity);
+    messageEntity.setRawContent(content);
+    messageEntity.setRole(role.getValue());
+    messageEntity.setCreatedAt(new Date());
 
-    return new ThreadTitleDto(request.title());
+    return messageRepository.save(messageEntity);
   }
+
 }

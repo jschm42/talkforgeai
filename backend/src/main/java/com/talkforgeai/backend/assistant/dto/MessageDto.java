@@ -17,10 +17,12 @@
 package com.talkforgeai.backend.assistant.dto;
 
 import java.util.Date;
+import org.springframework.ai.chat.messages.MessageType;
 
 public record MessageDto(String id,
                          String rawContent,
                          String parsedContent,
+                         MessageType role,
                          Date createdAt,
                          String assistantId,
                          String threadId) {

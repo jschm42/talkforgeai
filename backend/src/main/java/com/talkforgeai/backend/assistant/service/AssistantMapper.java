@@ -29,6 +29,7 @@ import com.talkforgeai.backend.assistant.dto.ThreadDto;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -109,7 +110,8 @@ public class AssistantMapper {
 
   public MessageDto toDto(MessageEntity messageEntity) {
     return new MessageDto(messageEntity.getId(), messageEntity.getRawContent(),
-        messageEntity.getParsedContent(), messageEntity.getCreatedAt(),
+        messageEntity.getParsedContent(), MessageType.fromValue(messageEntity.getRole()),
+        messageEntity.getCreatedAt(),
         messageEntity.getAssistant().getId(), messageEntity.getThread().getId());
   }
 
