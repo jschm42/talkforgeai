@@ -167,10 +167,10 @@ public class AssistantSpringService {
         .withModel("gpt-3.5-turbo")
         .build();
 
-    Mono.fromRunnable(() -> saveNewMessage(assistantId, threadId, MessageType.USER,
-            message, message))  // Wrap blocking call
-        .subscribeOn(Schedulers.boundedElastic())  // Subscribe on separate thread pool
-        .subscribe();  // Subscribe to start execution
+    Mono<Object> saveUserMessageMono = Mono.fromRunnable(
+            () -> saveNewMessage(assistantId, threadId, MessageType.USER,
+                message, message))  // Wrap blocking call
+        .subscribeOn(Schedulers.boundedElastic());
 
     Mono<AssistantEntity> assistantEntityMono = Mono.fromCallable(
             () -> assistantRepository.findById(assistantId)
@@ -187,7 +187,9 @@ public class AssistantSpringService {
 
     StringBuilder assistantMessageContent = new StringBuilder();
 
-    return Flux.from(streamContextTuple)
+    return saveUserMessageMono
+        .then(streamContextTuple)
+        .flux()
         .flatMap(tuple -> {
           AssistantEntity assistantEntity = tuple.getT1();
           List<MessageEntity> pastMessagesList = tuple.getT2();
