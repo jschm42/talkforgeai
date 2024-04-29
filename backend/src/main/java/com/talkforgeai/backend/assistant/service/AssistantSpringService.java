@@ -82,6 +82,7 @@ import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.function.Tuple2;
 
 @Service
 public class AssistantSpringService {
@@ -171,15 +172,27 @@ public class AssistantSpringService {
         .subscribeOn(Schedulers.boundedElastic())  // Subscribe on separate thread pool
         .subscribe();  // Subscribe to start execution
 
+    Mono<AssistantEntity> assistantEntityMono = Mono.fromCallable(
+            () -> assistantRepository.findById(assistantId)
+                .orElseThrow(() -> new AssistentException("Assistant not found")))
+        .subscribeOn(Schedulers.boundedElastic());
+
     Mono<List<MessageEntity>> pastMessages = Mono.fromCallable(
             () -> messageRepository.findByThreadId(threadId, Sort.by(Direction.ASC, "createdAt")))
         .subscribeOn(Schedulers.boundedElastic());
 
+    Mono<Tuple2<AssistantEntity, List<MessageEntity>>> streamContextTuple = Mono.zip(
+        assistantEntityMono,
+        pastMessages);
+
     StringBuilder assistantMessageContent = new StringBuilder();
 
-    return Flux.from(pastMessages)
-        .flatMap(list -> {
-          List<Message> promptMessageList = list.stream()
+    return Flux.from(streamContextTuple)
+        .flatMap(tuple -> {
+          AssistantEntity assistantEntity = tuple.getT1();
+          List<MessageEntity> pastMessagesList = tuple.getT2();
+
+          List<Message> promptMessageList = pastMessagesList.stream()
               .map(m -> {
                 if (m.getRole().equals(MessageType.USER.getValue())) {
                   return (Message) new UserMessage(m.getRawContent());
@@ -375,7 +388,6 @@ public class AssistantSpringService {
     return new GenerateImageResponse(downloadImage(image.getData().get(0).getUrl()));
   }
 
-
   @Transactional
   public AssistantDto createAssistant(AssistantDto assistant) {
     AssistantEntity assistantEntity = assistantMapper.toEntity(assistant);
@@ -499,6 +511,10 @@ public class AssistantSpringService {
     messageEntity.setCreatedAt(new Date());
 
     return messageRepository.save(messageEntity);
+  }
+
+  record StreamContext(AssistantEntity assistantEntity, List<MessageEntity> pastMessages) {
+
   }
 
 }
