@@ -20,6 +20,7 @@ class Assistant {
   id = '';
   name = '';
   description = '';
+  system = '';
   model = '';
   imagePath = '';
   properties = {...AssistantPropertiesDefault};

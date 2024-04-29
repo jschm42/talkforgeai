@@ -20,6 +20,7 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
@@ -39,22 +40,29 @@ public class AssistantEntity {
 
   @Column(name = "image_path", length = 100)
   private String imagePath;
+
   @Column(name = "name", length = 50)
   private String name;
+
   @Column(name = "description", length = 200)
   private String description;
+
   @Column(name = "system", length = 20)
   private String system;
+
   @Column(name = "model", length = 30)
   private String model;
+
   @Lob
   @Column(name = "instructions")
   private String instructions;
-  @ElementCollection
+
+  @ElementCollection(fetch = FetchType.EAGER)
   @MapKeyColumn(name = "property_key")
   @CollectionTable(name = "assistant_properties", joinColumns = @JoinColumn(name = "assistant_id"))
   @Column(name = "property_value")
   private Map<String, AssistantPropertyValue> properties = new HashMap<>();
+
   @Column(name = "created_at")
   private Date createdAt;
 

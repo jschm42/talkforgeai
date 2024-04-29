@@ -23,6 +23,7 @@ import com.talkforgeai.backend.assistant.dto.AssistantDto;
 import com.talkforgeai.backend.assistant.dto.GenerateImageResponse;
 import com.talkforgeai.backend.assistant.dto.MessageDto;
 import com.talkforgeai.backend.assistant.dto.MessageListParsedDto;
+import com.talkforgeai.backend.assistant.dto.ModelSystem;
 import com.talkforgeai.backend.assistant.dto.ParsedMessageDto;
 import com.talkforgeai.backend.assistant.dto.ProfileImageUploadResponse;
 import com.talkforgeai.backend.assistant.dto.ThreadDto;
@@ -65,6 +66,7 @@ import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
+import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -163,25 +165,24 @@ public class AssistantSpringService {
 
   public Flux<ServerSentEvent<String>> streamRunConversation(String assistantId, String threadId,
       String message) {
-    ChatOptions options = OpenAiChatOptions.builder()
-        .withModel("gpt-3.5-turbo")
-        .build();
 
     Mono<Object> saveUserMessageMono = Mono.fromRunnable(
             () -> saveNewMessage(assistantId, threadId, MessageType.USER,
                 message, message))  // Wrap blocking call
         .subscribeOn(Schedulers.boundedElastic());
 
-    Mono<AssistantEntity> assistantEntityMono = Mono.fromCallable(
+    Mono<AssistantDto> assistantEntityMono = Mono.fromCallable(
             () -> assistantRepository.findById(assistantId)
                 .orElseThrow(() -> new AssistentException("Assistant not found")))
+        .map(assistantMapper::toDto)
         .subscribeOn(Schedulers.boundedElastic());
 
-    Mono<List<MessageEntity>> pastMessages = Mono.fromCallable(
+    Mono<List<MessageDto>> pastMessages = Mono.fromCallable(
             () -> messageRepository.findByThreadId(threadId, Sort.by(Direction.ASC, "createdAt")))
+        .map(assistantMapper::toDto)
         .subscribeOn(Schedulers.boundedElastic());
 
-    Mono<Tuple2<AssistantEntity, List<MessageEntity>>> streamContextTuple = Mono.zip(
+    Mono<Tuple2<AssistantDto, List<MessageDto>>> streamContextTuple = Mono.zip(
         assistantEntityMono,
         pastMessages);
 
@@ -191,23 +192,27 @@ public class AssistantSpringService {
         .then(streamContextTuple)
         .flux()
         .flatMap(tuple -> {
-          AssistantEntity assistantEntity = tuple.getT1();
-          List<MessageEntity> pastMessagesList = tuple.getT2();
+          AssistantDto assistantDto = tuple.getT1();
+          List<MessageDto> pastMessagesList = tuple.getT2();
 
           List<Message> promptMessageList = pastMessagesList.stream()
               .map(m -> {
-                if (m.getRole().equals(MessageType.USER.getValue())) {
-                  return (Message) new UserMessage(m.getRawContent());
-                } else if (m.getRole().equals(MessageType.ASSISTANT.getValue())) {
-                  return (Message) new AssistantMessage(m.getRawContent());
+                if (MessageType.USER.equals(m.role())) {
+                  return (Message) new UserMessage(m.rawContent());
+                } else if (MessageType.ASSISTANT.equals(m.role())) {
+                  return (Message) new AssistantMessage(m.rawContent());
                 }
-                throw new AssistentException("Unknown message type: " + m.getRole());
+                throw new AssistentException("Unknown message type: " + m.role());
               })
               .toList();
 
           List<Message> finalPromptMessageList = new ArrayList<>(promptMessageList);
+          finalPromptMessageList.addFirst(new SystemMessage(assistantDto.instructions()));
           finalPromptMessageList.add(new UserMessage(message));
 
+          OpenAiChatOptions options = getPromptOptions(assistantDto);
+          LOGGER.debug("Starting stream with prompt: {}", finalPromptMessageList);
+          LOGGER.debug("Prompt Options: {}", printPromptOptions(assistantDto.system(), options));
           return chatClient.stream(new Prompt(finalPromptMessageList, options));
         })
         .mapNotNull(chatResponse -> {
@@ -371,7 +376,7 @@ public class AssistantSpringService {
     modifiedEntity.setModel(modifiedAssistant.model());
     modifiedEntity.setInstructions(modifiedAssistant.instructions());
     modifiedEntity.setImagePath(modifiedAssistant.imagePath());
-    modifiedEntity.setSystem(modifiedAssistant.system());
+    modifiedEntity.setSystem(modifiedAssistant.system().name());
     modifiedEntity.setProperties(assistantMapper.mapProperties(modifiedAssistant.properties()));
 
     assistantRepository.save(modifiedEntity);
@@ -515,8 +520,30 @@ public class AssistantSpringService {
     return messageRepository.save(messageEntity);
   }
 
-  record StreamContext(AssistantEntity assistantEntity, List<MessageEntity> pastMessages) {
+  private OpenAiChatOptions getPromptOptions(AssistantDto assistantDto) {
+    return OpenAiChatOptions.builder()
+        .withModel(assistantDto.model())
+        .build();
+  }
 
+  private String printPromptOptions(ModelSystem system, ChatOptions options) {
+    StringBuilder printedOptions = new StringBuilder("[");
+    printedOptions.append("system=").append(system).append(", ");
+
+    if (options instanceof OpenAiChatOptions openAiChatOptions) {
+      printedOptions.append("model=").append(openAiChatOptions.getModel()).append(", ");
+      printedOptions.append("topP=").append(openAiChatOptions.getTopP()).append(", ");
+      printedOptions.append("n=").append(openAiChatOptions.getN()).append(", ");
+      printedOptions.append("seed=").append(openAiChatOptions.getSeed()).append(", ");
+      printedOptions.append("frequencePenalty=").append(openAiChatOptions.getFrequencyPenalty())
+          .append(", ");
+      printedOptions.append("presencePenalty=").append(openAiChatOptions.getPresencePenalty())
+          .append(", ");
+      printedOptions.append("temperature=").append(openAiChatOptions.getTemperature()).append(", ");
+    }
+
+    printedOptions.append("]");
+    return printedOptions.toString();
   }
 
 }

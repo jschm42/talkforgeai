@@ -25,9 +25,11 @@ import com.talkforgeai.backend.assistant.domain.MessageEntity;
 import com.talkforgeai.backend.assistant.domain.ThreadEntity;
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
 import com.talkforgeai.backend.assistant.dto.MessageDto;
+import com.talkforgeai.backend.assistant.dto.ModelSystem;
 import com.talkforgeai.backend.assistant.dto.ThreadDto;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.stereotype.Component;
@@ -41,7 +43,7 @@ public class AssistantMapper {
         assistantEntity.getCreatedAt(),
         assistantEntity.getName(),
         assistantEntity.getDescription(),
-        assistantEntity.getSystem(),
+        ModelSystem.valueOf(assistantEntity.getSystem()),
         assistantEntity.getModel(),
         assistantEntity.getInstructions(),
         assistantEntity.getImagePath(),
@@ -58,7 +60,7 @@ public class AssistantMapper {
     entity.setModel(assistantDto.model());
     entity.setInstructions(assistantDto.instructions());
     entity.setImagePath(assistantDto.imagePath());
-    entity.setSystem(assistantDto.system());
+    entity.setSystem(assistantDto.system().name());
     entity.setProperties(mapProperties(assistantDto.properties()));
     return entity;
   }
@@ -109,10 +111,19 @@ public class AssistantMapper {
   }
 
   public MessageDto toDto(MessageEntity messageEntity) {
-    return new MessageDto(messageEntity.getId(), messageEntity.getRawContent(),
-        messageEntity.getParsedContent(), MessageType.fromValue(messageEntity.getRole()),
+    return new MessageDto(
+        messageEntity.getId(),
+        messageEntity.getRawContent(),
+        messageEntity.getParsedContent(),
+        MessageType.fromValue(messageEntity.getRole()),
         messageEntity.getCreatedAt(),
-        messageEntity.getAssistant().getId(), messageEntity.getThread().getId());
+        messageEntity.getAssistant().getId(),
+        messageEntity.getThread().getId()
+    );
+  }
+
+  public List<MessageDto> toDto(List<MessageEntity> messageEntity) {
+    return Arrays.asList(messageEntity.stream().map(this::toDto).toArray(MessageDto[]::new));
   }
 
   public MessageEntity toEntity(MessageDto messageDto) {
