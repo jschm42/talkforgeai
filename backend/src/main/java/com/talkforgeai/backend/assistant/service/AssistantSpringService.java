@@ -21,9 +21,9 @@ import com.talkforgeai.backend.assistant.domain.MessageEntity;
 import com.talkforgeai.backend.assistant.domain.ThreadEntity;
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
 import com.talkforgeai.backend.assistant.dto.GenerateImageResponse;
+import com.talkforgeai.backend.assistant.dto.LlmSystem;
 import com.talkforgeai.backend.assistant.dto.MessageDto;
 import com.talkforgeai.backend.assistant.dto.MessageListParsedDto;
-import com.talkforgeai.backend.assistant.dto.ModelSystem;
 import com.talkforgeai.backend.assistant.dto.ModelSystemInfo;
 import com.talkforgeai.backend.assistant.dto.ParsedMessageDto;
 import com.talkforgeai.backend.assistant.dto.ProfileImageUploadResponse;
@@ -43,7 +43,6 @@ import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.image.CreateImageRequest;
 import com.theokanning.openai.image.ImageResult;
-import com.theokanning.openai.model.Model;
 import com.theokanning.openai.service.OpenAiService;
 import jakarta.transaction.Transactional;
 import java.awt.image.BufferedImage;
@@ -54,6 +53,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -72,8 +72,10 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.mistralai.api.MistralAiApi;
 import org.springframework.ai.openai.OpenAiChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi.ChatModel;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
@@ -404,11 +406,16 @@ public class AssistantSpringService {
     return assistantMapper.toDto(assistantRepository.save(assistantEntity));
   }
 
-  public List<String> retrieveModels() {
-    return openAiService.listModels().stream()
-        .map(Model::getId)
-        .filter(id -> id.startsWith("gpt") && !id.contains("instruct"))
-        .toList();
+  public List<String> retrieveModels(LlmSystem system) {
+    switch (system) {
+      case OPENAI:
+        return Arrays.stream(ChatModel.values()).map(ChatModel::getValue).toList();
+      case MISTRAL:
+        return Arrays.stream(MistralAiApi.ChatModel.values()).map(MistralAiApi.ChatModel::getValue)
+            .toList();
+      default:
+        throw new AssistentException("Unknown system: " + system);
+    }
   }
 
   @Transactional
@@ -528,7 +535,7 @@ public class AssistantSpringService {
         .build();
   }
 
-  private String printPromptOptions(ModelSystem system, ChatOptions options) {
+  private String printPromptOptions(LlmSystem system, ChatOptions options) {
     StringBuilder printedOptions = new StringBuilder("[");
     printedOptions.append("system=").append(system).append(", ");
 
@@ -548,8 +555,8 @@ public class AssistantSpringService {
     return printedOptions.toString();
   }
 
-  public List<ModelSystemInfo> listModelSystems() {
-    return Stream.of(ModelSystem.values())
+  public List<ModelSystemInfo> listSystems() {
+    return Stream.of(LlmSystem.values())
         .map(system -> new ModelSystemInfo(system.name(), system.getDescription()))
         .toList();
   }

@@ -15,13 +15,12 @@
  */
 
 import {AssistantPropertiesDefault} from '@/const/assistant.properties';
-import ModelSystem from './model-system';
 
 class Assistant {
   id = '';
   name = '';
   description = '';
-  system: ModelSystem | undefined;
+  system = '';
   model = '';
   imagePath = '';
   properties = {...AssistantPropertiesDefault};

@@ -18,7 +18,6 @@ import {defineStore} from 'pinia';
 import Thread, {ThreadMessage} from '@/store/to/thread';
 import Assistant from '@/store/to/assistant';
 import Role from '@/store/to/role';
-import ModelSystem from '@/store/to/model-system';
 
 export const useChatStore = defineStore('chat', {
   state: () => {
@@ -26,7 +25,6 @@ export const useChatStore = defineStore('chat', {
       isAutoSpeak: false, // Flag to indicate if auto speak is enabled
       currentStatusMessage: '', // Current status message
       currentStatusMessageType: '', // Type of the current status message
-      modelSystems: [] as Array<ModelSystem>,
       threadMessages: [] as Array<ThreadMessage>, // Array of thread messages
       parsedMessages: {} as any, // Object of parsed messages
       threadId: '', // Current thread ID

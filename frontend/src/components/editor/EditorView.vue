@@ -115,7 +115,7 @@ export default defineComponent({
     const personaFormStore = usePersonaFormStore(); // Call useMyStore() inside the setup function
     const appStore = useAppStore();
     const assistants = useAssistants();
-    return {store: personaFormStore, appStore, assistants};
+    return {personaFormStore, appStore, assistants};
   },
   data() {
     return {
@@ -125,7 +125,7 @@ export default defineComponent({
   props: ['assistantId'],
   methods: {
     async handleSubmit() {
-      const form = this.store.assistantForm;
+      const form = this.personaFormStore.assistantForm;
       const assistant = new Assistant();
       assistant.imagePath = form.imagePath;
       assistant.id = undefined;
@@ -171,15 +171,38 @@ export default defineComponent({
     },
   },
   async mounted() {
-    this.store.resetPersonaEditForm();
+    this.personaFormStore.resetPersonaEditForm();
+
     if (this.assistantId) {
       try {
         const assistant = await this.assistants.retrieveAssistant(this.assistantId);
-        this.store.setPersonaEditForm(assistant);
+        this.personaFormStore.setPersonaEditForm(assistant);
       } catch (error) {
         this.appStore.handleError(error);
       }
     }
+
+    try {
+      const llmSystems = await this.assistants.retrieveLlmSystems();
+      this.personaFormStore.systems = llmSystems;
+      if (!this.personaFormStore.assistantForm.system) {
+        this.personaFormStore.assistantForm.system = llmSystems[0].key;
+      }
+    } catch (error) {
+      this.appStore.handleError(error);
+    }
+
+    try {
+      const models = await this.assistants.retrieveModels(
+          this.personaFormStore.assistantForm.system);
+      this.personaFormStore.models = models;
+      if (!this.personaFormStore.assistantForm.model) {
+        this.personaFormStore.assistantForm.model = models[0];
+      }
+    } catch (error) {
+      this.appStore.handleError(error);
+    }
+
   },
 });
 </script>

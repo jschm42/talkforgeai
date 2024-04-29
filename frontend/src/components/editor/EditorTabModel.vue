@@ -25,10 +25,7 @@ import {useAssistants} from '@/composable/use-assistants';
 export default defineComponent({
   name: 'PersonaTabModel',
   data() {
-    return {
-      chatGptModels: [],
-      modelSystems: [],
-    };
+    return {};
   },
   computed: {
     assistantProperties() {
@@ -36,31 +33,23 @@ export default defineComponent({
     },
   },
   setup() {
-    const {assistantForm} = storeToRefs(usePersonaFormStore());
+    const {assistantForm, systems, models} = storeToRefs(usePersonaFormStore());
     const assistants = useAssistants();
     const appStore = useAppStore();
 
-    return {assistantForm, appStore, assistants};
+    return {assistantForm, systems, models, appStore, assistants};
   },
-  methods: {},
+  methods: {
+    async onModelChange() {
+      try {
+        this.models = await this.assistants.retrieveModels(
+            this.assistantForm.system);
+      } catch (error) {
+        this.appStore.handleError(error);
+      }
+    },
+  },
   async mounted() {
-    try {
-      this.chatGptModels = await this.assistants.retrieveGPTModels();
-      if (!this.assistantForm.model) {
-        this.assistantForm.model = this.chatGptModels[0];
-      }
-    } catch (error) {
-      this.appStore.handleError(error);
-    }
-
-    try {
-      this.modelSystems = await this.assistants.retrieveModelSystems();
-      if (!this.assistantForm.system) {
-        this.assistantForm.system = this.modelSystems[0];
-      }
-    } catch (error) {
-      this.appStore.handleError(error);
-    }
 
   },
 });
@@ -70,8 +59,8 @@ export default defineComponent({
   <div class="mb-3 p-3">
     <select id="selectSystem" v-model="assistantForm.system"
             aria-label="System"
-            class="form-select my-2">
-      <option v-for="system in modelSystems" :key="system.key" :value="system.key">
+            class="form-select my-2" @change="onModelChange">
+      <option v-for="system in systems" :key="system.key" :value="system.key">
         {{ system.description }}
       </option>
     </select>
@@ -79,7 +68,7 @@ export default defineComponent({
     <select id="selectChatModel" v-model="assistantForm.model"
             aria-label="Chat Model"
             class="form-select my-2">
-      <option v-for="model in chatGptModels" :key="model" :value="model">{{ model }}
+      <option v-for="model in models" :key="model" :value="model">{{ model }}
       </option>
     </select>
 

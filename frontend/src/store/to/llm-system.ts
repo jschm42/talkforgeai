@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.assistant.dto;
-
-public enum ModelSystem {
-  OPEN_AI("OpenAI"),
-  MISTRAL("Mistral");
-
-  final String description;
-
-  ModelSystem(String description) {
-    this.description = description;
-  }
-
-  public String getDescription() {
-    return description;
-  }
+class LlmSystem {
+  key = '';
+  description = '';
 }
+
+export default LlmSystem;

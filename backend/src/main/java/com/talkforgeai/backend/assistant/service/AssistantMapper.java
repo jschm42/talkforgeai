@@ -24,8 +24,8 @@ import com.talkforgeai.backend.assistant.domain.AssistantPropertyValue;
 import com.talkforgeai.backend.assistant.domain.MessageEntity;
 import com.talkforgeai.backend.assistant.domain.ThreadEntity;
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
+import com.talkforgeai.backend.assistant.dto.LlmSystem;
 import com.talkforgeai.backend.assistant.dto.MessageDto;
-import com.talkforgeai.backend.assistant.dto.ModelSystem;
 import com.talkforgeai.backend.assistant.dto.ThreadDto;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -43,7 +43,7 @@ public class AssistantMapper {
         assistantEntity.getCreatedAt(),
         assistantEntity.getName(),
         assistantEntity.getDescription(),
-        ModelSystem.valueOf(assistantEntity.getSystem()),
+        LlmSystem.valueOf(assistantEntity.getSystem()),
         assistantEntity.getModel(),
         assistantEntity.getInstructions(),
         assistantEntity.getImagePath(),

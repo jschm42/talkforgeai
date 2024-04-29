@@ -28,7 +28,7 @@ public record AssistantDto(
     Date createdAt,
     String name,
     String description,
-    ModelSystem system,
+    LlmSystem system,
     String model,
     String instructions,
     String imagePath,

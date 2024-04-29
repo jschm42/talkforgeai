@@ -30,7 +30,7 @@ import axios from 'axios';
 import Assistant from '@/store/to/assistant';
 import {useHighlighting} from '@/composable/use-highligthing';
 import Role from '@/store/to/role';
-import ModelSystem from '@/store/to/model-system';
+import LlmSystem from '@/store/to/llm-system';
 
 const DELAY_TIME = 20;
 const DEBOUNCE_TIME = 200;
@@ -46,12 +46,7 @@ export function useAssistants() {
   const {replaceCodeContent} = useHighlighting();
 
   onMounted(() => {
-    axios.get(`/api/v1/systems`).then(result => {
-      console.log('Available model systems: ', result.data);
-      chatStore.modelSystems = result.data;
-    }).catch(error => {
-      console.error(error);
-    });
+
   });
 
   onUnmounted(() => {
@@ -191,9 +186,9 @@ export function useAssistants() {
     }
   };
 
-  const retrieveGPTModels = async () => {
+  const retrieveModels = async (system: string) => {
     console.log('Retrieving GPT models');
-    const result = await axios.get('/api/v1/assistants/models');
+    const result = await axios.get('/api/v1/assistants/models/' + system);
     return result.data;
   };
 
@@ -207,8 +202,8 @@ export function useAssistants() {
     chatStore.assistantList = result.data;
   };
 
-  const retrieveModelSystems = async (): Promise<Array<ModelSystem>> => {
-    console.log('Retrieving model systems');
+  const retrieveLlmSystems = async (): Promise<Array<LlmSystem>> => {
+    console.log('Retrieving LLM systems');
     const result = await axios.get(`/api/v1/systems`);
     return result.data;
   };
@@ -526,9 +521,9 @@ export function useAssistants() {
     regenerateCurrentRun,
     submitUserMessage,
     runConversation,
-    retrieveGPTModels,
+    retrieveModels,
     uploadAssistantImage,
     generateAssistantImage,
-    retrieveModelSystems,
+    retrieveLlmSystems,
   };
 }

@@ -20,6 +20,7 @@ import com.talkforgeai.backend.assistant.dto.AssistantDto;
 import com.talkforgeai.backend.assistant.dto.ChatCompletionSpringRequest;
 import com.talkforgeai.backend.assistant.dto.GenerateImageRequest;
 import com.talkforgeai.backend.assistant.dto.GenerateImageResponse;
+import com.talkforgeai.backend.assistant.dto.LlmSystem;
 import com.talkforgeai.backend.assistant.dto.MessageListParsedDto;
 import com.talkforgeai.backend.assistant.dto.ModelSystemInfo;
 import com.talkforgeai.backend.assistant.dto.ParsedMessageDto;
@@ -72,9 +73,10 @@ public class AssistantSpringController {
     this.fileStorageService = fileStorageService;
   }
 
-  @GetMapping("/assistants/models")
-  public List<String> retrieveAssistantModelIds() {
-    return assistantService.retrieveModels();
+  @GetMapping("/assistants/models/{llmSystem}")
+  public List<String> retrieveAssistantModels(
+      @PathVariable("llmSystem") LlmSystem llmSystem) {
+    return assistantService.retrieveModels(llmSystem);
   }
 
   @GetMapping("/assistants/{assistantId}")
@@ -105,8 +107,8 @@ public class AssistantSpringController {
   }
 
   @GetMapping("/systems")
-  public List<ModelSystemInfo> listModelSystems() {
-    return assistantService.listModelSystems();
+  public List<ModelSystemInfo> listSystems() {
+    return assistantService.listSystems();
   }
 
 
