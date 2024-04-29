@@ -30,6 +30,7 @@ import axios from 'axios';
 import Assistant from '@/store/to/assistant';
 import {useHighlighting} from '@/composable/use-highligthing';
 import Role from '@/store/to/role';
+import ModelSystem from '@/store/to/model-system';
 
 const DELAY_TIME = 20;
 const DEBOUNCE_TIME = 200;
@@ -45,7 +46,12 @@ export function useAssistants() {
   const {replaceCodeContent} = useHighlighting();
 
   onMounted(() => {
-
+    axios.get(`/api/v1/systems`).then(result => {
+      console.log('Available model systems: ', result.data);
+      chatStore.modelSystems = result.data;
+    }).catch(error => {
+      console.error(error);
+    });
   });
 
   onUnmounted(() => {
@@ -199,6 +205,12 @@ export function useAssistants() {
       },
     });
     chatStore.assistantList = result.data;
+  };
+
+  const retrieveModelSystems = async (): Promise<Array<ModelSystem>> => {
+    console.log('Retrieving model systems');
+    const result = await axios.get(`/api/v1/systems`);
+    return result.data;
   };
 
   const retrieveAssistant = async (assistantId: string): Promise<Assistant> => {
@@ -517,5 +529,6 @@ export function useAssistants() {
     retrieveGPTModels,
     uploadAssistantImage,
     generateAssistantImage,
+    retrieveModelSystems,
   };
 }

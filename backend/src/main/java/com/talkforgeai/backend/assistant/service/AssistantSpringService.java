@@ -24,6 +24,7 @@ import com.talkforgeai.backend.assistant.dto.GenerateImageResponse;
 import com.talkforgeai.backend.assistant.dto.MessageDto;
 import com.talkforgeai.backend.assistant.dto.MessageListParsedDto;
 import com.talkforgeai.backend.assistant.dto.ModelSystem;
+import com.talkforgeai.backend.assistant.dto.ModelSystemInfo;
 import com.talkforgeai.backend.assistant.dto.ParsedMessageDto;
 import com.talkforgeai.backend.assistant.dto.ProfileImageUploadResponse;
 import com.talkforgeai.backend.assistant.dto.ThreadDto;
@@ -59,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -546,4 +548,9 @@ public class AssistantSpringService {
     return printedOptions.toString();
   }
 
+  public List<ModelSystemInfo> listModelSystems() {
+    return Stream.of(ModelSystem.values())
+        .map(system -> new ModelSystemInfo(system.name(), system.getDescription()))
+        .toList();
+  }
 }

@@ -112,10 +112,10 @@ export default defineComponent({
     QuestionModal,
   },
   setup() {
-    const store = usePersonaFormStore(); // Call useMyStore() inside the setup function
+    const personaFormStore = usePersonaFormStore(); // Call useMyStore() inside the setup function
     const appStore = useAppStore();
     const assistants = useAssistants();
-    return {store, appStore, assistants};
+    return {store: personaFormStore, appStore, assistants};
   },
   data() {
     return {
@@ -132,6 +132,7 @@ export default defineComponent({
       assistant.instructions = form.instructions;
       assistant.name = form.name;
       assistant.description = form.description || '';
+      assistant.system = form.system;
       assistant.model = form.model;
       assistant.tools = [];
       assistant.file_ids = [];

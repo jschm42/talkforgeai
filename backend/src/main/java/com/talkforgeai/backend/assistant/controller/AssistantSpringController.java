@@ -21,6 +21,7 @@ import com.talkforgeai.backend.assistant.dto.ChatCompletionSpringRequest;
 import com.talkforgeai.backend.assistant.dto.GenerateImageRequest;
 import com.talkforgeai.backend.assistant.dto.GenerateImageResponse;
 import com.talkforgeai.backend.assistant.dto.MessageListParsedDto;
+import com.talkforgeai.backend.assistant.dto.ModelSystemInfo;
 import com.talkforgeai.backend.assistant.dto.ParsedMessageDto;
 import com.talkforgeai.backend.assistant.dto.ProfileImageUploadResponse;
 import com.talkforgeai.backend.assistant.dto.ThreadDto;
@@ -102,6 +103,12 @@ public class AssistantSpringController {
   public AssistantDto createAssistant(@RequestBody AssistantDto assistant) {
     return assistantService.createAssistant(assistant);
   }
+
+  @GetMapping("/systems")
+  public List<ModelSystemInfo> listModelSystems() {
+    return assistantService.listModelSystems();
+  }
+
 
   @GetMapping("/assistants/images/{imageFile}")
   public ResponseEntity<byte[]> getImage(@PathVariable String imageFile) {

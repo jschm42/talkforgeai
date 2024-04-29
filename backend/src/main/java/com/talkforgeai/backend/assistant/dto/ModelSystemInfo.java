@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Jean Schmitz.
+ * Copyright (c) 2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-import {AssistantPropertiesDefault} from '@/const/assistant.properties';
-import ModelSystem from './model-system';
+package com.talkforgeai.backend.assistant.dto;
 
-class Assistant {
-  id = '';
-  name = '';
-  description = '';
-  system: ModelSystem | undefined;
-  model = '';
-  imagePath = '';
-  properties = {...AssistantPropertiesDefault};
+public record ModelSystemInfo(String key, String description) {
+
 }
-
-export default Assistant;

@@ -27,6 +27,7 @@ export default defineComponent({
   data() {
     return {
       chatGptModels: [],
+      modelSystems: [],
     };
   },
   computed: {
@@ -51,12 +52,30 @@ export default defineComponent({
     } catch (error) {
       this.appStore.handleError(error);
     }
+
+    try {
+      this.modelSystems = await this.assistants.retrieveModelSystems();
+      if (!this.assistantForm.system) {
+        this.assistantForm.system = this.modelSystems[0];
+      }
+    } catch (error) {
+      this.appStore.handleError(error);
+    }
+
   },
 });
 </script>
 
 <template>
   <div class="mb-3 p-3">
+    <select id="selectSystem" v-model="assistantForm.system"
+            aria-label="System"
+            class="form-select my-2">
+      <option v-for="system in modelSystems" :key="system.key" :value="system.key">
+        {{ system.description }}
+      </option>
+    </select>
+
     <select id="selectChatModel" v-model="assistantForm.model"
             aria-label="Chat Model"
             class="form-select my-2">
