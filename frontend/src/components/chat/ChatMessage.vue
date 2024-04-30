@@ -50,6 +50,14 @@ export default {
       }
       return '';
     },
+    assistantModel() {
+      const assistantId = this.message.assistantId;
+      const assistant = this.chatStore.assistantList.find(a => a.id === assistantId);
+      if (assistant) {
+        return assistant.model;
+      }
+      return '';
+    },
     messageClass() {
       return {
         'role-user': this.message.role === Role.USER,
@@ -146,9 +154,18 @@ export default {
             <v-card-text v-else v-html="getContent()"></v-card-text>
           </div>
 
-          <v-card-actions v-if="isAssistant">
-            <chat-message-text-to-speech ref="chatMessageAudioPlayerRef"
-                                         :message="message"></chat-message-text-to-speech>
+          <v-card-actions v-if="isAssistant" class="d-flex justify-space-between">
+            <div>
+              <chat-message-text-to-speech ref="chatMessageAudioPlayerRef"
+                                           :message="message"></chat-message-text-to-speech>
+            </div>
+            <div>
+              <v-badge
+                  :content="assistantModel"
+                  color="primary"
+                  inline
+              ></v-badge>
+            </div>
           </v-card-actions>
         </v-card>
       </v-col>

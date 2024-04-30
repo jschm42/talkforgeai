@@ -68,7 +68,11 @@ public class UniversalChatService {
           .append(", ");
       printedOptions.append("presencePenalty=").append(openAiChatOptions.getPresencePenalty())
           .append(", ");
-      printedOptions.append("temperature=").append(openAiChatOptions.getTemperature()).append(", ");
+      printedOptions.append("temperature=").append(openAiChatOptions.getTemperature());
+    } else if (options instanceof MistralAiChatOptions mistralAiChatOptions) {
+      printedOptions.append("model=").append(mistralAiChatOptions.getModel()).append(", ");
+      printedOptions.append("topP=").append(mistralAiChatOptions.getTopP()).append(", ");
+      printedOptions.append("temperature=").append(mistralAiChatOptions.getTemperature());
     }
 
     printedOptions.append("]");
