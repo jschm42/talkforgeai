@@ -49,6 +49,12 @@ export default {
     hasDescription() {
       return !!this.assistant.description;
     },
+    assistantModel() {
+      return this.assistant.model;
+    },
+    modelInfo() {
+      return this.assistant.system + ' - ' + this.assistant.model;
+    },
   },
   methods: {
     onPersonaSelected() {
@@ -72,17 +78,22 @@ export default {
 </script>
 
 <template>
-  <v-card class="mx-auto" height="280" variant="elevated" width="200">
+  <v-card class="mx-auto" height="300" variant="elevated" width="200">
     <div role="button" @click="onPersonaSelected">
-      <v-avatar v-if="imageSrc !== ''" :image="imageSrc" size="120">
+      <v-avatar v-if="imageSrc !== ''" :image="imageSrc" :title="assistant.name" size="120">
       </v-avatar>
       <v-img v-else alt="Robot" class="mx-auto" max-height="120"
              max-width="200" src="@/assets/robot.svg"></v-img>
 
-      <v-card-title>{{ assistant.name }}</v-card-title>
-      <v-card-text class="description">
+      <v-card-title :title="assistant.name">{{ assistant.name }}</v-card-title>
+      <v-card-text :title="assistant.description" class="description">
         {{ assistant.description }}
       </v-card-text>
+      <v-badge :content="assistantModel"
+               :title="modelInfo"
+               color="primary"
+               inline
+      ></v-badge>
     </div>
 
     <v-card-actions>
