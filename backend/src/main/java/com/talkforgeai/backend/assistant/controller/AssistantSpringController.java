@@ -211,4 +211,10 @@ public class AssistantSpringController {
       @RequestBody ThreadTitleGenerationRequestDto request) {
     return assistantService.generateThreadTitle(threadId, request);
   }
+
+  @PostMapping("/threads/{threadId}/runs/{runId}/cancel")
+  public ResponseEntity<Void> cancelRun(@PathVariable String threadId, @PathVariable String runId) {
+    assistantService.cancelStream(threadId, runId);
+    return ResponseEntity.ok().build();
+  }
 }

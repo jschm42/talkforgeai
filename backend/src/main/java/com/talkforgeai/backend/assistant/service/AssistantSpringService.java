@@ -60,8 +60,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
+import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.ChatResponse;
@@ -111,11 +113,14 @@ public class AssistantSpringService {
 
   private final UniqueIdGenerator uniqueIdGenerator;
 
+  private final Map<String, Subscription> activeStreams = new ConcurrentHashMap<>();
+
   public AssistantSpringService(OpenAiService openAiService, OpenAiChatClient chatClient,
       AssistantRepository assistantRepository, MessageRepository messageRepository,
       ThreadRepository threadRepository, FileStorageService fileStorageService,
       MessageProcessor messageProcessor, AssistantMapper assistantMapper,
       UniqueIdGenerator uniqueIdGenerator) {
+
     this.openAiService = openAiService;
     this.chatClient = chatClient;
     this.assistantRepository = assistantRepository;
@@ -167,8 +172,19 @@ public class AssistantSpringService {
         .toList();
   }
 
+  public void cancelStream(String threadId, String runId) {
+    LOGGER.info("Cancelling stream for threadId={}, runId={}", threadId, runId);
+
+    Subscription subscription = activeStreams.remove(runId);
+    if (subscription != null) {
+      subscription.cancel();
+    }
+  }
+
   public Flux<ServerSentEvent<String>> streamRunConversation(String assistantId, String threadId,
       String message) {
+
+    final String runId = uniqueIdGenerator.generateRunId();
 
     Mono<Object> saveUserMessageMono = Mono.fromRunnable(
             () -> saveNewMessage(assistantId, threadId, MessageType.USER,
@@ -190,64 +206,83 @@ public class AssistantSpringService {
         assistantEntityMono,
         pastMessages);
 
+    Flux<ServerSentEvent<String>> runIdMono = Flux.just(ServerSentEvent.<String>builder()
+        .event("run.started")
+        .data(runId)
+        .build());
+
     StringBuilder assistantMessageContent = new StringBuilder();
 
-    return saveUserMessageMono
-        .then(streamContextTuple)
-        .flux()
-        .flatMap(tuple -> {
-          AssistantDto assistantDto = tuple.getT1();
-          List<MessageDto> pastMessagesList = tuple.getT2();
+    return runIdMono.concatWith(
+        saveUserMessageMono
+            .then(assistantEntityMono)
+            .then(streamContextTuple)
+            .flux()
+            .flatMap(tuple -> {
+              AssistantDto assistantDto = tuple.getT1();
+              List<MessageDto> pastMessagesList = tuple.getT2();
 
-          List<Message> promptMessageList = pastMessagesList.stream()
-              .map(m -> {
-                if (MessageType.USER.equals(m.role())) {
-                  return (Message) new UserMessage(m.rawContent());
-                } else if (MessageType.ASSISTANT.equals(m.role())) {
-                  return (Message) new AssistantMessage(m.rawContent());
-                }
-                throw new AssistentException("Unknown message type: " + m.role());
-              })
-              .toList();
+              List<Message> promptMessageList = pastMessagesList.stream()
+                  .map(m -> {
+                    if (MessageType.USER.equals(m.role())) {
+                      return (Message) new UserMessage(m.rawContent());
+                    } else if (MessageType.ASSISTANT.equals(m.role())) {
+                      return (Message) new AssistantMessage(m.rawContent());
+                    }
+                    throw new AssistentException("Unknown message type: " + m.role());
+                  })
+                  .toList();
 
-          List<Message> finalPromptMessageList = new ArrayList<>(promptMessageList);
-          finalPromptMessageList.addFirst(new SystemMessage(assistantDto.instructions()));
-          finalPromptMessageList.add(new UserMessage(message));
+              List<Message> finalPromptMessageList = new ArrayList<>(promptMessageList);
+              finalPromptMessageList.addFirst(new SystemMessage(assistantDto.instructions()));
+              finalPromptMessageList.add(new UserMessage(message));
 
-          OpenAiChatOptions options = getPromptOptions(assistantDto);
-          LOGGER.debug("Starting stream with prompt: {}", finalPromptMessageList);
-          LOGGER.debug("Prompt Options: {}", printPromptOptions(assistantDto.system(), options));
-          return chatClient.stream(new Prompt(finalPromptMessageList, options));
-        })
-        .mapNotNull(chatResponse -> {
-          String content = chatResponse.getResult().getOutput().getContent();
-          LOGGER.info("ChatResponse received: {}", content);
+              OpenAiChatOptions options = getPromptOptions(assistantDto);
+              LOGGER.debug("Starting stream with prompt: {}", finalPromptMessageList);
+              LOGGER.debug("Prompt Options: {}",
+                  printPromptOptions(assistantDto.system(), options));
 
-          if (content != null) {
-            assistantMessageContent.append(chatResponse.getResult().getOutput().getContent());
-          }
+              return chatClient.stream(
+                  new Prompt(finalPromptMessageList, options));
+            })
+            .doOnCancel(() -> {
+              LOGGER.info("doOnCancel. message={}", assistantMessageContent);
+            })
+            .mapNotNull(chatResponse -> {
+              String content = chatResponse.getResult().getOutput().getContent();
+              LOGGER.info("ChatResponse received: {}", content);
 
-          ServerSentEvent<String> responseSseEvent = createResponseSseEvent(chatResponse);
+              if (content != null) {
+                assistantMessageContent.append(chatResponse.getResult().getOutput().getContent());
+              }
 
-          if (responseSseEvent != null) {
-            LOGGER.info("Sending event '{}'", responseSseEvent.event());
-          }
+              ServerSentEvent<String> responseSseEvent = createResponseSseEvent(chatResponse);
 
-          return responseSseEvent;
-        }).doOnNext(chatResponse -> {
-          LOGGER.info("doOnNext response: {}", chatResponse);
-        })
-        .doOnComplete(() -> {
-          LOGGER.info("doOnComplete. message={}", assistantMessageContent);
+              if (responseSseEvent != null) {
+                LOGGER.info("Sending event '{}'", responseSseEvent.event());
+              }
 
-          Mono.fromRunnable(() -> saveNewMessage(assistantId, threadId, MessageType.ASSISTANT,
-                  assistantMessageContent.toString(), null))  // Wrap blocking call
-              .subscribeOn(Schedulers.boundedElastic())  // Subscribe on separate thread pool
-              .subscribe();  // Subscribe to start execution
-        })
-        .doOnError(throwable -> {
-          LOGGER.error("doOnError: {}", throwable.getMessage());
-        });
+              return responseSseEvent;
+            })
+            .doOnSubscribe(subscription -> {
+              LOGGER.info("doOnSubscribe. message={}", assistantMessageContent);
+
+              activeStreams.put(runId, subscription);
+            })
+            .doOnNext(chatResponse -> {
+              LOGGER.info("doOnNext response: {}", chatResponse);
+            })
+            .doOnComplete(() -> {
+              LOGGER.info("doOnComplete. message={}", assistantMessageContent);
+
+              Mono.fromRunnable(() -> saveNewMessage(assistantId, threadId, MessageType.ASSISTANT,
+                      assistantMessageContent.toString(), null))  // Wrap blocking call
+                  .subscribeOn(Schedulers.boundedElastic())  // Subscribe on separate thread pool
+                  .subscribe();  // Subscribe to start execution
+            })
+            .doOnError(throwable -> {
+              LOGGER.error("doOnError: {}", throwable.getMessage());
+            }));
   }
 
   private ServerSentEvent<String> createResponseSseEvent(ChatResponse chatResponse) {

@@ -43,10 +43,10 @@ export default {
     },
     personaImage() {
       // Find the assistant in the store
-      const assistantId = this.message.assistant_id;
+      const assistantId = this.message.assistantId;
       const assistant = this.chatStore.assistantList.find(a => a.id === assistantId);
       if (assistant) {
-        return this.assistants.getAssistantImageUrl(assistant.image_path);
+        return this.assistants.getAssistantImageUrl(assistant.imagePath);
       }
       return '';
     },

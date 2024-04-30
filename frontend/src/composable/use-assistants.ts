@@ -170,10 +170,18 @@ export function useAssistants() {
       case 'thread.message.delta':
         processDeltaEvent(data);
         break;
+      case 'run.started':
+        processRunStartedEvent(data);
+        break;
     }
 
     debouncedUpdateCallback();
   };
+
+  function processRunStartedEvent(data: string) {
+    console.log('## processRunStartedEvent', data);
+    chatStore.runId = data;
+  }
 
   const processDeltaEvent = (data: string) => {
     console.log('## processDeltaEvent', data);
@@ -466,6 +474,8 @@ export function useAssistants() {
   const cancelCurrentRun = async () => {
     if (chatStore.runId.length > 0) {
       await cancelRun(chatStore.threadId, chatStore.runId);
+      chatStore.runId = '';
+      chatStore.currentStatusMessageType = '';
     }
   };
 

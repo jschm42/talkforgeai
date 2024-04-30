@@ -25,6 +25,10 @@ public class UniqueIdGenerator {
   private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   private static final SecureRandom random = new SecureRandom();
 
+  public String generateRunId() {
+    return generateUniqueId("run", 20);
+  }
+
   public String generateThreadId() {
     return generateUniqueId("thread", 20);
   }
