@@ -75,8 +75,6 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.mistralai.api.MistralAiApi;
-import org.springframework.ai.openai.OpenAiChatClient;
-import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi.ChatModel;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -99,7 +97,7 @@ public class AssistantSpringService {
 
   private final OpenAiService openAiService;
 
-  private final OpenAiChatClient chatClient;
+  private final UniversalChatService universalChatService;
 
   private final AssistantRepository assistantRepository;
   private final MessageRepository messageRepository;
@@ -115,14 +113,15 @@ public class AssistantSpringService {
 
   private final Map<String, Subscription> activeStreams = new ConcurrentHashMap<>();
 
-  public AssistantSpringService(OpenAiService openAiService, OpenAiChatClient chatClient,
+  public AssistantSpringService(OpenAiService openAiService,
+      UniversalChatService universalChatService,
       AssistantRepository assistantRepository, MessageRepository messageRepository,
       ThreadRepository threadRepository, FileStorageService fileStorageService,
       MessageProcessor messageProcessor, AssistantMapper assistantMapper,
       UniqueIdGenerator uniqueIdGenerator) {
 
     this.openAiService = openAiService;
-    this.chatClient = chatClient;
+    this.universalChatService = universalChatService;
     this.assistantRepository = assistantRepository;
     this.messageRepository = messageRepository;
     this.threadRepository = threadRepository;
@@ -237,13 +236,15 @@ public class AssistantSpringService {
               finalPromptMessageList.addFirst(new SystemMessage(assistantDto.instructions()));
               finalPromptMessageList.add(new UserMessage(message));
 
-              OpenAiChatOptions options = getPromptOptions(assistantDto);
+              ChatOptions promptOptions = universalChatService.getPromptOptions(assistantDto);
               LOGGER.debug("Starting stream with prompt: {}", finalPromptMessageList);
               LOGGER.debug("Prompt Options: {}",
-                  printPromptOptions(assistantDto.system(), options));
+                  universalChatService.printPromptOptions(assistantDto.system(), promptOptions));
 
-              return chatClient.stream(
-                  new Prompt(finalPromptMessageList, options));
+              return universalChatService.stream(
+                  assistantDto.system(),
+                  new Prompt(finalPromptMessageList, promptOptions)
+              );
             })
             .doOnCancel(() -> {
               LOGGER.info("doOnCancel. message={}", assistantMessageContent);
@@ -564,31 +565,6 @@ public class AssistantSpringService {
     return messageRepository.save(messageEntity);
   }
 
-  private OpenAiChatOptions getPromptOptions(AssistantDto assistantDto) {
-    return OpenAiChatOptions.builder()
-        .withModel(assistantDto.model())
-        .build();
-  }
-
-  private String printPromptOptions(LlmSystem system, ChatOptions options) {
-    StringBuilder printedOptions = new StringBuilder("[");
-    printedOptions.append("system=").append(system).append(", ");
-
-    if (options instanceof OpenAiChatOptions openAiChatOptions) {
-      printedOptions.append("model=").append(openAiChatOptions.getModel()).append(", ");
-      printedOptions.append("topP=").append(openAiChatOptions.getTopP()).append(", ");
-      printedOptions.append("n=").append(openAiChatOptions.getN()).append(", ");
-      printedOptions.append("seed=").append(openAiChatOptions.getSeed()).append(", ");
-      printedOptions.append("frequencePenalty=").append(openAiChatOptions.getFrequencyPenalty())
-          .append(", ");
-      printedOptions.append("presencePenalty=").append(openAiChatOptions.getPresencePenalty())
-          .append(", ");
-      printedOptions.append("temperature=").append(openAiChatOptions.getTemperature()).append(", ");
-    }
-
-    printedOptions.append("]");
-    return printedOptions.toString();
-  }
 
   public List<ModelSystemInfo> listSystems() {
     return Stream.of(LlmSystem.values())

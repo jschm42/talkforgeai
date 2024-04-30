@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ const AssistantProperties = {
   ELEVENLABS_MODELID: 'elevenlabs_modelId',
   ELEVENLABS_SIMILARITYBOOST: 'elevenlabs_similarityBoost',
   ELEVENLABS_STABILITY: 'elevenlabs_stability',
-  CHATGPT_TEMPERATURE: 'chatgpt_temperature',
-  CHATGPT_TOP_P: 'chatgpt_topP',
-  CHATGPT_FREQUENCY_PENALTY: 'chatgpt_frequencyPenalty',
-  CHATGPT_PRESENCE_PENALTY: 'chatgpt_presencePenalty',
+  MODEL_TEMPERATURE: 'model_temperature',
+  MODEL_TOP_P: 'model_topP',
+  MODEL_FREQUENCY_PENALTY: 'model_frequencyPenalty',
+  MODEL_PRESENCE_PENALTY: 'model_presencePenalty',
   FEATURE_PLANTUML: 'feature_plantUMLGeneration',
   FEATURE_IMAGEGENERATION: 'feature_imageGeneration',
   FEATURE_AUTOSPEAKDEFAULT: 'feature_autoSpeakDefault',
@@ -44,10 +44,10 @@ const AssistantPropertiesDefault = {
   [AssistantProperties.ELEVENLABS_MODELID]: '',
   [AssistantProperties.ELEVENLABS_SIMILARITYBOOST]: '0',
   [AssistantProperties.ELEVENLABS_STABILITY]: '0',
-  [AssistantProperties.CHATGPT_TEMPERATURE]: '0.7',
-  [AssistantProperties.CHATGPT_TOP_P]: '1.0',
-  [AssistantProperties.CHATGPT_FREQUENCY_PENALTY]: '0',
-  [AssistantProperties.CHATGPT_PRESENCE_PENALTY]: '0',
+  [AssistantProperties.MODEL_TEMPERATURE]: '0.7',
+  [AssistantProperties.MODEL_TOP_P]: '1.0',
+  [AssistantProperties.MODEL_FREQUENCY_PENALTY]: '0',
+  [AssistantProperties.MODEL_PRESENCE_PENALTY]: '0',
   [AssistantProperties.FEATURE_PLANTUML]: 'false',
   [AssistantProperties.FEATURE_IMAGEGENERATION]: 'true',
   [AssistantProperties.FEATURE_AUTOSPEAKDEFAULT]: 'false',

@@ -41,6 +41,10 @@ public class UniqueIdGenerator {
     return generateUniqueId("asst", 20);
   }
 
+  public String generateImageId() {
+    return generateUniqueId("img", 20);
+  }
+
   public String generateUniqueId(String prefix, int length) {
     String randomChars = generateRandomString(length);
     return prefix + "_" + randomChars;

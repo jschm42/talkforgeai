@@ -78,12 +78,12 @@ export default defineComponent({
       <div class="row">
         <div class="col-10 p-0">
           <input id="rangeTemperature"
-                 v-model="assistantForm.properties[assistantProperties.CHATGPT_TEMPERATURE]"
+                 v-model="assistantForm.properties[assistantProperties.MODEL_TEMPERATURE]"
                  class="form-range" max="1.0"
                  min="0.0" step="0.1" type="range">
         </div>
         <div class="col-2">
-          <label>{{ assistantForm.properties[assistantProperties.CHATGPT_TEMPERATURE] }}</label>
+          <label>{{ assistantForm.properties[assistantProperties.MODEL_TEMPERATURE] }}</label>
         </div>
       </div>
     </div>
@@ -94,13 +94,13 @@ export default defineComponent({
       <div class="row">
         <div class="col-10 p-0">
           <input id="rangeTopP"
-                 v-model="assistantForm.properties[assistantProperties.CHATGPT_TOP_P]"
+                 v-model="assistantForm.properties[assistantProperties.MODEL_TOP_P]"
                  class="form-range"
                  max="1.0" min="0.0"
                  step="0.1" type="range">
         </div>
         <div class="col-2">
-          <label>{{ assistantForm.properties[assistantProperties.CHATGPT_TOP_P] }}</label>
+          <label>{{ assistantForm.properties[assistantProperties.MODEL_TOP_P] }}</label>
         </div>
       </div>
     </div>
@@ -111,14 +111,14 @@ export default defineComponent({
       <div class="row">
         <div class="col-10 p-0">
           <input id="rangeFrequencePenalty"
-                 v-model="assistantForm.properties[assistantProperties.CHATGPT_FREQUENCY_PENALTY]"
+                 v-model="assistantForm.properties[assistantProperties.MODEL_FREQUENCY_PENALTY]"
                  class="form-range"
                  max="1.0" min="0.0"
                  step="0.1" type="range">
         </div>
         <div class="col-2">
           <label>{{
-              assistantForm.properties[assistantProperties.CHATGPT_FREQUENCY_PENALTY]
+              assistantForm.properties[assistantProperties.MODEL_FREQUENCY_PENALTY]
             }}</label>
         </div>
       </div>
@@ -130,14 +130,14 @@ export default defineComponent({
       <div class="row">
         <div class="col-10 p-0">
           <input id="rangePresencePenalty"
-                 v-model="assistantForm.properties[assistantProperties.CHATGPT_PRESENCE_PENALTY]"
+                 v-model="assistantForm.properties[assistantProperties.MODEL_PRESENCE_PENALTY]"
                  class="form-range"
                  max="1.0" min="0.0"
                  step="0.1" type="range">
         </div>
         <div class="col-2">
           <label>{{
-              assistantForm.properties[assistantProperties.CHATGPT_PRESENCE_PENALTY]
+              assistantForm.properties[assistantProperties.MODEL_PRESENCE_PENALTY]
             }}</label>
         </div>
       </div>
