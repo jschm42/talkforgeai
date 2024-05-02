@@ -73,12 +73,6 @@ public class AssistantSpringController {
     this.fileStorageService = fileStorageService;
   }
 
-  @GetMapping("/assistants/models/{llmSystem}")
-  public List<String> retrieveAssistantModels(
-      @PathVariable("llmSystem") LlmSystem llmSystem) {
-    return assistantService.retrieveModels(llmSystem);
-  }
-
   @GetMapping("/assistants/{assistantId}")
   public AssistantDto retrieveAssistant(@PathVariable("assistantId") String assistantId) {
     return assistantService.retrieveAssistant(assistantId);
@@ -105,12 +99,6 @@ public class AssistantSpringController {
   public AssistantDto createAssistant(@RequestBody AssistantDto assistant) {
     return assistantService.createAssistant(assistant);
   }
-
-  @GetMapping("/systems")
-  public List<ModelSystemInfo> listSystems() {
-    return assistantService.listSystems();
-  }
-
 
   @GetMapping("/assistants/images/{imageFile}")
   public ResponseEntity<byte[]> getImage(@PathVariable String imageFile) {
@@ -216,5 +204,17 @@ public class AssistantSpringController {
   public ResponseEntity<Void> cancelRun(@PathVariable String threadId, @PathVariable String runId) {
     assistantService.cancelStream(threadId, runId);
     return ResponseEntity.ok().build();
+  }
+
+
+  @GetMapping("/assistants/models/{llmSystem}")
+  public List<String> retrieveAssistantModels(
+      @PathVariable("llmSystem") LlmSystem llmSystem) {
+    return assistantService.retrieveModels(llmSystem);
+  }
+
+  @GetMapping("/assistants/systems")
+  public List<ModelSystemInfo> listSystems() {
+    return assistantService.listSystems();
   }
 }

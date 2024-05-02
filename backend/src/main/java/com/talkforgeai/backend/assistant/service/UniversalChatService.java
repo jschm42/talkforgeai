@@ -25,6 +25,8 @@ import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.mistralai.MistralAiChatClient;
 import org.springframework.ai.mistralai.MistralAiChatOptions;
+import org.springframework.ai.ollama.OllamaChatClient;
+import org.springframework.ai.ollama.api.OllamaOptions;
 import org.springframework.ai.openai.OpenAiChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.stereotype.Service;
@@ -35,11 +37,13 @@ public class UniversalChatService {
 
   private final OpenAiChatClient openAiChatClient;
   private final MistralAiChatClient mistralAiChatClient;
+  private final OllamaChatClient ollamaChatClient;
 
   public UniversalChatService(OpenAiChatClient openAiChatClient,
-      MistralAiChatClient mistralAiChatClient) {
+      MistralAiChatClient mistralAiChatClient, OllamaChatClient ollamaChatClient) {
     this.openAiChatClient = openAiChatClient;
     this.mistralAiChatClient = mistralAiChatClient;
+    this.ollamaChatClient = ollamaChatClient;
   }
 
 
@@ -51,9 +55,13 @@ public class UniversalChatService {
       case MISTRAL -> {
         return getMistralOptions(assistantDto);
       }
+      case OLLAMA -> {
+        return getOllamaOptions(assistantDto);
+      }
       default -> throw new IllegalStateException("Unexpected system: " + assistantDto.system());
     }
   }
+
 
   public String printPromptOptions(LlmSystem system, ChatOptions options) {
     StringBuilder printedOptions = new StringBuilder("[");
@@ -91,6 +99,9 @@ public class UniversalChatService {
       case MISTRAL -> {
         return mistralAiChatClient;
       }
+      case OLLAMA -> {
+        return ollamaChatClient;
+      }
       default -> throw new IllegalStateException("Unexpected system: " + system);
     }
   }
@@ -120,5 +131,19 @@ public class UniversalChatService {
             Float.valueOf(properties.get(AssistantProperties.MODEL_TEMPERATURE.getKey())))
         .build();
   }
+
+  private ChatOptions getOllamaOptions(AssistantDto assistantDto) {
+    Map<String, String> properties = assistantDto.properties();
+
+    return OllamaOptions.create()
+        .withModel(assistantDto.model())
+        .withFrequencyPenalty(
+            Float.valueOf(properties.get(AssistantProperties.MODEL_FREQUENCY_PENALTY.getKey())))
+        .withPresencePenalty(
+            Float.valueOf(properties.get(AssistantProperties.MODEL_PRESENCE_PENALTY.getKey())))
+        .withTemperature(
+            Float.valueOf(properties.get(AssistantProperties.MODEL_TEMPERATURE.getKey())));
+  }
+
 
 }

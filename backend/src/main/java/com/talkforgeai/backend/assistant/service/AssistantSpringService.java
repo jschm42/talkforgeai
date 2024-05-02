@@ -111,6 +111,7 @@ public class AssistantSpringService {
 
   private final UniqueIdGenerator uniqueIdGenerator;
 
+
   private final Map<String, Subscription> activeStreams = new ConcurrentHashMap<>();
 
   public AssistantSpringService(OpenAiService openAiService,
@@ -442,18 +443,6 @@ public class AssistantSpringService {
     return assistantMapper.toDto(assistantRepository.save(assistantEntity));
   }
 
-  public List<String> retrieveModels(LlmSystem system) {
-    switch (system) {
-      case OPENAI:
-        return Arrays.stream(ChatModel.values()).map(ChatModel::getValue).toList();
-      case MISTRAL:
-        return Arrays.stream(MistralAiApi.ChatModel.values()).map(MistralAiApi.ChatModel::getValue)
-            .toList();
-      default:
-        throw new AssistentException("Unknown system: " + system);
-    }
-  }
-
   @Transactional
   public void deleteAssistant(String assistantId) {
     assistantRepository.deleteById(assistantId);
@@ -566,9 +555,26 @@ public class AssistantSpringService {
   }
 
 
+  private List<String> getLocalOllamaModels() {
+    return Arrays.asList("llama2", "llama3");
+  }
+
   public List<ModelSystemInfo> listSystems() {
     return Stream.of(LlmSystem.values())
         .map(system -> new ModelSystemInfo(system.name(), system.getDescription()))
         .toList();
   }
+
+  public List<String> retrieveModels(LlmSystem system) {
+    return switch (system) {
+      case OPENAI -> Arrays.stream(ChatModel.values()).map(ChatModel::getValue).toList();
+      case MISTRAL ->
+          Arrays.stream(MistralAiApi.ChatModel.values()).map(MistralAiApi.ChatModel::getValue)
+              .toList();
+      case OLLAMA -> getLocalOllamaModels();
+      default -> throw new AssistentException("Unknown system: " + system);
+    };
+  }
+
+
 }

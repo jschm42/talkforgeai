@@ -212,7 +212,7 @@ export function useAssistants() {
 
   const retrieveLlmSystems = async (): Promise<Array<LlmSystem>> => {
     console.log('Retrieving LLM systems');
-    const result = await axios.get(`/api/v1/systems`);
+    const result = await axios.get(`/api/v1/assistants/systems`);
     return result.data;
   };
 
