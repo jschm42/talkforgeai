@@ -206,7 +206,6 @@ public class AssistantSpringController {
     return ResponseEntity.ok().build();
   }
 
-
   @GetMapping("/assistants/models/{llmSystem}")
   public List<String> retrieveAssistantModels(
       @PathVariable("llmSystem") LlmSystem llmSystem) {

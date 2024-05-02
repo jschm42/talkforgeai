@@ -91,9 +91,13 @@ export function useAssistants() {
               currentEvent = part.substring(6);
             } else if (part.startsWith('data:')) {
               const data = part.substring(5);
-              processData(data, currentEvent, debouncedUpdateCallback);
+              const result = processData(data, currentEvent, debouncedUpdateCallback);
               currentEvent = '';
               await sleep(DELAY_TIME);
+
+              if (result && result.length > 0) {
+                throw Error(result);
+              }
             }
           }
         }
@@ -163,9 +167,11 @@ export function useAssistants() {
     return result.data;
   };
 
-  const processData = (data: string, event: string, debouncedUpdateCallback: () => void) => {
+  const processData = (
+      data: string, event: string, debouncedUpdateCallback: () => void): string => {
     console.log('PROCESS event=' + event + ': ', data);
 
+    let result = '';
     switch (event) {
       case 'thread.message.delta':
         processDeltaEvent(data);
@@ -173,9 +179,15 @@ export function useAssistants() {
       case 'run.started':
         processRunStartedEvent(data);
         break;
+      case 'error':
+        chatStore.updateStatus(data, 'error');
+        result = data;
+        break;
     }
 
     debouncedUpdateCallback();
+
+    return result;
   };
 
   function processRunStartedEvent(data: string) {

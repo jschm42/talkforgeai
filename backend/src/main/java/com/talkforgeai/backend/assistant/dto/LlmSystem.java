@@ -19,6 +19,7 @@ package com.talkforgeai.backend.assistant.dto;
 public enum LlmSystem {
   OPENAI("OpenAI"),
   MISTRAL("Mistral"),
+  ANSTHROPIC("Anthropic"),
   OLLAMA("Ollama");
 
   private final String description;

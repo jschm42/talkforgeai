@@ -66,6 +66,7 @@ import javax.imageio.ImageIO;
 import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -282,8 +283,12 @@ public class AssistantSpringService {
                   .subscribeOn(Schedulers.boundedElastic())  // Subscribe on separate thread pool
                   .subscribe();  // Subscribe to start execution
             })
-            .doOnError(throwable -> {
-              LOGGER.error("doOnError: {}", throwable.getMessage());
+            .onErrorResume(throwable -> {
+              LOGGER.error("Error while streaming: {}", throwable.getMessage());
+              return Flux.just(ServerSentEvent.<String>builder()
+                  .event("error")
+                  .data(throwable.getMessage())
+                  .build());
             }));
   }
 
@@ -570,6 +575,9 @@ public class AssistantSpringService {
       case OPENAI -> Arrays.stream(ChatModel.values()).map(ChatModel::getValue).toList();
       case MISTRAL ->
           Arrays.stream(MistralAiApi.ChatModel.values()).map(MistralAiApi.ChatModel::getValue)
+              .toList();
+      case ANSTHROPIC ->
+          Arrays.stream(AnthropicApi.ChatModel.values()).map(AnthropicApi.ChatModel::getValue)
               .toList();
       case OLLAMA -> getLocalOllamaModels();
       default -> throw new AssistentException("Unknown system: " + system);

@@ -19,6 +19,8 @@ package com.talkforgeai.backend.assistant.service;
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
 import com.talkforgeai.backend.assistant.dto.LlmSystem;
 import java.util.Map;
+import org.springframework.ai.anthropic.AnthropicChatClient;
+import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.StreamingChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
@@ -37,12 +39,15 @@ public class UniversalChatService {
 
   private final OpenAiChatClient openAiChatClient;
   private final MistralAiChatClient mistralAiChatClient;
+  private final AnthropicChatClient anthropicChatClient;
   private final OllamaChatClient ollamaChatClient;
 
   public UniversalChatService(OpenAiChatClient openAiChatClient,
-      MistralAiChatClient mistralAiChatClient, OllamaChatClient ollamaChatClient) {
+      MistralAiChatClient mistralAiChatClient, AnthropicChatClient anthropicChatClient,
+      OllamaChatClient ollamaChatClient) {
     this.openAiChatClient = openAiChatClient;
     this.mistralAiChatClient = mistralAiChatClient;
+    this.anthropicChatClient = anthropicChatClient;
     this.ollamaChatClient = ollamaChatClient;
   }
 
@@ -58,10 +63,12 @@ public class UniversalChatService {
       case OLLAMA -> {
         return getOllamaOptions(assistantDto);
       }
+      case ANSTHROPIC -> {
+        return getAnthropicOptions(assistantDto);
+      }
       default -> throw new IllegalStateException("Unexpected system: " + assistantDto.system());
     }
   }
-
 
   public String printPromptOptions(LlmSystem system, ChatOptions options) {
     StringBuilder printedOptions = new StringBuilder("[");
@@ -81,6 +88,19 @@ public class UniversalChatService {
       printedOptions.append("model=").append(mistralAiChatOptions.getModel()).append(", ");
       printedOptions.append("topP=").append(mistralAiChatOptions.getTopP()).append(", ");
       printedOptions.append("temperature=").append(mistralAiChatOptions.getTemperature());
+    } else if (options instanceof OllamaOptions ollamaOptions) {
+      printedOptions.append("model=").append(ollamaOptions.getModel()).append(", ");
+      printedOptions.append("temperature=").append(ollamaOptions.getTemperature()).append(", ");
+      printedOptions.append("frequencePenalty=").append(ollamaOptions.getFrequencyPenalty())
+          .append(", ");
+      printedOptions.append("presencePenalty=").append(ollamaOptions.getPresencePenalty());
+    } else if (options instanceof AnthropicChatOptions anthropicChatOptions) {
+      printedOptions.append("model=").append(anthropicChatOptions.getModel()).append(", ");
+      printedOptions.append("temperature=").append(anthropicChatOptions.getTemperature())
+          .append(", ");
+      printedOptions.append("topP=").append(anthropicChatOptions.getTopP());
+    } else {
+      throw new IllegalStateException("Unexpected options: " + options);
     }
 
     printedOptions.append("]");
@@ -101,6 +121,9 @@ public class UniversalChatService {
       }
       case OLLAMA -> {
         return ollamaChatClient;
+      }
+      case ANSTHROPIC -> {
+        return anthropicChatClient;
       }
       default -> throw new IllegalStateException("Unexpected system: " + system);
     }
@@ -145,5 +168,15 @@ public class UniversalChatService {
             Float.valueOf(properties.get(AssistantProperties.MODEL_TEMPERATURE.getKey())));
   }
 
+  private ChatOptions getAnthropicOptions(AssistantDto assistantDto) {
+    Map<String, String> properties = assistantDto.properties();
+
+    return AnthropicChatOptions.builder()
+        .withModel(assistantDto.model())
+        .withTemperature(
+            Float.valueOf(properties.get(AssistantProperties.MODEL_TEMPERATURE.getKey())))
+        .withTopP(Float.valueOf(properties.get(AssistantProperties.MODEL_TOP_P.getKey())))
+        .build();
+  }
 
 }
