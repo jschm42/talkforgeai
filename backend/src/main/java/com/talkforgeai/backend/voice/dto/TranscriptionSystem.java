@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai.exception;
+package com.talkforgeai.backend.voice.dto;
 
-public class OpenAIException extends RuntimeException {
+public enum TranscriptionSystem {
+  OPENAI("OpenAI");
 
-  public OpenAIException(String message) {
-    super(message);
+  private final String description;
+
+  TranscriptionSystem(String description) {
+    this.description = description;
   }
 
-  public OpenAIException(String message, Throwable cause) {
-    super(message, cause);
+  public String getDescription() {
+    return description;
   }
-
 }

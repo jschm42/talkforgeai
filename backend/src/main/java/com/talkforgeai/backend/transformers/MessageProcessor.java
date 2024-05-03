@@ -16,10 +16,10 @@
 
 package com.talkforgeai.backend.transformers;
 
+import com.talkforgeai.backend.assistant.service.UniversalImageGenService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
 import com.talkforgeai.service.plantuml.PlantUMLService;
-import com.theokanning.openai.service.OpenAiService;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ public class MessageProcessor {
   List<Transformer> transformers = new ArrayList<>();
 
   public MessageProcessor(FileStorageService fileStorageService,
-      PlantUMLService plantUMLService, OpenAiService openAiService) {
+      PlantUMLService plantUMLService, UniversalImageGenService imageGenService) {
     this.fileStorageService = fileStorageService;
 
     transformers.add(new HtmlEncoderTransformer());
@@ -47,7 +47,7 @@ public class MessageProcessor {
     transformers.add(new MarkdownTextTransformer());
     transformers.add(new NewLineTransformer());
 
-    transformers.add(new ImageDownloadTransformer(openAiService));
+    transformers.add(new ImageDownloadTransformer(imageGenService));
   }
 
   public String transform(String content, String threadId, String messageId) {

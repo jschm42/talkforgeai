@@ -21,6 +21,7 @@ import com.talkforgeai.backend.assistant.dto.LlmSystem;
 import java.util.Map;
 import org.springframework.ai.anthropic.AnthropicChatClient;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
+import org.springframework.ai.chat.ChatClient;
 import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.StreamingChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
@@ -50,7 +51,6 @@ public class UniversalChatService {
     this.anthropicChatClient = anthropicChatClient;
     this.ollamaChatClient = ollamaChatClient;
   }
-
 
   public ChatOptions getPromptOptions(AssistantDto assistantDto) {
     switch (assistantDto.system()) {
@@ -107,11 +107,23 @@ public class UniversalChatService {
     return printedOptions.toString();
   }
 
+  ChatResponse call(LlmSystem system, Prompt prompt) {
+    return getChatClient(system).call(prompt);
+  }
+
   Flux<ChatResponse> stream(LlmSystem system, Prompt prompt) {
     return getStreamingChatClient(system).stream(prompt);
   }
 
   StreamingChatClient getStreamingChatClient(LlmSystem system) {
+    return (StreamingChatClient) getClient(system);
+  }
+
+  ChatClient getChatClient(LlmSystem system) {
+    return (ChatClient) getClient(system);
+  }
+
+  private Object getClient(LlmSystem system) {
     switch (system) {
       case OPENAI -> {
         return openAiChatClient;

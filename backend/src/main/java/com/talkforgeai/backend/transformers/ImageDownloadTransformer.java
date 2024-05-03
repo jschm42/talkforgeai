@@ -16,10 +16,9 @@
 
 package com.talkforgeai.backend.transformers;
 
+import com.talkforgeai.backend.assistant.dto.ImageGenSystem;
+import com.talkforgeai.backend.assistant.service.UniversalImageGenService;
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
-import com.theokanning.openai.image.CreateImageRequest;
-import com.theokanning.openai.image.ImageResult;
-import com.theokanning.openai.service.OpenAiService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -31,6 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.image.ImageResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -39,7 +39,9 @@ public class ImageDownloadTransformer implements Transformer {
   public static final Logger LOGGER = LoggerFactory.getLogger(ImageDownloadTransformer.class);
   private static final Pattern UrlRegEx = Pattern.compile(
       "<image-prompt>[\\n]?([\\s\\S]*?)[\\n]?</image-prompt>", Pattern.MULTILINE);
-  private final OpenAiService service;
+
+  private final UniversalImageGenService service;
+
   String template = """
       %s
       <div class="card shadow">
@@ -50,7 +52,7 @@ public class ImageDownloadTransformer implements Transformer {
       %s
       """;
 
-  public ImageDownloadTransformer(OpenAiService service) {
+  public ImageDownloadTransformer(UniversalImageGenService service) {
     this.service = service;
   }
 
@@ -62,17 +64,10 @@ public class ImageDownloadTransformer implements Transformer {
       String fullTag = matcher.group(0);
       String prompt = matcher.group(1);
 
-      CreateImageRequest request = new CreateImageRequest();
-      request.setPrompt(prompt);
-      request.setN(1);
-      request.setSize("1024x1024");
-      request.setModel("dall-e-3");
-      request.setStyle("natural");
-
-      ImageResult image = service.createImage(request);
+      ImageResponse imageResponse = service.generate(ImageGenSystem.OPENAI, prompt);
       try {
         String localFilePath = downloadImage(
-            image.getData().get(0).getUrl(),
+            imageResponse.getResult().getOutput().getUrl(),
             context.messageId(),
             context.threadDirectory()
         );

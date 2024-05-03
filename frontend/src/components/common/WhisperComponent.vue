@@ -78,7 +78,7 @@ export default {
         formData.append('file', blob);
 
         try {
-          const response = await axios.post('http://localhost:8080/api/convert', formData, {
+          const response = await axios.post('/api/v1/stt/convert', formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
             },

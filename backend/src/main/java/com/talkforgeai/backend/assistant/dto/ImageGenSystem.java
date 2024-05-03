@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service.openai.dto;
+package com.talkforgeai.backend.assistant.dto;
 
-public record ChatStreamChunk(String content) {
+public enum ImageGenSystem {
+  OPENAI("OpenAI"),
+  STABILITY("Stability");
 
+  private final String description;
+
+  ImageGenSystem(String description) {
+    this.description = description;
+  }
+
+  public String getDescription() {
+    return description;
+  }
 }

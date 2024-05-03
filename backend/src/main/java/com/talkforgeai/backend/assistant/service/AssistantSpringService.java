@@ -21,6 +21,7 @@ import com.talkforgeai.backend.assistant.domain.MessageEntity;
 import com.talkforgeai.backend.assistant.domain.ThreadEntity;
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
 import com.talkforgeai.backend.assistant.dto.GenerateImageResponse;
+import com.talkforgeai.backend.assistant.dto.ImageGenSystem;
 import com.talkforgeai.backend.assistant.dto.LlmSystem;
 import com.talkforgeai.backend.assistant.dto.MessageDto;
 import com.talkforgeai.backend.assistant.dto.MessageListParsedDto;
@@ -37,13 +38,6 @@ import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
-import com.theokanning.openai.ListSearchParameters;
-import com.theokanning.openai.completion.chat.ChatCompletionRequest;
-import com.theokanning.openai.completion.chat.ChatMessage;
-import com.theokanning.openai.completion.chat.ChatMessageRole;
-import com.theokanning.openai.image.CreateImageRequest;
-import com.theokanning.openai.image.ImageResult;
-import com.theokanning.openai.service.OpenAiService;
 import jakarta.transaction.Transactional;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -75,7 +69,9 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.image.ImageResponse;
 import org.springframework.ai.mistralai.api.MistralAiApi;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi.ChatModel;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -96,9 +92,8 @@ public class AssistantSpringService {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(AssistantSpringService.class);
 
-  private final OpenAiService openAiService;
-
   private final UniversalChatService universalChatService;
+  private final UniversalImageGenService universalImageGenService;
 
   private final AssistantRepository assistantRepository;
   private final MessageRepository messageRepository;
@@ -115,15 +110,15 @@ public class AssistantSpringService {
 
   private final Map<String, Subscription> activeStreams = new ConcurrentHashMap<>();
 
-  public AssistantSpringService(OpenAiService openAiService,
-      UniversalChatService universalChatService,
+  public AssistantSpringService(
+      UniversalChatService universalChatService, UniversalImageGenService universalImageGenService,
       AssistantRepository assistantRepository, MessageRepository messageRepository,
       ThreadRepository threadRepository, FileStorageService fileStorageService,
       MessageProcessor messageProcessor, AssistantMapper assistantMapper,
       UniqueIdGenerator uniqueIdGenerator) {
 
-    this.openAiService = openAiService;
     this.universalChatService = universalChatService;
+    this.universalImageGenService = universalImageGenService;
     this.assistantRepository = assistantRepository;
     this.messageRepository = messageRepository;
     this.threadRepository = threadRepository;
@@ -313,8 +308,7 @@ public class AssistantSpringService {
     return event;
   }
 
-  public MessageListParsedDto listMessages(String threadId,
-      ListSearchParameters listSearchParameters) {
+  public MessageListParsedDto listMessages(String threadId) {
 
     List<MessageEntity> messageEntities = messageRepository.findByThreadId(threadId,
         Sort.by(Direction.ASC, "createdAt"));
@@ -381,27 +375,27 @@ public class AssistantSpringService {
 
     String content = """
         Generate a title in less than 6 words for the following message: %s
-        """.formatted(request.userMessageContent());
+        """.formatted(request.userMessage());
 
-    ChatMessage chatMessage = new ChatMessage(ChatMessageRole.USER.value(), content);
-
-    ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest
-        .builder()
-        .model("gpt-3.5-turbo")
-        .messages(List.of(chatMessage))
-        .maxTokens(256)
+    OpenAiChatOptions options = OpenAiChatOptions.builder()
+        .withModel(ChatModel.GPT_3_5_TURBO.getValue())
+        .withMaxTokens(256)
         .build();
 
-    ChatMessage responseMessage = openAiService.createChatCompletion(chatCompletionRequest)
-        .getChoices().get(0).getMessage();
+    Prompt titlePrompt = new Prompt(new UserMessage(content), options);
 
-    String generatedTitle = responseMessage.getContent();
+    try {
+      ChatResponse titleResponse = universalChatService.call(LlmSystem.OPENAI, titlePrompt);
 
-    String parsedTitle = generatedTitle.replace("\"", "");
-    threadEntity.setTitle(parsedTitle);
-    threadRepository.save(threadEntity);
+      String generatedTitle = titleResponse.getResult().getOutput().getContent();
 
-    return new ThreadTitleDto(generatedTitle);
+      String parsedTitle = generatedTitle.replace("\"", "");
+      threadEntity.setTitle(parsedTitle);
+      threadRepository.save(threadEntity);
+      return new ThreadTitleDto(generatedTitle);
+    } catch (Exception e) {
+      throw new AssistentException("Failed to generate title", e);
+    }
   }
 
   public ThreadDto retrieveThread(String threadId) {
@@ -429,16 +423,8 @@ public class AssistantSpringService {
   }
 
   public GenerateImageResponse generateImage(String prompt) throws IOException {
-    CreateImageRequest request = new CreateImageRequest();
-    request.setPrompt(prompt);
-    request.setN(1);
-    request.setSize("1024x1024");
-    request.setModel("dall-e-3");
-    request.setStyle("natural");
-
-    ImageResult image = openAiService.createImage(request);
-
-    return new GenerateImageResponse(downloadImage(image.getData().get(0).getUrl()));
+    ImageResponse imageResponse = universalImageGenService.generate(ImageGenSystem.OPENAI, prompt);
+    return new GenerateImageResponse(downloadImage(imageResponse.getResult().getOutput().getUrl()));
   }
 
   @Transactional

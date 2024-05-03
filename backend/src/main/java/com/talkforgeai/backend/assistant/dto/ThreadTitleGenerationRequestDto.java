@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package com.talkforgeai.backend.assistant.dto;
 
-public record ThreadTitleGenerationRequestDto(String userMessageContent,
-                                              String assistantMessageContent) {
+public record ThreadTitleGenerationRequestDto(String userMessage,
+                                              String assistantMessage) {
 
 }

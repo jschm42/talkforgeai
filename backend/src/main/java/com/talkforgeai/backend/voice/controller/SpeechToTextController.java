@@ -17,29 +17,31 @@
 package com.talkforgeai.backend.voice.controller;
 
 import com.talkforgeai.backend.storage.FileStorageService;
-import com.talkforgeai.backend.voice.service.STTService;
+import com.talkforgeai.backend.voice.service.SpeechToTextService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@RestController
-public class WhisperController {
+@RestController()
+@RequestMapping("/api/v1/stt")
+public class SpeechToTextController {
 
-  private final STTService sttService;
+  private final SpeechToTextService speechToTextService;
 
   private final FileStorageService fileStorageService;
 
-  public WhisperController(STTService sttService,
+  public SpeechToTextController(SpeechToTextService speechToTextService,
       FileStorageService fileStorageService) {
-    this.sttService = sttService;
+    this.speechToTextService = speechToTextService;
     this.fileStorageService = fileStorageService;
   }
 
-  @PostMapping("/api/convert")
+  @PostMapping("/convert")
   public ResponseEntity<String> convert(@RequestParam("file") MultipartFile file) {
-    return sttService.convert(file,
+    return speechToTextService.convert(file,
         fileStorageService.getDataDirectory().resolve("uploads"));
   }
 }

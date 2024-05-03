@@ -31,14 +31,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TTSService {
+public class TextToSpeechService {
 
-  public static final Logger LOGGER = LoggerFactory.getLogger(TTSService.class);
+  public static final Logger LOGGER = LoggerFactory.getLogger(TextToSpeechService.class);
 
   private final ElevenLabsService elevenLabsService;
   private final AssistantSpringService assistantService;
 
-  public TTSService(ElevenLabsService elevenLabsService, AssistantSpringService assistantService) {
+  public TextToSpeechService(ElevenLabsService elevenLabsService,
+      AssistantSpringService assistantService) {
     this.assistantService = assistantService;
     this.elevenLabsService = elevenLabsService;
   }

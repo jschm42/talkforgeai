@@ -16,15 +16,14 @@
 
 package com.talkforgeai.backend.voice.service;
 
-import com.theokanning.openai.audio.CreateTranscriptionRequest;
-import com.theokanning.openai.audio.TranscriptionResult;
-import com.theokanning.openai.service.OpenAiService;
+import com.talkforgeai.backend.voice.dto.TranscriptionSystem;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.openai.audio.transcription.AudioTranscriptionResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,15 +33,14 @@ import org.springframework.web.multipart.MultipartFile;
  * Service for Speech to Text (STT) operations.
  */
 @Service
-public class STTService {
+public class SpeechToTextService {
 
-  public static final Logger LOGGER = LoggerFactory.getLogger(STTService.class);
+  public static final Logger LOGGER = LoggerFactory.getLogger(SpeechToTextService.class);
 
+  private final UniversalTranscriptionService universalTranscriptionService;
 
-  private final OpenAiService openAiService;
-
-  public STTService(OpenAiService openAiService) {
-    this.openAiService = openAiService;
+  public SpeechToTextService(UniversalTranscriptionService universalTranscriptionService) {
+    this.universalTranscriptionService = universalTranscriptionService;
   }
 
   public ResponseEntity<String> convert(MultipartFile file, Path uploadDirectory) {
@@ -62,15 +60,10 @@ public class STTService {
   }
 
   private String transscribeAudio(File file) {
-    CreateTranscriptionRequest request = new CreateTranscriptionRequest();
-    request.setModel("whisper-1");
-    //request.setResponseFormat("text");
-    // The language of the input audio. Supplying the input language in ISO-639-1 format will improve accuracy and latency.
-    //request.setLanguage();
+    AudioTranscriptionResponse transcriptionResponse = universalTranscriptionService.transcribe(
+        TranscriptionSystem.OPENAI, file);
 
-    TranscriptionResult transcription = openAiService.createTranscription(request, file);
-
-    String responseText = transcription.getText();
+    String responseText = transcriptionResponse.getResult().getOutput();
     LOGGER.info("Extracted audio text: {}", responseText);
     return responseText;
   }

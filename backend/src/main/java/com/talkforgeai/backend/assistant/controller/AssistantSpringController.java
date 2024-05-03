@@ -31,8 +31,6 @@ import com.talkforgeai.backend.assistant.dto.ThreadTitleGenerationRequestDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleUpdateRequestDto;
 import com.talkforgeai.backend.assistant.service.AssistantSpringService;
 import com.talkforgeai.backend.storage.FileStorageService;
-import com.theokanning.openai.ListSearchParameters;
-import com.theokanning.openai.ListSearchParameters.Order;
 import jakarta.websocket.server.PathParam;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -146,11 +144,7 @@ public class AssistantSpringController {
   public MessageListParsedDto listMessages(@PathVariable("threadId") String threadId,
       @PathParam("limit") Integer limit, @PathParam("order") String order) {
 
-    ListSearchParameters listRequest = ListSearchParameters.builder()
-        .limit(limit)
-        .order(Order.valueOf(order))
-        .build();
-    return assistantService.listMessages(threadId, listRequest);
+    return assistantService.listMessages(threadId);
   }
 
 

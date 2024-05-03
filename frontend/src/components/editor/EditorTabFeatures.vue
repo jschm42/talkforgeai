@@ -48,7 +48,7 @@ export default defineComponent({
              v-model="assistantForm.properties[PersonaProperties.FEATURE_TITLEGENERATION]"
              class="form-check-input" type="checkbox">
       <label class="form-check-label" for="checkboxTitleGeneration">
-        Title generation
+        Title generation (uses OpenAI ChatGPT 3.5)
       </label>
     </div>
     <div class="form-check">

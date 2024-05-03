@@ -33,20 +33,5 @@
       <groupId>net.sourceforge.plantuml</groupId>
       <artifactId>plantuml</artifactId>
     </dependency>
-
-    <!-- https://mvnrepository.com/artifact/com.theokanning.openai-gpt3-java/client -->
-    <dependency>
-      <groupId>com.theokanning.openai-gpt3-java</groupId>
-      <artifactId>client</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.theokanning.openai-gpt3-java</groupId>
-      <artifactId>service</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.theokanning.openai-gpt3-java</groupId>
-      <artifactId>api</artifactId>
-    </dependency>
-
   </dependencies>
 </project>
