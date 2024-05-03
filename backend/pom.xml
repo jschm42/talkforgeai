@@ -16,38 +16,38 @@
   -->
 
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.talkforgeai</groupId>
-    <artifactId>talkforgeai</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
-  </parent>
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.talkforgeai</groupId>
+        <artifactId>talkforgeai</artifactId>
+        <version>0.2.0-SNAPSHOT</version>
+    </parent>
 
-  <artifactId>backend</artifactId>
-  <packaging>jar</packaging>
+    <artifactId>backend</artifactId>
+    <packaging>jar</packaging>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.talkforgeai</groupId>
-      <artifactId>service</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>com.talkforgeai</groupId>
+            <artifactId>service</artifactId>
+            <version>0.2.0-SNAPSHOT</version>
+        </dependency>
 
-    <dependency>
-      <groupId>net.sourceforge.plantuml</groupId>
-      <artifactId>plantuml</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>net.sourceforge.plantuml</groupId>
+            <artifactId>plantuml</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>com.theokanning.openai-gpt3-java</groupId>
-      <artifactId>service</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.theokanning.openai-gpt3-java</groupId>
-      <artifactId>api</artifactId>
-    </dependency>
-  </dependencies>
+        <dependency>
+            <groupId>com.theokanning.openai-gpt3-java</groupId>
+            <artifactId>service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.theokanning.openai-gpt3-java</groupId>
+            <artifactId>api</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>
