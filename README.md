@@ -90,9 +90,37 @@ Available properties:
 
 ### Using Docker
 
-Deploy using Docker with commands customized for your local settings:
+Deploy using Docker with commands customized for your local settings and environment variables
+managed via a `.env` file:
 
-    docker run -d -p [your local port]:8090 -e TALKFORGEAI_APIKEY=[your API Key] talkforgeai/talkforgeai:latest
+1. **Create an `.env` file** on your system where you'll specify all necessary environment variables
+   for the Docker container. Example content for your `.env` file:
+
+    ```plaintext
+    TALKFORGEAI_APIKEY=yourTalkforgeAIapikey
+    ELEVENLABS_APIKEY=yourElevenLabsApiKey
+    OTHER_ENV_VAR=someOtherValue
+    ```
+
+2. **Run the Docker container** using the `.env` file to provide the environment variables:
+
+    ```bash
+    docker run -d -p [your local port]:8090 --env-file /path/to/your/.env file talkforgeai/talkforgeai:latest
+    ```
+
+   Replace `/path/to/your/.env` with the actual path to your `.env` file and `[your local port]`
+   with the port number you want to use on your host.
+
+   For example, if your `.env` file is located at `/home/user/talkforgeai/.env` and you want to run
+   your container on local port 8090, the command would be:
+
+    ```bash
+    docker run -d -p 8090:8090 --env-file /home/user/talkforgeai/.env talkforgeai/talkforgeai:latest
+    ```
+
+This approach allows you to manage environment variables centrally within the `.env` file,
+simplifying the Docker command and enhancing security by avoiding the direct listing of sensitive
+information in the command line or scripts.
 
 ## Building from Source
 
