@@ -19,20 +19,19 @@ production use.
 
 ## Features
 
-- Create and manage multiple, GPT-style, chatbot Assistants with custom personalities using AI
-  providers like
-  OpenAI, Mistral, Anthropic, and Ollama.
-- Each assistant can be customized with unique personality traits, an avatar image and one of the
+- 🤖 Create and manage multiple, GPT-style, chatbot Assistants with custom personalities using AI
+  providers like OpenAI, Mistral, Anthropic, and Ollama.
+- 🎨 Each assistant can be customized with unique personality traits, an avatar image and one of the
   supported AI models.
-- Support for both cloud-based and local AI models, enhancing flexibility and control over data
+- ☁️ Support for both cloud-based and local AI models, enhancing flexibility and control over data
   processing.
-- Support for text and voice input, with text-to-speech output through Elevenlabs or the browser
+- 🗣️ Support for text and voice input, with text-to-speech output through Elevenlabs or the browser
   build-in MS Speech API.
-- Generate a profile picture for your Assistant directly inside the app.
-- Image generation through DALL-E 3, compatible with various GPT models.
-- Advanced diagram creation with PlantUML and graphical enhancement of LaTeX code.
-- Code highlighting for generated source code.
-- Docker container support for simplified deployment.
+- 🖼️ Generate a profile picture for your Assistant directly inside the app.
+- 🎭 Image generation through DALL-E 3, compatible with various GPT models.
+- 📊 Advanced diagram creation with PlantUML and graphical enhancement of LaTeX code.
+- 💻 Code highlighting for generated source code.
+- 📦 Docker container support for simplified deployment.
 
 ## Upcoming Features
 
