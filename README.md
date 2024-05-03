@@ -40,6 +40,8 @@ production use.
 - Persistent memory capabilities for storing essential information.
 - Support for Vector Storage like Apache Cassandra, Redis, Neo4j and local storage.
 - Expanded task functions like email automation and calendar queries.
+- Integration with additional AI providers and services.
+- Enhanced image generation capabilities with OpenAI and StablilityAI .
 
 ## Installation
 
@@ -97,9 +99,11 @@ managed via a `.env` file:
    for the Docker container. Example content for your `.env` file:
 
     ```plaintext
-    TALKFORGEAI_APIKEY=yourTalkforgeAIapikey
-    ELEVENLABS_APIKEY=yourElevenLabsApiKey
-    OTHER_ENV_VAR=someOtherValue
+    SPRING_AI_OPENAI_API_KEY=[your OpenAI API Key]
+    SPRING_AI_MISTRALAI_API_KEY=[your Mistral AI API Key]
+    SPRING_AI_ANTHROPIC_API_KEY=[your Anthropic API Key]
+    SPRING_AI_OLLAMA_BASE_URL=http://localhost:11434
+    ELEVENLABS_API_KEY=[your ElevenLabs API Key]
     ```
 
 2. **Run the Docker container** using the `.env` file to provide the environment variables:
