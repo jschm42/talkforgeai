@@ -2,118 +2,117 @@
 
 ## Overview
 
-TalkforgeAI is an AI-powered chat software that facilitates the creation of personalized chatbots
-using the OpenAI
-Assistant API. It allows users to tailor the chat experience by creating individual AI profiles,
-known as Personas, each
-with its own personality profile and avatar image. In addition to text input, prompts can be
-generated via voice input,
-and the AI's responses can be delivered through browser-based or Elevenlabs text-to-speech output.
+TalkforgeAI is an advanced AI-powered chat software designed to facilitate the creation of highly
+personalized chatbots, now referred to as "Assistants". This software integrates with multiple AI
+platforms including OpenAI, Mistral, Anthropic, and Ollama, supporting both cloud-based and local AI
+models. Users can customize each Assistant with unique personality traits and an avatar image. The
+chatbots can interact via text or voice inputs, with responses delivered through browser-based or
+Elevenlabs text-to-speech output.
+
+**Note:** This project is still in the early stages of development and may not yet be suitable for
+production use.
 
 ### Prerequisites
 
-- An OpenAI API key is required to use the OpenAI Assistant API. To obtain one, visit
-  the [OpenAI website](https://openai.com/) and follow the instructions for API key generation.
-- For optional Elevenlabs speech output, an API key is also necessary. Please visit
-  the [Elevenlabs website](https://elevenlabs.io/) for instructions.
+- An API key from any supported AI provider (OpenAI, Mistral, Anthropic, Ollama) is required.
+- For optional Elevenlabs speech output, an API key is also necessary.
 
 ## Features
 
-- Create individual chatbot profiles with custom personalities using the OpenAI Assistant API.
-- Generate a profile picture for your chatbot right inside the app.
-- Image generation through DALL-E 3 directly in chat, compatible with both GPT-3.5 and GPT-4 models.
-- Access to all relevant GPT models:
-  - gpt-4
-  - gpt-4-32k
-  - gpt-4-vision-preview
-  - gpt-3.5-turbo
-  - gpt-3.5-turbo-16k
-
-- Creation of PlantUML diagrams, such as class, sequence, or activity diagrams.
-- Graphical enhancement of generated LaTeX code.
-- Custom instruction definitions.
+- Create and manage multiple, GPT-style, chatbot Assistants with custom personalities using AI
+  providers like
+  OpenAI, Mistral, Anthropic, and Ollama.
+- Each assistant can be customized with unique personality traits, an avatar image and one of the
+  supported AI models.
+- Support for both cloud-based and local AI models, enhancing flexibility and control over data
+  processing.
+- Support for text and voice input, with text-to-speech output through Elevenlabs or the browser
+  build-in MS Speech API.
+- Generate a profile picture for your Assistant directly inside the app.
+- Image generation through DALL-E 3, compatible with various GPT models.
+- Advanced diagram creation with PlantUML and graphical enhancement of LaTeX code.
 - Code highlighting for generated source code.
 - Docker container support for simplified deployment.
 
 ## Upcoming Features
 
-- Multi-user support with access control for the features of each Persona, allowing for the
-  assignment and sharing of
-  Personas among users.
-- Image interpretation, initially supported by Huggingface models.
-- Reading and evaluating web links.
-- Upload of files to be interpreted by the AI (PDF, TXT, etc.)
-- Memory feature to store critical information in the database and retrieve it as needed, allowing
-  for the persistence
-  of information beyond the maximum token limit.
-- Function support for tasks such as sending emails, querying calendar data, etc.
+- Enhanced multi-user support with comprehensive access controls for managing Assistants.
+- Support for uploading and interpreting files (PDF, TXT, etc.).
+- Persistent memory capabilities for storing essential information.
+- Support for Vector Storage like Apache Cassandra, Redis, Neo4j and local storage.
+- Expanded task functions like email automation and calendar queries.
 
 ## Installation
 
 ### Building the Project
 
-- Ensure Java 21 or higher is installed on your system and the JAVA_HOME environment variable is set
-  correctly.
+- Ensure Java 21 or higher is installed on your system and the JAVA_HOME environment variable is
+  correctly set.
 
 ### Starting the Server
 
-- To run from a JAR file, use the following command with the appropriate API keys and data directory
-  specified:
+To run from a JAR file, include API keys and specify the data directory as shown in this example:
 
-      java -jar ./talkforgeai-0.1.0.jar --server.port=8090 --openai.api-key=[your OpenAI API Key] --elevenlabs.api-key=[you Elevenlabs API-Key] --talkforgeai.datadir=[your TalkforgeAI data directory]
+    java -jar ./talkforgeai-0.1.0.jar --server.port=8090 --spring.ai.openai.api-key=[your API Key] --talkforgeai.datadir=[your TalkforgeAI data directory]
 
-- Alternatively, use a properties file for configuration:
+Alternatively, configure using a properties file:
 
-      java -jar ./talkforgeai-0.1.0.jar --spring.config.additional-location=./talkforgeai.properties
+    java -jar ./talkforgeai-0.1.0.jar --spring.config.additional-location=./talkforgeai.properties
 
-- Available properties:
-  - server.port: Port to run the server on. Default is 8090.
-  - openai.api-key: OpenAI API key
-  - elevenlabs.api-key: Elevenlabs API key
-  - talkforgeai.datadir: Directory to store data in
-  - logging.level.com.talkforgeai: Log level for TalkforgeAI. Default is INFO.
+Example properties file (if you don't want to use a model, leave property empty or remove it from
+the file):
+
+    spring.ai.openai.api-key=[your API Key]
+    spring.ai.mistralai.api-key=[your API Key]
+    spring.ai.anthropic.api-key=[your API Key]
+    spring.ai.ollama.base-url=http://localhost:11434
+    elevenlabs.api-key=[your API Key]
+    server.port=8090
+    talkforgeai.datadir=[your TalkforgeAI data directory]
+
+Available properties:
+
+| Property                                    | Default Value                                       | Description                                          |
+|---------------------------------------------|-----------------------------------------------------|------------------------------------------------------|
+| `server.port`                               | `8090`                                              | The port on which the server will run.               |
+| `talkforgeai.datadir`                       | `${user.home}/.talkforgeai`                         | The directory where TalkforgeAI data will be stored. |
+| `spring.servlet.multipart.max-file-size`    | `5MB`                                               | The maximum file size for multipart file uploads.    |
+| `spring.servlet.multipart.max-request-size` | `5MB`                                               | The maximum request size for multipart file uploads. |
+| `spring.ai.mistralai.api-key`               | -                                                   | The API key for Mistral AI.                          |
+| `spring.ai.ollama.base-url`                 | `http://localhost:11434`                            | The base URL for Ollama AI.                          |
+| `spring.ai.anthropic.api-key`               | -                                                   | The API key for Anthropic AI.                        |
+| `spring.ai.anthropic.version`               | `2023-06-01`                                        | The version of Anthropic AI.                         |
+| `elevenlabs.api-key`                        | -                                                   | The API key for Elevenlabs.                          |
+| `elevenlabs.api-url`                        | `https://api.elevenlabs.io`                         | The base URL for Elevenlabs API.                     |
+| `spring.datasource.url`                     | `jdbc:sqlite:${talkforgeai.datadir}/talkforgeai.db` | The URL for the SQLite database.                     |
+| `spring.datasource.driverClassName`         | `org.sqlite.JDBC`                                   | The driver class name for the SQLite database.       |
+| `spring.jpa.database-platform`              | `org.hibernate.community.dialect.SQLiteDialect`     | The dialect for the SQLite database.                 |
+| `logging.level.com.talkforgeai`             | `INFO`                                              | The log level for TalkforgeAI.                       |
 
 ### Using Docker
 
-- Deploy using Docker with the following command:
+Deploy using Docker with commands customized for your local settings:
 
-      docker run -d -p [your local port]:8090 -e TALKFORGEAI_OPENAI_APIKEY=[your OpenAI API Key] -e TALKFORGEAI_ELEVENLABS_APIKEY=[you Elevenlabs API-Key] talkforgeai/talkforgeai:latest
-
-- If you want to use a local properties file, you can mount it into the container:
-
-      docker run -d -p [your local port]:8090 -v [your local properties file]:/usr/local/talkforgeai/talkforgeai.properties:ro -v C:/Users/jschmitz/DEV/talkforge-data:/data talkforgeai/talkforgeai:latest
-
-- If you want to use a local data directory, you can mount it into the container:
-
-      docker run -d -p [your local port]:8090 -v [your local data directory]:/data talkforgeai/talkforgeai:latest
+    docker run -d -p [your local port]:8090 -e TALKFORGEAI_APIKEY=[your API Key] talkforgeai/talkforgeai:latest
 
 ## Building from Source
 
-- After cloning the repository, building is straightforward with Maven:
+After cloning the repository, build the project using Maven:
 
-        mvn clean package
+    mvn clean package
 
-*Note: Replace placeholder text (e.g., [your OpenAI API Key]) with actual API keys and directory
-paths as required for
-your setup.*
+*Note: Replace placeholder text (e.g., [your API Key]) with actual API keys and directory paths as
+needed.*
 
 ## Contributing
 
-Contributions are welcome! Please read our contributing guidelines for how to proceed.
+Contributions are welcome! Review our contributing guidelines to get started.
 
 ## License
 
-TalkforgeAI is released under the Apache License 2.0. See the [LICENSE](LICENSE) file for more
-details.
+TalkforgeAI is released under the Apache License 2.0. See the LICENSE file for more details.
 
 ## Support
 
-For support and queries, please open an issue on the GitHub repository or contact the maintainers
+For support and inquiries, please open an issue on the GitHub repository or contact the maintainers
 directly.
-
----
-
-This README is a basic guide for getting started with TalkforgeAI. For more detailed documentation,
-please refer to the
-project's documentation site.
-
