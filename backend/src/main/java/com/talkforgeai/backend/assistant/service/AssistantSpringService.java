@@ -36,6 +36,7 @@ import com.talkforgeai.backend.assistant.exception.AssistentException;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
+import com.talkforgeai.backend.service.UniqueIdGenerator;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
 import jakarta.transaction.Transactional;

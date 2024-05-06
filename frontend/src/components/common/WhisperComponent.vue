@@ -15,10 +15,13 @@
   -->
 
 <template>
-  <i :class="{'bi-mic-fill': !isRecording, 'bi-record-circle': isRecording}"
-     class="bi record-button" role="button"
-     @mousedown="startRecording"
-     @mouseup="stopRecording"></i>
+  <button
+      :class="{ 'bi-mic-fill': !isRecording, 'bi-record-circle': isRecording }"
+      class="bi record-button"
+      @mousedown="startRecording($event)"
+      @mouseup="stopRecording($event)"
+  >
+  </button>
 </template>
 
 <style scoped>
@@ -29,71 +32,75 @@
 
 <script>
 import axios from 'axios';
+import {onMounted, ref} from 'vue';
 import RecordRTC from 'recordrtc';
 
 export default {
   name: 'WhisperComponent',
-  data() {
-    return {
-      text: '',
-      recorder: null,
-      isRecording: false,
-    };
-  },
-  mounted() {
-    window.addEventListener('keydown', this.handleKeydown);
-  },
-  beforeUnmount() {
-    window.removeEventListener('keydown', this.handleKeydown);
-  },
-  methods: {
-    async handleKeydown(event) {
-      if (event.ctrlKey && event.key === 'r') {
-        event.preventDefault(); // Prevent default behavior
-        if (this.isRecording) {
-          await this.stopRecording();
-        } else {
-          await this.startRecording();
-        }
-      }
-    },
-    async startRecording() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-        this.recorder = RecordRTC(stream, {type: 'audio'});
-        this.isRecording = true;
-        await this.recorder.startRecording();
-      } catch (e) {
-        console.error('Failed to start recording: ', e);
-      }
-    },
-    async stopRecording() {
-      if (!this.recorder) {
-        return;
-      }
+  setup(props, {emit}) {
+    const recordedBlobUrl = ref(null);
+    let isRecording = ref(false);
+    let mediaStream = null;
+    let recorder = null;
 
-      await this.recorder.stopRecording(async () => {
-        let blob = this.recorder.getBlob();
-        let formData = new FormData();
-        formData.append('file', blob);
+    const startRecording = async () => {
+      console.log('Start recording');
+      isRecording = true;
 
-        try {
-          const response = await axios.post('/api/v1/stt/convert', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
-
-          console.log('Response: ', response);
-          this.text = response.data;
-          this.$emit('onReceiveText', this.text);
-        } catch (e) {
-          console.error('Failed to send audio file: ', e);
-        } finally {
-          this.isRecording = false;
-        }
+      mediaStream = await navigator.mediaDevices.getUserMedia({audio: true});
+      recorder = new RecordRTC(mediaStream, {
+        type: 'audio',
+        mimeType: 'audio/webm',
+        sampleRate: 44100,
+        numberOfAudioChannels: 1,
+        desiredSampRate: 16000,
+        bitsPerSecond: 128000,
       });
-    },
+
+      await recorder.startRecording();
+    };
+
+    const saveBlob = (blob) => {
+      console.log('Saving blob: ', blob);
+      let formData = new FormData();
+      formData.append('file', blob);
+
+      try {
+        axios.post('/api/v1/stt/convert', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }).then((response) => {
+          console.log('Response: ', response);
+          const text = response.data;
+          emit('onReceiveText', text);
+        });
+      } catch (e) {
+        console.error('Failed to send audio file: ', e);
+      } finally {
+        isRecording = false;
+      }
+    };
+
+    const stopRecording = () => {
+      recorder.stopRecording(() => {
+        const blob = recorder.getBlob();
+        saveBlob(blob);
+      });
+    };
+
+    onMounted(() => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error('getUserMedia() not supported.');
+      }
+    });
+
+    return {
+      recordedBlobUrl,
+      startRecording,
+      stopRecording,
+      isRecording,
+    };
   },
 };
 </script>

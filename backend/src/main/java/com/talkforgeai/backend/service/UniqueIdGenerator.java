@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.assistant.service;
+package com.talkforgeai.backend.service;
 
 import java.security.SecureRandom;
 import org.springframework.stereotype.Component;
@@ -43,6 +43,10 @@ public class UniqueIdGenerator {
 
   public String generateImageId() {
     return generateUniqueId("img", 20);
+  }
+
+  public String generateAudioId() {
+    return generateUniqueId("aud", 20);
   }
 
   public String generateUniqueId(String prefix, int length) {

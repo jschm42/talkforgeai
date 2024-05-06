@@ -41,7 +41,6 @@ public class SpeechToTextController {
 
   @PostMapping("/convert")
   public ResponseEntity<String> convert(@RequestParam("file") MultipartFile file) {
-    return speechToTextService.convert(file,
-        fileStorageService.getDataDirectory().resolve("uploads"));
+    return speechToTextService.convert(file, fileStorageService.getTempDirectory());
   }
 }

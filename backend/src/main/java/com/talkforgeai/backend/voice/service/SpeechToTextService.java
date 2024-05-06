@@ -16,6 +16,7 @@
 
 package com.talkforgeai.backend.voice.service;
 
+import com.talkforgeai.backend.service.UniqueIdGenerator;
 import com.talkforgeai.backend.voice.dto.TranscriptionSystem;
 import java.io.File;
 import java.io.IOException;
@@ -39,16 +40,21 @@ public class SpeechToTextService {
 
   private final UniversalTranscriptionService universalTranscriptionService;
 
-  public SpeechToTextService(UniversalTranscriptionService universalTranscriptionService) {
+  private final UniqueIdGenerator uniqueIdGenerator;
+
+  public SpeechToTextService(UniversalTranscriptionService universalTranscriptionService,
+      UniqueIdGenerator uniqueIdGenerator) {
     this.universalTranscriptionService = universalTranscriptionService;
+    this.uniqueIdGenerator = uniqueIdGenerator;
   }
 
-  public ResponseEntity<String> convert(MultipartFile file, Path uploadDirectory) {
+  public ResponseEntity<String> convert(MultipartFile file, Path tempDirectory) {
     try {
-      Files.createDirectories(uploadDirectory);
-      Path path = uploadDirectory.resolve("audio.wav");
-      file.transferTo(path);
-      String text = transscribeAudio(path.toFile());
+      Files.createDirectories(tempDirectory);
+      Path audioFile = tempDirectory.resolve(uniqueIdGenerator.generateAudioId() + ".wav");
+      file.transferTo(audioFile);
+      String text = transscribeAudio(audioFile.toFile());
+      Files.delete(audioFile);
       return ResponseEntity.ok(text);
     } catch (IOException e) {
       LOGGER.error("Failed to create directory or transfer file: {}", e.getMessage());
