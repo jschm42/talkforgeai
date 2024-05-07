@@ -245,11 +245,11 @@ public class AssistantSpringService {
               );
             })
             .doOnCancel(() -> {
-              LOGGER.info("doOnCancel. message={}", assistantMessageContent);
+              LOGGER.debug("doOnCancel. message={}", assistantMessageContent);
             })
             .mapNotNull(chatResponse -> {
               String content = chatResponse.getResult().getOutput().getContent();
-              LOGGER.info("ChatResponse received: {}", content);
+              LOGGER.debug("ChatResponse received: {}", content);
 
               if (content != null) {
                 assistantMessageContent.append(chatResponse.getResult().getOutput().getContent());
@@ -258,21 +258,21 @@ public class AssistantSpringService {
               ServerSentEvent<String> responseSseEvent = createResponseSseEvent(chatResponse);
 
               if (responseSseEvent != null) {
-                LOGGER.info("Sending event '{}'", responseSseEvent.event());
+                LOGGER.debug("Sending event '{}'", responseSseEvent.event());
               }
 
               return responseSseEvent;
             })
             .doOnSubscribe(subscription -> {
-              LOGGER.info("doOnSubscribe. message={}", assistantMessageContent);
+              LOGGER.debug("doOnSubscribe. message={}", assistantMessageContent);
 
               activeStreams.put(runId, subscription);
             })
             .doOnNext(chatResponse -> {
-              LOGGER.info("doOnNext response: {}", chatResponse);
+              LOGGER.debug("doOnNext response: {}", chatResponse);
             })
             .doOnComplete(() -> {
-              LOGGER.info("doOnComplete. message={}", assistantMessageContent);
+              LOGGER.debug("doOnComplete. message={}", assistantMessageContent);
 
               Mono.fromRunnable(() -> saveNewMessage(assistantId, threadId, MessageType.ASSISTANT,
                       assistantMessageContent.toString(), null))  // Wrap blocking call
