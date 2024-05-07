@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.talkforgeai</groupId>
     <artifactId>talkforgeai</artifactId>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>0.2.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>app</artifactId>
@@ -31,17 +31,17 @@
     <dependency>
       <groupId>com.talkforgeai</groupId>
       <artifactId>backend</artifactId>
-      <version>0.2.1-SNAPSHOT</version>
+      <version>0.2.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.talkforgeai</groupId>
       <artifactId>frontend</artifactId>
-      <version>0.2.1-SNAPSHOT</version>
+      <version>0.2.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.talkforgeai</groupId>
       <artifactId>service</artifactId>
-      <version>0.2.1-SNAPSHOT</version>
+      <version>0.2.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
