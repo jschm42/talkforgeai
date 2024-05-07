@@ -45,7 +45,7 @@ export default {
 
     const startRecording = async () => {
       console.log('Start recording');
-      isRecording = true;
+      isRecording.value = true;
 
       mediaStream = await navigator.mediaDevices.getUserMedia({audio: true});
       recorder = new RecordRTC(mediaStream, {
@@ -78,7 +78,7 @@ export default {
       } catch (e) {
         console.error('Failed to send audio file: ', e);
       } finally {
-        isRecording = false;
+        isRecording.value = false;
       }
     };
 
