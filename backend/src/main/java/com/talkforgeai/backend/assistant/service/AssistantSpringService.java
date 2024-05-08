@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -234,15 +235,15 @@ public class AssistantSpringService {
               finalPromptMessageList.addFirst(new SystemMessage(assistantDto.instructions()));
               finalPromptMessageList.add(new UserMessage(message));
 
-              ChatOptions promptOptions = universalChatService.getPromptOptions(assistantDto);
+              ChatOptions promptOptions = universalChatService.getPromptOptions(assistantDto,
+                  Set.of("contextStorageFunction"));
               LOGGER.debug("Starting stream with prompt: {}", finalPromptMessageList);
               LOGGER.debug("Prompt Options: {}",
                   universalChatService.printPromptOptions(assistantDto.system(), promptOptions));
 
-              return universalChatService.stream(
-                  assistantDto.system(),
-                  new Prompt(finalPromptMessageList, promptOptions)
-              );
+              Prompt prompt = new Prompt(finalPromptMessageList, promptOptions);
+
+              return universalChatService.stream(assistantDto.system(), prompt);
             })
             .doOnCancel(() -> {
               LOGGER.debug("doOnCancel. message={}", assistantMessageContent);
