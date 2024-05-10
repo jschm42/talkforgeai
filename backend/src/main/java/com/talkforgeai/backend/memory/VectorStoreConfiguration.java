@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Jean Schmitz.
+ * Copyright (c) 2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,28 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.service;
+package com.talkforgeai.backend.memory;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
+import org.springframework.ai.openai.OpenAiEmbeddingClient;
+import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class OkHttpClientConfiguration {
+public class VectorStoreConfiguration {
 
-  public static final int TIMEOUT_MS = 1000 * 60 * 5;
+
+  private final OpenAiEmbeddingClient embeddingClient;
+
+  public VectorStoreConfiguration(OpenAiEmbeddingClient embeddingClient) {
+    this.embeddingClient = embeddingClient;
+  }
 
   @Bean
-  public OkHttpClient createOkHttpClient() {
-    return new OkHttpClient.Builder()
-        .callTimeout(TIMEOUT_MS, MILLISECONDS)
-        .readTimeout(TIMEOUT_MS, MILLISECONDS)
-        .writeTimeout(TIMEOUT_MS, MILLISECONDS)
-        .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-        .build();
+  SimpleVectorStore simpleVectorStore() {
+    SimpleVectorStore simpleVectorStore = new SimpleVectorStore(embeddingClient);
+
+    return simpleVectorStore;
   }
+
 }

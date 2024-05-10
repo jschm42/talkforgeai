@@ -33,9 +33,11 @@ import com.talkforgeai.backend.assistant.dto.ThreadTitleDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleGenerationRequestDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleUpdateRequestDto;
 import com.talkforgeai.backend.assistant.exception.AssistentException;
+import com.talkforgeai.backend.assistant.functions.ContextTool;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
+import com.talkforgeai.backend.memory.service.MemoryService;
 import com.talkforgeai.backend.service.UniqueIdGenerator;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
@@ -87,7 +89,6 @@ import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import reactor.util.function.Tuple2;
 
 @Service
 public class AssistantSpringService {
@@ -109,6 +110,8 @@ public class AssistantSpringService {
 
   private final UniqueIdGenerator uniqueIdGenerator;
 
+  private final MemoryService memoryService;
+
 
   private final Map<String, Subscription> activeStreams = new ConcurrentHashMap<>();
 
@@ -117,7 +120,7 @@ public class AssistantSpringService {
       AssistantRepository assistantRepository, MessageRepository messageRepository,
       ThreadRepository threadRepository, FileStorageService fileStorageService,
       MessageProcessor messageProcessor, AssistantMapper assistantMapper,
-      UniqueIdGenerator uniqueIdGenerator) {
+      UniqueIdGenerator uniqueIdGenerator, MemoryService memoryService) {
 
     this.universalChatService = universalChatService;
     this.universalImageGenService = universalImageGenService;
@@ -128,6 +131,7 @@ public class AssistantSpringService {
     this.messageProcessor = messageProcessor;
     this.assistantMapper = assistantMapper;
     this.uniqueIdGenerator = uniqueIdGenerator;
+    this.memoryService = memoryService;
   }
 
   public AssistantDto retrieveAssistant(String assistantId) {
@@ -200,9 +204,18 @@ public class AssistantSpringService {
         .map(assistantMapper::toDto)
         .subscribeOn(Schedulers.boundedElastic());
 
-    Mono<Tuple2<AssistantDto, List<MessageDto>>> streamContextTuple = Mono.zip(
-        assistantEntityMono,
-        pastMessages);
+    Mono<List<String>> memoryResults = Mono.fromCallable(
+            () -> memoryService.search(message))
+        .subscribeOn(Schedulers.boundedElastic());
+
+    Mono<PreparedInfos> preparedInfosMono = Mono.zip(
+        Arrays.asList(assistantEntityMono, pastMessages, memoryResults), args -> {
+          return new PreparedInfos(
+              (AssistantDto) args[0],
+              (List<MessageDto>) args[1],
+              (List<String>) args[2]
+          );
+        });
 
     Flux<ServerSentEvent<String>> runIdMono = Flux.just(ServerSentEvent.<String>builder()
         .event("run.started")
@@ -214,11 +227,12 @@ public class AssistantSpringService {
     return runIdMono.concatWith(
         saveUserMessageMono
             .then(assistantEntityMono)
-            .then(streamContextTuple)
+            .then(preparedInfosMono)
             .flux()
-            .flatMap(tuple -> {
-              AssistantDto assistantDto = tuple.getT1();
-              List<MessageDto> pastMessagesList = tuple.getT2();
+            .flatMap(preparedInfos -> {
+              AssistantDto assistantDto = preparedInfos.assistantDto();
+              List<MessageDto> pastMessagesList = preparedInfos.pastMessages();
+              List<String> memoryResultsList = preparedInfos.memoryResults();
 
               List<Message> promptMessageList = pastMessagesList.stream()
                   .map(m -> {
@@ -233,10 +247,18 @@ public class AssistantSpringService {
 
               List<Message> finalPromptMessageList = new ArrayList<>(promptMessageList);
               finalPromptMessageList.addFirst(new SystemMessage(assistantDto.instructions()));
-              finalPromptMessageList.add(new UserMessage(message));
+
+              StringBuilder memoryMessage = new StringBuilder();
+              if (!memoryResultsList.isEmpty()) {
+                memoryMessage.append("Use the following information from memory:\n");
+                memoryResultsList.forEach(result -> memoryMessage.append(result).append("\n"));
+                memoryMessage.append("\nUser message:\n");
+              }
+
+              finalPromptMessageList.add(new UserMessage(memoryMessage.append(message).toString()));
 
               ChatOptions promptOptions = universalChatService.getPromptOptions(assistantDto,
-                  Set.of("contextStorageFunction"));
+                  Set.of(ContextTool.MEMORY_STORE.getFunctionBeanName()));
               LOGGER.debug("Starting stream with prompt: {}", finalPromptMessageList);
               LOGGER.debug("Prompt Options: {}",
                   universalChatService.printPromptOptions(assistantDto.system(), promptOptions));
@@ -547,7 +569,6 @@ public class AssistantSpringService {
     return messageRepository.save(messageEntity);
   }
 
-
   private List<String> getLocalOllamaModels() {
     return Arrays.asList("llama2", "llama3");
   }
@@ -570,6 +591,11 @@ public class AssistantSpringService {
       case OLLAMA -> getLocalOllamaModels();
       default -> throw new AssistentException("Unknown system: " + system);
     };
+  }
+
+  record PreparedInfos(AssistantDto assistantDto, List<MessageDto> pastMessages,
+                       List<String> memoryResults) {
+
   }
 
 

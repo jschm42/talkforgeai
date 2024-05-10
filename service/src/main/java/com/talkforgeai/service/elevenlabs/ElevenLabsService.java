@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ElevenLabsService {
+
+  // TODO Refactoring to use RestClient instead of OkHttpClient
 
   public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
   public static final Logger LOGGER = LoggerFactory.getLogger(ElevenLabsService.class);

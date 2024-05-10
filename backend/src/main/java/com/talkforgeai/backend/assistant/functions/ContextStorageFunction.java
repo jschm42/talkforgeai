@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.talkforgeai.backend.memory.service.MemoryService;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +30,17 @@ public class ContextStorageFunction implements
 
   public static final Logger LOGGER = LoggerFactory.getLogger(ContextStorageFunction.class);
 
+  private final MemoryService memoryService;
+
+  public ContextStorageFunction(MemoryService memoryService) {
+    this.memoryService = memoryService;
+  }
+
   @Override
   public Response apply(Request request) {
-    LOGGER.info("Storing context information: {}", request.contextInfo());
-    return new Response("Saved context information.");
+    LOGGER.info("Storing information in memory: {}", request.contextInfo());
+    memoryService.store(request.contextInfo());
+    return new Response("I stored the following information in memory: " + request.contextInfo());
   }
 
   /**
