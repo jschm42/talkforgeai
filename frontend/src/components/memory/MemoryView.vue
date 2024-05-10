@@ -18,6 +18,23 @@
   <v-app>
     <v-container>
       <v-row>
+        <h1>Memory</h1>
+      </v-row>
+      <v-row>
+        <v-col>
+          <v-data-table-server
+              v-model:items-per-page="serverTable.itemsPerPage"
+              :headers="serverTable.headers"
+              :items="serverTable.serverItems"
+              :items-length="serverTable.totalItems"
+              :loading="serverTable.loading"
+              :search="serverTable.search"
+              item-value="content"
+              @update:options="loadServerItems"
+          ></v-data-table-server>
+        </v-col>
+      </v-row>
+      <v-row>
         <v-col cols="8">
           <v-form>
             <v-text-field v-model="newContentText" label="New content"></v-text-field>
@@ -29,6 +46,7 @@
           </v-form>
         </v-col>
       </v-row>
+      <v-divider></v-divider>
       <v-row>
         <v-col cols="8">
           <v-form>
@@ -43,18 +61,17 @@
           </v-form>
         </v-col>
         <v-col cols="1">
-          <v-btn @click="onSearchMemory">Search</v-btn>
+          <v-btn @click="onSearchSimilarity">Search</v-btn>
         </v-col>
         <v-col cols="1">
-          <v-btn @click="onShowAllMemory">Show all</v-btn>
+          <v-btn @click="onClearSimilarities">Clear</v-btn>
         </v-col>
       </v-row>
       <v-row>
-        <v-col>
-          <v-data-table v-model="selected" :items="memoryList" item-value="ID"
-                        show-select></v-data-table>
-        </v-col>
+        <v-data-table :items="similarityTable">
+        </v-data-table>
       </v-row>
+
     </v-container>
   </v-app>
 </template>
@@ -67,50 +84,73 @@ export default {
   setup() {
     const memory = useMemory();
 
+    const similarityTable = ref([]);
+
+    const serverTable = ref({
+      itemsPerPage: 5,
+      headers: [
+        {title: 'Content', key: 'content', align: 'start', sortable: false},
+        {title: 'ID', key: 'id', align: 'start', sortable: false},
+      ],
+      search: '',
+      serverItems: [],
+      loading: true,
+      totalItems: 0,
+    });
+
     const newContentText = ref('');
     const searchText = ref('');
-    const memoryList = ref([]);
     const selected = ref([]);
     const searchThreshold = ref(0.5);
 
     onMounted(async () => {
-      //await onShowAllMemory();
+      await loadServerItems({page: 1, itemsPerPage: 10});
     });
+
+    const loadServerItems = async (page) => {
+      console.log('Loading items', page);
+      serverTable.value.loading = true;
+      serverTable.value.serverItems = await memory.list(page.page, page.itemsPerPage);
+      serverTable.value.totalItems = await memory.count();
+      serverTable.value.loading = false;
+    };
 
     const onAddNewContent = async () => {
       await memory.store(newContentText.value);
-      //await onShowAllMemory();
+      await loadServerItems();
     };
 
-    const onSearchMemory = async () => {
+    const onSearchSimilarity = async () => {
       let memoryResponses = await memory.search(searchText.value, 10, searchThreshold.value);
-      updateTable(memoryResponses);
+      updateSimilarityTable(memoryResponses);
     };
 
-    const onShowAllMemory = async () => {
-      let memoryResponses = await memory.search('', 10, 0.0);
-      updateTable(memoryResponses);
+    const onClearSimilarities = async () => {
+      similarityTable.value = [];
     };
 
-    function updateTable(memoryResponses) {
-      memoryList.value = [];
-      memoryResponses.map((memory) => {
-        memoryList.value.push({
-          'ID': memory.id,
-          'Content': memory.content,
+    const updateSimilarityTable = (similarityResponses) => {
+      similarityTable.value = [];
+      similarityResponses.map((similarity) => {
+        similarityTable.value.push({
+          'Content': similarity.content,
+          'ID': similarity.id,
         });
       });
-    }
+    };
 
     return {
       searchText,
       newContentText,
-      memoryList,
       selected,
       onAddNewContent,
-      onShowAllMemory,
-      onSearchMemory,
+      onSearchSimilarity,
+      onClearSimilarities,
       searchThreshold,
+      serverTable,
+      loadServerItems,
+      updateSimilarityTable,
+      similarityTable,
     };
   },
 };

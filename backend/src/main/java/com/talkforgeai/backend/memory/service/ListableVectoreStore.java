@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Jean Schmitz.
+ * Copyright (c) 2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.memory.repository;
+package com.talkforgeai.backend.memory.service;
 
-import com.talkforgeai.backend.memory.domain.MemoryDocument;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.util.List;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.VectorStore;
 
-@Repository
-public interface MemoryRepository extends JpaRepository<MemoryDocument, String> {
+public interface ListableVectoreStore extends VectorStore {
 
-  Page<MemoryDocument> findAll(Pageable pageable);
+  int count();
+
+  List<Document> list();
+
+  List<Document> list(int page, int pageSize);
 }

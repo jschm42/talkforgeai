@@ -72,4 +72,26 @@ public class MemoryService {
     }).toList();
   }
 
+  public List<DocumentWithoutEmbeddings> list(int page, int pageSize) {
+    LOGGER.info("Listing all documents");
+
+    if (vectorStore instanceof ListableVectoreStore listableVectoreStore) {
+      return listableVectoreStore.list(page, pageSize).stream()
+          .map(d -> new DocumentWithoutEmbeddings(d.getId(), d.getContent())).toList();
+    } else {
+      throw new UnsupportedOperationException("VectorStore does not support listing");
+    }
+  }
+
+  public boolean supportsList() {
+    return vectorStore instanceof ListableVectoreStore;
+  }
+
+  public int count() {
+    if (vectorStore instanceof ListableVectoreStore listableVectoreStore) {
+      return listableVectoreStore.count();
+    } else {
+      throw new UnsupportedOperationException("VectorStore does not support count");
+    }
+  }
 }

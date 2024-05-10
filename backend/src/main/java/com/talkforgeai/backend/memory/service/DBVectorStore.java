@@ -32,12 +32,11 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingClient;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.SimpleVectorStore.EmbeddingMath;
-import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.data.domain.PageRequest;
 
-public class DBVectorStore implements VectorStore {
+public class DBVectorStore implements ListableVectoreStore {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(DBVectorStore.class);
-
 
   private final MemoryRepository memoryRepository;
   private final EmbeddingClient embeddingClient;
@@ -116,6 +115,29 @@ public class DBVectorStore implements VectorStore {
 
   private List<Double> getUserQueryEmbedding(String query) {
     return this.embeddingClient.embed(query);
+  }
+
+  @Override
+  public int count() {
+    return (int) memoryRepository.count();
+  }
+
+  @Override
+  public List<Document> list() {
+    return memoryRepository.findAll().stream()
+        .map(memoryDocument -> new Document(memoryDocument.getId(), memoryDocument.getContent(),
+            new HashMap<>()))
+        .toList();
+  }
+
+  @Override
+  public List<Document> list(int page, int pageSize) {
+
+    return memoryRepository.findAll(
+            PageRequest.of(page, pageSize == -1 ? Integer.MAX_VALUE : pageSize)).stream()
+        .map(memoryDocument -> new Document(memoryDocument.getId(), memoryDocument.getContent(),
+            new HashMap<>()))
+        .toList();
   }
 
   public record Similarity(String key, double score) {

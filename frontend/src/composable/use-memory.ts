@@ -48,8 +48,15 @@ export function useMemory() {
     return result.data;
   };
 
-  const list = async (): Promise<Array<MemoryResponse>> => {
-    const result = await axios.get('/api/v1/memory/list');
+  const list = async (page: number, itemsPerPage: number): Promise<Array<MemoryResponse>> => {
+    const backendPage = page - 1;
+    const result = await axios.get(
+        `/api/v1/memory/list/${backendPage}/${itemsPerPage}`);
+    return result.data;
+  };
+
+  const count = async (): Promise<number> => {
+    const result = await axios.get('/api/v1/memory/count');
     return result.data;
   };
 
@@ -57,5 +64,6 @@ export function useMemory() {
     store,
     search,
     list,
+    count,
   };
 }
