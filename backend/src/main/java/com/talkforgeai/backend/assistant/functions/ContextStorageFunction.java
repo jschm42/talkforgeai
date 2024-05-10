@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.talkforgeai.backend.memory.service.FileVectorStore.DocumentWithoutEmbeddings;
 import com.talkforgeai.backend.memory.service.MemoryService;
 import java.util.function.Function;
 import org.slf4j.Logger;
@@ -39,8 +40,10 @@ public class ContextStorageFunction implements
   @Override
   public Response apply(Request request) {
     LOGGER.info("Storing information in memory: {}", request.contextInfo());
-    memoryService.store(request.contextInfo());
-    return new Response("I stored the following information in memory: " + request.contextInfo());
+    DocumentWithoutEmbeddings storedDocument = memoryService.store(request.contextInfo());
+    return new Response(
+        storedDocument.id(),
+        "I stored the following information in memory: " + request.contextInfo());
   }
 
   /**
@@ -52,7 +55,7 @@ public class ContextStorageFunction implements
 
   }
 
-  public record Response(String savedInfo) {
+  public record Response(String id, String data) {
 
   }
 }

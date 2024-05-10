@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import {createRouter, createWebHashHistory, RouteRecordRaw} from 'vue-router';
 import PersonaChoiceView from '@/components/choice/ChoiceView.vue';
 import ChatView from '@/components/chat/ChatView.vue';
 import EditorView from '@/components/editor/EditorView.vue';
+import MemoryView from '@/components/memory/MemoryView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -41,6 +42,13 @@ const routes: Array<RouteRecordRaw> = [
     path: '/persona/edit/:assistantId',
     name: 'persona-edit',
     component: EditorView,
+    props: true,
+  },
+
+  {
+    path: '/memory/editor',
+    name: 'memory-editor',
+    component: MemoryView,
     props: true,
   },
 

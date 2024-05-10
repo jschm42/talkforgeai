@@ -16,8 +16,8 @@
 
 package com.talkforgeai.backend.memory.service;
 
+import com.talkforgeai.backend.memory.service.FileVectorStore.DocumentWithoutEmbeddings;
 import com.talkforgeai.backend.storage.FileStorageService;
-import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.SimpleVectorStore;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,39 +34,42 @@ public class MemoryService {
   public static final Logger LOGGER = LoggerFactory.getLogger(MemoryService.class);
 
   private final FileStorageService fileStorageService;
-  private final SimpleVectorStore vectorStore;
+  private final VectorStore vectorStore;
 
-  public MemoryService(FileStorageService fileStorageService, SimpleVectorStore vectorStore) {
+  MemoryService(FileStorageService fileStorageService, VectorStore vectorStore) {
     this.fileStorageService = fileStorageService;
     this.vectorStore = vectorStore;
   }
 
-  @PostConstruct
-  public void init() {
-    if (getFile().exists()) {
-      LOGGER.info("Loading vector file: {}", getFile());
-      vectorStore.load(getFile());
-    }
-  }
+//  @PostConstruct
+//  public void init() {
+//    if (getFile().exists()) {
+//      LOGGER.info("Loading vector file: {}", getFile());
+//      vectorStore.load(getFile());
+//    }
+//  }
 
-  public void store(String data) {
+  public DocumentWithoutEmbeddings store(String data) {
     Document document = new Document(data);
 
     LOGGER.info("Adding document: {}", document);
     vectorStore.add(List.of(document));
 
-    LOGGER.info("Saving vector file: {}", getFile());
-    vectorStore.save(getFile());
+//    LOGGER.info("Saving vector file: {}", getFile());
+//    vectorStore.(getFile());
+
+    return new DocumentWithoutEmbeddings(document.getId(), document.getContent());
   }
 
   private @NotNull File getFile() {
     return fileStorageService.getTempDirectory().resolve("vectorstore.json").toFile();
   }
 
-  public List<String> search(String info) {
-    SearchRequest searchRequest = SearchRequest.query(info);
-    searchRequest.withSimilarityThreshold(0.8f);
+  public List<DocumentWithoutEmbeddings> search(SearchRequest searchRequest) {
     LOGGER.info("Searching for: {}", searchRequest);
-    return vectorStore.similaritySearch(searchRequest).stream().map(Document::getContent).toList();
+    return vectorStore.similaritySearch(searchRequest).stream().map(d -> {
+      return new DocumentWithoutEmbeddings(d.getId(), d.getContent());
+    }).toList();
   }
+
 }

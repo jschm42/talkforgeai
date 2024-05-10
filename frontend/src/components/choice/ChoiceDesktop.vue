@@ -24,11 +24,17 @@
     </v-list-item>
     <!--      <v-divider></v-divider>-->
     <v-list density="comfortable" lines="false" nav>
-      <v-list-subheader>Main Desktop</v-list-subheader>
-      <v-list-item color="primary" title="Create Persona" variant="elevated"
-                   @click.prevent="onCreateNewPersona">
+      <v-list-subheader>Main</v-list-subheader>
+      <v-list-item color="primary" title="Create assistant" variant="elevated"
+                   @click.prevent="onCreateNewAssistant">
         <template v-slot:prepend>
           <v-icon icon="mdi-plus-thick"></v-icon>
+        </template>
+      </v-list-item>
+      <v-list-item color="primary" title="Memory" variant="elevated"
+                   @click.prevent="onOpenMemoryEditor">
+        <template v-slot:prepend>
+          <v-icon icon="mdi-head-snowflake"></v-icon>
         </template>
       </v-list-item>
     </v-list>
@@ -90,8 +96,12 @@ export default defineComponent({
       return !!assistant.image_path;
     },
 
-    onCreateNewPersona() {
+    onCreateNewAssistant() {
       this.$router.push({name: 'persona-create'});
+    },
+
+    onOpenMemoryEditor() {
+      this.$router.push({name: 'memory-editor'});
     },
 
   },

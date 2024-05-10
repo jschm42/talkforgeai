@@ -49,6 +49,10 @@ public class UniqueIdGenerator {
     return generateUniqueId("aud", 20);
   }
 
+  public String generateMemoryId() {
+    return generateUniqueId("mem", 20);
+  }
+
   public String generateUniqueId(String prefix, int length) {
     String randomChars = generateRandomString(length);
     return prefix + "_" + randomChars;

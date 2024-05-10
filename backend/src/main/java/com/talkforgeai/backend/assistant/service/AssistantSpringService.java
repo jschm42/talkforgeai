@@ -37,6 +37,7 @@ import com.talkforgeai.backend.assistant.functions.ContextTool;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
+import com.talkforgeai.backend.memory.service.FileVectorStore.DocumentWithoutEmbeddings;
 import com.talkforgeai.backend.memory.service.MemoryService;
 import com.talkforgeai.backend.service.UniqueIdGenerator;
 import com.talkforgeai.backend.storage.FileStorageService;
@@ -77,6 +78,7 @@ import org.springframework.ai.image.ImageResponse;
 import org.springframework.ai.mistralai.api.MistralAiApi;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi.ChatModel;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
@@ -204,8 +206,8 @@ public class AssistantSpringService {
         .map(assistantMapper::toDto)
         .subscribeOn(Schedulers.boundedElastic());
 
-    Mono<List<String>> memoryResults = Mono.fromCallable(
-            () -> memoryService.search(message))
+    Mono<List<DocumentWithoutEmbeddings>> memoryResults = Mono.fromCallable(
+            () -> memoryService.search(SearchRequest.query(message).withSimilarityThreshold(0.75f)))
         .subscribeOn(Schedulers.boundedElastic());
 
     Mono<PreparedInfos> preparedInfosMono = Mono.zip(
@@ -213,7 +215,7 @@ public class AssistantSpringService {
           return new PreparedInfos(
               (AssistantDto) args[0],
               (List<MessageDto>) args[1],
-              (List<String>) args[2]
+              (List<DocumentWithoutEmbeddings>) args[2]
           );
         });
 
@@ -232,7 +234,7 @@ public class AssistantSpringService {
             .flatMap(preparedInfos -> {
               AssistantDto assistantDto = preparedInfos.assistantDto();
               List<MessageDto> pastMessagesList = preparedInfos.pastMessages();
-              List<String> memoryResultsList = preparedInfos.memoryResults();
+              List<DocumentWithoutEmbeddings> memoryResultsList = preparedInfos.memoryResults();
 
               List<Message> promptMessageList = pastMessagesList.stream()
                   .map(m -> {
@@ -251,7 +253,8 @@ public class AssistantSpringService {
               StringBuilder memoryMessage = new StringBuilder();
               if (!memoryResultsList.isEmpty()) {
                 memoryMessage.append("Use the following information from memory:\n");
-                memoryResultsList.forEach(result -> memoryMessage.append(result).append("\n"));
+                memoryResultsList.forEach(
+                    result -> memoryMessage.append(result.content()).append("\n"));
                 memoryMessage.append("\nUser message:\n");
               }
 
@@ -594,7 +597,7 @@ public class AssistantSpringService {
   }
 
   record PreparedInfos(AssistantDto assistantDto, List<MessageDto> pastMessages,
-                       List<String> memoryResults) {
+                       List<DocumentWithoutEmbeddings> memoryResults) {
 
   }
 

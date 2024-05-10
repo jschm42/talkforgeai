@@ -28,6 +28,10 @@
           <v-list-item @click="onCreateNewPersona">
             <v-list-item-title>Create persona</v-list-item-title>
           </v-list-item>
+
+          <v-list-item @click="onOpenMemoryEditor">
+            <v-list-item-title>Memory</v-list-item-title>
+          </v-list-item>
         </v-list>
       </v-menu>
     </v-toolbar>
@@ -90,6 +94,10 @@ export default defineComponent({
 
     onCreateNewPersona() {
       this.$router.push({name: 'persona-create'});
+    },
+
+    onOpenMemoryEditor() {
+      this.$router.push({name: 'memory-editor'});
     },
 
   },
