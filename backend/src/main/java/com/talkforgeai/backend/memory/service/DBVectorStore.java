@@ -17,6 +17,7 @@
 package com.talkforgeai.backend.memory.service;
 
 import com.talkforgeai.backend.memory.domain.MemoryDocument;
+import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
 import com.talkforgeai.backend.memory.repository.MemoryRepository;
 import com.talkforgeai.backend.service.UniqueIdGenerator;
 import java.util.ArrayList;
@@ -131,10 +132,11 @@ public class DBVectorStore implements ListableVectoreStore {
   }
 
   @Override
-  public List<Document> list(int page, int pageSize) {
+  public List<Document> list(MemoryListRequestDto listRequest) {
 
     return memoryRepository.findAll(
-            PageRequest.of(page, pageSize == -1 ? Integer.MAX_VALUE : pageSize)).stream()
+            PageRequest.of(listRequest.page() - 1,
+                listRequest.pageSize() == -1 ? Integer.MAX_VALUE : listRequest.pageSize())).stream()
         .map(memoryDocument -> new Document(memoryDocument.getId(), memoryDocument.getContent(),
             new HashMap<>()))
         .toList();

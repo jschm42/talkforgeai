@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.memory.service;
+package com.talkforgeai.backend.memory.dto;
 
-import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
 import java.util.List;
-import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.VectorStore;
+import java.util.Map;
 
-public interface ListableVectoreStore extends VectorStore {
 
-  int count();
+public record MemoryListRequestDto(int page, int pageSize, List<MemoryListOrderDto> sortBy,
+                                   Map<String, String> search) {
 
-  List<Document> list();
 
-  List<Document> list(MemoryListRequestDto searchRequest);
+  public record MemoryListOrderDto(String key, String order) {
+
+  }
+
 }

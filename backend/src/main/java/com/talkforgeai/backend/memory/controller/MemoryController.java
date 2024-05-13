@@ -16,6 +16,7 @@
 
 package com.talkforgeai.backend.memory.controller;
 
+import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
 import com.talkforgeai.backend.memory.dto.MemorySearchRequestDto;
 import com.talkforgeai.backend.memory.dto.MemoryStoreRequestDto;
 import com.talkforgeai.backend.memory.service.FileVectorStore.DocumentWithoutEmbeddings;
@@ -23,7 +24,6 @@ import com.talkforgeai.backend.memory.service.MemoryService;
 import java.util.List;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,10 +51,9 @@ public class MemoryController {
         .withTopK(search.topK()));
   }
 
-  @GetMapping("/list/{page}/{pageSize}")
-  public List<DocumentWithoutEmbeddings> list(@PathVariable("page") int page,
-      @PathVariable("pageSize") int pageSize) {
-    return memoryService.list(page, pageSize);
+  @PostMapping("/list")
+  public List<DocumentWithoutEmbeddings> list(@RequestBody MemoryListRequestDto request) {
+    return memoryService.list(request);
   }
 
 

@@ -48,10 +48,14 @@ export function useMemory() {
     return result.data;
   };
 
-  const list = async (page: number, itemsPerPage: number): Promise<Array<MemoryResponse>> => {
-    const backendPage = page - 1;
-    const result = await axios.get(
-        `/api/v1/memory/list/${backendPage}/${itemsPerPage}`);
+  const list = async (
+      page: number, pageSize: number, sortBy: []): Promise<Array<MemoryResponse>> => {
+    const result = await axios.post(
+        `/api/v1/memory/list`, {
+          page,
+          pageSize,
+          sortBy,
+        });
     return result.data;
   };
 

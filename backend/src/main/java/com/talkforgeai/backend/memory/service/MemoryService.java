@@ -16,11 +16,10 @@
 
 package com.talkforgeai.backend.memory.service;
 
+import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
 import com.talkforgeai.backend.memory.service.FileVectorStore.DocumentWithoutEmbeddings;
 import com.talkforgeai.backend.storage.FileStorageService;
-import java.io.File;
 import java.util.List;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
@@ -61,22 +60,17 @@ public class MemoryService {
     return new DocumentWithoutEmbeddings(document.getId(), document.getContent());
   }
 
-  private @NotNull File getFile() {
-    return fileStorageService.getTempDirectory().resolve("vectorstore.json").toFile();
-  }
-
   public List<DocumentWithoutEmbeddings> search(SearchRequest searchRequest) {
     LOGGER.info("Searching for: {}", searchRequest);
-    return vectorStore.similaritySearch(searchRequest).stream().map(d -> {
-      return new DocumentWithoutEmbeddings(d.getId(), d.getContent());
-    }).toList();
+    return vectorStore.similaritySearch(searchRequest).stream()
+        .map(d -> new DocumentWithoutEmbeddings(d.getId(), d.getContent())).toList();
   }
 
-  public List<DocumentWithoutEmbeddings> list(int page, int pageSize) {
-    LOGGER.info("Listing all documents");
+  public List<DocumentWithoutEmbeddings> list(MemoryListRequestDto request) {
+    LOGGER.info("Listing documents: {}", request);
 
     if (vectorStore instanceof ListableVectoreStore listableVectoreStore) {
-      return listableVectoreStore.list(page, pageSize).stream()
+      return listableVectoreStore.list(request).stream()
           .map(d -> new DocumentWithoutEmbeddings(d.getId(), d.getContent())).toList();
     } else {
       throw new UnsupportedOperationException("VectorStore does not support listing");
