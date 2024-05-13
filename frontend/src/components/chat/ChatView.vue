@@ -176,11 +176,7 @@ export default defineComponent({
 
 <style>
 pre {
-  background-color: #303030;
-  color: white;
-  border: 1px solid #e9ecef;
-  border-radius: 0.25rem;
-  padding: 1rem;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 .mobile-sidebar {

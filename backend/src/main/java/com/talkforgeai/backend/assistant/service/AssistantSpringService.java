@@ -65,7 +65,6 @@ import javax.imageio.ImageIO;
 import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -75,7 +74,6 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.image.ImageResponse;
-import org.springframework.ai.mistralai.api.MistralAiApi;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi.ChatModel;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -345,10 +343,15 @@ public class AssistantSpringService {
           .build();
     } else {
       String content = chatResponse.getResult().getOutput().getContent();
-      content = content.replace("\n", "\\n");
+      String eventContent = "";
+
+      if (content != null && !content.isEmpty()) {
+        eventContent = content.replace("\n", "\\n");
+      }
+
       event = ServerSentEvent.<String>builder()
           .event("thread.message.delta")
-          .data(content)
+          .data(eventContent)
           .build();
     }
 
@@ -594,10 +597,6 @@ public class AssistantSpringService {
     return messageRepository.save(messageEntity);
   }
 
-  private List<String> getLocalOllamaModels() {
-    return Arrays.asList("llama2", "llama3");
-  }
-
   public List<ModelSystemInfo> listSystems() {
     return Stream.of(LlmSystem.values())
         .map(system -> new ModelSystemInfo(system.name(), system.getDescription()))
@@ -605,23 +604,11 @@ public class AssistantSpringService {
   }
 
   public List<String> retrieveModels(LlmSystem system) {
-    return switch (system) {
-      case OPENAI -> Arrays.stream(ChatModel.values()).map(ChatModel::getValue).toList();
-      case MISTRAL ->
-          Arrays.stream(MistralAiApi.ChatModel.values()).map(MistralAiApi.ChatModel::getValue)
-              .toList();
-      case ANSTHROPIC ->
-          Arrays.stream(AnthropicApi.ChatModel.values()).map(AnthropicApi.ChatModel::getValue)
-              .toList();
-      case OLLAMA -> getLocalOllamaModels();
-      default -> throw new AssistentException("Unknown system: " + system);
-    };
+    return universalChatService.getModels(system);
   }
 
   record PreparedInfos(AssistantDto assistantDto, List<MessageDto> pastMessages,
                        List<DocumentWithoutEmbeddings> memoryResults) {
 
   }
-
-
 }

@@ -18,10 +18,14 @@ package com.talkforgeai.backend.assistant.service;
 
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
 import com.talkforgeai.backend.assistant.dto.LlmSystem;
+import com.talkforgeai.backend.assistant.exception.AssistentException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.ai.anthropic.AnthropicChatClient;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
+import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.ChatClient;
 import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.StreamingChatClient;
@@ -29,28 +33,39 @@ import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.mistralai.MistralAiChatClient;
 import org.springframework.ai.mistralai.MistralAiChatOptions;
+import org.springframework.ai.mistralai.api.MistralAiApi;
 import org.springframework.ai.ollama.OllamaChatClient;
 import org.springframework.ai.ollama.api.OllamaOptions;
 import org.springframework.ai.openai.OpenAiChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 import reactor.core.publisher.Flux;
 
 @Service
 public class UniversalChatService {
+
+  @Qualifier("openAiRestClient")
+  private final RestClient openAiRestClient;
 
   private final OpenAiChatClient openAiChatClient;
   private final MistralAiChatClient mistralAiChatClient;
   private final AnthropicChatClient anthropicChatClient;
   private final OllamaChatClient ollamaChatClient;
 
-  public UniversalChatService(OpenAiChatClient openAiChatClient,
+  @Qualifier("ollamaAiRestClient")
+  private final RestClient ollamaAiRestClient;
+
+  public UniversalChatService(RestClient openAiRestClient, OpenAiChatClient openAiChatClient,
       MistralAiChatClient mistralAiChatClient, AnthropicChatClient anthropicChatClient,
-      OllamaChatClient ollamaChatClient) {
+      OllamaChatClient ollamaChatClient, RestClient ollamaAiRestClient) {
+    this.openAiRestClient = openAiRestClient;
     this.openAiChatClient = openAiChatClient;
     this.mistralAiChatClient = mistralAiChatClient;
     this.anthropicChatClient = anthropicChatClient;
     this.ollamaChatClient = ollamaChatClient;
+    this.ollamaAiRestClient = ollamaAiRestClient;
   }
 
   public ChatOptions getPromptOptions(AssistantDto assistantDto, Set<String> functionNames) {
@@ -195,6 +210,61 @@ public class UniversalChatService {
             Float.valueOf(properties.get(AssistantProperties.MODEL_TEMPERATURE.getKey())))
         .withTopP(Float.valueOf(properties.get(AssistantProperties.MODEL_TOP_P.getKey())))
         .build();
+  }
+
+  public List<String> getModels(LlmSystem llmSystem) {
+    switch (llmSystem) {
+      case OPENAI -> {
+        OpenAiModelResponse response = openAiRestClient.get().uri("/v1/models").retrieve()
+            .body(OpenAiModelResponse.class);
+
+        if (response == null) {
+          throw new AssistentException("Failed to retrieve models from OpenAI");
+        }
+
+        return response.data().stream()
+            .map(OpenAiModelResponse.OpenAiModelDetail::id)
+            .filter(id -> id.startsWith("gpt-"))
+            .sorted()
+            .toList();
+      }
+      case MISTRAL -> {
+        return Arrays.stream(MistralAiApi.ChatModel.values()).map(MistralAiApi.ChatModel::getValue)
+            .toList();
+      }
+      case OLLAMA -> {
+        OllamaAiModelResponse response = ollamaAiRestClient.get().uri("/api/tags").retrieve()
+            .body(OllamaAiModelResponse.class);
+
+        if (response == null) {
+          throw new AssistentException("Failed to retrieve models from Ollama");
+        }
+
+        return response.models().stream().map(OllamaAiModelResponse.OllamaAiModelDetail::name)
+            .sorted()
+            .toList();
+      }
+      case ANSTHROPIC -> {
+        return Arrays.stream(AnthropicApi.ChatModel.values()).map(AnthropicApi.ChatModel::getValue)
+            .toList();
+      }
+      default -> throw new IllegalStateException("Unexpected system: " + llmSystem);
+    }
+  }
+
+
+  record OpenAiModelResponse(String object, List<OpenAiModelDetail> data) {
+
+    record OpenAiModelDetail(String id) {
+
+    }
+  }
+
+  record OllamaAiModelResponse(List<OllamaAiModelDetail> models) {
+
+    record OllamaAiModelDetail(String name) {
+
+    }
   }
 
 }
