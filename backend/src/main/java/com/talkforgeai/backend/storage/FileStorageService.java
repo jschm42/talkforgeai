@@ -70,6 +70,10 @@ public class FileStorageService {
     return getDataDirectory().resolve("threads");
   }
 
+  public Path getImportDirectory() {
+    return getDataDirectory().resolve("import");
+  }
+
   public void createDataDirectories() {
     try {
       Path createdPath = Files.createDirectories(getDataDirectory());
@@ -83,6 +87,9 @@ public class FileStorageService {
 
       createdPath = Files.createDirectories(getTempDirectory());
       LOGGER.info("Created temp directory {}", createdPath);
+
+      createdPath = Files.createDirectories(getImportDirectory());
+      LOGGER.info("Created import directory {}", createdPath);
 
       LOGGER.info("Directories created successfully");
     } catch (IOException e) {

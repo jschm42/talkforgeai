@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.talkforgeai.backend;
 
+import com.talkforgeai.backend.assistant.service.AssistantImportService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -25,15 +26,19 @@ import org.springframework.context.annotation.Configuration;
 public class CommandLineRunnerConfiguration {
 
   private final FileStorageService fileStorageService;
+  private final AssistantImportService assistantImportService;
 
-  public CommandLineRunnerConfiguration(FileStorageService fileStorageService) {
+  public CommandLineRunnerConfiguration(FileStorageService fileStorageService,
+      AssistantImportService assistantImportService) {
     this.fileStorageService = fileStorageService;
+    this.assistantImportService = assistantImportService;
   }
 
   @Bean
   CommandLineRunner commandLineRunner() {
     return args -> {
       fileStorageService.createDataDirectories();
+      assistantImportService.importAssistants();
     };
   }
 }

@@ -159,6 +159,11 @@ public class AssistantSpringService {
         .toList();
   }
 
+  public boolean doesAssistantExistByName(String assistantName) {
+    return assistantRepository.existsByName(assistantName);
+  }
+
+
   @Transactional
   public ThreadDto createThread() {
     ThreadEntity threadEntity = new ThreadEntity();
@@ -444,9 +449,11 @@ public class AssistantSpringService {
     modifiedEntity.setInstructions(modifiedAssistant.instructions());
     modifiedEntity.setImagePath(modifiedAssistant.imagePath());
     modifiedEntity.setSystem(modifiedAssistant.system().name());
-    modifiedEntity.setProperties(assistantMapper.mapProperties(modifiedAssistant.properties()));
+    modifiedEntity.setProperties(new HashMap<>());
+    AssistantEntity savedAssistant = assistantRepository.save(modifiedEntity);
 
-    assistantRepository.save(modifiedEntity);
+    savedAssistant.setProperties(assistantMapper.mapProperties(modifiedAssistant.properties()));
+    assistantRepository.save(savedAssistant);
   }
 
   public GenerateImageResponse generateImage(String prompt) throws IOException {
