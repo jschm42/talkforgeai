@@ -77,6 +77,9 @@ public class PlantUMLTransformer implements Transformer {
         throw new RuntimeException(ioEx);
       }
 
+      // HTML decode the code
+      code = code.replace("&lt;", "<").replace("&gt;", ">");
+      
       DiagramDescription diagramDescription = service.generateUmlDiagram(code,
           localFilePath.toString());
       LOGGER.info("Generated PlantUML diagram: {}", diagramDescription.getDescription());

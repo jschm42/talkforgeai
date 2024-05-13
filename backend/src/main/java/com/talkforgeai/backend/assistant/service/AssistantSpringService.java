@@ -96,6 +96,8 @@ import reactor.core.scheduler.Schedulers;
 public class AssistantSpringService {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(AssistantSpringService.class);
+  public static final String SYSTEM_MESSAGE_PLANTUML = "You can generate PlantUML diagrams. PlantUML code that you generate will be transformed to a downloadable image.";
+  public static final String SYSTEM_MESSAGE_IMAGE_GEN = "You can generate an image by using the following syntax: !image_gen[<image prompt>]";
 
   private final UniversalChatService universalChatService;
   private final UniversalImageGenService universalImageGenService;
@@ -253,6 +255,19 @@ public class AssistantSpringService {
                   .toList();
 
               List<Message> finalPromptMessageList = new ArrayList<>(promptMessageList);
+
+              if (assistantDto.properties()
+                  .get(AssistantProperties.FEATURE_IMAGEGENERATION.getKey()).equals(
+                      "true")) {
+                finalPromptMessageList.addFirst(new SystemMessage(SYSTEM_MESSAGE_IMAGE_GEN));
+              }
+
+              if (assistantDto.properties()
+                  .get(AssistantProperties.FEATURE_PLANTUML.getKey()).equals(
+                      "true")) {
+                finalPromptMessageList.addFirst(new SystemMessage(SYSTEM_MESSAGE_PLANTUML));
+              }
+
               finalPromptMessageList.addFirst(new SystemMessage(assistantDto.instructions()));
 
               StringBuilder memoryMessage = new StringBuilder();

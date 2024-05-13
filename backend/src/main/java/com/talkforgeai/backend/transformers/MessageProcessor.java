@@ -34,20 +34,19 @@ public class MessageProcessor {
   List<Transformer> transformers = new ArrayList<>();
 
   public MessageProcessor(FileStorageService fileStorageService,
-      PlantUMLService plantUMLService, UniversalImageGenService imageGenService) {
+      UniversalImageGenService universalImageGenService,
+      PlantUMLService plantUMLService) {
     this.fileStorageService = fileStorageService;
 
     transformers.add(new HtmlEncoderTransformer());
+    transformers.add(new ImageDownloadTransformer(universalImageGenService));
     transformers.add(new LaTeXTransformer());
     transformers.add(new PlantUMLTransformer(plantUMLService));
     transformers.add(new CodeBlockTransformer());
     transformers.add(new CodePhraseTransformer());
     transformers.add(new MarkdownHeaderTransformer());
-//    transformers.add(new MarkdownListTransformer());
     transformers.add(new MarkdownTextTransformer());
     transformers.add(new NewLineTransformer());
-
-    transformers.add(new ImageDownloadTransformer(imageGenService));
   }
 
   public String transform(String content, String threadId, String messageId) {

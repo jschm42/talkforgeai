@@ -37,8 +37,12 @@ import org.springframework.stereotype.Component;
 public class ImageDownloadTransformer implements Transformer {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(ImageDownloadTransformer.class);
+//  private static final Pattern UrlRegEx = Pattern.compile(
+//      "<image-prompt>[\\n]?([\\s\\S]*?)[\\n]?</image-prompt>", Pattern.MULTILINE);
+
   private static final Pattern UrlRegEx = Pattern.compile(
-      "<image-prompt>[\\n]?([\\s\\S]*?)[\\n]?</image-prompt>", Pattern.MULTILINE);
+      "!image_gen\\[([\\s\\S]*?)\\]", Pattern.MULTILINE);
+
 
   private final UniversalImageGenService service;
 
@@ -114,6 +118,6 @@ public class ImageDownloadTransformer implements Transformer {
       throw ex;
     }
 
-    return "/api/v1/session/" + threadId + "/" + fileName;
+    return "/api/v1/threads/" + threadId + "/" + fileName;
   }
 }
