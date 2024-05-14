@@ -16,9 +16,10 @@
 
 package com.talkforgeai.backend.memory.service;
 
+import com.talkforgeai.backend.assistant.functions.FunctionContext;
+import com.talkforgeai.backend.memory.dto.DocumentWithoutEmbeddings;
 import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
-import com.talkforgeai.backend.memory.service.FileVectorStore.DocumentWithoutEmbeddings;
-import com.talkforgeai.backend.storage.FileStorageService;
+import com.talkforgeai.backend.memory.dto.MetadataKey;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,38 +33,29 @@ public class MemoryService {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(MemoryService.class);
 
-  private final FileStorageService fileStorageService;
   private final VectorStore vectorStore;
 
-  MemoryService(FileStorageService fileStorageService, VectorStore vectorStore) {
-    this.fileStorageService = fileStorageService;
+  MemoryService(VectorStore vectorStore) {
     this.vectorStore = vectorStore;
   }
 
-//  @PostConstruct
-//  public void init() {
-//    if (getFile().exists()) {
-//      LOGGER.info("Loading vector file: {}", getFile());
-//      vectorStore.load(getFile());
-//    }
-//  }
-
-  public DocumentWithoutEmbeddings store(String data) {
+  public DocumentWithoutEmbeddings store(String data, FunctionContext functionContext) {
     Document document = new Document(data);
+
+    document.getMetadata().put(MetadataKey.SYSTEM.key(), functionContext.embedLlmSystem().name());
+    document.getMetadata().put(MetadataKey.MODEL.key(), functionContext.embedModel());
+    document.getMetadata().put(MetadataKey.ASSISTANT_ID.key(), functionContext.assistantId());
 
     LOGGER.info("Adding document: {}", document);
     vectorStore.add(List.of(document));
 
-//    LOGGER.info("Saving vector file: {}", getFile());
-//    vectorStore.(getFile());
-
-    return new DocumentWithoutEmbeddings(document.getId(), document.getContent());
+    return DocumentWithoutEmbeddings.from(document);
   }
 
   public List<DocumentWithoutEmbeddings> search(SearchRequest searchRequest) {
     LOGGER.info("Searching for: {}", searchRequest);
     return vectorStore.similaritySearch(searchRequest).stream()
-        .map(d -> new DocumentWithoutEmbeddings(d.getId(), d.getContent())).toList();
+        .map(DocumentWithoutEmbeddings::from).toList();
   }
 
   public List<DocumentWithoutEmbeddings> list(MemoryListRequestDto request) {
@@ -71,7 +63,7 @@ public class MemoryService {
 
     if (vectorStore instanceof ListableVectoreStore listableVectoreStore) {
       return listableVectoreStore.list(request).stream()
-          .map(d -> new DocumentWithoutEmbeddings(d.getId(), d.getContent())).toList();
+          .map(DocumentWithoutEmbeddings::from).toList();
     } else {
       throw new UnsupportedOperationException("VectorStore does not support listing");
     }

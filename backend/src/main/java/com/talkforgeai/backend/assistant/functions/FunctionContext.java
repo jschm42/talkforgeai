@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.memory.dto;
+package com.talkforgeai.backend.assistant.functions;
 
-public record MemoryStoreRequestDto(String content, String assistantId) {
+import com.talkforgeai.backend.assistant.dto.LlmSystem;
+
+public record FunctionContext(LlmSystem embedLlmSystem,
+                              String embedModel, String assistantId) {
 
 }

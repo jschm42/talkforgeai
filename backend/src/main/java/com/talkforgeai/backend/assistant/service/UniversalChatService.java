@@ -22,7 +22,6 @@ import com.talkforgeai.backend.assistant.exception.AssistentException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.springframework.ai.anthropic.AnthropicChatClient;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.anthropic.api.AnthropicApi;
@@ -34,6 +33,7 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.mistralai.MistralAiChatClient;
 import org.springframework.ai.mistralai.MistralAiChatOptions;
 import org.springframework.ai.mistralai.api.MistralAiApi;
+import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.ollama.OllamaChatClient;
 import org.springframework.ai.ollama.api.OllamaOptions;
 import org.springframework.ai.openai.OpenAiChatClient;
@@ -68,13 +68,14 @@ public class UniversalChatService {
     this.ollamaAiRestClient = ollamaAiRestClient;
   }
 
-  public ChatOptions getPromptOptions(AssistantDto assistantDto, Set<String> functionNames) {
+  public ChatOptions getPromptOptions(AssistantDto assistantDto,
+      List<FunctionCallback> functionCallbacks) {
     switch (assistantDto.system()) {
       case OPENAI -> {
-        return getOpenAiOptions(assistantDto, functionNames);
+        return getOpenAiOptions(assistantDto, functionCallbacks);
       }
       case MISTRAL -> {
-        return getMistralOptions(assistantDto, functionNames);
+        return getMistralOptions(assistantDto, functionCallbacks);
       }
       case OLLAMA -> {
         return getOllamaOptions(assistantDto);
@@ -160,7 +161,7 @@ public class UniversalChatService {
   }
 
   private MistralAiChatOptions getMistralOptions(AssistantDto assistantDto,
-      Set<String> functionNames) {
+      List<FunctionCallback> functionCallbacks) {
     return MistralAiChatOptions.builder()
         .withModel(assistantDto.model())
         .withTopP(
@@ -168,11 +169,12 @@ public class UniversalChatService {
         .withTemperature(
             Float.valueOf(
                 assistantDto.properties().get(AssistantProperties.MODEL_TEMPERATURE.getKey())))
-        .withFunctions(functionNames)
+        .withFunctionCallbacks(functionCallbacks)
         .build();
   }
 
-  private OpenAiChatOptions getOpenAiOptions(AssistantDto assistantDto, Set<String> functionNames) {
+  private OpenAiChatOptions getOpenAiOptions(AssistantDto assistantDto,
+      List<FunctionCallback> functionCallbacks) {
     Map<String, String> properties = assistantDto.properties();
 
     return OpenAiChatOptions.builder()
@@ -184,7 +186,7 @@ public class UniversalChatService {
             Float.valueOf(properties.get(AssistantProperties.MODEL_PRESENCE_PENALTY.getKey())))
         .withTemperature(
             Float.valueOf(properties.get(AssistantProperties.MODEL_TEMPERATURE.getKey())))
-        .withFunctions(functionNames)
+        .withFunctionCallbacks(functionCallbacks)
         .build();
   }
 

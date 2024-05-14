@@ -54,12 +54,12 @@ public class MemoryDocument {
   @Lob
   @Column(name = "embeddings")
   private String embeddings;
-
+  
   @ElementCollection(fetch = FetchType.EAGER)
   @MapKeyColumn(name = "metadata_key")
   @CollectionTable(name = "memory_metadata", joinColumns = @JoinColumn(name = "memory_document_id"))
   @Column(name = "metadataValue")
-  private Map<String, MemoryDocumentMetadataValue> properties = new HashMap<>();
+  private Map<String, MemoryDocumentMetadataValue> metadata = new HashMap<>();
 
   public String getId() {
     return id;
@@ -108,5 +108,13 @@ public class MemoryDocument {
     } catch (IOException e) {
       throw new MemoryException("Error writing embedding to byte array", e);
     }
+  }
+
+  public Map<String, MemoryDocumentMetadataValue> getMetadata() {
+    return metadata;
+  }
+
+  public void setMetadata(Map<String, MemoryDocumentMetadataValue> metadata) {
+    this.metadata = metadata;
   }
 }

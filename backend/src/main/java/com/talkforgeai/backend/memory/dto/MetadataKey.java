@@ -16,6 +16,18 @@
 
 package com.talkforgeai.backend.memory.dto;
 
-public record MemoryStoreRequestDto(String content, String assistantId) {
+public enum MetadataKey {
+  SYSTEM("system"),
+  MODEL("model"),
+  ASSISTANT_ID("assistantId");
 
+  private final String key;
+
+  MetadataKey(String key) {
+    this.key = key;
+  }
+
+  public String key() {
+    return key;
+  }
 }

@@ -25,6 +25,12 @@ public class MemoryDocumentMetadataValue {
   @Lob
   private String metadataValue;
 
+  public static MemoryDocumentMetadataValue of(String value) {
+    MemoryDocumentMetadataValue metadataValue = new MemoryDocumentMetadataValue();
+    metadataValue.setMetadataValue(value);
+    return metadataValue;
+  }
+
   public String getMetadataValue() {
     return metadataValue;
   }

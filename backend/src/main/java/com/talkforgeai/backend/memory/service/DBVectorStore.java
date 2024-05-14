@@ -17,11 +17,13 @@
 package com.talkforgeai.backend.memory.service;
 
 import com.talkforgeai.backend.memory.domain.MemoryDocument;
+import com.talkforgeai.backend.memory.domain.MemoryDocumentMetadataValue;
 import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
 import com.talkforgeai.backend.memory.repository.MemoryRepository;
 import com.talkforgeai.backend.service.UniqueIdGenerator;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +66,11 @@ public class DBVectorStore implements ListableVectoreStore {
           // Convert List<Double> to byte[]
           documentEntity.setId(uniqueIdGenerator.generateMemoryId());
           documentEntity.setContent(document.getContent());
+          documentEntity.setCreatedAt(new Date());
+
+          document.getMetadata().forEach((key, value) -> documentEntity.getMetadata()
+              .put(key, MemoryDocumentMetadataValue.of(value.toString())));
+
           return documentEntity;
         })
         .toList();

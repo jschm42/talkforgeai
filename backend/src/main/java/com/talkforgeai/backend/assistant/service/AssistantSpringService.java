@@ -33,11 +33,15 @@ import com.talkforgeai.backend.assistant.dto.ThreadTitleDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleGenerationRequestDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleUpdateRequestDto;
 import com.talkforgeai.backend.assistant.exception.AssistentException;
+import com.talkforgeai.backend.assistant.functions.ContextStorageFunction;
+import com.talkforgeai.backend.assistant.functions.ContextStorageFunction.Request;
+import com.talkforgeai.backend.assistant.functions.ContextStorageFunction.Response;
 import com.talkforgeai.backend.assistant.functions.ContextTool;
+import com.talkforgeai.backend.assistant.functions.FunctionContext;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
-import com.talkforgeai.backend.memory.service.FileVectorStore.DocumentWithoutEmbeddings;
+import com.talkforgeai.backend.memory.dto.DocumentWithoutEmbeddings;
 import com.talkforgeai.backend.memory.service.MemoryService;
 import com.talkforgeai.backend.service.UniqueIdGenerator;
 import com.talkforgeai.backend.storage.FileStorageService;
@@ -57,7 +61,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -65,6 +68,7 @@ import javax.imageio.ImageIO;
 import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
 import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -74,6 +78,7 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.image.ImageResponse;
+import org.springframework.ai.model.function.FunctionCallbackWrapper;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi.ChatModel;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -278,8 +283,17 @@ public class AssistantSpringService {
 
               finalPromptMessageList.add(new UserMessage(memoryMessage.append(message).toString()));
 
+              FunctionCallbackWrapper<Request, Response> func = FunctionCallbackWrapper.builder(
+                      new ContextStorageFunction(memoryService, new FunctionContext(LlmSystem.OPENAI,
+                          OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL, assistantId)))
+                  .withDescription(
+                      "Store relevant information in the vector database for later retrieval.")
+                  .withName(ContextTool.MEMORY_STORE.getFunctionBeanName())
+                  .build();
+
               ChatOptions promptOptions = universalChatService.getPromptOptions(assistantDto,
-                  Set.of(ContextTool.MEMORY_STORE.getFunctionBeanName()));
+                  List.of(func));
+
               LOGGER.debug("Starting stream with prompt: {}", finalPromptMessageList);
               LOGGER.debug("Prompt Options: {}",
                   universalChatService.printPromptOptions(assistantDto.system(), promptOptions));

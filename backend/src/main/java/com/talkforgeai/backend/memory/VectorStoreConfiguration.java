@@ -39,7 +39,7 @@ public class VectorStoreConfiguration {
   }
 
   @Bean
-  VectorStore fileVectorStore() {
+  VectorStore dbVectorStore() {
     return new DBVectorStore(memoryRepository, embeddingClient, uniqueIdGenerator);
   }
 

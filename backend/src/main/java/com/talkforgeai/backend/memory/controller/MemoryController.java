@@ -16,12 +16,15 @@
 
 package com.talkforgeai.backend.memory.controller;
 
+import com.talkforgeai.backend.assistant.dto.LlmSystem;
+import com.talkforgeai.backend.assistant.functions.FunctionContext;
+import com.talkforgeai.backend.memory.dto.DocumentWithoutEmbeddings;
 import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
 import com.talkforgeai.backend.memory.dto.MemorySearchRequestDto;
 import com.talkforgeai.backend.memory.dto.MemoryStoreRequestDto;
-import com.talkforgeai.backend.memory.service.FileVectorStore.DocumentWithoutEmbeddings;
 import com.talkforgeai.backend.memory.service.MemoryService;
 import java.util.List;
+import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,7 +44,9 @@ public class MemoryController {
 
   @PostMapping("/store")
   public DocumentWithoutEmbeddings storeInMemory(@RequestBody MemoryStoreRequestDto request) {
-    return memoryService.store(request.content());
+    return memoryService.store(request.content(),
+        new FunctionContext(LlmSystem.OPENAI, OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL,
+            request.assistantId()));
   }
 
   @PostMapping("/search")

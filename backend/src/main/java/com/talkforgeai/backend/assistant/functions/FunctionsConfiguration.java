@@ -16,20 +16,14 @@
 
 package com.talkforgeai.backend.assistant.functions;
 
-import com.talkforgeai.backend.assistant.functions.ContextStorageFunction.Request;
-import com.talkforgeai.backend.assistant.functions.ContextStorageFunction.Response;
-import com.talkforgeai.backend.memory.service.MemoryService;
-import java.util.function.Function;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Description;
 
 @Configuration
 public class FunctionsConfiguration {
 
-  @Bean
-  @Description("Store relevant information in the vector database for later retrieval.")
-  public Function<Request, Response> contextStorageFunction(MemoryService memoryService) {
-    return new ContextStorageFunction(memoryService);
-  }
+//  @Bean
+//  @Description("Store relevant information in the vector database for later retrieval.")
+//  public Function<Request, Response> contextStorageFunction(MemoryService memoryService) {
+//    return new ContextStorageFunction(memoryService);
+//  }
 }
