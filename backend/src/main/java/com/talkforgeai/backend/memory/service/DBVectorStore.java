@@ -133,8 +133,7 @@ public class DBVectorStore implements ListableVectoreStore {
   @Override
   public List<Document> list() {
     return memoryRepository.findAll().stream()
-        .map(memoryDocument -> new Document(memoryDocument.getId(), memoryDocument.getContent(),
-            new HashMap<>()))
+        .map(this::mapDocument)
         .toList();
   }
 
@@ -144,12 +143,23 @@ public class DBVectorStore implements ListableVectoreStore {
     return memoryRepository.findAll(
             PageRequest.of(listRequest.page() - 1,
                 listRequest.pageSize() == -1 ? Integer.MAX_VALUE : listRequest.pageSize())).stream()
-        .map(memoryDocument -> new Document(memoryDocument.getId(), memoryDocument.getContent(),
-            new HashMap<>()))
+        .map(this::mapDocument)
         .toList();
+  }
+
+  private Document mapDocument(MemoryDocument memoryDocument) {
+    Map<String, Object> metadata = new HashMap<>();
+    memoryDocument.getMetadata()
+        .forEach((key, value) -> metadata.put(key, value.getMetadataValue()));
+
+    return new Document(
+        memoryDocument.getId(),
+        memoryDocument.getContent(),
+        metadata);
   }
 
   public record Similarity(String key, double score) {
 
   }
+
 }

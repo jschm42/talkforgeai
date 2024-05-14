@@ -129,6 +129,9 @@ export default {
       headers: [
         {title: 'Content', key: 'content', align: 'start', sortable: true},
         {title: 'ID', key: 'id', align: 'start', sortable: false},
+        {title: 'Assistant', key: 'assistantId', align: 'start', sortable: false},
+        {title: 'System', key: 'system', align: 'start', sortable: false},
+        {title: 'Model', key: 'model', align: 'start', sortable: false},
       ],
       serverItems: [],
       loading: true,

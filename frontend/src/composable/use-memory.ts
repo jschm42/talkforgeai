@@ -27,6 +27,9 @@ import axios from 'axios';
 export class MemoryResponse {
   id = '';
   content = '';
+  assistant = '';
+  system = '';
+  model = '';
 }
 
 export function useMemory() {
