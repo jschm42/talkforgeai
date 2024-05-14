@@ -122,7 +122,9 @@ export const useChatStore = defineStore('chat', {
       this.currentStatusMessage = '';
       this.currentStatusMessageType = '';
     },
-
+    getAssistantById(assistantId: string): Assistant | undefined {
+      return this.assistantList.find((assistant) => assistant.id === assistantId);
+    },
   },
 
 });

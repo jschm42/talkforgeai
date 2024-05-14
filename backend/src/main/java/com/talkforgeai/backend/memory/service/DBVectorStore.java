@@ -19,6 +19,7 @@ package com.talkforgeai.backend.memory.service;
 import com.talkforgeai.backend.memory.domain.MemoryDocument;
 import com.talkforgeai.backend.memory.domain.MemoryDocumentMetadataValue;
 import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
+import com.talkforgeai.backend.memory.dto.MetadataKey;
 import com.talkforgeai.backend.memory.repository.MemoryRepository;
 import com.talkforgeai.backend.service.UniqueIdGenerator;
 import java.util.ArrayList;
@@ -56,6 +57,18 @@ public class DBVectorStore implements ListableVectoreStore {
   public void add(List<Document> documents) {
     // Convert documents to MemoryDocument
     List<MemoryDocument> memoryDocuments = documents.stream()
+        .filter(document -> {
+          int countDocs = memoryRepository.countByContentAndKeyValue(document.getContent(),
+              MetadataKey.ASSISTANT_ID.key(),
+              MemoryDocumentMetadataValue.of(
+                  (String) document.getMetadata().get(MetadataKey.ASSISTANT_ID.key())));
+          if (countDocs > 0) {
+            LOGGER.warn(
+                "Document with content '{}' already exists in the database. Document will be ignored.",
+                document.getContent());
+          }
+          return countDocs == 0;
+        })
         .map(document -> {
           MemoryDocument documentEntity = new MemoryDocument();
 

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.talkforgeai.backend.memory.dto.DocumentWithoutEmbeddings;
+import com.talkforgeai.backend.memory.dto.MemoryStoreRequestDto;
 import com.talkforgeai.backend.memory.service.MemoryService;
 import java.util.function.Function;
 import org.slf4j.Logger;
@@ -42,8 +43,9 @@ public class ContextStorageFunction implements
   @Override
   public Response apply(Request request) {
     LOGGER.info("Storing information in memory: {}", request.contextInfo());
-    DocumentWithoutEmbeddings storedDocument = memoryService.store(request.contextInfo(),
-        functionContext);
+    MemoryStoreRequestDto requestDto = new MemoryStoreRequestDto(request.contextInfo(),
+        functionContext.assistantId());
+    DocumentWithoutEmbeddings storedDocument = memoryService.store(requestDto);
     return new Response(
         storedDocument.id(),
         "I stored the following information in memory: " + request.contextInfo());

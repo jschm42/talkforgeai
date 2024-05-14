@@ -17,13 +17,20 @@
 package com.talkforgeai.backend.memory.repository;
 
 import com.talkforgeai.backend.memory.domain.MemoryDocument;
+import com.talkforgeai.backend.memory.domain.MemoryDocumentMetadataValue;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MemoryRepository extends JpaRepository<MemoryDocument, String> {
 
-  Page<MemoryDocument> findAll(Pageable pageable);
+  @NotNull
+  Page<MemoryDocument> findAll(@NotNull Pageable pageable);
+
+  @Query("SELECT COUNT(m) FROM MemoryDocument m WHERE m.content = :content AND KEY(m.metadata) = :key AND VALUE(m.metadata) = :value")
+  int countByContentAndKeyValue(String content, String key, MemoryDocumentMetadataValue value);
 }

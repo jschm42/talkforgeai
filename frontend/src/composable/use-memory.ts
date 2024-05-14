@@ -23,16 +23,18 @@
  * @module useAssistants
  */
 import axios from 'axios';
+import {useChatStore} from '@/store/chat-store';
 
 export class MemoryResponse {
   id = '';
   content = '';
-  assistant = '';
+  assistantId = '';
   system = '';
   model = '';
 }
 
 export function useMemory() {
+  const chatStore = useChatStore();
 
   const store = async (content: string): Promise<MemoryResponse> => {
     const result = await axios.post('/api/v1/memory/store', {
@@ -59,6 +61,7 @@ export function useMemory() {
           pageSize,
           sortBy,
         });
+
     return result.data;
   };
 

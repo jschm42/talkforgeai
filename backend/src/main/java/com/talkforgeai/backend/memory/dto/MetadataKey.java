@@ -19,7 +19,8 @@ package com.talkforgeai.backend.memory.dto;
 public enum MetadataKey {
   SYSTEM("system"),
   MODEL("model"),
-  ASSISTANT_ID("assistantId");
+  ASSISTANT_ID("assistantId"),
+  ASSISTANT_NAME("assistantName");
 
   private final String key;
 

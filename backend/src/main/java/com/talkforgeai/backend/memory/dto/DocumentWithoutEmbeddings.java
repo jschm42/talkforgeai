@@ -21,6 +21,7 @@ import java.util.Map;
 import org.springframework.ai.document.Document;
 
 public record DocumentWithoutEmbeddings(String id, String content, String assistantId,
+                                        String assistantName,
                                         String system, String model) {
 
   private static String getMetadataValue(Map<String, Object> meta, MetadataKey key) {
@@ -33,6 +34,7 @@ public record DocumentWithoutEmbeddings(String id, String content, String assist
         document.getId(),
         document.getContent(),
         getMetadataValue(meta, MetadataKey.ASSISTANT_ID),
+        getMetadataValue(meta, MetadataKey.ASSISTANT_NAME),
         getMetadataValue(meta, MetadataKey.SYSTEM),
         getMetadataValue(meta, MetadataKey.MODEL)
     );

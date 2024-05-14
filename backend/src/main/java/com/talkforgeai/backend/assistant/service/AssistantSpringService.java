@@ -285,7 +285,8 @@ public class AssistantSpringService {
 
               FunctionCallbackWrapper<Request, Response> func = FunctionCallbackWrapper.builder(
                       new ContextStorageFunction(memoryService, new FunctionContext(LlmSystem.OPENAI,
-                          OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL, assistantId)))
+                          OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL, assistantId,
+                          assistantDto.name())))
                   .withDescription(
                       "Store relevant information in the vector database for later retrieval.")
                   .withName(ContextTool.MEMORY_STORE.getFunctionBeanName())

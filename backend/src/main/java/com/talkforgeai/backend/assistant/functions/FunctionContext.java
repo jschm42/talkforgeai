@@ -19,6 +19,6 @@ package com.talkforgeai.backend.assistant.functions;
 import com.talkforgeai.backend.assistant.dto.LlmSystem;
 
 public record FunctionContext(LlmSystem embedLlmSystem,
-                              String embedModel, String assistantId) {
+                              String embedModel, String assistantId, String assistantName) {
 
 }

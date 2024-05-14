@@ -128,8 +128,8 @@ export default {
       itemsPerPage: 10,
       headers: [
         {title: 'Content', key: 'content', align: 'start', sortable: true},
-        {title: 'ID', key: 'id', align: 'start', sortable: false},
-        {title: 'Assistant', key: 'assistantId', align: 'start', sortable: false},
+        // {title: 'ID', key: 'id', align: 'start', sortable: false},
+        {title: 'Assistant', key: 'assistantName', align: 'start', sortable: false},
         {title: 'System', key: 'system', align: 'start', sortable: false},
         {title: 'Model', key: 'model', align: 'start', sortable: false},
       ],
@@ -160,6 +160,7 @@ export default {
     const loadServerItems = async (pageable) => {
       console.log('Loading items', pageable);
       serverTable.value.loading = true;
+
       serverTable.value.serverItems = await memory.list(pageable.page, pageable.itemsPerPage,
           pageable.sortBy, pageable.search);
       serverTable.value.totalItems = await memory.count();

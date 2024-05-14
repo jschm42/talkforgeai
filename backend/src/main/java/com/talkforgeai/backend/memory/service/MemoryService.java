@@ -16,13 +16,16 @@
 
 package com.talkforgeai.backend.memory.service;
 
-import com.talkforgeai.backend.assistant.functions.FunctionContext;
+import com.talkforgeai.backend.assistant.dto.LlmSystem;
+import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.memory.dto.DocumentWithoutEmbeddings;
 import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
+import com.talkforgeai.backend.memory.dto.MemoryStoreRequestDto;
 import com.talkforgeai.backend.memory.dto.MetadataKey;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -33,18 +36,27 @@ public class MemoryService {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(MemoryService.class);
 
+  private final AssistantRepository assistantRepository;
   private final VectorStore vectorStore;
 
-  MemoryService(VectorStore vectorStore) {
+  MemoryService(AssistantRepository assistantRepository, VectorStore vectorStore) {
+    this.assistantRepository = assistantRepository;
     this.vectorStore = vectorStore;
   }
 
-  public DocumentWithoutEmbeddings store(String data, FunctionContext functionContext) {
-    Document document = new Document(data);
+  public DocumentWithoutEmbeddings store(MemoryStoreRequestDto request) {
+    Document document = new Document(request.content());
 
-    document.getMetadata().put(MetadataKey.SYSTEM.key(), functionContext.embedLlmSystem().name());
-    document.getMetadata().put(MetadataKey.MODEL.key(), functionContext.embedModel());
-    document.getMetadata().put(MetadataKey.ASSISTANT_ID.key(), functionContext.assistantId());
+    document.getMetadata().put(MetadataKey.SYSTEM.key(), LlmSystem.OPENAI.name());
+    document.getMetadata()
+        .put(MetadataKey.MODEL.key(), OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL);
+    document.getMetadata().put(MetadataKey.ASSISTANT_ID.key(), request.assistantId());
+
+    if (request.assistantId() != null && !request.assistantId().isBlank()) {
+      var assistant = assistantRepository.findById(request.assistantId());
+      assistant.ifPresent(
+          a -> document.getMetadata().put(MetadataKey.ASSISTANT_NAME.key(), a.getName()));
+    }
 
     LOGGER.info("Adding document: {}", document);
     vectorStore.add(List.of(document));
