@@ -15,102 +15,99 @@
   -->
 
 <template>
-  <v-app>
-    <v-container>
+  <v-container>
+    <v-card>
+      <v-tabs
+          v-model="tab"
+          bg-color="primary">
+        <v-tab value="one">Memory</v-tab>
+        <v-tab value="two">Similarity Search</v-tab>
+      </v-tabs>
 
-      <v-card>
-        <v-tabs
-            v-model="tab"
-            bg-color="primary">
-          <v-tab value="one">Memory</v-tab>
-          <v-tab value="two">Similarity Search</v-tab>
-        </v-tabs>
-
-        <v-card-text>
-          <v-tabs-window v-model="tab">
-            <v-tabs-window-item value="one">
-              <v-row>
-                <v-col>
-                  <v-data-table-server
-                      v-model:items-per-page="serverTable.itemsPerPage"
-                      :headers="serverTable.headers"
-                      :items="serverTable.serverItems"
-                      :items-length="serverTable.totalItems"
-                      :loading="serverTable.loading"
-                      :search="searchModifier"
-                      item-value="content"
-                      @update:options="loadServerItems"
-                  >
-                    <template v-slot:tfoot>
-                      <tr>
-                        <td>
-                          <v-text-field v-model="searchContent" class="ma-2" density="compact"
-                                        hide-details placeholder="Search content..."></v-text-field>
-                        </td>
-                        <td>
-                          <v-text-field
-                              v-model="searchId"
-                              class="ma-2"
-                              density="compact"
-                              hide-details
-                              placeholder="Search ID..."
-                              type="string"
-                          ></v-text-field>
-                        </td>
-                      </tr>
-                    </template>
+      <v-card-text>
+        <v-tabs-window v-model="tab">
+          <v-tabs-window-item value="one">
+            <v-row>
+              <v-col>
+                <v-data-table-server
+                    v-model:items-per-page="serverTable.itemsPerPage"
+                    :headers="serverTable.headers"
+                    :items="serverTable.serverItems"
+                    :items-length="serverTable.totalItems"
+                    :loading="serverTable.loading"
+                    :search="searchModifier"
+                    item-value="content"
+                    @update:options="loadServerItems"
+                >
+                  <template v-slot:tfoot>
+                    <tr>
+                      <td>
+                        <v-text-field v-model="searchContent" class="ma-2" density="compact"
+                                      hide-details placeholder="Search content..."></v-text-field>
+                      </td>
+                      <td>
+                        <v-text-field
+                            v-model="searchId"
+                            class="ma-2"
+                            density="compact"
+                            hide-details
+                            placeholder="Search ID..."
+                            type="string"
+                        ></v-text-field>
+                      </td>
+                    </tr>
+                  </template>
 
 
-                  </v-data-table-server>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="9">
-                  <v-form>
-                    <v-text-field v-model="newContentText" label="New content"></v-text-field>
-                  </v-form>
-                </v-col>
-                <v-col>
-                  <v-form>
-                    <v-btn @click="onAddNewContent">Add content</v-btn>
-                  </v-form>
-                </v-col>
-              </v-row>
-            </v-tabs-window-item>
+                </v-data-table-server>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="9">
+                <v-form>
+                  <v-text-field v-model="newContentText" label="New content"></v-text-field>
+                </v-form>
+              </v-col>
+              <v-col>
+                <v-form>
+                  <v-btn @click="onAddNewContent">Add content</v-btn>
+                </v-form>
+              </v-col>
+            </v-row>
+          </v-tabs-window-item>
 
-            <v-tabs-window-item value="two">
-              <v-row>
-                <v-col cols="8">
-                  <v-form>
-                    <v-text-field v-model="searchText" label="Similarity search"></v-text-field>
-                  </v-form>
-                </v-col>
-                <v-col cols="2">
-                  <v-form>
-                    <v-text-field v-model="searchThreshold"
-                                  hint="A double value ranging from 0 to 1, where values closer to 1 indicate higher similarity. By default, if you set a threshold of 0.75, for instance, only documents with a similarity above this value are returned"
-                                  label="Threshold"></v-text-field>
-                  </v-form>
-                </v-col>
-                <v-col cols="1">
-                  <v-btn @click="onSearchSimilarity">Search</v-btn>
-                </v-col>
-                <v-col cols="1">
-                  <v-btn @click="onClearSimilarities">Clear</v-btn>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-data-table :items="similarityTable" hide-default-footer>
-                </v-data-table>
-              </v-row>
+          <v-tabs-window-item value="two">
+            <v-row>
+              <v-col cols="8">
+                <v-form>
+                  <v-text-field v-model="searchText" label="Similarity search"></v-text-field>
+                </v-form>
+              </v-col>
+              <v-col cols="2">
+                <v-form>
+                  <v-text-field v-model="searchThreshold"
+                                hint="A double value ranging from 0 to 1, where values closer to 1 indicate higher similarity. By default, if you set a threshold of 0.75, for instance, only documents with a similarity above this value are returned"
+                                label="Threshold"></v-text-field>
+                </v-form>
+              </v-col>
+              <v-col cols="1">
+                <v-btn @click="onSearchSimilarity">Search</v-btn>
+              </v-col>
+              <v-col cols="1">
+                <v-btn @click="onClearSimilarities">Clear</v-btn>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-data-table :items="similarityTable" hide-default-footer>
+              </v-data-table>
+            </v-row>
 
-            </v-tabs-window-item>
-          </v-tabs-window>
-        </v-card-text>
-      </v-card>
+          </v-tabs-window-item>
+        </v-tabs-window>
+      </v-card-text>
+    </v-card>
 
-    </v-container>
-  </v-app>
+  </v-container>
 </template>
 
 <script>
