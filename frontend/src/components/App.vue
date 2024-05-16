@@ -15,7 +15,44 @@
   -->
 
 <template>
-  <router-view/>
+
+  <v-app>
+    <v-navigation-drawer absolute permanent width="200">
+      <v-list-item>
+        <img alt="Talkforge AI" class="logo" src="@/assets/logo.png"
+             style="width: 90%" title="Talkforge AI">
+
+        <div class="d-flex flex-grow-1 align-items-start">
+        </div>
+      </v-list-item>
+      <v-list density="comfortable" lines="false" nav>
+        <v-list-subheader>Main</v-list-subheader>
+        <v-list-item color="primary" title="Assistants" variant="elevated"
+                     @click.prevent="onListAssistants">
+          <template v-slot:prepend>
+            <v-icon icon="mdi-head-snowflake"></v-icon>
+          </template>
+        </v-list-item>
+        <v-list-item color="primary" title="Create assistant" variant="elevated"
+                     @click.prevent="onCreateNewAssistant">
+          <template v-slot:prepend>
+            <v-icon icon="mdi-plus-thick"></v-icon>
+          </template>
+        </v-list-item>
+        <v-list-item color="primary" title="Memory" variant="elevated"
+                     @click.prevent="onOpenMemoryEditor">
+          <template v-slot:prepend>
+            <v-icon icon="mdi-memory"></v-icon>
+          </template>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-main>
+      <router-view name="mainView"/>
+    </v-main>
+  </v-app>
+
 
   <error-alerts></error-alerts>
 </template>
@@ -50,25 +87,45 @@ h2 {
 
 
 <script>
-import {useChatStore} from '@/store/chat-store';
-import {usePersonaFormStore} from '@/store/persona-form-store';
 import ErrorAlerts from '@/components/common/ErrorAlerts.vue';
+import {onMounted} from 'vue';
+import {useRouter} from 'vue-router';
+import {useAppStore} from '@/store/app-store';
+import {useAssistants} from '@/composable/use-assistants';
 
 export default {
   name: 'ChatContainer',
   components: {ErrorAlerts},
   setup() {
-    const chatStore = useChatStore(); // Call useMyStore() inside the setup function
-    const personaStore = usePersonaFormStore();
+    const appStore = useAppStore();
+    const assistants = useAssistants();
+    const router = useRouter();
+
+    const onListAssistants = () => {
+      router.push({name: 'assistant-choice'});
+    };
+
+    const onCreateNewAssistant = () => {
+      router.push({name: 'assistant-create'});
+    };
+
+    const onOpenMemoryEditor = () => {
+      router.push({name: 'memory-editor'});
+    };
+
+    onMounted(async () => {
+      try {
+        await assistants.retrieveAssistants();
+      } catch (error) {
+        appStore.handleError(error);
+      }
+    });
 
     return {
-      chatStore,
-      personaStore,
+      onListAssistants,
+      onCreateNewAssistant,
+      onOpenMemoryEditor,
     };
   },
-  data() {
-    return {};
-  },
-  methods: {},
 };
 </script>

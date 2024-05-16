@@ -15,106 +15,100 @@
   -->
 
 <template>
-  <v-app>
-    <v-container fluid>
+  <v-container fluid>
 
-      <v-row>
-        <!-- Sidebar visible on lg and higher screens -->
-        <v-col class="d-none d-md-block sidebar" cols="3" md="3" sm="4" xl="2">
+    <v-row>
+      <!-- Sidebar visible on lg and higher screens -->
+      <v-col class="d-none d-md-block sidebar" cols="3" md="3" sm="4" xl="2">
 
-          <v-container class="d-flex flex-column nav-container">
-            <v-row class="flex-grow-0">
-              <!-- Row 1 with flex-grow 1 -->
-              <v-col>
-                <ChatHeader></ChatHeader>
-              </v-col>
-            </v-row>
-            <v-row class="flex-grow-0">
-              <!-- Row 2 with flex-grow 2 -->
-              <v-col>
-                <v-btn class="mx-2" prepend-icon="mdi-keyboard-backspace"
-                       @click.prevent="onClickBack">
-                  Back
-                </v-btn>
-                <v-btn prepend-icon="mdi-plus-thick" @click.prevent="onNewThread">
-                  New Chat
-                </v-btn>
-              </v-col>
-            </v-row>
-            <v-row class="flex-grow-1 scrollable-container">
-              <!-- Row 3 with flex-grow 3 -->
-              <v-col>
-                <ThreadList></ThreadList>
-              </v-col>
-            </v-row>
-          </v-container>
-
-          <!-- Add more buttons as needed -->
-        </v-col>
-        <v-col>
-          <!-- Main Content -->
-          <v-row class="toolbar-header p-2 d-lg-none">
-            <v-col class="d-flex">
-              <v-toolbar
-                  dark
-                  image="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
-                  prominent
-              >
-                <v-btn prepend-icon="mdi-arrow-left-bold-box-outline" @click.prevent="onClickBack">
-                </v-btn>
-                <v-toolbar-title>{{ assistantName }}</v-toolbar-title>
-                <v-app-bar-nav-icon @click="toggleSidebar"></v-app-bar-nav-icon>
-              </v-toolbar>
-
+        <v-container class="d-flex flex-column nav-container">
+          <v-row class="flex-grow-0">
+            <!-- Row 1 with flex-grow 1 -->
+            <v-col>
+              <ChatHeader></ChatHeader>
             </v-col>
           </v-row>
-
-          <ChatContainer></ChatContainer>
-        </v-col>
-
-        <!-- Sidebar for xs to md screens, full screen -->
-        <div v-if="showSidebar" class="mobile-sidebar d-lg-none p-3">
-          <!-- Sidebar content -->
-          <div class="row">
-            <div class="col">
-              <ChatHeader :show-name="true"></ChatHeader>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col">
-              <v-toolbar>
-                <div class="btn btn-outline-light d-flex align-items-center me-2 d-none d-lg-block"
-                     @click.prevent="onClickBack">
-                  <i class="bi bi-box-arrow-left me-2"></i>
-                  Back
-                </div>
-
-                <v-spacer></v-spacer>
-
-                <div class="btn btn-outline-light d-flex align-items-center"
-                     @click.prevent="onNewThread">
-                  <i class="bi bi-plus-circle-fill mx-2"></i>
-                  New Chat
-                </div>
-              </v-toolbar>
-            </div>
-          </div>
-          <div class="row my-2">
-            <div class="col">
+          <v-row class="flex-grow-0">
+            <!-- Row 2 with flex-grow 2 -->
+            <v-col>
+              <v-btn prepend-icon="mdi-plus-thick" @click.prevent="onNewThread">
+                New Chat
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-row class="flex-grow-1 scrollable-container">
+            <!-- Row 3 with flex-grow 3 -->
+            <v-col>
               <ThreadList></ThreadList>
-            </div>
+            </v-col>
+          </v-row>
+        </v-container>
+
+        <!-- Add more buttons as needed -->
+      </v-col>
+      <v-col>
+        <!-- Main Content -->
+        <v-row class="toolbar-header p-2 d-lg-none">
+          <v-col class="d-flex">
+            <v-toolbar
+                dark
+                image="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
+                prominent
+            >
+              <v-btn prepend-icon="mdi-arrow-left-bold-box-outline" @click.prevent="onClickBack">
+              </v-btn>
+              <v-toolbar-title>{{ assistantName }}</v-toolbar-title>
+              <v-app-bar-nav-icon @click="toggleSidebar"></v-app-bar-nav-icon>
+            </v-toolbar>
+
+          </v-col>
+        </v-row>
+
+        <ChatContainer></ChatContainer>
+      </v-col>
+
+      <!-- Sidebar for xs to md screens, full screen -->
+      <div v-if="showSidebar" class="mobile-sidebar d-lg-none p-3">
+        <!-- Sidebar content -->
+        <div class="row">
+          <div class="col">
+            <ChatHeader :show-name="true"></ChatHeader>
           </div>
-          <!-- Add more buttons as needed -->
-          <button class="btn btn-outline-light" @click="toggleSidebar">
-            <i class="bi bi-x"></i>
-            Close
-          </button>
-
         </div>
+        <div class="row">
+          <div class="col">
+            <v-toolbar>
+              <div class="btn btn-outline-light d-flex align-items-center me-2 d-none d-lg-block"
+                   @click.prevent="onClickBack">
+                <i class="bi bi-box-arrow-left me-2"></i>
+                Back
+              </div>
 
-      </v-row>
-    </v-container>
-  </v-app>
+              <v-spacer></v-spacer>
+
+              <div class="btn btn-outline-light d-flex align-items-center"
+                   @click.prevent="onNewThread">
+                <i class="bi bi-plus-circle-fill mx-2"></i>
+                New Chat
+              </div>
+            </v-toolbar>
+          </div>
+        </div>
+        <div class="row my-2">
+          <div class="col">
+            <ThreadList></ThreadList>
+          </div>
+        </div>
+        <!-- Add more buttons as needed -->
+        <button class="btn btn-outline-light" @click="toggleSidebar">
+          <i class="bi bi-x"></i>
+          Close
+        </button>
+
+      </div>
+
+    </v-row>
+  </v-container>
 </template>
 
 <script lang="ts">

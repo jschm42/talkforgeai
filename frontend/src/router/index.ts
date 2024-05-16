@@ -15,40 +15,49 @@
  */
 
 import {createRouter, createWebHashHistory, RouteRecordRaw} from 'vue-router';
-import PersonaChoiceView from '@/components/choice/ChoiceView.vue';
 import ChatView from '@/components/chat/ChatView.vue';
 import EditorView from '@/components/editor/EditorView.vue';
 import MemoryView from '@/components/memory/MemoryView.vue';
+import ChoiceView from '@/components/choice/ChoiceView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: 'persona-choice',
-    component: PersonaChoiceView,
+    name: 'assistant-choice',
+    components: {
+      mainView: ChoiceView,
+    },
   },
   {
     path: '/chat/:assistantId',
     name: 'chat',
-    component: ChatView,
+    components: {
+      mainView: ChatView,
+    },
     props: true,
   },
   {
-    path: '/persona/create',
-    name: 'persona-create',
-    component: EditorView,
+    path: '/assistant/create',
+    name: 'assistant-create',
+    components: {
+      mainView: EditorView,
+    },
   },
 
   {
-    path: '/persona/edit/:assistantId',
-    name: 'persona-edit',
-    component: EditorView,
+    path: '/assistant/edit/:assistantId',
+    name: 'assistant-edit',
+    components: {
+      mainView: EditorView,
+    },
     props: true,
   },
-
   {
     path: '/memory/editor',
     name: 'memory-editor',
-    component: MemoryView,
+    components: {
+      mainView: MemoryView,
+    },
     props: true,
   },
 

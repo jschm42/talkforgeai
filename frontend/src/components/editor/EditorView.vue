@@ -15,7 +15,7 @@
   -->
 
 <template>
-  <div class="container col-lg-5 col-10 p-2 editor-container">
+  <div class="container editor-container">
     <h2>Assistant Editor</h2>
     <form class="form-panel" @submit.prevent="handleSubmit">
 
@@ -146,13 +146,13 @@ export default defineComponent({
           await this.assistants.createAssistant(assistant);
         }
 
-        this.$router.push({name: 'persona-choice'});
+        this.$router.push({name: 'assistant-choice'});
       } catch (error) {
         this.appStore.handleError(error);
       }
     },
     onCancel() {
-      this.$router.push({name: 'persona-choice'});
+      this.$router.push({name: 'assistant-choice'});
     },
     onDelete() {
       this.showModal = true;
@@ -162,7 +162,7 @@ export default defineComponent({
       if (answer) {
         try {
           this.assistants.deleteAssistant(this.assistantId).then(() => {
-            this.$router.push({name: 'persona-choice'});
+            this.$router.push({name: 'assistant-choice'});
           });
         } catch (error) {
           this.appStore.handleError(error);

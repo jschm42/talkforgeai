@@ -15,31 +15,36 @@
   -->
 
 <template>
-  <v-app>
-    <component :is="currentViewComponent"></component>
-  </v-app>
+
+  <!-- Main Content -->
+
+  <div class="container" style="overflow: auto; height: 90vh">
+    <div class="d-flex flex-wrap flex-row">
+      <div v-for="assistant in assistantList"
+           :key="assistant.id" class="d-flex flex-column m-1">
+        <assistant-element :assistant="assistant"></assistant-element>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <script>
 import {computed, onMounted} from 'vue';
 import {useAppStore} from '@/store/app-store';
-import {useDisplay} from 'vuetify';
-import ChoiceMobile from '@/components/choice/ChoiceMobile.vue';
-import ChoiceDesktop from '@/components/choice/ChoiceDesktop.vue';
 import {useAssistants} from '@/composable/use-assistants';
+import AssistantElement from '@/components/assistant/AssistantElement.vue';
+import {useChatStore} from '@/store/chat-store';
 
 export default {
-  components: {ChoiceDesktop, ChoiceMobile},
+  components: {AssistantElement},
   setup() {
-    const {mobile} = useDisplay();
+    const chatStore = useChatStore();
     const appStore = useAppStore();
     const assistants = useAssistants();
 
-    const currentViewComponent = computed(() => {
-      // You can adjust the breakpoint here according to your needs
-
-      const isMobile = mobile.value;
-      return isMobile ? 'ChoiceMobile' : 'ChoiceDesktop';
+    const assistantList = computed(() => {
+      return chatStore.assistantList;
     });
 
     onMounted(async () => {
@@ -51,7 +56,8 @@ export default {
     });
 
     return {
-      currentViewComponent,
+      assistantList,
+      chatStore,
     };
   },
 };

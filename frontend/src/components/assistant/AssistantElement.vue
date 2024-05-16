@@ -63,7 +63,7 @@ export default {
       this.$router.push({name: 'chat', params: {assistantId: this.assistant.id}});
     },
     onEditPersona() {
-      this.$router.push({name: 'persona-edit', params: {assistantId: this.assistant.id}});
+      this.$router.push({name: 'assistant-edit', params: {assistantId: this.assistant.id}});
     },
     onMouseOver() {
       console.log('onMouseOver');
