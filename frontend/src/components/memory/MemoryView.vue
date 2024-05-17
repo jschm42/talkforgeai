@@ -51,23 +51,18 @@
                       </td>
                       <td>
                         <v-text-field
-                            v-model="searchId"
-                            class="ma-2"
-                            density="compact"
-                            hide-details
-                            placeholder="Search ID..."
-                            type="string"
-                        ></v-text-field>
-                      </td>
-                      <td>
-                        <v-text-field
-                            v-model="searchAssistant"
+                            v-model="searchAssistantName"
                             class="ma-2"
                             density="compact"
                             hide-details
                             placeholder="Search Assistant..."
                             type="string"
                         ></v-text-field>
+                      </td>
+                      <td>
+                        <v-select v-model="searchSystem" :items="availableSystems" class="ma-2"
+                                  density="compact" hide-details
+                                  placeholder="Search System..."></v-select>
                       </td>
                     </tr>
                   </template>
@@ -200,9 +195,10 @@ export default {
     const selectedAssistant = ref('');
     const selectedAssistants = ref([]);
     const availableAssistants = ref([]);
-    const searchId = ref('');
+    const availableSystems = ref([]);
+    const searchAssistantName = ref('');
     const searchText = ref('');
-    const searchAssistant = ref('');
+    const searchSystem = ref('');
     let searchModifier = ref('');
     const newContentText = ref('');
     const selected = ref([]);
@@ -210,22 +206,39 @@ export default {
 
     onMounted(async () => {
       availableAssistants.value = await assistants.retrieveAssistants();
+      const systems = await assistants.retrieveLlmSystems();
+      availableSystems.value = ['ALL', ...systems.map((system) => system.key)];
       await loadServerItems({page: 1, itemsPerPage: serverTable.value.itemsPerPage});
     });
 
-    watch(searchContent, async (newContent, oldContent) => {
+    watch(searchContent, async (newContent) => {
       console.log('Search content', newContent);
-      //searchModifier = String(Date.now());
+      await refresh();
+    });
+
+    watch(searchAssistantName, async (newContent) => {
+      console.log('Search assistant Name', newContent);
+      await refresh();
+    });
+
+    watch(searchSystem, async (newContent) => {
+      console.log('Search assistant Name', newContent);
+      await refresh();
+    });
+
+    const refresh = async () => {
       await loadServerItems(
           {
             page: 1,
             itemsPerPage: serverTable.value.itemsPerPage,
             sortBy: [],
             search: {
-              content: newContent,
+              content: searchContent.value,
+              assistantName: searchAssistantName.value,
+              system: searchSystem.value === 'ALL' ? '' : searchSystem.value,
             },
           });
-    });
+    };
 
     const loadServerItems = async (pageable) => {
       console.log('Loading items', pageable);
@@ -309,6 +322,7 @@ export default {
       selectedAssistant,
       selectedAssistants,
       availableAssistants,
+      availableSystems,
       selected,
       itemProps,
       onAddNewContent,
@@ -327,8 +341,8 @@ export default {
       tab,
       searchModifier,
       searchContent,
-      searchId,
-      searchAssistant,
+      searchAssistantName,
+      searchSystem,
     };
   },
 };

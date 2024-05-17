@@ -22,6 +22,8 @@ import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
 import com.talkforgeai.backend.memory.dto.MetadataKey;
 import com.talkforgeai.backend.memory.repository.MemoryRepository;
 import com.talkforgeai.backend.service.UniqueIdGenerator;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,13 +44,19 @@ import org.springframework.data.domain.PageRequest;
 public class DBVectorStore implements ListableVectoreStore {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(DBVectorStore.class);
-
+  public static final String SEARCH_ASSISTANT_ID = "assistantId";
+  public static final String SEARCH_ASSISTANT_NAME = "assistantName";
+  public static final String SEARCH_SYSTEM = "system";
+  public static final String SEARCH_CONTENT = "content";
+  private final EntityManager entityManager;
   private final MemoryRepository memoryRepository;
   private final EmbeddingClient embeddingClient;
   private final UniqueIdGenerator uniqueIdGenerator;
 
-  public DBVectorStore(MemoryRepository memoryRepository, EmbeddingClient embeddingClient,
+  public DBVectorStore(EntityManager entityManager, MemoryRepository memoryRepository,
+      EmbeddingClient embeddingClient,
       UniqueIdGenerator uniqueIdGenerator) {
+    this.entityManager = entityManager;
     this.memoryRepository = memoryRepository;
     this.embeddingClient = embeddingClient;
     this.uniqueIdGenerator = uniqueIdGenerator;
@@ -166,17 +174,59 @@ public class DBVectorStore implements ListableVectoreStore {
     PageRequest pageRequest = PageRequest.of(listRequest.page() - 1,
         listRequest.pageSize() == -1 ? Integer.MAX_VALUE : listRequest.pageSize());
 
-    if (listRequest.search() != null && !listRequest.search().isEmpty()) {
-      if (listRequest.search().get("content") != null) {
-        return memoryRepository.findByContentLike(pageRequest,
-                "%" + listRequest.search().get("content") + "%")
-            .stream()
-            .map(this::mapDocument)
-            .toList();
+    Map<String, String> searchMap = listRequest.search();
+    StringBuilder query = new StringBuilder("SELECT m FROM MemoryDocument m WHERE 1 = 1");
+
+    if (searchMap != null && !searchMap.isEmpty()) {
+      if (searchMap.get(SEARCH_CONTENT) != null && !searchMap.get(SEARCH_CONTENT).isBlank()) {
+        query.append(" AND m.content LIKE :content");
+      }
+
+      if (searchMap.get(SEARCH_ASSISTANT_ID) != null && !searchMap.get(SEARCH_ASSISTANT_ID)
+          .isBlank()) {
+        query.append(" AND m.metadata['assistantId'].metadataValue LIKE :assistantId");
+      }
+
+      if (searchMap.get(SEARCH_ASSISTANT_NAME) != null && !searchMap.get(SEARCH_ASSISTANT_NAME)
+          .isBlank()) {
+        query.append(" AND m.metadata['assistantName'].metadataValue LIKE :assistantName");
+      }
+
+      if (searchMap.get(SEARCH_SYSTEM) != null && !searchMap.get(SEARCH_SYSTEM).isBlank()) {
+        query.append(" AND m.metadata['system'].metadataValue = :system");
       }
     }
 
-    return memoryRepository.findAll(pageRequest).stream()
+    query.append(" ORDER BY m.createdAt DESC");
+
+    TypedQuery<MemoryDocument> typedQuery = entityManager.createQuery(query.toString(),
+            MemoryDocument.class)
+        .setFirstResult(pageRequest.getPageNumber() * pageRequest.getPageSize())
+        .setMaxResults(pageRequest.getPageSize());
+
+    if (searchMap != null && !searchMap.isEmpty()) {
+      if (searchMap.get(SEARCH_CONTENT) != null && !searchMap.get(SEARCH_CONTENT).isBlank()) {
+        typedQuery.setParameter(SEARCH_CONTENT, "%" + searchMap.get(SEARCH_CONTENT) + "%");
+      }
+
+      if (searchMap.get(SEARCH_ASSISTANT_ID) != null && !searchMap.get(SEARCH_ASSISTANT_ID)
+          .isBlank()) {
+        typedQuery.setParameter(SEARCH_ASSISTANT_ID,
+            "%" + searchMap.get(SEARCH_ASSISTANT_ID) + "%");
+      }
+
+      if (searchMap.get(SEARCH_ASSISTANT_NAME) != null && !searchMap.get(SEARCH_ASSISTANT_NAME)
+          .isBlank()) {
+        typedQuery.setParameter(SEARCH_ASSISTANT_NAME,
+            "%" + searchMap.get(SEARCH_ASSISTANT_NAME) + "%");
+      }
+
+      if (searchMap.get(SEARCH_SYSTEM) != null && !searchMap.get(SEARCH_SYSTEM).isBlank()) {
+        typedQuery.setParameter(SEARCH_SYSTEM, searchMap.get(SEARCH_SYSTEM));
+      }
+    }
+
+    return typedQuery.getResultList().stream()
         .map(this::mapDocument)
         .toList();
   }
@@ -201,5 +251,6 @@ public class DBVectorStore implements ListableVectoreStore {
   public record Similarity(String key, double score) {
 
   }
+
 
 }

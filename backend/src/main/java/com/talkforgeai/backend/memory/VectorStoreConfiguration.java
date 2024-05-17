@@ -19,6 +19,7 @@ package com.talkforgeai.backend.memory;
 import com.talkforgeai.backend.memory.repository.MemoryRepository;
 import com.talkforgeai.backend.memory.service.DBVectorStore;
 import com.talkforgeai.backend.service.UniqueIdGenerator;
+import jakarta.persistence.EntityManager;
 import org.springframework.ai.openai.OpenAiEmbeddingClient;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.context.annotation.Bean;
@@ -27,12 +28,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class VectorStoreConfiguration {
 
+  private final EntityManager entityManager;
   private final OpenAiEmbeddingClient embeddingClient;
   private final MemoryRepository memoryRepository;
   private final UniqueIdGenerator uniqueIdGenerator;
 
-  public VectorStoreConfiguration(OpenAiEmbeddingClient embeddingClient,
+  public VectorStoreConfiguration(EntityManager entityManager,
+      OpenAiEmbeddingClient embeddingClient,
       MemoryRepository memoryRepository, UniqueIdGenerator uniqueIdGenerator) {
+    this.entityManager = entityManager;
     this.embeddingClient = embeddingClient;
     this.memoryRepository = memoryRepository;
     this.uniqueIdGenerator = uniqueIdGenerator;
@@ -40,7 +44,7 @@ public class VectorStoreConfiguration {
 
   @Bean
   VectorStore dbVectorStore() {
-    return new DBVectorStore(memoryRepository, embeddingClient, uniqueIdGenerator);
+    return new DBVectorStore(entityManager, memoryRepository, embeddingClient, uniqueIdGenerator);
   }
 
 }
