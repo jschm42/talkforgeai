@@ -20,7 +20,6 @@ import com.talkforgeai.backend.assistant.dto.LlmSystem;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.memory.dto.DocumentWithoutEmbeddings;
 import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
-import com.talkforgeai.backend.memory.dto.MemoryStoreRequestDto;
 import com.talkforgeai.backend.memory.dto.MetadataKey;
 import java.util.List;
 import org.slf4j.Logger;
@@ -44,16 +43,16 @@ public class MemoryService {
     this.vectorStore = vectorStore;
   }
 
-  public DocumentWithoutEmbeddings store(MemoryStoreRequestDto request) {
-    Document document = new Document(request.content());
+  public DocumentWithoutEmbeddings store(String content, String assistantId) {
+    Document document = new Document(content);
 
     document.getMetadata().put(MetadataKey.SYSTEM.key(), LlmSystem.OPENAI.name());
     document.getMetadata()
         .put(MetadataKey.MODEL.key(), OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL);
 
-    if (request.assistantId() != null && !request.assistantId().isBlank()) {
-      document.getMetadata().put(MetadataKey.ASSISTANT_ID.key(), request.assistantId());
-      var assistant = assistantRepository.findById(request.assistantId());
+    if (assistantId != null && !assistantId.isBlank()) {
+      document.getMetadata().put(MetadataKey.ASSISTANT_ID.key(), assistantId);
+      var assistant = assistantRepository.findById(assistantId);
       assistant.ifPresent(
           a -> document.getMetadata().put(MetadataKey.ASSISTANT_NAME.key(), a.getName()));
     }

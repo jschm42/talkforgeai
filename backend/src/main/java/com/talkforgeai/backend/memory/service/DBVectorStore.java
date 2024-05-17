@@ -60,10 +60,17 @@ public class DBVectorStore implements ListableVectoreStore {
     // Convert documents to MemoryDocument
     List<MemoryDocument> memoryDocuments = documents.stream()
         .filter(document -> {
-          int countDocs = memoryRepository.countByContentAndKeyValue(document.getContent(),
-              MetadataKey.ASSISTANT_ID.key(),
-              MemoryDocumentMetadataValue.of(
-                  (String) document.getMetadata().get(MetadataKey.ASSISTANT_ID.key())));
+          int countDocs;
+          if (document.getMetadata().get(MetadataKey.ASSISTANT_ID.key()) == null) {
+            countDocs = memoryRepository.countByContentExcludingKey(document.getContent(),
+                MetadataKey.ASSISTANT_ID.key());
+          } else {
+            countDocs = memoryRepository.countByContentAndKeyValue(document.getContent(),
+                MetadataKey.ASSISTANT_ID.key(),
+                MemoryDocumentMetadataValue.of(
+                    (String) document.getMetadata().get(MetadataKey.ASSISTANT_ID.key())));
+          }
+
           if (countDocs > 0) {
             LOGGER.warn(
                 "Document with content '{}' already exists in the database. Document will be ignored.",

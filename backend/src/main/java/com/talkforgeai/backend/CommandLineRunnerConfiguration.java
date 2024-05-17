@@ -17,6 +17,7 @@
 package com.talkforgeai.backend;
 
 import com.talkforgeai.backend.assistant.service.AssistantImportService;
+import com.talkforgeai.backend.memory.service.MemoryImportService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -27,11 +28,13 @@ public class CommandLineRunnerConfiguration {
 
   private final FileStorageService fileStorageService;
   private final AssistantImportService assistantImportService;
+  private final MemoryImportService memoryImportService;
 
   public CommandLineRunnerConfiguration(FileStorageService fileStorageService,
-      AssistantImportService assistantImportService) {
+      AssistantImportService assistantImportService, MemoryImportService memoryImportService) {
     this.fileStorageService = fileStorageService;
     this.assistantImportService = assistantImportService;
+    this.memoryImportService = memoryImportService;
   }
 
   @Bean
@@ -39,6 +42,7 @@ public class CommandLineRunnerConfiguration {
     return args -> {
       fileStorageService.createDataDirectories();
       assistantImportService.importAssistants();
+      memoryImportService.importMemory();
     };
   }
 }

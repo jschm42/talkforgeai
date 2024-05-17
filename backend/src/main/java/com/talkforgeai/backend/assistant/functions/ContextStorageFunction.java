@@ -45,7 +45,8 @@ public class ContextStorageFunction implements
     LOGGER.info("Storing information in memory: {}", request.contextInfo());
     MemoryStoreRequestDto requestDto = new MemoryStoreRequestDto(request.contextInfo(),
         functionContext.assistantId());
-    DocumentWithoutEmbeddings storedDocument = memoryService.store(requestDto);
+    DocumentWithoutEmbeddings storedDocument = memoryService.store(requestDto.content(),
+        requestDto.assistantId());
     return new Response(
         storedDocument.id(),
         "I stored the following information in memory: " + request.contextInfo());

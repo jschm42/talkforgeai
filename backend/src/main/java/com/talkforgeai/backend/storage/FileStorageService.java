@@ -74,6 +74,14 @@ public class FileStorageService {
     return getDataDirectory().resolve("import");
   }
 
+  public Path getAssistantImportDirectory() {
+    return getImportDirectory().resolve("assistants");
+  }
+
+  public Path getMemoryImportDirectory() {
+    return getImportDirectory().resolve("memory");
+  }
+
   public void createDataDirectories() {
     try {
       Path createdPath = Files.createDirectories(getDataDirectory());
@@ -90,6 +98,12 @@ public class FileStorageService {
 
       createdPath = Files.createDirectories(getImportDirectory());
       LOGGER.info("Created import directory {}", createdPath);
+
+      createdPath = Files.createDirectories(getAssistantImportDirectory());
+      LOGGER.info("Created assistant import directory {}", createdPath);
+
+      createdPath = Files.createDirectories(getMemoryImportDirectory());
+      LOGGER.info("Created memory import directory {}", createdPath);
 
       LOGGER.info("Directories created successfully");
     } catch (IOException e) {

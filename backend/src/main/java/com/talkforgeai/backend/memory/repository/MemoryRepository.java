@@ -33,4 +33,8 @@ public interface MemoryRepository extends JpaRepository<MemoryDocument, String> 
 
   @Query("SELECT COUNT(m) FROM MemoryDocument m WHERE m.content = :content AND KEY(m.metadata) = :key AND VALUE(m.metadata) = :value")
   int countByContentAndKeyValue(String content, String key, MemoryDocumentMetadataValue value);
+
+  @Query("SELECT COUNT(m) FROM MemoryDocument m WHERE m.content = :content AND KEY(m.metadata) != :key")
+  int countByContentExcludingKey(String content, String key);
+
 }

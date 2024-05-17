@@ -51,9 +51,10 @@ public class AssistantImportService {
 
   @Transactional
   public void importAssistants() {
-    LOGGER.info("Importing assistants from directory: {}", fileStorageService.getImportDirectory());
+    LOGGER.info("Importing assistants from directory: {}",
+        fileStorageService.getAssistantImportDirectory());
     ObjectMapper objectMapper = new ObjectMapper();
-    Path importDirectory = fileStorageService.getImportDirectory();
+    Path importDirectory = fileStorageService.getAssistantImportDirectory();
 
     try (Stream<Path> paths = Files.list(importDirectory)) {
       paths

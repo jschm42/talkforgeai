@@ -42,7 +42,7 @@ public class MemoryController {
 
   @PostMapping("/store")
   public DocumentWithoutEmbeddings storeInMemory(@RequestBody MemoryStoreRequestDto request) {
-    return memoryService.store(request);
+    return memoryService.store(request.content(), request.assistantId());
   }
 
   @PostMapping("/search")
