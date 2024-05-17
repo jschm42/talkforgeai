@@ -59,6 +59,16 @@
                             type="string"
                         ></v-text-field>
                       </td>
+                      <td>
+                        <v-text-field
+                            v-model="searchAssistant"
+                            class="ma-2"
+                            density="compact"
+                            hide-details
+                            placeholder="Search Assistant..."
+                            type="string"
+                        ></v-text-field>
+                      </td>
                     </tr>
                   </template>
 
@@ -69,26 +79,32 @@
             <v-row>
               <v-col>
                 <v-form>
-                  <v-btn @click="onDeleteSelected">
+                  <v-btn @click="showDeleteItemsModal=true">
                     Delete selected
                   </v-btn>
-                  <v-btn @click="onDeleteAll">
+                  <v-btn @click="showDeleteAllModal=true">
                     Delete all
                   </v-btn>
                 </v-form>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="7">
+              <v-col cols="6">
                 <v-form>
                   <v-text-field v-model="newContentText" label="New content"></v-text-field>
                 </v-form>
               </v-col>
               <v-col cols="2">
                 <v-form>
-                  <v-select v-model="selectedAssistant" :item-props="itemProps"
-                            :items="availableAssistants"
-                            label="Assistant"></v-select>
+                  <v-select v-model="selectedAssistant" :disabled="isGlobalContent"
+                            :item-props="itemProps"
+                            :items="availableAssistants" label="Assistant"></v-select>
+                </v-form>
+              </v-col>
+              <v-col cols="1">
+                <v-form>
+                  <v-checkbox v-model="isGlobalContent" label="Global"
+                              @change="onChangeIsGlobalContent"></v-checkbox>
                 </v-form>
               </v-col>
               <v-col>
@@ -131,14 +147,31 @@
     </v-card>
 
   </v-container>
+
+  <QuestionModal
+      :isOpen="showDeleteItemsModal"
+      message="'Are you sure you want to delete the selected memory entries?'"
+      title="Delete memory entries"
+      @answer="onDeleteMemoryEntriesAnswer"
+  />
+
+  <QuestionModal
+      :isOpen="showDeleteAllModal"
+      message="'Are you sure you want to delete all memory entries?'"
+      title="Delete all memory entries"
+      @answer="onDeleteAllAnswer"
+  />
+
 </template>
 
 <script>
 import {onMounted, ref, watch} from 'vue';
 import {useMemory} from '@/composable/use-memory';
 import {useAssistants} from '@/composable/use-assistants';
+import QuestionModal from '@/components/common/QuestionModal.vue';
 
 export default {
+  components: {QuestionModal},
   setup() {
     const memory = useMemory();
     const assistants = useAssistants();
@@ -160,14 +193,18 @@ export default {
       totalItems: 0,
     });
 
+    const showDeleteItemsModal = ref(false);
+    const showDeleteAllModal = ref(false);
+    const isGlobalContent = ref(true);
     const searchContent = ref('');
     const selectedAssistant = ref('');
     const selectedAssistants = ref([]);
     const availableAssistants = ref([]);
     const searchId = ref('');
+    const searchText = ref('');
+    const searchAssistant = ref('');
     let searchModifier = ref('');
     const newContentText = ref('');
-    const searchText = ref('');
     const selected = ref([]);
     const searchThreshold = ref(0.5);
 
@@ -180,15 +217,24 @@ export default {
       console.log('Search content', newContent);
       //searchModifier = String(Date.now());
       await loadServerItems(
-          {page: 1, itemsPerPage: serverTable.value.itemsPerPage, search: newContent});
+          {
+            page: 1,
+            itemsPerPage: serverTable.value.itemsPerPage,
+            sortBy: [],
+            search: {
+              content: newContent,
+            },
+          });
     });
 
     const loadServerItems = async (pageable) => {
       console.log('Loading items', pageable);
       serverTable.value.loading = true;
 
+      const search = pageable.search === '' ? {} : pageable.search;
+
       serverTable.value.serverItems = await memory.list(pageable.page, pageable.itemsPerPage,
-          pageable.sortBy, pageable.search);
+          pageable.sortBy, search);
       serverTable.value.totalItems = await memory.count();
       serverTable.value.loading = false;
     };
@@ -198,6 +244,12 @@ export default {
         title: item.name,
         subtitle: item.description,
       };
+    };
+
+    const onChangeIsGlobalContent = () => {
+      if (isGlobalContent.value) {
+        selectedAssistant.value = '';
+      }
     };
 
     const onAddNewContent = async () => {
@@ -212,6 +264,20 @@ export default {
 
     const onClearSimilarities = async () => {
       similarityTable.value = [];
+    };
+
+    const onDeleteMemoryEntriesAnswer = async (answer) => {
+      showDeleteItemsModal.value = false;
+      if (answer) {
+        await onDeleteSelected();
+      }
+    };
+
+    const onDeleteAllAnswer = async (answer) => {
+      showDeleteAllModal.value = false;
+      if (answer) {
+        await onDeleteAll();
+      }
     };
 
     const onDeleteSelected = async () => {
@@ -235,6 +301,9 @@ export default {
     };
 
     return {
+      showDeleteItemsModal,
+      showDeleteAllModal,
+      isGlobalContent,
       searchText,
       newContentText,
       selectedAssistant,
@@ -247,6 +316,9 @@ export default {
       onClearSimilarities,
       onDeleteSelected,
       onDeleteAll,
+      onDeleteMemoryEntriesAnswer,
+      onChangeIsGlobalContent,
+      onDeleteAllAnswer,
       searchThreshold,
       serverTable,
       loadServerItems,
@@ -256,6 +328,7 @@ export default {
       searchModifier,
       searchContent,
       searchId,
+      searchAssistant,
     };
   },
 };

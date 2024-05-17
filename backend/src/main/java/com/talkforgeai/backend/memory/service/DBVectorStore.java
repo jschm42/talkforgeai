@@ -163,10 +163,20 @@ public class DBVectorStore implements ListableVectoreStore {
 
   @Override
   public List<Document> list(MemoryListRequestDto listRequest) {
+    PageRequest pageRequest = PageRequest.of(listRequest.page() - 1,
+        listRequest.pageSize() == -1 ? Integer.MAX_VALUE : listRequest.pageSize());
 
-    return memoryRepository.findAll(
-            PageRequest.of(listRequest.page() - 1,
-                listRequest.pageSize() == -1 ? Integer.MAX_VALUE : listRequest.pageSize())).stream()
+    if (listRequest.search() != null && !listRequest.search().isEmpty()) {
+      if (listRequest.search().get("content") != null) {
+        return memoryRepository.findByContentLike(pageRequest,
+                "%" + listRequest.search().get("content") + "%")
+            .stream()
+            .map(this::mapDocument)
+            .toList();
+      }
+    }
+
+    return memoryRepository.findAll(pageRequest).stream()
         .map(this::mapDocument)
         .toList();
   }

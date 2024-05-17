@@ -31,6 +31,8 @@ public interface MemoryRepository extends JpaRepository<MemoryDocument, String> 
   @NotNull
   Page<MemoryDocument> findAll(@NotNull Pageable pageable);
 
+  Page<MemoryDocument> findByContentLike(@NotNull Pageable pageable, String content);
+
   @Query("SELECT COUNT(m) FROM MemoryDocument m WHERE m.content = :content AND KEY(m.metadata) = :key AND VALUE(m.metadata) = :value")
   int countByContentAndKeyValue(String content, String key, MemoryDocumentMetadataValue value);
 
