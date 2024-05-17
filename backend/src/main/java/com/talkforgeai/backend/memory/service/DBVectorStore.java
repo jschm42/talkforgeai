@@ -17,12 +17,12 @@
 package com.talkforgeai.backend.memory.service;
 
 import com.talkforgeai.backend.memory.domain.MemoryDocument;
-import com.talkforgeai.backend.memory.domain.MemoryDocumentMetadataValue;
+import com.talkforgeai.backend.memory.domain.MemoryMetadata;
 import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
 import com.talkforgeai.backend.memory.dto.MemoryListRequestDto.MemoryListOrderDto;
 import com.talkforgeai.backend.memory.dto.MetadataKey;
 import com.talkforgeai.backend.memory.repository.MemoryRepository;
-import com.talkforgeai.backend.service.UniqueIdGenerator;
+import com.talkforgeai.backend.util.UniqueIdUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
@@ -53,15 +53,12 @@ public class DBVectorStore implements ListableVectoreStore {
   private final EntityManager entityManager;
   private final MemoryRepository memoryRepository;
   private final EmbeddingClient embeddingClient;
-  private final UniqueIdGenerator uniqueIdGenerator;
 
   public DBVectorStore(EntityManager entityManager, MemoryRepository memoryRepository,
-      EmbeddingClient embeddingClient,
-      UniqueIdGenerator uniqueIdGenerator) {
+      EmbeddingClient embeddingClient) {
     this.entityManager = entityManager;
     this.memoryRepository = memoryRepository;
     this.embeddingClient = embeddingClient;
-    this.uniqueIdGenerator = uniqueIdGenerator;
   }
 
   @Transactional
@@ -77,8 +74,8 @@ public class DBVectorStore implements ListableVectoreStore {
           } else {
             countDocs = memoryRepository.countByContentAndKeyValue(document.getContent(),
                 MetadataKey.ASSISTANT_ID.key(),
-                MemoryDocumentMetadataValue.of(
-                    (String) document.getMetadata().get(MetadataKey.ASSISTANT_ID.key())));
+                (String) document.getMetadata().get(MetadataKey.ASSISTANT_ID.key())
+            );
           }
 
           if (countDocs > 0) {
@@ -96,12 +93,12 @@ public class DBVectorStore implements ListableVectoreStore {
           documentEntity.setEmbeddings(
               embedding.stream().mapToDouble(Double::doubleValue).toArray());
           // Convert List<Double> to byte[]
-          documentEntity.setId(uniqueIdGenerator.generateMemoryId());
+          documentEntity.setId(UniqueIdUtil.generateMemoryId());
           documentEntity.setContent(document.getContent());
           documentEntity.setCreatedAt(new Date());
 
           document.getMetadata().forEach((key, value) -> documentEntity.getMetadata()
-              .put(key, MemoryDocumentMetadataValue.of(value.toString())));
+              .add(MemoryMetadata.of(documentEntity, key, value.toString())));
 
           return documentEntity;
         })
@@ -177,16 +174,18 @@ public class DBVectorStore implements ListableVectoreStore {
         listRequest.pageSize() == -1 ? Integer.MAX_VALUE : listRequest.pageSize());
 
     Map<String, String> searchMap = listRequest.search();
-    StringBuilder query = new StringBuilder("SELECT m FROM MemoryDocument m WHERE 1 = 1");
+    StringBuilder query = new StringBuilder(
+        "SELECT md FROM MemoryDocument md JOIN MemoryMetadata mm ON md.id = mm.memoryDocument.id "
+            + "WHERE 1 = 1 ");
 
     if (searchMap != null && !searchMap.isEmpty()) {
       appendQueryCondition(query, searchMap, SEARCH_CONTENT, "m.content LIKE :content");
       appendQueryCondition(query, searchMap, SEARCH_ASSISTANT_ID,
-          "KEY(m.metadata) = 'assistantId' AND VALUE(m.metadata) LIKE :assistantId");
+          "mm.metadataKey = 'assistantId' AND mm.metadataValue LIKE :assistantId");
       appendQueryCondition(query, searchMap, SEARCH_ASSISTANT_NAME,
-          "KEY(m.metadata) = 'assistantName' AND VALUE(m.metadata) LIKE :assistantName");
+          "mm.metadataKey = 'assistantName' AND mm.metadataValue LIKE :assistantName");
       appendQueryCondition(query, searchMap, SEARCH_SYSTEM,
-          "KEY(m.metadata) = 'system' AND VALUE(m.metadata) = :system");
+          "mm.metadataKey = 'system' AND mm.metadataValue = :system");
     }
 
     List<MemoryListOrderDto> sortBy = listRequest.sortBy();
@@ -196,11 +195,8 @@ public class DBVectorStore implements ListableVectoreStore {
       query.append(" ORDER BY ");
       for (MemoryListOrderDto order : sortBy) {
         if (order.key().equals(SEARCH_CONTENT) || order.key().equals(SEARCH_CREATED_AT)) {
-          query.append("m.").append(order.key()).append(" ").append(order.order()).append(", ");
-          continue;
+          query.append("mm.").append(order.key()).append(" ").append(order.order()).append(", ");
         }
-        query.append("m.metadata['").append(order.key()).append("'].metadataValue ")
-            .append(order.order()).append(", ");
       }
       query.delete(query.length() - 2, query.length());
     }
@@ -234,7 +230,7 @@ public class DBVectorStore implements ListableVectoreStore {
   private Document mapDocument(MemoryDocument memoryDocument) {
     Map<String, Object> metadata = new HashMap<>();
     memoryDocument.getMetadata()
-        .forEach((key, value) -> metadata.put(key, value.getMetadataValue()));
+        .forEach(m -> metadata.put(m.getMetadataKey(), m.getMetadataValue()));
 
     return new Document(
         memoryDocument.getId(),

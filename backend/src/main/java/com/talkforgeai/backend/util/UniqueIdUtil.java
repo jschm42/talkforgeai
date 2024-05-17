@@ -14,51 +14,57 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.service;
+package com.talkforgeai.backend.util;
 
 import java.security.SecureRandom;
-import org.springframework.stereotype.Component;
 
-@Component
-public class UniqueIdGenerator {
+public class UniqueIdUtil {
 
   private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   private static final SecureRandom random = new SecureRandom();
 
-  public String generateRunId() {
+  private UniqueIdUtil() {
+    throw new IllegalStateException("Utility class");
+  }
+
+  public static String generateRunId() {
     return generateUniqueId("run", 20);
   }
 
-  public String generateThreadId() {
+  public static String generateThreadId() {
     return generateUniqueId("thread", 20);
   }
 
-  public String generateMessageId() {
+  public static String generateMessageId() {
     return generateUniqueId("msg", 20);
   }
 
-  public String generateAssistantId() {
+  public static String generateAssistantId() {
     return generateUniqueId("asst", 20);
   }
 
-  public String generateImageId() {
+  public static String generateImageId() {
     return generateUniqueId("img", 20);
   }
 
-  public String generateAudioId() {
+  public static String generateAudioId() {
     return generateUniqueId("aud", 20);
   }
 
-  public String generateMemoryId() {
+  public static String generateMemoryId() {
     return generateUniqueId("mem", 20);
   }
 
-  public String generateUniqueId(String prefix, int length) {
+  public static String generateMemoryMetaId() {
+    return generateUniqueId("meta", 20);
+  }
+
+  public static String generateUniqueId(String prefix, int length) {
     String randomChars = generateRandomString(length);
     return prefix + "_" + randomChars;
   }
 
-  private String generateRandomString(int length) {
+  private static String generateRandomString(int length) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < length; i++) {
       sb.append(ALPHABET.charAt(random.nextInt(ALPHABET.length())));

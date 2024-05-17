@@ -43,9 +43,9 @@ import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
 import com.talkforgeai.backend.memory.dto.DocumentWithoutEmbeddings;
 import com.talkforgeai.backend.memory.service.MemoryService;
-import com.talkforgeai.backend.service.UniqueIdGenerator;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
+import com.talkforgeai.backend.util.UniqueIdUtil;
 import jakarta.transaction.Transactional;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -115,8 +115,6 @@ public class AssistantSpringService {
 
   private final AssistantMapper assistantMapper;
 
-  private final UniqueIdGenerator uniqueIdGenerator;
-
   private final MemoryService memoryService;
 
 
@@ -127,7 +125,7 @@ public class AssistantSpringService {
       AssistantRepository assistantRepository, MessageRepository messageRepository,
       ThreadRepository threadRepository, FileStorageService fileStorageService,
       MessageProcessor messageProcessor, AssistantMapper assistantMapper,
-      UniqueIdGenerator uniqueIdGenerator, MemoryService memoryService) {
+      MemoryService memoryService) {
 
     this.universalChatService = universalChatService;
     this.universalImageGenService = universalImageGenService;
@@ -137,7 +135,6 @@ public class AssistantSpringService {
     this.fileStorageService = fileStorageService;
     this.messageProcessor = messageProcessor;
     this.assistantMapper = assistantMapper;
-    this.uniqueIdGenerator = uniqueIdGenerator;
     this.memoryService = memoryService;
   }
 
@@ -172,7 +169,7 @@ public class AssistantSpringService {
   @Transactional
   public ThreadDto createThread() {
     ThreadEntity threadEntity = new ThreadEntity();
-    threadEntity.setId(uniqueIdGenerator.generateThreadId());
+    threadEntity.setId(UniqueIdUtil.generateThreadId());
     threadEntity.setTitle("<no title>");
     threadEntity.setCreatedAt(new Date());
     threadRepository.save(threadEntity);
@@ -198,7 +195,7 @@ public class AssistantSpringService {
   public Flux<ServerSentEvent<String>> streamRunConversation(String assistantId, String threadId,
       String message) {
 
-    final String runId = uniqueIdGenerator.generateRunId();
+    final String runId = UniqueIdUtil.generateRunId();
 
     Mono<Object> saveUserMessageMono = Mono.fromRunnable(
             () -> saveNewMessage(assistantId, threadId, MessageType.USER,
@@ -497,7 +494,7 @@ public class AssistantSpringService {
   @Transactional
   public AssistantDto createAssistant(AssistantDto assistant) {
     AssistantEntity assistantEntity = assistantMapper.toEntity(assistant);
-    assistantEntity.setId(uniqueIdGenerator.generateAssistantId());
+    assistantEntity.setId(UniqueIdUtil.generateAssistantId());
     return assistantMapper.toDto(assistantRepository.save(assistantEntity));
   }
 
@@ -601,7 +598,7 @@ public class AssistantSpringService {
         .orElseThrow(() -> new AssistentException("Assistant not found"));
 
     MessageEntity messageEntity = new MessageEntity();
-    messageEntity.setId(uniqueIdGenerator.generateMessageId());
+    messageEntity.setId(UniqueIdUtil.generateMessageId());
     messageEntity.setThread(threadEntity);
     messageEntity.setAssistant(assistantEntity);
     messageEntity.setRawContent(rawContent);

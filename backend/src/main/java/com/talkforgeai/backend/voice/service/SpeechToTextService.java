@@ -16,7 +16,7 @@
 
 package com.talkforgeai.backend.voice.service;
 
-import com.talkforgeai.backend.service.UniqueIdGenerator;
+import com.talkforgeai.backend.util.UniqueIdUtil;
 import com.talkforgeai.backend.voice.dto.TranscriptionSystem;
 import java.io.File;
 import java.io.IOException;
@@ -40,18 +40,14 @@ public class SpeechToTextService {
 
   private final UniversalTranscriptionService universalTranscriptionService;
 
-  private final UniqueIdGenerator uniqueIdGenerator;
-
-  public SpeechToTextService(UniversalTranscriptionService universalTranscriptionService,
-      UniqueIdGenerator uniqueIdGenerator) {
+  public SpeechToTextService(UniversalTranscriptionService universalTranscriptionService) {
     this.universalTranscriptionService = universalTranscriptionService;
-    this.uniqueIdGenerator = uniqueIdGenerator;
   }
 
   public ResponseEntity<String> convert(MultipartFile file, Path tempDirectory) {
     try {
       Files.createDirectories(tempDirectory);
-      Path audioFile = tempDirectory.resolve(uniqueIdGenerator.generateAudioId() + ".wav");
+      Path audioFile = tempDirectory.resolve(UniqueIdUtil.generateAudioId() + ".wav");
       file.transferTo(audioFile);
       String text = transscribeAudio(audioFile.toFile());
       Files.delete(audioFile);

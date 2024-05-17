@@ -16,26 +16,25 @@
 
 package com.talkforgeai.backend.memory.domain;
 
+import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.FetchType.EAGER;
+
 import com.talkforgeai.backend.memory.exceptions.MemoryException;
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
-import jakarta.persistence.MapKeyColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Entity
 @Table(name = "memory_document")
@@ -54,12 +53,9 @@ public class MemoryDocument {
   @Lob
   @Column(name = "embeddings")
   private String embeddings;
-  
-  @ElementCollection(fetch = FetchType.EAGER)
-  @MapKeyColumn(name = "metadata_key")
-  @CollectionTable(name = "memory_metadata", joinColumns = @JoinColumn(name = "memory_document_id"))
-  @Column(name = "metadataValue")
-  private Map<String, MemoryDocumentMetadataValue> metadata = new HashMap<>();
+
+  @OneToMany(mappedBy = "memoryDocument", fetch = EAGER, cascade = ALL)
+  private List<MemoryMetadata> metadata = new ArrayList<>();
 
   public String getId() {
     return id;
@@ -83,6 +79,14 @@ public class MemoryDocument {
 
   public void setContent(String content) {
     this.content = content;
+  }
+
+  public List<MemoryMetadata> getMetadata() {
+    return metadata;
+  }
+
+  public void setMetadata(List<MemoryMetadata> metadata) {
+    this.metadata = metadata;
   }
 
   // Convert byte[] back to double[]
@@ -110,11 +114,4 @@ public class MemoryDocument {
     }
   }
 
-  public Map<String, MemoryDocumentMetadataValue> getMetadata() {
-    return metadata;
-  }
-
-  public void setMetadata(Map<String, MemoryDocumentMetadataValue> metadata) {
-    this.metadata = metadata;
-  }
 }

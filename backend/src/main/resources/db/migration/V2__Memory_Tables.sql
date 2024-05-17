@@ -24,11 +24,15 @@ create table memory_document
 
 create table memory_metadata
 (
+  id                 varchar(50) not null primary key,
   memory_document_id varchar(50) not null,
   metadata_key       varchar(50) not null,
   metadata_value     CLOB,
-  primary key (memory_document_id, metadata_key)
+  foreign key (memory_document_id) references memory_document (id)
 );
 
 create index idx_memory_document_content on memory_document (content);
 create index idx_memory_document_created_at on memory_document (created_at);
+
+create index idx_memory_metadata_key on memory_metadata (metadata_key);
+create index idx_memory_metadata_memory_document_id on memory_metadata (memory_document_id);

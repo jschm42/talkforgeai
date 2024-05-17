@@ -17,7 +17,6 @@
 package com.talkforgeai.backend.memory.repository;
 
 import com.talkforgeai.backend.memory.domain.MemoryDocument;
-import com.talkforgeai.backend.memory.domain.MemoryDocumentMetadataValue;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,10 +32,15 @@ public interface MemoryRepository extends JpaRepository<MemoryDocument, String> 
 
   Page<MemoryDocument> findByContentLike(@NotNull Pageable pageable, String content);
 
-  @Query("SELECT COUNT(m) FROM MemoryDocument m WHERE m.content = :content AND KEY(m.metadata) = :key AND VALUE(m.metadata) = :value")
-  int countByContentAndKeyValue(String content, String key, MemoryDocumentMetadataValue value);
+  @Query(
+      "SELECT COUNT(md) FROM MemoryDocument md JOIN MemoryMetadata mm ON md.id = mm.memoryDocument.id "
+          + "WHERE md.content = :content AND mm.metadataKey = :key "
+          + "AND mm.metadataValue = :value")
+  int countByContentAndKeyValue(String content, String key, String value);
 
-  @Query("SELECT COUNT(m) FROM MemoryDocument m WHERE m.content = :content AND KEY(m.metadata) != :key")
+  @Query(
+      "SELECT COUNT(md) FROM MemoryDocument md JOIN MemoryMetadata mm ON md.id = mm.memoryDocument.id "
+          + "WHERE md.content = :content AND mm.metadataKey != :key")
   int countByContentExcludingKey(String content, String key);
 
 }
