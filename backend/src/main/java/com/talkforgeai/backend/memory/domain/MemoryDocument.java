@@ -16,25 +16,21 @@
 
 package com.talkforgeai.backend.memory.domain;
 
-import static jakarta.persistence.CascadeType.ALL;
-import static jakarta.persistence.FetchType.EAGER;
-
+import com.talkforgeai.backend.assistant.domain.AssistantEntity;
 import com.talkforgeai.backend.memory.exceptions.MemoryException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Table(name = "memory_document")
@@ -54,8 +50,14 @@ public class MemoryDocument {
   @Column(name = "embeddings")
   private String embeddings;
 
-  @OneToMany(mappedBy = "memoryDocument", fetch = EAGER, cascade = ALL)
-  private List<MemoryMetadata> metadata = new ArrayList<>();
+  @Column(name = "system")
+  private String system;
+
+  @Column(name = "model")
+  private String model;
+
+  @ManyToOne(optional = true)
+  private AssistantEntity assistant;
 
   public String getId() {
     return id;
@@ -79,14 +81,6 @@ public class MemoryDocument {
 
   public void setContent(String content) {
     this.content = content;
-  }
-
-  public List<MemoryMetadata> getMetadata() {
-    return metadata;
-  }
-
-  public void setMetadata(List<MemoryMetadata> metadata) {
-    this.metadata = metadata;
   }
 
   // Convert byte[] back to double[]
@@ -114,4 +108,31 @@ public class MemoryDocument {
     }
   }
 
+  public void setEmbeddings(String embeddings) {
+    this.embeddings = embeddings;
+  }
+
+  public AssistantEntity getAssistant() {
+    return assistant;
+  }
+
+  public void setAssistant(AssistantEntity assistant) {
+    this.assistant = assistant;
+  }
+
+  public String getSystem() {
+    return system;
+  }
+
+  public void setSystem(String system) {
+    this.system = system;
+  }
+
+  public String getModel() {
+    return model;
+  }
+
+  public void setModel(String model) {
+    this.model = model;
+  }
 }

@@ -16,6 +16,7 @@
 
 package com.talkforgeai.backend.memory;
 
+import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.memory.repository.MemoryRepository;
 import com.talkforgeai.backend.memory.service.DBVectorStore;
 import jakarta.persistence.EntityManager;
@@ -30,18 +31,20 @@ public class VectorStoreConfiguration {
   private final EntityManager entityManager;
   private final OpenAiEmbeddingClient embeddingClient;
   private final MemoryRepository memoryRepository;
+  private final AssistantRepository assistantRepository;
 
   public VectorStoreConfiguration(EntityManager entityManager,
       OpenAiEmbeddingClient embeddingClient,
-      MemoryRepository memoryRepository) {
+      MemoryRepository memoryRepository, AssistantRepository assistantRepository) {
     this.entityManager = entityManager;
     this.embeddingClient = embeddingClient;
     this.memoryRepository = memoryRepository;
+    this.assistantRepository = assistantRepository;
   }
 
   @Bean
   VectorStore dbVectorStore() {
-    return new DBVectorStore(entityManager, memoryRepository, embeddingClient);
+    return new DBVectorStore(entityManager, memoryRepository, assistantRepository, embeddingClient);
   }
 
 }

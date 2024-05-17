@@ -30,17 +30,11 @@ public interface MemoryRepository extends JpaRepository<MemoryDocument, String> 
   @NotNull
   Page<MemoryDocument> findAll(@NotNull Pageable pageable);
 
-  Page<MemoryDocument> findByContentLike(@NotNull Pageable pageable, String content);
+  @Query("SELECT COUNT(md) FROM MemoryDocument md WHERE md.content = :content AND md.assistant.id = :assistantId")
+  int countByContentAndAssistantId(String content, String assistantId);
 
   @Query(
-      "SELECT COUNT(md) FROM MemoryDocument md JOIN MemoryMetadata mm ON md.id = mm.memoryDocument.id "
-          + "WHERE md.content = :content AND mm.metadataKey = :key "
-          + "AND mm.metadataValue = :value")
-  int countByContentAndKeyValue(String content, String key, String value);
-
-  @Query(
-      "SELECT COUNT(md) FROM MemoryDocument md JOIN MemoryMetadata mm ON md.id = mm.memoryDocument.id "
-          + "WHERE md.content = :content AND mm.metadataKey != :key")
-  int countByContentExcludingKey(String content, String key);
+      "SELECT COUNT(md) FROM MemoryDocument md WHERE md.content = :content AND md.assistant is null")
+  int countByContentAndEmptyAssistant(String content);
 
 }

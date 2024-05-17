@@ -16,8 +16,8 @@
 
 package com.talkforgeai.backend.memory.service;
 
+import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.memory.domain.MemoryDocument;
-import com.talkforgeai.backend.memory.domain.MemoryMetadata;
 import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
 import com.talkforgeai.backend.memory.dto.MemoryListRequestDto.MemoryListOrderDto;
 import com.talkforgeai.backend.memory.dto.MetadataKey;
@@ -52,12 +52,15 @@ public class DBVectorStore implements ListableVectoreStore {
   public static final String SEARCH_CREATED_AT = "createdAt";
   private final EntityManager entityManager;
   private final MemoryRepository memoryRepository;
+  private final AssistantRepository assistantRepository;
   private final EmbeddingClient embeddingClient;
 
   public DBVectorStore(EntityManager entityManager, MemoryRepository memoryRepository,
+      AssistantRepository assistantRepository,
       EmbeddingClient embeddingClient) {
     this.entityManager = entityManager;
     this.memoryRepository = memoryRepository;
+    this.assistantRepository = assistantRepository;
     this.embeddingClient = embeddingClient;
   }
 
@@ -69,13 +72,10 @@ public class DBVectorStore implements ListableVectoreStore {
         .filter(document -> {
           int countDocs;
           if (document.getMetadata().get(MetadataKey.ASSISTANT_ID.key()) == null) {
-            countDocs = memoryRepository.countByContentExcludingKey(document.getContent(),
-                MetadataKey.ASSISTANT_ID.key());
+            countDocs = memoryRepository.countByContentAndEmptyAssistant(document.getContent());
           } else {
-            countDocs = memoryRepository.countByContentAndKeyValue(document.getContent(),
-                MetadataKey.ASSISTANT_ID.key(),
-                (String) document.getMetadata().get(MetadataKey.ASSISTANT_ID.key())
-            );
+            countDocs = memoryRepository.countByContentAndAssistantId(document.getContent(),
+                (String) document.getMetadata().get(MetadataKey.ASSISTANT_ID.key()));
           }
 
           if (countDocs > 0) {
@@ -96,9 +96,13 @@ public class DBVectorStore implements ListableVectoreStore {
           documentEntity.setId(UniqueIdUtil.generateMemoryId());
           documentEntity.setContent(document.getContent());
           documentEntity.setCreatedAt(new Date());
-
-          document.getMetadata().forEach((key, value) -> documentEntity.getMetadata()
-              .add(MemoryMetadata.of(documentEntity, key, value.toString())));
+          documentEntity.setSystem((String) document.getMetadata().get(MetadataKey.SYSTEM.key()));
+          documentEntity.setModel((String) document.getMetadata().get(MetadataKey.MODEL.key()));
+          if (document.getMetadata().containsKey(MetadataKey.ASSISTANT_ID.key())) {
+            assistantRepository.findById(
+                    (String) document.getMetadata().get(MetadataKey.ASSISTANT_ID.key()))
+                .ifPresent(documentEntity::setAssistant);
+          }
 
           return documentEntity;
         })
@@ -175,17 +179,17 @@ public class DBVectorStore implements ListableVectoreStore {
 
     Map<String, String> searchMap = listRequest.search();
     StringBuilder query = new StringBuilder(
-        "SELECT md FROM MemoryDocument md JOIN MemoryMetadata mm ON md.id = mm.memoryDocument.id "
+        "SELECT md FROM MemoryDocument md LEFT JOIN AssistantEntity a ON md.assistant.id = a.id "
             + "WHERE 1 = 1 ");
 
     if (searchMap != null && !searchMap.isEmpty()) {
-      appendQueryCondition(query, searchMap, SEARCH_CONTENT, "m.content LIKE :content");
+      appendQueryCondition(query, searchMap, SEARCH_CONTENT, "md.content LIKE :content");
       appendQueryCondition(query, searchMap, SEARCH_ASSISTANT_ID,
-          "mm.metadataKey = 'assistantId' AND mm.metadataValue LIKE :assistantId");
+          "a.id LIKE :assistantId");
       appendQueryCondition(query, searchMap, SEARCH_ASSISTANT_NAME,
-          "mm.metadataKey = 'assistantName' AND mm.metadataValue LIKE :assistantName");
+          "a.name LIKE :assistantName");
       appendQueryCondition(query, searchMap, SEARCH_SYSTEM,
-          "mm.metadataKey = 'system' AND mm.metadataValue = :system");
+          "md.system = :system");
     }
 
     List<MemoryListOrderDto> sortBy = listRequest.sortBy();
@@ -194,11 +198,15 @@ public class DBVectorStore implements ListableVectoreStore {
     if (sortBy != null && !sortBy.isEmpty()) {
       query.append(" ORDER BY ");
       for (MemoryListOrderDto order : sortBy) {
-        if (order.key().equals(SEARCH_CONTENT) || order.key().equals(SEARCH_CREATED_AT)) {
-          query.append("mm.").append(order.key()).append(" ").append(order.order()).append(", ");
+        if (order.key().equals(SEARCH_ASSISTANT_ID)) {
+          query.append("a.id").append(" ").append(order.order()).append(", ");
+        } else if (order.key().equals(SEARCH_ASSISTANT_NAME)) {
+          query.append("a.name").append(" ").append(order.order()).append(", ");
+        } else {
+          query.append("md.").append(order.key()).append(" ").append(order.order()).append(", ");
         }
+        query.delete(query.length() - 2, query.length());
       }
-      query.delete(query.length() - 2, query.length());
     }
 
     TypedQuery<MemoryDocument> typedQuery = entityManager.createQuery(query.toString(),
@@ -229,8 +237,13 @@ public class DBVectorStore implements ListableVectoreStore {
 
   private Document mapDocument(MemoryDocument memoryDocument) {
     Map<String, Object> metadata = new HashMap<>();
-    memoryDocument.getMetadata()
-        .forEach(m -> metadata.put(m.getMetadataKey(), m.getMetadataValue()));
+
+    metadata.put(MetadataKey.SYSTEM.key(), memoryDocument.getSystem());
+    metadata.put(MetadataKey.MODEL.key(), memoryDocument.getModel());
+    metadata.put(MetadataKey.ASSISTANT_ID.key(),
+        memoryDocument.getAssistant() == null ? null : memoryDocument.getAssistant().getId());
+    metadata.put(MetadataKey.ASSISTANT_NAME.key(),
+        memoryDocument.getAssistant() == null ? null : memoryDocument.getAssistant().getName());
 
     return new Document(
         memoryDocument.getId(),

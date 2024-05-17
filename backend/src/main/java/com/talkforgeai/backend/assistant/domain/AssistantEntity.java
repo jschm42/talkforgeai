@@ -16,6 +16,7 @@
 
 package com.talkforgeai.backend.assistant.domain;
 
+import com.talkforgeai.backend.memory.domain.MemoryDocument;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -25,9 +26,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.MapKeyColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Entity
@@ -63,8 +67,12 @@ public class AssistantEntity {
   @Column(name = "property_value")
   private Map<String, AssistantPropertyValue> properties = new HashMap<>();
 
+  @OneToMany(mappedBy = "assistant", fetch = FetchType.LAZY)
+  private List<MemoryDocument> memoryDocuments = new ArrayList<>();
+
   @Column(name = "created_at")
   private Date createdAt;
+
 
   // Standard getters and setters
   public String getId() {
@@ -137,6 +145,14 @@ public class AssistantEntity {
 
   public void setInstructions(String instructions) {
     this.instructions = instructions;
+  }
+
+  public List<MemoryDocument> getMemoryDocuments() {
+    return memoryDocuments;
+  }
+
+  public void setMemoryDocuments(List<MemoryDocument> memoryDocuments) {
+    this.memoryDocuments = memoryDocuments;
   }
 
 }

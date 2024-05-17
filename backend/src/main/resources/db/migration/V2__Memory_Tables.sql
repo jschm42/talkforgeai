@@ -16,23 +16,18 @@
 
 create table memory_document
 (
-  id         varchar(50) not null primary key,
-  created_at timestamp,
-  content    CLOB,
-  embeddings CLOB
+  id           varchar(50) not null primary key,
+  created_at   timestamp,
+  content      CLOB,
+  system       varchar(50),
+  model        varchar(50),
+  assistant_id varchar(50),
+  embeddings   CLOB,
+  foreign key (assistant_id) references assistant (id)
 );
 
-create table memory_metadata
-(
-  id                 varchar(50) not null primary key,
-  memory_document_id varchar(50) not null,
-  metadata_key       varchar(50) not null,
-  metadata_value     CLOB,
-  foreign key (memory_document_id) references memory_document (id)
-);
-
-create index idx_memory_document_content on memory_document (content);
+create index idx_memory_document_system on memory_document (system);
+create index idx_memory_document_model on memory_document (model);
+create index idx_memory_document_assistantId on memory_document (assistant_id);
 create index idx_memory_document_created_at on memory_document (created_at);
 
-create index idx_memory_metadata_key on memory_metadata (metadata_key);
-create index idx_memory_metadata_memory_document_id on memory_metadata (memory_document_id);
