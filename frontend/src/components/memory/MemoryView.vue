@@ -178,10 +178,9 @@ export default {
       itemsPerPage: 10,
       headers: [
         {title: 'Content', key: 'content', align: 'start', sortable: true},
-        // {title: 'ID', key: 'id', align: 'start', sortable: false},
-        {title: 'Assistant', key: 'assistantName', align: 'start', sortable: false},
-        {title: 'System', key: 'system', align: 'start', sortable: false},
-        {title: 'Model', key: 'model', align: 'start', sortable: false},
+        {title: 'Assistant', key: 'assistantName', align: 'start', sortable: true},
+        {title: 'System', key: 'system', align: 'start', sortable: true},
+        {title: 'Model', key: 'model', align: 'start', sortable: true},
       ],
       serverItems: [],
       loading: true,
