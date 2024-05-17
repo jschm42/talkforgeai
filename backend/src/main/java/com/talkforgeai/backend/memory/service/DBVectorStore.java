@@ -22,6 +22,7 @@ import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
 import com.talkforgeai.backend.memory.dto.MetadataKey;
 import com.talkforgeai.backend.memory.repository.MemoryRepository;
 import com.talkforgeai.backend.service.UniqueIdGenerator;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -53,6 +54,7 @@ public class DBVectorStore implements ListableVectoreStore {
     this.uniqueIdGenerator = uniqueIdGenerator;
   }
 
+  @Transactional
   @Override
   public void add(List<Document> documents) {
     // Convert documents to MemoryDocument
@@ -91,9 +93,11 @@ public class DBVectorStore implements ListableVectoreStore {
     memoryRepository.saveAll(memoryDocuments);
   }
 
+  @Transactional
   @Override
   public Optional<Boolean> delete(List<String> idList) {
-    return Optional.empty();
+    memoryRepository.deleteAllById(idList);
+    return Optional.of(true);
   }
 
   @Override
@@ -158,6 +162,12 @@ public class DBVectorStore implements ListableVectoreStore {
                 listRequest.pageSize() == -1 ? Integer.MAX_VALUE : listRequest.pageSize())).stream()
         .map(this::mapDocument)
         .toList();
+  }
+
+  @Transactional
+  @Override
+  public void deleteAll() {
+    memoryRepository.deleteAll();
   }
 
   private Document mapDocument(MemoryDocument memoryDocument) {

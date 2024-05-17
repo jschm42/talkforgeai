@@ -153,7 +153,7 @@ export default defineComponent({
       try {
         this.chatStore.selectedAssistant.imagePath = '';
         if (this.chatStore.assistantList.length === 0) {
-          await this.assistants.retrieveAssistants();
+          this.chatStore.assistantList = await this.assistants.retrieveAssistants();
         }
         await this.assistants.selectAssistant(this.assistantId);
         await this.assistants.retrieveThreads();

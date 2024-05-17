@@ -92,12 +92,14 @@ import {onMounted} from 'vue';
 import {useRouter} from 'vue-router';
 import {useAppStore} from '@/store/app-store';
 import {useAssistants} from '@/composable/use-assistants';
+import {useChatStore} from '@/store/chat-store';
 
 export default {
   name: 'ChatContainer',
   components: {ErrorAlerts},
   setup() {
     const appStore = useAppStore();
+    const chatStore = useChatStore();
     const assistants = useAssistants();
     const router = useRouter();
 
@@ -115,7 +117,7 @@ export default {
 
     onMounted(async () => {
       try {
-        await assistants.retrieveAssistants();
+        chatStore.assistantList = await assistants.retrieveAssistants();
       } catch (error) {
         appStore.handleError(error);
       }

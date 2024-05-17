@@ -49,7 +49,7 @@ export default {
 
     onMounted(async () => {
       try {
-        await assistants.retrieveAssistants();
+        chatStore.assistantList = await assistants.retrieveAssistants();
       } catch (error) {
         appStore.handleError(error);
       }

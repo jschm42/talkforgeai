@@ -36,9 +36,10 @@ export class MemoryResponse {
 export function useMemory() {
   const chatStore = useChatStore();
 
-  const store = async (content: string): Promise<MemoryResponse> => {
+  const store = async (content: string, assistantId?: string): Promise<MemoryResponse> => {
     const result = await axios.post('/api/v1/memory/store', {
       content,
+      assistantId,
     });
     return result.data;
   };
@@ -65,6 +66,16 @@ export function useMemory() {
     return result.data;
   };
 
+  const remove = async (memoryIds: string[]) => {
+    await axios.post('/api/v1/memory/remove', {
+      memoryIds,
+    });
+  };
+
+  const clear = async () => {
+    await axios.post('/api/v1/memory/clear');
+  };
+
   const count = async (): Promise<number> => {
     const result = await axios.get('/api/v1/memory/count');
     return result.data;
@@ -75,5 +86,7 @@ export function useMemory() {
     search,
     list,
     count,
+    remove,
+    clear,
   };
 }

@@ -18,6 +18,7 @@ package com.talkforgeai.backend.memory.controller;
 
 import com.talkforgeai.backend.memory.dto.DocumentWithoutEmbeddings;
 import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
+import com.talkforgeai.backend.memory.dto.MemoryRemoveRequestDto;
 import com.talkforgeai.backend.memory.dto.MemorySearchRequestDto;
 import com.talkforgeai.backend.memory.dto.MemoryStoreRequestDto;
 import com.talkforgeai.backend.memory.service.MemoryService;
@@ -56,6 +57,15 @@ public class MemoryController {
     return memoryService.list(request);
   }
 
+  @PostMapping("/remove")
+  public void remove(@RequestBody MemoryRemoveRequestDto request) {
+    memoryService.remove(request.memoryIds());
+  }
+
+  @PostMapping("/clear")
+  public void clear() {
+    memoryService.clear();
+  }
 
   @GetMapping("/count")
   public int count() {

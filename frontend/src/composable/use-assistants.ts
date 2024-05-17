@@ -212,14 +212,14 @@ export function useAssistants() {
     return result.data;
   };
 
-  const retrieveAssistants = async () => {
+  const retrieveAssistants = async (): Promise<Array<Assistant>> => {
     console.log('Retrieving assistants');
     const result = await axios.get('/api/v1/assistants', {
       params: {
         order: Order.ASCENDING,
       },
     });
-    chatStore.assistantList = result.data;
+    return result.data;
   };
 
   const retrieveLlmSystems = async (): Promise<Array<LlmSystem>> => {

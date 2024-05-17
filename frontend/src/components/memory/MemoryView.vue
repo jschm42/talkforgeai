@@ -15,7 +15,7 @@
   -->
 
 <template>
-  <v-container>
+  <v-container class="scrollable-container">
     <v-card>
       <v-tabs
           v-model="tab"
@@ -30,17 +30,21 @@
             <v-row>
               <v-col>
                 <v-data-table-server
+                    v-model="selectedAssistants"
                     v-model:items-per-page="serverTable.itemsPerPage"
                     :headers="serverTable.headers"
                     :items="serverTable.serverItems"
                     :items-length="serverTable.totalItems"
                     :loading="serverTable.loading"
                     :search="searchModifier"
-                    item-value="content"
+                    item-value="id"
+                    show-select
                     @update:options="loadServerItems"
                 >
                   <template v-slot:tfoot>
                     <tr>
+                      <td>
+                      </td>
                       <td>
                         <v-text-field v-model="searchContent" class="ma-2" density="compact"
                                       hide-details placeholder="Search content..."></v-text-field>
@@ -63,9 +67,28 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="9">
+              <v-col>
+                <v-form>
+                  <v-btn @click="onDeleteSelected">
+                    Delete selected
+                  </v-btn>
+                  <v-btn @click="onDeleteAll">
+                    Delete all
+                  </v-btn>
+                </v-form>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="7">
                 <v-form>
                   <v-text-field v-model="newContentText" label="New content"></v-text-field>
+                </v-form>
+              </v-col>
+              <v-col cols="2">
+                <v-form>
+                  <v-select v-model="selectedAssistant" :item-props="itemProps"
+                            :items="availableAssistants"
+                            label="Assistant"></v-select>
                 </v-form>
               </v-col>
               <v-col>
@@ -113,10 +136,12 @@
 <script>
 import {onMounted, ref, watch} from 'vue';
 import {useMemory} from '@/composable/use-memory';
+import {useAssistants} from '@/composable/use-assistants';
 
 export default {
   setup() {
     const memory = useMemory();
+    const assistants = useAssistants();
 
     const tab = ref(null);
     const similarityTable = ref([]);
@@ -136,6 +161,9 @@ export default {
     });
 
     const searchContent = ref('');
+    const selectedAssistant = ref('');
+    const selectedAssistants = ref([]);
+    const availableAssistants = ref([]);
     const searchId = ref('');
     let searchModifier = ref('');
     const newContentText = ref('');
@@ -144,6 +172,7 @@ export default {
     const searchThreshold = ref(0.5);
 
     onMounted(async () => {
+      availableAssistants.value = await assistants.retrieveAssistants();
       await loadServerItems({page: 1, itemsPerPage: serverTable.value.itemsPerPage});
     });
 
@@ -164,8 +193,15 @@ export default {
       serverTable.value.loading = false;
     };
 
+    const itemProps = (item) => {
+      return {
+        title: item.name,
+        subtitle: item.description,
+      };
+    };
+
     const onAddNewContent = async () => {
-      await memory.store(newContentText.value);
+      await memory.store(newContentText.value, selectedAssistant.value.id);
       await loadServerItems({page: 1, itemsPerPage: serverTable.value.itemsPerPage});
     };
 
@@ -176,6 +212,16 @@ export default {
 
     const onClearSimilarities = async () => {
       similarityTable.value = [];
+    };
+
+    const onDeleteSelected = async () => {
+      await memory.remove(selectedAssistants.value);
+      await loadServerItems({page: 1, itemsPerPage: serverTable.value.itemsPerPage});
+    };
+
+    const onDeleteAll = async () => {
+      await memory.clear();
+      await loadServerItems({page: 1, itemsPerPage: serverTable.value.itemsPerPage});
     };
 
     const updateSimilarityTable = (similarityResponses) => {
@@ -191,10 +237,16 @@ export default {
     return {
       searchText,
       newContentText,
+      selectedAssistant,
+      selectedAssistants,
+      availableAssistants,
       selected,
+      itemProps,
       onAddNewContent,
       onSearchSimilarity,
       onClearSimilarities,
+      onDeleteSelected,
+      onDeleteAll,
       searchThreshold,
       serverTable,
       loadServerItems,
@@ -211,5 +263,8 @@ export default {
 </script>
 
 <style scoped>
-
+.scrollable-container {
+  overflow-y: auto;
+  height: 100vh; /* Adjust this value as needed */
+}
 </style>

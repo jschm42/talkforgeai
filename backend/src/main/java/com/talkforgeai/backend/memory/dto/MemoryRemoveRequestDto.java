@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.memory.service;
+package com.talkforgeai.backend.memory.dto;
 
-import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
 import java.util.List;
-import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.VectorStore;
 
-public interface ListableVectoreStore extends VectorStore {
+public record MemoryRemoveRequestDto(List<String> memoryIds) {
 
-  int count();
-
-  List<Document> list();
-
-  List<Document> list(MemoryListRequestDto searchRequest);
-
-  void deleteAll();
 }

@@ -50,9 +50,9 @@ public class MemoryService {
     document.getMetadata().put(MetadataKey.SYSTEM.key(), LlmSystem.OPENAI.name());
     document.getMetadata()
         .put(MetadataKey.MODEL.key(), OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL);
-    document.getMetadata().put(MetadataKey.ASSISTANT_ID.key(), request.assistantId());
 
     if (request.assistantId() != null && !request.assistantId().isBlank()) {
+      document.getMetadata().put(MetadataKey.ASSISTANT_ID.key(), request.assistantId());
       var assistant = assistantRepository.findById(request.assistantId());
       assistant.ifPresent(
           a -> document.getMetadata().put(MetadataKey.ASSISTANT_NAME.key(), a.getName()));
@@ -90,6 +90,21 @@ public class MemoryService {
       return listableVectoreStore.count();
     } else {
       throw new UnsupportedOperationException("VectorStore does not support count");
+    }
+  }
+
+  public void remove(List<String> strings) {
+    LOGGER.info("Removing documents: {}", strings);
+    vectorStore.delete(strings);
+  }
+
+  public void clear() {
+    LOGGER.info("Deleting all memory");
+
+    if (vectorStore instanceof ListableVectoreStore listableVectoreStore) {
+      listableVectoreStore.deleteAll();
+    } else {
+      throw new UnsupportedOperationException("VectorStore does not support listing");
     }
   }
 }

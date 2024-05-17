@@ -18,4 +18,9 @@ package com.talkforgeai.backend.memory.dto;
 
 public record MemoryStoreRequestDto(String content, String assistantId) {
 
+  public MemoryStoreRequestDto {
+    if (content == null || content.isBlank()) {
+      throw new IllegalArgumentException("Content must not be null or blank");
+    }
+  }
 }
