@@ -210,43 +210,28 @@ export default {
       await loadServerItems({page: 1, itemsPerPage: serverTable.value.itemsPerPage});
     });
 
-    watch(searchContent, async (newContent) => {
-      console.log('Search content', newContent);
-      await refresh();
+    watch(searchContent, async () => {
+      searchModifier.value = String(Date.now());
     });
 
-    watch(searchAssistantName, async (newContent) => {
-      console.log('Search assistant Name', newContent);
-      await refresh();
+    watch(searchAssistantName, async () => {
+      searchModifier.value = String(Date.now());
     });
 
-    watch(searchSystem, async (newContent) => {
-      console.log('Search assistant Name', newContent);
-      await refresh();
+    watch(searchSystem, async () => {
+      searchModifier.value = String(Date.now());
     });
-
-    const refresh = async () => {
-      await loadServerItems(
-          {
-            page: 1,
-            itemsPerPage: serverTable.value.itemsPerPage,
-            sortBy: [],
-            search: {
-              content: searchContent.value,
-              assistantName: searchAssistantName.value,
-              system: searchSystem.value === 'ALL' ? '' : searchSystem.value,
-            },
-          });
-    };
 
     const loadServerItems = async (pageable) => {
       console.log('Loading items', pageable);
       serverTable.value.loading = true;
 
-      const search = pageable.search === '' ? {} : pageable.search;
-
       serverTable.value.serverItems = await memory.list(pageable.page, pageable.itemsPerPage,
-          pageable.sortBy, search);
+          pageable.sortBy, {
+            content: searchContent.value,
+            assistantName: searchAssistantName.value,
+            system: searchSystem.value === 'ALL' ? '' : searchSystem.value,
+          });
       serverTable.value.totalItems = await memory.count();
       serverTable.value.loading = false;
     };

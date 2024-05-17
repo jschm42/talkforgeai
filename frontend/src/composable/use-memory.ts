@@ -56,7 +56,7 @@ export function useMemory() {
 
   const list = async (
       page: number, pageSize: number, sortBy = [],
-      search?: string): Promise<Array<MemoryResponse>> => {
+      search?: any): Promise<Array<MemoryResponse>> => {
     const result = await axios.post(
         `/api/v1/memory/list`, {
           page,
