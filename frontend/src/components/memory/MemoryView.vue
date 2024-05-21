@@ -74,12 +74,13 @@
             <v-row>
               <v-col>
                 <v-form>
-                  <v-btn @click="showDeleteItemsModal=true">
+                  <v-btn class="m-2" variant="tonal" @click="showDeleteItemsModal=true">
                     Delete selected
                   </v-btn>
-                  <v-btn @click="showDeleteAllModal=true">
+                  <v-btn class="m-2" variant="tonal" @click="showDeleteAllModal=true">
                     Delete all
                   </v-btn>
+                  Total items: {{ serverTable.totalItems }}
                 </v-form>
               </v-col>
             </v-row>
@@ -96,15 +97,15 @@
                             :items="availableAssistants" label="Assistant"></v-select>
                 </v-form>
               </v-col>
-              <v-col cols="1">
+              <v-col cols="2">
                 <v-form>
                   <v-checkbox v-model="isGlobalContent" label="Global"
                               @change="onChangeIsGlobalContent"></v-checkbox>
                 </v-form>
               </v-col>
-              <v-col>
+              <v-col cols="2">
                 <v-form>
-                  <v-btn @click="onAddNewContent">Add content</v-btn>
+                  <v-btn variant="tonal" @click="onAddNewContent">Add content</v-btn>
                 </v-form>
               </v-col>
             </v-row>
@@ -197,7 +198,7 @@ export default {
     const availableSystems = ref([]);
     const searchAssistantName = ref('');
     const searchText = ref('');
-    const searchSystem = ref('');
+    const searchSystem = ref('ALL');
     let searchModifier = ref('');
     const newContentText = ref('');
     const selected = ref([]);
