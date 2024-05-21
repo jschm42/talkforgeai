@@ -140,6 +140,65 @@ public class AssistantSpringService {
     this.memoryService = memoryService;
   }
 
+  private static @NotNull Mono<InitInfos> getInitInfosMono(Mono<AssistantDto> assistantEntityMono,
+      Mono<List<MessageDto>> pastMessages) {
+    Mono<InitInfos> initInfosMono = Mono.zip(
+        Arrays.asList(assistantEntityMono, pastMessages),
+        args -> new InitInfos((AssistantDto) args[0], (List<MessageDto>) args[1]));
+    return initInfosMono;
+  }
+
+  private static @NotNull Flux<ServerSentEvent<String>> getRunIdEventFlux(String runId) {
+    Flux<ServerSentEvent<String>> runIdMono = Flux.just(ServerSentEvent.<String>builder()
+        .event("run.started")
+        .data(runId)
+        .build());
+    return runIdMono;
+  }
+
+  private static @NotNull List<Message> getFinalPromptMessageList(String message,
+      List<MessageDto> pastMessagesList, AssistantDto assistantDto,
+      List<DocumentWithoutEmbeddings> memoryResultsList) {
+    List<Message> promptMessageList = pastMessagesList.stream()
+        .map(m -> {
+          if (MessageType.USER.equals(m.role())) {
+            return (Message) new UserMessage(m.rawContent());
+          } else if (MessageType.ASSISTANT.equals(m.role())) {
+            return (Message) new AssistantMessage(m.rawContent());
+          }
+          throw new AssistentException("Unknown message type: " + m.role());
+        })
+        .toList();
+
+    List<Message> finalPromptMessageList = new ArrayList<>(promptMessageList);
+
+    if (assistantDto.properties()
+        .get(AssistantProperties.FEATURE_IMAGEGENERATION.getKey()).equals(
+            "true")) {
+      finalPromptMessageList.addFirst(new SystemMessage(SYSTEM_MESSAGE_IMAGE_GEN));
+    }
+
+    if (assistantDto.properties()
+        .get(AssistantProperties.FEATURE_PLANTUML.getKey()).equals(
+            "true")) {
+      finalPromptMessageList.addFirst(new SystemMessage(SYSTEM_MESSAGE_PLANTUML));
+    }
+
+    finalPromptMessageList.addFirst(new SystemMessage(assistantDto.instructions()));
+
+    StringBuilder memoryMessage = new StringBuilder();
+    if (!memoryResultsList.isEmpty()) {
+      memoryMessage.append("Use the following information from memory:\n");
+      memoryResultsList.forEach(
+          result -> memoryMessage.append(result.content()).append("\n"));
+      memoryMessage.append("\nUser message:\n");
+    }
+
+    finalPromptMessageList.add(
+        new UserMessage(memoryMessage.append(message).toString()));
+    return finalPromptMessageList;
+  }
+
   public AssistantDto retrieveAssistant(String assistantId) {
     AssistantEntity assistant = assistantRepository.findById(assistantId)
         .orElseThrow(() -> new AssistentException("Assistant not found"));
@@ -166,7 +225,6 @@ public class AssistantSpringService {
   public boolean doesAssistantExistByName(String assistantName) {
     return assistantRepository.existsByName(assistantName);
   }
-
 
   @Transactional
   public ThreadDto createThread() {
@@ -199,34 +257,14 @@ public class AssistantSpringService {
 
     final String runId = UniqueIdUtil.generateRunId();
 
-    Mono<Object> saveUserMessageMono = Mono.fromRunnable(
-            () -> saveNewMessage(assistantId, threadId, MessageType.USER,
-                message, message))  // Wrap blocking call
-        .subscribeOn(Schedulers.boundedElastic());
-
-    Mono<AssistantDto> assistantEntityMono = Mono.fromCallable(
-            () -> assistantRepository.findById(assistantId)
-                .orElseThrow(() -> new AssistentException("Assistant not found")))
-        .map(assistantMapper::toDto)
-        .subscribeOn(Schedulers.boundedElastic());
-
-    Mono<List<MessageDto>> pastMessages = Mono.fromCallable(
-            () -> messageRepository.findByThreadId(threadId, Sort.by(Direction.ASC, "createdAt")))
-        .map(assistantMapper::toDto)
-        .subscribeOn(Schedulers.boundedElastic());
-
-    Mono<InitInfos> initInfosMono = Mono.zip(
-        Arrays.asList(assistantEntityMono, pastMessages),
-        args -> new InitInfos((AssistantDto) args[0], (List<MessageDto>) args[1]));
-
-    Flux<ServerSentEvent<String>> runIdMono = Flux.just(ServerSentEvent.<String>builder()
-        .event("run.started")
-        .data(runId)
-        .build());
+    Mono<Object> saveUserMessageMono = getSaveUserMessageMono(assistantId, threadId, message);
+    Mono<AssistantDto> assistantEntityMono = getAssistantEntityMono(assistantId);
+    Mono<List<MessageDto>> pastMessages = getPastMessagesMono(threadId);
+    Mono<InitInfos> initInfosMono = getInitInfosMono(assistantEntityMono, pastMessages);
 
     StringBuilder assistantMessageContent = new StringBuilder();
 
-    return runIdMono.concatWith(
+    return getRunIdEventFlux(runId).concatWith(
         saveUserMessageMono
             .then(initInfosMono)
             .flux()
@@ -243,58 +281,20 @@ public class AssistantSpringService {
               List<MessageDto> pastMessagesList = preparedInfos.pastMessages();
               List<DocumentWithoutEmbeddings> memoryResultsList = preparedInfos.memoryResults();
 
-              List<Message> promptMessageList = pastMessagesList.stream()
-                  .map(m -> {
-                    if (MessageType.USER.equals(m.role())) {
-                      return (Message) new UserMessage(m.rawContent());
-                    } else if (MessageType.ASSISTANT.equals(m.role())) {
-                      return (Message) new AssistantMessage(m.rawContent());
-                    }
-                    throw new AssistentException("Unknown message type: " + m.role());
-                  })
-                  .toList();
+              List<Message> finalPromptMessageList = getFinalPromptMessageList(message,
+                  pastMessagesList,
+                  assistantDto, memoryResultsList);
 
-              List<Message> finalPromptMessageList = new ArrayList<>(promptMessageList);
-
-              if (assistantDto.properties()
-                  .get(AssistantProperties.FEATURE_IMAGEGENERATION.getKey()).equals(
-                      "true")) {
-                finalPromptMessageList.addFirst(new SystemMessage(SYSTEM_MESSAGE_IMAGE_GEN));
-              }
-
-              if (assistantDto.properties()
-                  .get(AssistantProperties.FEATURE_PLANTUML.getKey()).equals(
-                      "true")) {
-                finalPromptMessageList.addFirst(new SystemMessage(SYSTEM_MESSAGE_PLANTUML));
-              }
-
-              finalPromptMessageList.addFirst(new SystemMessage(assistantDto.instructions()));
-
-              StringBuilder memoryMessage = new StringBuilder();
-              if (!memoryResultsList.isEmpty()) {
-                memoryMessage.append("Use the following information from memory:\n");
-                memoryResultsList.forEach(
-                    result -> memoryMessage.append(result.content()).append("\n"));
-                memoryMessage.append("\nUser message:\n");
-              }
-
-              finalPromptMessageList.add(new UserMessage(memoryMessage.append(message).toString()));
-
-              FunctionCallbackWrapper<Request, Response> func = FunctionCallbackWrapper.builder(
-                      new ContextStorageFunction(memoryService, new FunctionContext(LlmSystem.OPENAI,
-                          OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL, assistantId,
-                          assistantDto.name())))
-                  .withDescription(
-                      "Store relevant information in the vector database for later retrieval.")
-                  .withName(ContextTool.MEMORY_STORE.getFunctionBeanName())
-                  .build();
+              FunctionCallbackWrapper<Request, Response> memoryFunctionCallback = getMemoryFunctionCallback(
+                  assistantId, assistantDto);
 
               ChatOptions promptOptions = universalChatService.getPromptOptions(assistantDto,
-                  List.of(func));
+                  List.of(memoryFunctionCallback));
 
               LOGGER.debug("Starting stream with prompt: {}", finalPromptMessageList);
               LOGGER.debug("Prompt Options: {}",
-                  universalChatService.printPromptOptions(assistantDto.system(), promptOptions));
+                  universalChatService.printPromptOptions(assistantDto.system(),
+                      promptOptions));
 
               Prompt prompt = new Prompt(finalPromptMessageList, promptOptions);
 
@@ -303,36 +303,21 @@ public class AssistantSpringService {
             .doOnCancel(() -> {
               LOGGER.debug("doOnCancel. message={}", assistantMessageContent);
             })
-            .mapNotNull(chatResponse -> {
-              String content = chatResponse.getResult().getOutput().getContent();
-              LOGGER.debug("ChatResponse received: {}", content);
-
-              if (content != null) {
-                assistantMessageContent.append(chatResponse.getResult().getOutput().getContent());
-              }
-
-              ServerSentEvent<String> responseSseEvent = createResponseSseEvent(chatResponse);
-
-              if (responseSseEvent != null) {
-                LOGGER.debug("Sending event '{}'", responseSseEvent.event());
-              }
-
-              return responseSseEvent;
-            })
+            .mapNotNull(chatResponse -> mapChatResponse(chatResponse, assistantMessageContent))
             .doOnSubscribe(subscription -> {
               LOGGER.debug("doOnSubscribe. message={}", assistantMessageContent);
 
               activeStreams.put(runId, subscription);
             })
-            .doOnNext(chatResponse -> {
-              LOGGER.debug("doOnNext response: {}", chatResponse);
-            })
+            .doOnNext(chatResponse -> LOGGER.debug("doOnNext response: {}", chatResponse))
             .doOnComplete(() -> {
               LOGGER.debug("doOnComplete. message={}", assistantMessageContent);
 
-              Mono.fromRunnable(() -> saveNewMessage(assistantId, threadId, MessageType.ASSISTANT,
-                      assistantMessageContent.toString(), null))  // Wrap blocking call
-                  .subscribeOn(Schedulers.boundedElastic())  // Subscribe on separate thread pool
+              Mono.fromRunnable(
+                      () -> saveNewMessage(assistantId, threadId, MessageType.ASSISTANT,
+                          assistantMessageContent.toString(), null))  // Wrap blocking call
+                  .subscribeOn(
+                      Schedulers.boundedElastic())  // Subscribe on separate thread pool
                   .subscribe();  // Subscribe to start execution
             })
             .onErrorResume(throwable -> {
@@ -342,6 +327,60 @@ public class AssistantSpringService {
                   .data(throwable.getMessage())
                   .build());
             }));
+  }
+
+  private @NotNull ServerSentEvent<String> mapChatResponse(ChatResponse chatResponse,
+      StringBuilder assistantMessageContent) {
+    String content = chatResponse.getResult().getOutput().getContent();
+    LOGGER.debug("ChatResponse received: {}", content);
+
+    if (content != null) {
+      assistantMessageContent.append(
+          chatResponse.getResult().getOutput().getContent());
+    }
+
+    ServerSentEvent<String> responseSseEvent = createResponseSseEvent(chatResponse);
+
+    if (responseSseEvent != null) {
+      LOGGER.debug("Sending event '{}'", responseSseEvent.event());
+    }
+    return responseSseEvent;
+  }
+
+  private FunctionCallbackWrapper<Request, Response> getMemoryFunctionCallback(
+      String assistantId, AssistantDto assistantDto) {
+    return FunctionCallbackWrapper.builder(
+            new ContextStorageFunction(memoryService,
+                new FunctionContext(LlmSystem.OPENAI,
+                    OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL, assistantId,
+                    assistantDto.name())))
+        .withDescription(
+            "Store relevant information in the vector database for later retrieval.")
+        .withName(ContextTool.MEMORY_STORE.getFunctionBeanName())
+        .build();
+  }
+
+  private @NotNull Mono<List<MessageDto>> getPastMessagesMono(String threadId) {
+    return Mono.fromCallable(
+            () -> messageRepository.findByThreadId(threadId, Sort.by(Direction.ASC, "createdAt")))
+        .map(assistantMapper::toDto)
+        .subscribeOn(Schedulers.boundedElastic());
+  }
+
+  private @NotNull Mono<AssistantDto> getAssistantEntityMono(String assistantId) {
+    return Mono.fromCallable(
+            () -> assistantRepository.findById(assistantId)
+                .orElseThrow(() -> new AssistentException("Assistant not found")))
+        .map(assistantMapper::toDto)
+        .subscribeOn(Schedulers.boundedElastic());
+  }
+
+  private @NotNull Mono<Object> getSaveUserMessageMono(String assistantId, String threadId,
+      String message) {
+    return Mono.fromRunnable(
+            () -> saveNewMessage(assistantId, threadId, MessageType.USER,
+                message, message))  // Wrap blocking call
+        .subscribeOn(Schedulers.boundedElastic());
   }
 
   private @NotNull List<DocumentWithoutEmbeddings> getMemorySearchResults(AssistantDto assistantDto,
@@ -506,6 +545,8 @@ public class AssistantSpringService {
     modifiedEntity.setInstructions(modifiedAssistant.instructions());
     modifiedEntity.setImagePath(modifiedAssistant.imagePath());
     modifiedEntity.setSystem(modifiedAssistant.system().name());
+    modifiedEntity.setMemory(MemoryType.GLOBAL.name()); // TODO: Implement memory type
+    modifiedEntity.setCreatedAt(new Date());
     modifiedEntity.setProperties(new HashMap<>());
     AssistantEntity savedAssistant = assistantRepository.save(modifiedEntity);
 
