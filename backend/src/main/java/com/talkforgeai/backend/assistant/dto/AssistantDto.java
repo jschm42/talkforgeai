@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Date;
 import java.util.Map;
 
+
 public record AssistantDto(
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String id,
@@ -32,6 +33,12 @@ public record AssistantDto(
     String model,
     String instructions,
     String imagePath,
+    MemoryType memory,
     Map<String, String> properties) {
 
+  public enum MemoryType {
+    NONE,
+    ASSISTANT,
+    GLOBAL
+  }
 }

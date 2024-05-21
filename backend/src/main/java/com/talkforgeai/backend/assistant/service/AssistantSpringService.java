@@ -20,6 +20,7 @@ import com.talkforgeai.backend.assistant.domain.AssistantEntity;
 import com.talkforgeai.backend.assistant.domain.MessageEntity;
 import com.talkforgeai.backend.assistant.domain.ThreadEntity;
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
+import com.talkforgeai.backend.assistant.dto.AssistantDto.MemoryType;
 import com.talkforgeai.backend.assistant.dto.GenerateImageResponse;
 import com.talkforgeai.backend.assistant.dto.ImageGenSystem;
 import com.talkforgeai.backend.assistant.dto.LlmSystem;
@@ -65,6 +66,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
+import org.jetbrains.annotations.NotNull;
 import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -213,18 +215,9 @@ public class AssistantSpringService {
         .map(assistantMapper::toDto)
         .subscribeOn(Schedulers.boundedElastic());
 
-    Mono<List<DocumentWithoutEmbeddings>> memoryResults = Mono.fromCallable(
-            () -> memoryService.search(SearchRequest.query(message).withSimilarityThreshold(0.75f)))
-        .subscribeOn(Schedulers.boundedElastic());
-
-    Mono<PreparedInfos> preparedInfosMono = Mono.zip(
-        Arrays.asList(assistantEntityMono, pastMessages, memoryResults), args -> {
-          return new PreparedInfos(
-              (AssistantDto) args[0],
-              (List<MessageDto>) args[1],
-              (List<DocumentWithoutEmbeddings>) args[2]
-          );
-        });
+    Mono<InitInfos> initInfosMono = Mono.zip(
+        Arrays.asList(assistantEntityMono, pastMessages),
+        args -> new InitInfos((AssistantDto) args[0], (List<MessageDto>) args[1]));
 
     Flux<ServerSentEvent<String>> runIdMono = Flux.just(ServerSentEvent.<String>builder()
         .event("run.started")
@@ -235,9 +228,16 @@ public class AssistantSpringService {
 
     return runIdMono.concatWith(
         saveUserMessageMono
-            .then(assistantEntityMono)
-            .then(preparedInfosMono)
+            .then(initInfosMono)
             .flux()
+            .flatMap(initInfos -> {
+              List<DocumentWithoutEmbeddings> memorySearchResults = getMemorySearchResults(
+                  initInfos.assistantDto, message);
+
+              return Flux.just(
+                  new PreparedInfos(initInfos.assistantDto(), initInfos.pastMessages(),
+                      memorySearchResults));
+            })
             .flatMap(preparedInfos -> {
               AssistantDto assistantDto = preparedInfos.assistantDto();
               List<MessageDto> pastMessagesList = preparedInfos.pastMessages();
@@ -342,6 +342,33 @@ public class AssistantSpringService {
                   .data(throwable.getMessage())
                   .build());
             }));
+  }
+
+  private @NotNull List<DocumentWithoutEmbeddings> getMemorySearchResults(AssistantDto assistantDto,
+      String message) {
+
+    if (assistantDto.memory() == MemoryType.NONE) {
+      return List.of();
+    }
+
+    LOGGER.info("Searching memory for message: {}", message);
+    List<DocumentWithoutEmbeddings> searchResults = memoryService.search(
+        SearchRequest.query(message).withSimilarityThreshold(0.75f));
+
+    if (assistantDto.memory() == MemoryType.ASSISTANT) {
+      List<DocumentWithoutEmbeddings> filteredMemory = searchResults.stream()
+          .filter(m -> m.assistantId() != null && m.assistantId().equals(assistantDto.id()))
+          .toList();
+
+      LOGGER.debug("Memory search results for assistant '{}': {}", assistantDto.id(),
+          filteredMemory);
+
+      return filteredMemory;
+    }
+
+    LOGGER.debug("Memory search results: {}", searchResults);
+
+    return searchResults;
   }
 
   private ServerSentEvent<String> createResponseSseEvent(ChatResponse chatResponse) {
@@ -617,6 +644,10 @@ public class AssistantSpringService {
 
   public List<String> retrieveModels(LlmSystem system) {
     return universalChatService.getModels(system);
+  }
+
+  record InitInfos(AssistantDto assistantDto, List<MessageDto> pastMessages) {
+
   }
 
   record PreparedInfos(AssistantDto assistantDto, List<MessageDto> pastMessages,

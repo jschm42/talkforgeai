@@ -39,7 +39,7 @@ public class MemoryDocument {
   @Id
   private String id;
 
-  @Column(name = "created_at")
+  @Column(name = "created_at", nullable = false)
   private Date createdAt;
 
   @Lob
@@ -50,13 +50,13 @@ public class MemoryDocument {
   @Column(name = "embeddings")
   private String embeddings;
 
-  @Column(name = "system")
+  @Column(name = "system", length = 50)
   private String system;
 
-  @Column(name = "model")
+  @Column(name = "model", length = 50)
   private String model;
 
-  @ManyToOne(optional = true)
+  @ManyToOne
   private AssistantEntity assistant;
 
   public String getId() {

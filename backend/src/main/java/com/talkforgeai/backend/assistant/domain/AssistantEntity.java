@@ -45,16 +45,16 @@ public class AssistantEntity {
   @Column(name = "image_path", length = 100)
   private String imagePath;
 
-  @Column(name = "name", length = 50)
+  @Column(name = "name", length = 50, nullable = false)
   private String name;
 
   @Column(name = "description", length = 200)
   private String description;
 
-  @Column(name = "system", length = 20)
+  @Column(name = "system", length = 20, nullable = false)
   private String system;
 
-  @Column(name = "model", length = 30)
+  @Column(name = "model", length = 30, nullable = false)
   private String model;
 
   @Lob
@@ -70,9 +70,11 @@ public class AssistantEntity {
   @OneToMany(mappedBy = "assistant", fetch = FetchType.LAZY)
   private List<MemoryDocument> memoryDocuments = new ArrayList<>();
 
-  @Column(name = "created_at")
-  private Date createdAt;
+  @Column(name = "memory", length = 20, nullable = false)
+  private String memory;
 
+  @Column(name = "created_at", nullable = false)
+  private Date createdAt;
 
   // Standard getters and setters
   public String getId() {
@@ -105,6 +107,14 @@ public class AssistantEntity {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public String getMemory() {
+    return memory;
+  }
+
+  public void setMemory(String memory) {
+    this.memory = memory;
   }
 
   public String getDescription() {

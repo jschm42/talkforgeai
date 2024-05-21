@@ -24,10 +24,12 @@ import com.talkforgeai.backend.assistant.domain.AssistantPropertyValue;
 import com.talkforgeai.backend.assistant.domain.MessageEntity;
 import com.talkforgeai.backend.assistant.domain.ThreadEntity;
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
+import com.talkforgeai.backend.assistant.dto.AssistantDto.MemoryType;
 import com.talkforgeai.backend.assistant.dto.LlmSystem;
 import com.talkforgeai.backend.assistant.dto.MessageDto;
 import com.talkforgeai.backend.assistant.dto.ThreadDto;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,7 @@ public class AssistantMapper {
         assistantEntity.getModel(),
         assistantEntity.getInstructions(),
         assistantEntity.getImagePath(),
+        MemoryType.valueOf(assistantEntity.getMemory()),
         mapAssistantProperties(assistantEntity.getProperties())
     );
   }
@@ -54,17 +57,17 @@ public class AssistantMapper {
   AssistantEntity toEntity(AssistantDto assistantDto) {
     AssistantEntity entity = new AssistantEntity();
     entity.setId(assistantDto.id());
-    entity.setCreatedAt(assistantDto.createdAt());
+    entity.setCreatedAt(new Date());
     entity.setName(assistantDto.name());
     entity.setDescription(assistantDto.description());
     entity.setModel(assistantDto.model());
     entity.setInstructions(assistantDto.instructions());
     entity.setImagePath(assistantDto.imagePath());
     entity.setSystem(assistantDto.system().name());
+    entity.setMemory(assistantDto.memory() == null ? null : assistantDto.memory().name());
     entity.setProperties(mapProperties(assistantDto.properties()));
     return entity;
   }
-
 
   public Map<String, String> mapAssistantProperties(
       Map<String, AssistantPropertyValue> properties) {

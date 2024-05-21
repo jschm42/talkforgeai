@@ -42,11 +42,14 @@ public class MessageEntity {
   @Column(name = "parsed_content")
   private String parsedContent;
   private String role;
-  @Column(name = "created_at")
+  
+  @Column(name = "created_at", nullable = false)
   private Date createdAt;
+
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "thread_id", nullable = false)
   private ThreadEntity thread;
+
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "assistant_id", nullable = false)
   private AssistantEntity assistant;

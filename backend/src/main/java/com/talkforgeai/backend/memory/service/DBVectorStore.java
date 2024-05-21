@@ -151,7 +151,17 @@ public class DBVectorStore implements ListableVectoreStore {
         .limit(request.getTopK())
         .map(s -> {
           MemoryDocument memoryDocument = documentMap.get(s.key());
-          return new Document(s.key(), memoryDocument.getContent(), new HashMap<>());
+
+          Map<String, Object> metadata = new HashMap<>();
+          metadata.put(MetadataKey.SYSTEM.key(), memoryDocument.getSystem());
+          metadata.put(MetadataKey.MODEL.key(), memoryDocument.getModel());
+          metadata.put(MetadataKey.ASSISTANT_ID.key(),
+              memoryDocument.getAssistant() == null ? null : memoryDocument.getAssistant().getId());
+          metadata.put(MetadataKey.ASSISTANT_NAME.key(),
+              memoryDocument.getAssistant() == null ? null
+                  : memoryDocument.getAssistant().getName());
+          
+          return new Document(s.key(), memoryDocument.getContent(), metadata);
         })
         .toList();
   }

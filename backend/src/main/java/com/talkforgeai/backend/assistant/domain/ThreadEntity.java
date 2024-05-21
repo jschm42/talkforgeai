@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Jean Schmitz.
+ * Copyright (c) 2023-2024 Jean Schmitz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,45 +20,44 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import java.util.Date;
 
 @Entity
 @Table(name = "thread")
 public class ThreadEntity {
 
-    @Id
-    @Column(name = "id", length = 50)
-    private String id;
+  @Id
+  @Column(name = "id", length = 50)
+  private String id;
 
-    @Column(length = 50)
-    private String title;
+  @Column(length = 50)
+  private String title;
 
-    @Column(name = "created_at")
-    private Date createdAt;
+  @Column(name = "created_at", nullable = false)
+  private Date createdAt;
 
-    // Standard getters and setters
-    public String getId() {
-        return id;
-    }
+  // Standard getters and setters
+  public String getId() {
+    return id;
+  }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public String getTitle() {
-        return title;
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-    public Date getCreatedAt() {
-        return createdAt;
-    }
+  public Date getCreatedAt() {
+    return createdAt;
+  }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
+  public void setCreatedAt(Date createdAt) {
+    this.createdAt = createdAt;
+  }
 }
