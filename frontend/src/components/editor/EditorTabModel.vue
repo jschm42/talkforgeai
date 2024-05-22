@@ -17,7 +17,7 @@
 <script>
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
-import {usePersonaFormStore} from '@/store/persona-form-store';
+import {useAssistantFormStore} from '@/store/persona-form-store';
 import AssistantProperties from '@/const/assistant.properties';
 import {useAppStore} from '@/store/app-store';
 import {useAssistants} from '@/composable/use-assistants';
@@ -33,7 +33,7 @@ export default defineComponent({
     },
   },
   setup() {
-    const {assistantForm, systems, models} = storeToRefs(usePersonaFormStore());
+    const {assistantForm, systems, models} = storeToRefs(useAssistantFormStore());
     const assistants = useAssistants();
     const appStore = useAppStore();
 

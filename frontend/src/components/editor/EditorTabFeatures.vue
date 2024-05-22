@@ -17,13 +17,13 @@
 <script>
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
-import {usePersonaFormStore} from '@/store/persona-form-store';
+import {useAssistantFormStore} from '@/store/persona-form-store';
 import AssistantProperties from '@/const/assistant.properties';
 
 export default defineComponent({
   name: 'PersonaTabFeatures',
   computed: {
-    PersonaProperties() {
+    AssistantProperties() {
       return AssistantProperties;
     },
   },
@@ -31,7 +31,7 @@ export default defineComponent({
     return {};
   },
   setup() {
-    const {assistantForm} = storeToRefs(usePersonaFormStore());
+    const {assistantForm} = storeToRefs(useAssistantFormStore());
 
     return {assistantForm};
   },
@@ -45,7 +45,7 @@ export default defineComponent({
   <div class="mb-3 p-3">
     <div class="form-check">
       <input id="checkboxTitleGeneration"
-             v-model="assistantForm.properties[PersonaProperties.FEATURE_TITLEGENERATION]"
+             v-model="assistantForm.properties[AssistantProperties.FEATURE_TITLEGENERATION]"
              class="form-check-input" type="checkbox">
       <label class="form-check-label" for="checkboxTitleGeneration">
         Title generation (uses OpenAI ChatGPT 3.5)
@@ -53,7 +53,7 @@ export default defineComponent({
     </div>
     <div class="form-check">
       <input id="checkboxImageGeneration"
-             v-model="assistantForm.properties[PersonaProperties.FEATURE_IMAGEGENERATION]"
+             v-model="assistantForm.properties[AssistantProperties.FEATURE_IMAGEGENERATION]"
              class="form-check-input" type="checkbox">
       <label class="form-check-label" for="checkboxImageGeneration">
         Image generation
@@ -61,7 +61,7 @@ export default defineComponent({
     </div>
     <div class="form-check">
       <input id="checkboxPlantUML"
-             v-model="assistantForm.properties[PersonaProperties.FEATURE_PLANTUML]"
+             v-model="assistantForm.properties[AssistantProperties.FEATURE_PLANTUML]"
              class="form-check-input" type="checkbox">
       <label class="form-check-label" for="checkboxPlantUML">
         PlantUML generation
@@ -69,7 +69,7 @@ export default defineComponent({
     </div>
     <div class="form-check">
       <input id="checkBoxAutoSpeakDefault"
-             v-model="assistantForm.properties[PersonaProperties.FEATURE_AUTOSPEAKDEFAULT]"
+             v-model="assistantForm.properties[AssistantProperties.FEATURE_AUTOSPEAKDEFAULT]"
              class="form-check-input" type="checkbox">
       <label class="form-check-label" for="checkBoxAutoSpeakDefault">
         Auto Speak is turned on by default

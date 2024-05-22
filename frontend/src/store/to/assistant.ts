@@ -22,6 +22,7 @@ class Assistant {
   description = '';
   system = '';
   model = '';
+  memory = 'NONE';
   imagePath = '';
   properties = {...AssistantPropertiesDefault};
 }

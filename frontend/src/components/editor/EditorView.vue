@@ -42,6 +42,13 @@
           </button>
         </li>
         <li class="nav-item">
+          <button id="memory-tab" aria-controls="memory-tab-pane" aria-selected="true"
+                  class="nav-link"
+                  data-bs-target="#memory-tab-pane" data-bs-toggle="tab" role="tab" type="button">
+            Memory
+          </button>
+        </li>
+        <li class="nav-item">
           <button id="features-tab" aria-controls="features-tab-pane" aria-selected="true"
                   class="nav-link"
                   data-bs-target="#features-tab-pane" data-bs-toggle="tab" role="tab" type="button">
@@ -69,6 +76,12 @@
           <editor-tab-voice ref="voiceTabPane"></editor-tab-voice>
         </div>
 
+        <div id="memory-tab-pane" aria-labelledby="memory-tab" class="tab-pane fade"
+             role="tabpanel"
+             tabindex="0">
+          <editor-tab-memory ref="memoryTabPane"></editor-tab-memory>
+        </div>
+
         <div id="features-tab-pane" aria-labelledby="features-tab" class="tab-pane fade"
              role="tabpanel"
              tabindex="0">
@@ -93,7 +106,7 @@
 
 <script>
 import {defineComponent} from 'vue';
-import {usePersonaFormStore} from '@/store/persona-form-store';
+import {useAssistantFormStore} from '@/store/persona-form-store';
 import Assistant from '@/store/to/assistant';
 import {useAppStore} from '@/store/app-store';
 import EditorTabFeatures from '@/components/editor/EditorTabFeatures.vue';
@@ -102,6 +115,7 @@ import EditorTabModel from '@/components/editor/EditorTabModel.vue';
 import EditorTabProfile from '@/components/editor/EditorTabProfile.vue';
 import QuestionModal from '@/components/common/QuestionModal.vue';
 import {useAssistants} from '@/composable/use-assistants';
+import EditorTabMemory from '@/components/editor/EditorTabMemory.vue';
 
 export default defineComponent({
   components: {
@@ -109,10 +123,11 @@ export default defineComponent({
     EditorTabVoice,
     EditorTabModel,
     EditorTabProfile,
+    EditorTabMemory,
     QuestionModal,
   },
   setup() {
-    const personaFormStore = usePersonaFormStore(); // Call useMyStore() inside the setup function
+    const personaFormStore = useAssistantFormStore(); // Call useMyStore() inside the setup function
     const appStore = useAppStore();
     const assistants = useAssistants();
     return {personaFormStore, appStore, assistants};
@@ -134,6 +149,7 @@ export default defineComponent({
       assistant.description = form.description || '';
       assistant.system = form.system;
       assistant.model = form.model;
+      assistant.memory = form.memory;
       assistant.tools = [];
       assistant.file_ids = [];
       assistant.metadata = {};
@@ -171,12 +187,12 @@ export default defineComponent({
     },
   },
   async mounted() {
-    this.personaFormStore.resetPersonaEditForm();
+    this.personaFormStore.resetAssistantEditForm();
 
     if (this.assistantId) {
       try {
         const assistant = await this.assistants.retrieveAssistant(this.assistantId);
-        this.personaFormStore.setPersonaEditForm(assistant);
+        this.personaFormStore.setAssistantEditForm(assistant);
       } catch (error) {
         this.appStore.handleError(error);
       }

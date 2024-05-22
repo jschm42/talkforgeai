@@ -17,7 +17,7 @@
 <script>
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
-import {usePersonaFormStore} from '@/store/persona-form-store';
+import {useAssistantFormStore} from '@/store/persona-form-store';
 import {useAppStore} from '@/store/app-store';
 import AssistantProperties, {TTSType} from '@/const/assistant.properties';
 import {useTextToSpeech} from '@/composable/use-text-to-speech';
@@ -32,7 +32,7 @@ export default defineComponent({
     };
   },
   setup() {
-    const {assistantForm} = storeToRefs(usePersonaFormStore());
+    const {assistantForm} = storeToRefs(useAssistantFormStore());
     const appStore = useAppStore();
     const textToSpeech = useTextToSpeech();
 

@@ -18,7 +18,7 @@ import {defineStore} from 'pinia';
 import Assistant from '@/store/to/assistant';
 import LlmSystem from '@/store/to/llm-system';
 
-export const usePersonaFormStore = defineStore('personaFormStore', {
+export const useAssistantFormStore = defineStore('assistantFormStore', {
   state: () => {
     return {
       assistantForm: new Assistant(),
@@ -32,11 +32,10 @@ export const usePersonaFormStore = defineStore('personaFormStore', {
     },
   },
   actions: {
-    resetPersonaEditForm() {
+    resetAssistantEditForm() {
       this.$reset();
     },
-    setPersonaEditForm(assistant: Assistant) {
-      console.log('setPersonaEditForm', assistant);
+    setAssistantEditForm(assistant: Assistant) {
       this.assistantForm = assistant;
     },
   },

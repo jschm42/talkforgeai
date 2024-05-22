@@ -17,7 +17,7 @@
 <script>
 import {defineComponent} from 'vue';
 import {storeToRefs} from 'pinia';
-import {usePersonaFormStore} from '@/store/persona-form-store';
+import {useAssistantFormStore} from '@/store/persona-form-store';
 import {useChatStore} from '@/store/chat-store';
 import {useAppStore} from '@/store/app-store';
 import {useAssistants} from '@/composable/use-assistants';
@@ -35,7 +35,7 @@ export default defineComponent({
     const chatStore = useChatStore();
     const appStore = useAppStore();
     const assistants = useAssistants();
-    const {assistantForm} = storeToRefs(usePersonaFormStore());
+    const {assistantForm} = storeToRefs(useAssistantFormStore());
 
     return {assistantForm, chatStore, appStore, assistants};
   },

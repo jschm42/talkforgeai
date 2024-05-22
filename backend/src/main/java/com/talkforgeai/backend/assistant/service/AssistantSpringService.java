@@ -545,7 +545,7 @@ public class AssistantSpringService {
     modifiedEntity.setInstructions(modifiedAssistant.instructions());
     modifiedEntity.setImagePath(modifiedAssistant.imagePath());
     modifiedEntity.setSystem(modifiedAssistant.system().name());
-    modifiedEntity.setMemory(MemoryType.GLOBAL.name()); // TODO: Implement memory type
+    modifiedEntity.setMemory(modifiedAssistant.memory().name());
     modifiedEntity.setCreatedAt(new Date());
     modifiedEntity.setProperties(new HashMap<>());
     AssistantEntity savedAssistant = assistantRepository.save(modifiedEntity);
