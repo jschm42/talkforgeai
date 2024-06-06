@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.memory.dto;
+package com.talkforgeai.backend.util;
 
-public enum MetadataKey {
-  SYSTEM("system"),
-  MODEL("model"),
-  ASSISTANT_ID("assistantId"),
-  ASSISTANT_NAME("assistantName"),
-  RUN_ID("runId");
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-  private final String key;
+public class JsonUtil {
 
-  MetadataKey(String key) {
-    this.key = key;
-  }
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
-  public String key() {
-    return key;
+  public static String convertObjectToJson(Object obj) {
+    try {
+      return objectMapper.writeValueAsString(obj);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Failed to convert object to JSON string", e);
+    }
   }
 }

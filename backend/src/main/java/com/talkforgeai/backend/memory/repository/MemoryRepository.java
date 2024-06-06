@@ -37,4 +37,5 @@ public interface MemoryRepository extends JpaRepository<MemoryDocument, String> 
       "SELECT COUNT(md) FROM MemoryDocument md WHERE md.content = :content AND md.assistant is null")
   int countByContentAndEmptyAssistant(String content);
 
+  int countByRunId(String runId);
 }

@@ -37,6 +37,7 @@ import java.util.Date;
 public class MemoryDocument {
 
   @Id
+  @Column(name = "id", length = 50)
   private String id;
 
   @Column(name = "created_at", nullable = false)
@@ -58,6 +59,8 @@ public class MemoryDocument {
 
   @ManyToOne
   private AssistantEntity assistant;
+  @Column(name = "run_id", length = 50)
+  private String runId;
 
   public String getId() {
     return id;
@@ -134,5 +137,13 @@ public class MemoryDocument {
 
   public void setModel(String model) {
     this.model = model;
+  }
+
+  public String getRunId() {
+    return runId;
+  }
+
+  public void setRunId(String runId) {
+    this.runId = runId;
   }
 }

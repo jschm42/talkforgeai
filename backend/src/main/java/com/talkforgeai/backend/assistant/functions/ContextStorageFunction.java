@@ -46,7 +46,7 @@ public class ContextStorageFunction implements
     MemoryStoreRequestDto requestDto = new MemoryStoreRequestDto(request.contextInfo(),
         functionContext.assistantId());
     DocumentWithoutEmbeddings storedDocument = memoryService.store(requestDto.content(),
-        requestDto.assistantId());
+        requestDto.assistantId(), functionContext.runId());
     return new Response(
         storedDocument.id(),
         "I stored the following information in memory: " + request.contextInfo());

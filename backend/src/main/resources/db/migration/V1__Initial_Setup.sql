@@ -66,6 +66,7 @@ create table memory_document
   system       varchar(50),
   model        varchar(50),
   assistant_id varchar(50),
+  run_id       varchar(50),
   embeddings   CLOB,
   foreign key (assistant_id) references assistant (id)
 );

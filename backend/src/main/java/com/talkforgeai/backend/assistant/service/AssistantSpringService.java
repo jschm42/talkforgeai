@@ -43,6 +43,7 @@ import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
 import com.talkforgeai.backend.memory.dto.DocumentWithoutEmbeddings;
+import com.talkforgeai.backend.memory.repository.MemoryRepository;
 import com.talkforgeai.backend.memory.service.MemoryService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
@@ -64,6 +65,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 import org.jetbrains.annotations.NotNull;
@@ -121,13 +123,14 @@ public class AssistantSpringService {
 
 
   private final Map<String, Subscription> activeStreams = new ConcurrentHashMap<>();
+  private final MemoryRepository memoryRepository;
 
   public AssistantSpringService(
       UniversalChatService universalChatService, UniversalImageGenService universalImageGenService,
       AssistantRepository assistantRepository, MessageRepository messageRepository,
       ThreadRepository threadRepository, FileStorageService fileStorageService,
       MessageProcessor messageProcessor, AssistantMapper assistantMapper,
-      MemoryService memoryService) {
+      MemoryService memoryService, MemoryRepository memoryRepository) {
 
     this.universalChatService = universalChatService;
     this.universalImageGenService = universalImageGenService;
@@ -138,6 +141,7 @@ public class AssistantSpringService {
     this.messageProcessor = messageProcessor;
     this.assistantMapper = assistantMapper;
     this.memoryService = memoryService;
+    this.memoryRepository = memoryRepository;
   }
 
   private static @NotNull Mono<InitInfos> getInitInfosMono(Mono<AssistantDto> assistantEntityMono,
@@ -265,74 +269,77 @@ public class AssistantSpringService {
     StringBuilder assistantMessageContent = new StringBuilder();
 
     return getRunIdEventFlux(runId).concatWith(
-        saveUserMessageMono
-            .then(initInfosMono)
-            .flux()
-            .flatMap(initInfos -> {
-              List<DocumentWithoutEmbeddings> memorySearchResults = getMemorySearchResults(
-                  initInfos.assistantDto, message);
+            saveUserMessageMono
+                .then(initInfosMono)
+                .flux()
+                .flatMap(initInfos -> {
+                  List<DocumentWithoutEmbeddings> memorySearchResults = getMemorySearchResults(
+                      initInfos.assistantDto, message);
 
-              return Flux.just(
-                  new PreparedInfos(initInfos.assistantDto(), initInfos.pastMessages(),
-                      memorySearchResults));
-            })
-            .flatMap(preparedInfos -> {
-              AssistantDto assistantDto = preparedInfos.assistantDto();
-              List<MessageDto> pastMessagesList = preparedInfos.pastMessages();
-              List<DocumentWithoutEmbeddings> memoryResultsList = preparedInfos.memoryResults();
+                  return Flux.just(
+                      new PreparedInfos(initInfos.assistantDto(), initInfos.pastMessages(),
+                          memorySearchResults));
+                })
+                .flatMap(preparedInfos -> {
+                  AssistantDto assistantDto = preparedInfos.assistantDto();
+                  List<MessageDto> pastMessagesList = preparedInfos.pastMessages();
+                  List<DocumentWithoutEmbeddings> memoryResultsList = preparedInfos.memoryResults();
 
-              List<Message> finalPromptMessageList = getFinalPromptMessageList(message,
-                  pastMessagesList,
-                  assistantDto, memoryResultsList);
+                  List<Message> finalPromptMessageList = getFinalPromptMessageList(message,
+                      pastMessagesList,
+                      assistantDto, memoryResultsList);
 
-              FunctionCallbackWrapper<Request, Response> memoryFunctionCallback = getMemoryFunctionCallback(
-                  assistantId, assistantDto);
+                  FunctionCallbackWrapper<Request, Response> memoryFunctionCallback = getMemoryFunctionCallback(
+                      assistantId, runId, assistantDto);
 
-              ChatOptions promptOptions = universalChatService.getPromptOptions(assistantDto,
-                  List.of(memoryFunctionCallback));
+                  ChatOptions promptOptions = universalChatService.getPromptOptions(assistantDto,
+                      List.of(memoryFunctionCallback));
 
-              LOGGER.debug("Starting stream with prompt: {}", finalPromptMessageList);
-              LOGGER.debug("Prompt Options: {}",
-                  universalChatService.printPromptOptions(assistantDto.system(),
-                      promptOptions));
+                  LOGGER.debug("Starting stream with prompt: {}", finalPromptMessageList);
+                  LOGGER.debug("Prompt Options: {}",
+                      universalChatService.printPromptOptions(assistantDto.system(),
+                          promptOptions));
 
-              Prompt prompt = new Prompt(finalPromptMessageList, promptOptions);
+                  Prompt prompt = new Prompt(finalPromptMessageList, promptOptions);
 
-              return universalChatService.stream(assistantDto.system(), prompt);
-            })
-            .doOnCancel(() -> {
-              LOGGER.debug("doOnCancel. message={}", assistantMessageContent);
-            })
-            .mapNotNull(chatResponse -> mapChatResponse(chatResponse, assistantMessageContent))
-            .doOnSubscribe(subscription -> {
-              LOGGER.debug("doOnSubscribe. message={}", assistantMessageContent);
+                  return universalChatService.stream(assistantDto.system(), prompt);
+                })
+                .doOnCancel(() -> {
+                  LOGGER.debug("doOnCancel. message={}", assistantMessageContent);
+                })
+                .mapNotNull(chatResponse -> mapChatResponse(chatResponse, assistantMessageContent))
+                .doOnSubscribe(subscription -> {
+                  LOGGER.debug("doOnSubscribe. message={}", assistantMessageContent);
 
-              activeStreams.put(runId, subscription);
-            })
-            .doOnNext(chatResponse -> LOGGER.debug("doOnNext response: {}", chatResponse))
-            .doOnComplete(() -> {
-              LOGGER.debug("doOnComplete. message={}", assistantMessageContent);
+                  activeStreams.put(runId, subscription);
+                })
+                .doOnComplete(() -> {
+                  LOGGER.trace("doOnComplete. message={}", assistantMessageContent);
 
-              Mono.fromRunnable(
-                      () -> saveNewMessage(assistantId, threadId, MessageType.ASSISTANT,
-                          assistantMessageContent.toString(), null))  // Wrap blocking call
-                  .subscribeOn(
-                      Schedulers.boundedElastic())  // Subscribe on separate thread pool
-                  .subscribe();  // Subscribe to start execution
-            })
-            .onErrorResume(throwable -> {
-              LOGGER.error("Error while streaming: {}", throwable.getMessage());
-              return Flux.just(ServerSentEvent.<String>builder()
-                  .event("error")
-                  .data(throwable.getMessage())
-                  .build());
-            }));
+                  Mono.fromRunnable(
+                          () -> saveNewMessage(assistantId, threadId, MessageType.ASSISTANT,
+                              assistantMessageContent.toString(), null))  // Wrap blocking call
+                      .subscribeOn(
+                          Schedulers.boundedElastic())  // Subscribe on separate thread pool
+                      .subscribe();  // Subscribe to start execution
+
+
+                })
+                .onErrorResume(throwable -> {
+                  LOGGER.error("Error while streaming: {}", throwable.getMessage());
+                  return Flux.just(ServerSentEvent.<String>builder()
+                      .event("error")
+                      .data(throwable.getMessage())
+                      .build());
+                }))
+        .log(AssistantSpringService.class.getName(), Level.FINE);
   }
 
-  private @NotNull ServerSentEvent<String> mapChatResponse(ChatResponse chatResponse,
+  private @NotNull ServerSentEvent<String> mapChatResponse(@NotNull ChatResponse chatResponse,
       StringBuilder assistantMessageContent) {
+
     String content = chatResponse.getResult().getOutput().getContent();
-    LOGGER.debug("ChatResponse received: {}", content);
+    LOGGER.trace("ChatResponse received: {}", chatResponse.getResult());
 
     if (content != null) {
       assistantMessageContent.append(
@@ -342,18 +349,21 @@ public class AssistantSpringService {
     ServerSentEvent<String> responseSseEvent = createResponseSseEvent(chatResponse);
 
     if (responseSseEvent != null) {
-      LOGGER.debug("Sending event '{}'", responseSseEvent.event());
+      LOGGER.trace("Sending event '{}'", responseSseEvent.event());
     }
     return responseSseEvent;
   }
 
   private FunctionCallbackWrapper<Request, Response> getMemoryFunctionCallback(
-      String assistantId, AssistantDto assistantDto) {
+      String assistantId, String runId, AssistantDto assistantDto) {
     return FunctionCallbackWrapper.builder(
             new ContextStorageFunction(memoryService,
                 new FunctionContext(LlmSystem.OPENAI,
-                    OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL, assistantId,
-                    assistantDto.name())))
+                    OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL,
+                    assistantId,
+                    assistantDto.name(),
+                    runId
+                )))
         .withDescription(
             "Store relevant information in the vector database for later retrieval.")
         .withName(ContextTool.MEMORY_STORE.getFunctionBeanName())

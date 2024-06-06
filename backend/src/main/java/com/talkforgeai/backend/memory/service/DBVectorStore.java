@@ -98,6 +98,7 @@ public class DBVectorStore implements ListableVectoreStore {
           documentEntity.setCreatedAt(new Date());
           documentEntity.setSystem((String) document.getMetadata().get(MetadataKey.SYSTEM.key()));
           documentEntity.setModel((String) document.getMetadata().get(MetadataKey.MODEL.key()));
+          documentEntity.setRunId((String) document.getMetadata().get(MetadataKey.RUN_ID.key()));
           if (document.getMetadata().containsKey(MetadataKey.ASSISTANT_ID.key())) {
             assistantRepository.findById(
                     (String) document.getMetadata().get(MetadataKey.ASSISTANT_ID.key()))
@@ -160,7 +161,7 @@ public class DBVectorStore implements ListableVectoreStore {
           metadata.put(MetadataKey.ASSISTANT_NAME.key(),
               memoryDocument.getAssistant() == null ? null
                   : memoryDocument.getAssistant().getName());
-          
+
           return new Document(s.key(), memoryDocument.getContent(), metadata);
         })
         .toList();

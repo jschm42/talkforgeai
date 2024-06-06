@@ -44,11 +44,16 @@ public class MemoryService {
   }
 
   public DocumentWithoutEmbeddings store(String content, String assistantId) {
+    return this.store(content, assistantId, "");
+  }
+
+  public DocumentWithoutEmbeddings store(String content, String assistantId, String runId) {
     Document document = new Document(content);
 
     document.getMetadata().put(MetadataKey.SYSTEM.key(), LlmSystem.OPENAI.name());
     document.getMetadata()
         .put(MetadataKey.MODEL.key(), OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL);
+    document.getMetadata().put(MetadataKey.RUN_ID.key(), runId);
 
     if (assistantId != null && !assistantId.isBlank()) {
       document.getMetadata().put(MetadataKey.ASSISTANT_ID.key(), assistantId);
