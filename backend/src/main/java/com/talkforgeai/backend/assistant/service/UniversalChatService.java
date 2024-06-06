@@ -22,21 +22,21 @@ import com.talkforgeai.backend.assistant.exception.AssistentException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.springframework.ai.anthropic.AnthropicChatClient;
+import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.anthropic.api.AnthropicApi;
-import org.springframework.ai.chat.ChatClient;
-import org.springframework.ai.chat.ChatResponse;
-import org.springframework.ai.chat.StreamingChatClient;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.StreamingChatModel;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.mistralai.MistralAiChatClient;
+import org.springframework.ai.mistralai.MistralAiChatModel;
 import org.springframework.ai.mistralai.MistralAiChatOptions;
 import org.springframework.ai.mistralai.api.MistralAiApi;
 import org.springframework.ai.model.function.FunctionCallback;
-import org.springframework.ai.ollama.OllamaChatClient;
+import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.api.OllamaOptions;
-import org.springframework.ai.openai.OpenAiChatClient;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -48,23 +48,23 @@ public class UniversalChatService {
 
   @Qualifier("openAiRestClient")
   private final RestClient openAiRestClient;
-
-  private final OpenAiChatClient openAiChatClient;
-  private final MistralAiChatClient mistralAiChatClient;
-  private final AnthropicChatClient anthropicChatClient;
-  private final OllamaChatClient ollamaChatClient;
+  private final OpenAiChatModel openAiChatModel;
+  private final MistralAiChatModel mistralAiChatModel;
+  private final AnthropicChatModel anthropicChatModel;
+  private final OllamaChatModel ollamaChatModel;
 
   @Qualifier("ollamaAiRestClient")
   private final RestClient ollamaAiRestClient;
 
-  public UniversalChatService(RestClient openAiRestClient, OpenAiChatClient openAiChatClient,
-      MistralAiChatClient mistralAiChatClient, AnthropicChatClient anthropicChatClient,
-      OllamaChatClient ollamaChatClient, RestClient ollamaAiRestClient) {
+  public UniversalChatService(RestClient openAiRestClient,
+      OpenAiChatModel openAiChatModel,
+      MistralAiChatModel mistralAiChatModel, AnthropicChatModel anthropicChatModel,
+      OllamaChatModel ollamaChatModel, RestClient ollamaAiRestClient) {
     this.openAiRestClient = openAiRestClient;
-    this.openAiChatClient = openAiChatClient;
-    this.mistralAiChatClient = mistralAiChatClient;
-    this.anthropicChatClient = anthropicChatClient;
-    this.ollamaChatClient = ollamaChatClient;
+    this.openAiChatModel = openAiChatModel;
+    this.mistralAiChatModel = mistralAiChatModel;
+    this.anthropicChatModel = anthropicChatModel;
+    this.ollamaChatModel = ollamaChatModel;
     this.ollamaAiRestClient = ollamaAiRestClient;
   }
 
@@ -134,27 +134,27 @@ public class UniversalChatService {
     return getStreamingChatClient(system).stream(prompt);
   }
 
-  StreamingChatClient getStreamingChatClient(LlmSystem system) {
-    return (StreamingChatClient) getClient(system);
+  StreamingChatModel getStreamingChatClient(LlmSystem system) {
+    return (StreamingChatModel) getClient(system);
   }
 
-  ChatClient getChatClient(LlmSystem system) {
-    return (ChatClient) getClient(system);
+  ChatModel getChatClient(LlmSystem system) {
+    return (ChatModel) getClient(system);
   }
 
   private Object getClient(LlmSystem system) {
     switch (system) {
       case OPENAI -> {
-        return openAiChatClient;
+        return openAiChatModel;
       }
       case MISTRAL -> {
-        return mistralAiChatClient;
+        return mistralAiChatModel;
       }
       case OLLAMA -> {
-        return ollamaChatClient;
+        return ollamaChatModel;
       }
       case ANSTHROPIC -> {
-        return anthropicChatClient;
+        return anthropicChatModel;
       }
       default -> throw new IllegalStateException("Unexpected system: " + system);
     }

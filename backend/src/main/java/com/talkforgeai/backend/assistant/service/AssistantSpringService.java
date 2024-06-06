@@ -43,7 +43,6 @@ import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
 import com.talkforgeai.backend.memory.dto.DocumentWithoutEmbeddings;
-import com.talkforgeai.backend.memory.repository.MemoryRepository;
 import com.talkforgeai.backend.memory.service.MemoryService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
@@ -73,12 +72,12 @@ import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
-import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.image.ImageResponse;
@@ -123,14 +122,13 @@ public class AssistantSpringService {
 
 
   private final Map<String, Subscription> activeStreams = new ConcurrentHashMap<>();
-  private final MemoryRepository memoryRepository;
 
   public AssistantSpringService(
       UniversalChatService universalChatService, UniversalImageGenService universalImageGenService,
       AssistantRepository assistantRepository, MessageRepository messageRepository,
       ThreadRepository threadRepository, FileStorageService fileStorageService,
       MessageProcessor messageProcessor, AssistantMapper assistantMapper,
-      MemoryService memoryService, MemoryRepository memoryRepository) {
+      MemoryService memoryService) {
 
     this.universalChatService = universalChatService;
     this.universalImageGenService = universalImageGenService;
@@ -141,7 +139,6 @@ public class AssistantSpringService {
     this.messageProcessor = messageProcessor;
     this.assistantMapper = assistantMapper;
     this.memoryService = memoryService;
-    this.memoryRepository = memoryRepository;
   }
 
   private static @NotNull Mono<InitInfos> getInitInfosMono(Mono<AssistantDto> assistantEntityMono,

@@ -20,7 +20,7 @@ import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.memory.repository.MemoryRepository;
 import com.talkforgeai.backend.memory.service.DBVectorStore;
 import jakarta.persistence.EntityManager;
-import org.springframework.ai.openai.OpenAiEmbeddingClient;
+import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,12 +29,12 @@ import org.springframework.context.annotation.Configuration;
 public class VectorStoreConfiguration {
 
   private final EntityManager entityManager;
-  private final OpenAiEmbeddingClient embeddingClient;
+  private final OpenAiEmbeddingModel embeddingClient;
   private final MemoryRepository memoryRepository;
   private final AssistantRepository assistantRepository;
 
   public VectorStoreConfiguration(EntityManager entityManager,
-      OpenAiEmbeddingClient embeddingClient,
+      OpenAiEmbeddingModel embeddingClient,
       MemoryRepository memoryRepository, AssistantRepository assistantRepository) {
     this.entityManager = entityManager;
     this.embeddingClient = embeddingClient;

@@ -19,9 +19,9 @@ package com.talkforgeai.backend.voice.service;
 import com.talkforgeai.backend.assistant.exception.AssistentException;
 import com.talkforgeai.backend.voice.dto.TranscriptionSystem;
 import java.io.File;
-import org.springframework.ai.model.ModelClient;
+import org.springframework.ai.model.Model;
 import org.springframework.ai.model.ModelOptions;
-import org.springframework.ai.openai.OpenAiAudioTranscriptionClient;
+import org.springframework.ai.openai.OpenAiAudioTranscriptionModel;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionOptions;
 import org.springframework.ai.openai.api.OpenAiAudioApi.TranscriptResponseFormat;
 import org.springframework.ai.openai.api.OpenAiAudioApi.WhisperModel;
@@ -33,11 +33,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class UniversalTranscriptionService {
 
-  private final OpenAiAudioTranscriptionClient openAiTranscriptionClient;
+  private final OpenAiAudioTranscriptionModel openAiTranscriptionModel;
 
 
-  public UniversalTranscriptionService(OpenAiAudioTranscriptionClient openAiTranscriptionClient) {
-    this.openAiTranscriptionClient = openAiTranscriptionClient;
+  public UniversalTranscriptionService(OpenAiAudioTranscriptionModel openAiTranscriptionModel) {
+    this.openAiTranscriptionModel = openAiTranscriptionModel;
   }
 
   ModelOptions getDefaultTranscriptionOptions(TranscriptionSystem system) {
@@ -90,11 +90,11 @@ public class UniversalTranscriptionService {
   }
 
 
-  private ModelClient<AudioTranscriptionPrompt, AudioTranscriptionResponse> getClient(
+  private Model<AudioTranscriptionPrompt, AudioTranscriptionResponse> getClient(
       TranscriptionSystem system) {
     switch (system) {
       case OPENAI -> {
-        return openAiTranscriptionClient;
+        return openAiTranscriptionModel;
       }
       default -> throw new IllegalStateException("Unexpected transcription system: " + system);
     }

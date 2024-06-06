@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.embedding.EmbeddingClient;
+import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.SimpleVectorStore.EmbeddingMath;
 import org.springframework.data.domain.PageRequest;
@@ -53,15 +53,15 @@ public class DBVectorStore implements ListableVectoreStore {
   private final EntityManager entityManager;
   private final MemoryRepository memoryRepository;
   private final AssistantRepository assistantRepository;
-  private final EmbeddingClient embeddingClient;
+  private final EmbeddingModel embeddingModel;
 
   public DBVectorStore(EntityManager entityManager, MemoryRepository memoryRepository,
       AssistantRepository assistantRepository,
-      EmbeddingClient embeddingClient) {
+      EmbeddingModel embeddingModel) {
     this.entityManager = entityManager;
     this.memoryRepository = memoryRepository;
     this.assistantRepository = assistantRepository;
-    this.embeddingClient = embeddingClient;
+    this.embeddingModel = embeddingModel;
   }
 
   @Transactional
@@ -89,7 +89,7 @@ public class DBVectorStore implements ListableVectoreStore {
           MemoryDocument documentEntity = new MemoryDocument();
 
           LOGGER.info("Calling EmbeddingClient for document id = {}", document.getId());
-          List<Double> embedding = this.embeddingClient.embed(document);
+          List<Double> embedding = this.embeddingModel.embed(document);
           documentEntity.setEmbeddings(
               embedding.stream().mapToDouble(Double::doubleValue).toArray());
           // Convert List<Double> to byte[]
@@ -168,7 +168,7 @@ public class DBVectorStore implements ListableVectoreStore {
   }
 
   private List<Double> getUserQueryEmbedding(String query) {
-    return this.embeddingClient.embed(query);
+    return this.embeddingModel.embed(query);
   }
 
   @Override

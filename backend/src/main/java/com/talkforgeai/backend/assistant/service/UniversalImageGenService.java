@@ -18,14 +18,14 @@ package com.talkforgeai.backend.assistant.service;
 
 import com.talkforgeai.backend.assistant.dto.ImageGenSystem;
 import com.talkforgeai.backend.assistant.exception.AssistentException;
-import org.springframework.ai.image.ImageClient;
+import org.springframework.ai.image.ImageModel;
 import org.springframework.ai.image.ImageOptions;
 import org.springframework.ai.image.ImagePrompt;
 import org.springframework.ai.image.ImageResponse;
-import org.springframework.ai.openai.OpenAiImageClient;
+import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.ai.openai.api.OpenAiImageApi;
-import org.springframework.ai.stabilityai.StabilityAiImageClient;
+import org.springframework.ai.stabilityai.StabilityAiImageModel;
 import org.springframework.ai.stabilityai.api.StabilityAiApi;
 import org.springframework.ai.stabilityai.api.StabilityAiImageOptions;
 import org.springframework.stereotype.Service;
@@ -33,14 +33,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class UniversalImageGenService {
 
-  private final OpenAiImageClient openAiImageClient;
+  private final OpenAiImageModel openAiImageModel;
 
-  private final StabilityAiImageClient stabilityAiImageClient;
+  private final StabilityAiImageModel stabilityAiImageModel;
 
-  public UniversalImageGenService(OpenAiImageClient openAiImageClient,
-      StabilityAiImageClient stabilityAiImageClient) {
-    this.openAiImageClient = openAiImageClient;
-    this.stabilityAiImageClient = stabilityAiImageClient;
+  public UniversalImageGenService(OpenAiImageModel openAiImageModel,
+      StabilityAiImageModel stabilityAiImageModel) {
+    this.openAiImageModel = openAiImageModel;
+    this.stabilityAiImageModel = stabilityAiImageModel;
   }
 
   public ImageResponse generate(ImageGenSystem imageGenSystem, String text) {
@@ -94,20 +94,20 @@ public class UniversalImageGenService {
     }
   }
 
-  private ImageClient getClient(ImageGenSystem system) {
+  private ImageModel getClient(ImageGenSystem system) {
     switch (system) {
       case OPENAI -> {
-        return openAiImageClient;
+        return openAiImageModel;
       }
       case STABILITY -> {
-        return stabilityAiImageClient;
+        return stabilityAiImageModel;
       }
       default -> throw new IllegalStateException("Unexpected image gen system: " + system);
     }
   }
 
-  public static record UniversalImageOptions(String model, String quality, int n, int height,
-                                             int width) {
+  public record UniversalImageOptions(String model, String quality, int n, int height,
+                                      int width) {
 
   }
 
