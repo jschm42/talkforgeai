@@ -98,10 +98,5 @@ export default {
   height: 93vh;
 }
 
-@media only screen and (min-width: 993px ) {
-  .chat-container {
-    height: 98vh;
-  }
-}
 
 </style>

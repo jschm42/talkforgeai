@@ -19,7 +19,7 @@
 
     <v-row>
       <!-- Sidebar visible on lg and higher screens -->
-      <v-col class="d-none d-md-block sidebar" cols="3" md="3" sm="4" xl="2">
+      <v-col class="sidebar" cols="3" md="3" sm="4" xl="2">
 
         <v-container class="d-flex flex-column nav-container">
           <v-row class="flex-grow-0">
@@ -46,24 +46,7 @@
 
         <!-- Add more buttons as needed -->
       </v-col>
-      <v-col>
-        <!-- Main Content -->
-        <v-row class="toolbar-header p-2 d-lg-none">
-          <v-col class="d-flex">
-            <v-toolbar
-                dark
-                image="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
-                prominent
-            >
-              <v-btn prepend-icon="mdi-arrow-left-bold-box-outline" @click.prevent="onClickBack">
-              </v-btn>
-              <v-toolbar-title>{{ assistantName }}</v-toolbar-title>
-              <v-app-bar-nav-icon @click="toggleSidebar"></v-app-bar-nav-icon>
-            </v-toolbar>
-
-          </v-col>
-        </v-row>
-
+      <v-col cols="9" md="9" sm="8" xl="10">
         <ChatContainer></ChatContainer>
       </v-col>
 
