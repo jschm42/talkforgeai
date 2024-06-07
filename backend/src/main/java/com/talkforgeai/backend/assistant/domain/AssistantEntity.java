@@ -70,6 +70,9 @@ public class AssistantEntity {
   @OneToMany(mappedBy = "assistant", fetch = FetchType.LAZY)
   private List<MemoryDocument> memoryDocuments = new ArrayList<>();
 
+  @OneToMany(mappedBy = "assistant", fetch = FetchType.LAZY)
+  private List<ThreadEntity> threads = new ArrayList<>();
+
   @Column(name = "memory", length = 20, nullable = false)
   private String memory;
 
@@ -165,5 +168,12 @@ public class AssistantEntity {
     this.memoryDocuments = memoryDocuments;
   }
 
+  public List<ThreadEntity> getThreads() {
+    return threads;
+  }
+
+  public void setThreads(List<ThreadEntity> threads) {
+    this.threads = threads;
+  }
 }
 

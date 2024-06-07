@@ -37,10 +37,14 @@ create table assistant_properties
 
 create table thread
 (
-  id         varchar(50) not null primary key,
-  title      varchar(50),
-  created_at timestamp
+  id           varchar(50) not null primary key,
+  title        varchar(50),
+  created_at   timestamp,
+  assistant_id varchar(50) not null,
+  foreign key (assistant_id) references assistant (id)
 );
+
+create index idx_thread_assistant_id on thread (assistant_id);
 
 create table message
 (

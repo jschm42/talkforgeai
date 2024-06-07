@@ -80,7 +80,7 @@ export function useAssistants() {
           chatStore.removeStatus();
           isReading = false;
         } else {
-          console.log('Chunk value: ', chunkValue);
+          //console.log('Chunk value: ', chunkValue);
           partial += chunkValue;
           const parts = partial.split('\n');
           partial = parts.pop() ?? '';
@@ -169,7 +169,7 @@ export function useAssistants() {
 
   const processData = (
       data: string, event: string, debouncedUpdateCallback: () => void): string => {
-    console.log('PROCESS event=' + event + ': ', data);
+    //console.log('PROCESS event=' + event + ': ', data);
 
     let result = '';
     switch (event) {
@@ -191,12 +191,12 @@ export function useAssistants() {
   };
 
   function processRunStartedEvent(data: string) {
-    console.log('## processRunStartedEvent', data);
+    //console.log('## processRunStartedEvent', data);
     chatStore.runId = data;
   }
 
   const processDeltaEvent = (data: string) => {
-    console.log('## processDeltaEvent', data);
+    //console.log('## processDeltaEvent', data);
     const lastMessage = chatStore.getLastMessage();
 
     if (data.length > 0) {
@@ -240,7 +240,7 @@ export function useAssistants() {
 
   const retrieveThreads = async () => {
     const result = await axios.get(
-        `/api/v1/threads`,
+        `/api/v1/threads/${chatStore.selectedAssistant.id}`,
         {
           params: {},
         },
@@ -251,13 +251,13 @@ export function useAssistants() {
 
   const retrieveThread = async (threadId: string) => {
     const result = await axios.get(
-        `/api/v1/threads/${threadId}`,
+        `/api/v1/threads/${chatStore.selectedAssistant.id}/${threadId}`,
     );
     return result.data;
   };
 
   const createThread = async () => {
-    const result = await axios.post(`/api/v1/threads`);
+    const result = await axios.post(`/api/v1/threads/${chatStore.selectedAssistant.id}`);
     return result.data;
   };
 

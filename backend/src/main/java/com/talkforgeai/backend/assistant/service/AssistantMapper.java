@@ -102,7 +102,7 @@ public class AssistantMapper {
 
   public ThreadDto toDto(ThreadEntity threadEntity) {
     return new ThreadDto(threadEntity.getId(), threadEntity.getTitle(),
-        threadEntity.getCreatedAt());
+        threadEntity.getCreatedAt(), toDto(threadEntity.getAssistant()));
   }
 
   public ThreadEntity toEntity(ThreadDto threadDto) {

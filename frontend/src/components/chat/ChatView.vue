@@ -163,6 +163,8 @@ export default defineComponent({
     },
   },
   mounted() {
+    this.chatStore.clearThreadsList();
+    this.chatStore.newThread();
     this.fetchData();
   },
 });

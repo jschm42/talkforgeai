@@ -61,9 +61,15 @@ export const useChatStore = defineStore('chat', {
   },
   actions: {
     /**
+     * Clear the threads list.
+     */
+    clearThreadsList() {
+      this.threads = [];
+    },
+    /**
      * Create a new thread.
      */
-    async newThread() {
+    newThread() {
       this.threadId = '';
       this.threadMessages = [];
       this.parsedMessages = {};

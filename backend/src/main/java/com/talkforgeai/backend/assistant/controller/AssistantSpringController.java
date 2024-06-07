@@ -125,19 +125,20 @@ public class AssistantSpringController {
     return assistantService.generateImage(generateImageRequest.prompt());
   }
 
-  @GetMapping("/threads")
-  public List<ThreadDto> listThreads() {
-    return assistantService.retrieveThreads();
+  @GetMapping("/threads/{assistantId}")
+  public List<ThreadDto> listThreads(@PathVariable("assistantId") String assistantId) {
+    return assistantService.retrieveThreads(assistantId);
   }
 
-  @PostMapping("/threads")
-  public ThreadDto createThread() {
-    return assistantService.createThread();
+  @PostMapping("/threads/{assistantId}")
+  public ThreadDto createThread(@PathVariable("assistantId") String assistantId) {
+    return assistantService.createThread(assistantId);
   }
 
-  @GetMapping("/threads/{threadId}")
-  public ThreadDto retrieveThread(@PathVariable("threadId") String threadId) {
-    return assistantService.retrieveThread(threadId);
+  @GetMapping("/threads/{assistantId}/{threadId}")
+  public ThreadDto retrieveThread(@PathVariable("assistantId") String assistantId,
+      @PathVariable("threadId") String threadId) {
+    return assistantService.retrieveThread(assistantId, threadId);
   }
 
   @GetMapping("/threads/{threadId}/messages")
@@ -162,7 +163,7 @@ public class AssistantSpringController {
   }
 
 
-  @GetMapping("/threads/{threadId}/{filename}")
+  @GetMapping("/threads/images/{threadId}/{filename}")
   public ResponseEntity<byte[]> getImage(@PathVariable String threadId,
       @PathVariable String filename) {
 

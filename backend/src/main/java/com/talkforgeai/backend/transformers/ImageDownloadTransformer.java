@@ -118,6 +118,6 @@ public class ImageDownloadTransformer implements Transformer {
       throw ex;
     }
 
-    return "/api/v1/threads/" + threadId + "/" + fileName;
+    return "/api/v1/threads/images/" + threadId + "/" + fileName;
   }
 }

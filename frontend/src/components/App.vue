@@ -19,8 +19,9 @@
   <v-app>
     <v-navigation-drawer absolute permanent width="200">
       <v-list-item>
-        <img alt="Talkforge AI" class="logo" src="@/assets/logo.png"
-             style="width: 90%" title="Talkforge AI">
+        <img alt="Talkforge AI" class="logo" role="button"
+             src="@/assets/logo.png" style="width: 90%" title="Talkforge AI"
+             @click.prevent="onListAssistants">
 
         <div class="d-flex flex-grow-1 align-items-start">
         </div>

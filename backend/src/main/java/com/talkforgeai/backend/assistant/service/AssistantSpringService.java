@@ -228,9 +228,11 @@ public class AssistantSpringService {
   }
 
   @Transactional
-  public ThreadDto createThread() {
+  public ThreadDto createThread(String assistantId) {
     ThreadEntity threadEntity = new ThreadEntity();
     threadEntity.setId(UniqueIdUtil.generateThreadId());
+    threadEntity.setAssistant(assistantRepository.findById(assistantId)
+        .orElseThrow(() -> new AssistentException("Assistant not found")));
     threadEntity.setTitle("<no title>");
     threadEntity.setCreatedAt(new Date());
     threadRepository.save(threadEntity);
@@ -238,8 +240,10 @@ public class AssistantSpringService {
     return assistantMapper.toDto(threadEntity);
   }
 
-  public List<ThreadDto> retrieveThreads() {
-    return this.threadRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream()
+  public List<ThreadDto> retrieveThreads(String assistantId) {
+    return this.threadRepository.findAllByAssistantId(assistantId,
+            Sort.by(Sort.Direction.DESC, "createdAt"))
+        .stream()
         .map(assistantMapper::toDto)
         .toList();
   }
@@ -533,10 +537,12 @@ public class AssistantSpringService {
     }
   }
 
-  public ThreadDto retrieveThread(String threadId) {
-    return threadRepository.findById(threadId)
-        .map(assistantMapper::toDto)
-        .orElseThrow(() -> new AssistentException("Thread not found"));
+  public ThreadDto retrieveThread(String assistantId, String threadId) {
+    ThreadEntity threadEntity = threadRepository.findByIdAndAssistantId(threadId, assistantId)
+        .orElseThrow(() -> new AssistentException(
+            "Thread " + threadId + " owned by assisant " + assistantId + " not found"));
+
+    return assistantMapper.toDto(threadEntity);
   }
 
   @Transactional

@@ -20,6 +20,7 @@ import java.util.Date;
 
 public record ThreadDto(String id,
                         String title,
-                        Date createdAt) {
+                        Date createdAt,
+                        AssistantDto assistant) {
 
 }

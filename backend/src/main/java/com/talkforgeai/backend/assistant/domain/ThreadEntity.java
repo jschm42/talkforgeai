@@ -19,6 +19,7 @@ package com.talkforgeai.backend.assistant.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.Date;
 
@@ -35,6 +36,9 @@ public class ThreadEntity {
 
   @Column(name = "created_at", nullable = false)
   private Date createdAt;
+
+  @ManyToOne
+  private AssistantEntity assistant;
 
   // Standard getters and setters
   public String getId() {
@@ -59,5 +63,13 @@ public class ThreadEntity {
 
   public void setCreatedAt(Date createdAt) {
     this.createdAt = createdAt;
+  }
+
+  public AssistantEntity getAssistant() {
+    return assistant;
+  }
+
+  public void setAssistant(AssistantEntity assistant) {
+    this.assistant = assistant;
   }
 }
