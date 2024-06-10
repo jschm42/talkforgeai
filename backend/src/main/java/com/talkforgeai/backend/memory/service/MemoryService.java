@@ -56,7 +56,7 @@ public class MemoryService {
     document.getMetadata().put(MetadataKey.RUN_ID.key(), runId);
 
     if (assistantId != null && !assistantId.isBlank()) {
-      document.getMetadata().put(MetadataKey.ASSISTANT_ID.key(), assistantId);
+      document.getMetadata().put(MetadataKey.CONVERSATION_ID.key(), assistantId);
       var assistant = assistantRepository.findById(assistantId);
       assistant.ifPresent(
           a -> document.getMetadata().put(MetadataKey.ASSISTANT_NAME.key(), a.getName()));

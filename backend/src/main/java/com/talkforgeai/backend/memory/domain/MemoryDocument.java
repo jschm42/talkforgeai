@@ -59,8 +59,11 @@ public class MemoryDocument {
 
   @ManyToOne
   private AssistantEntity assistant;
+
   @Column(name = "run_id", length = 50)
   private String runId;
+  @Column(name = "message_type", length = 20)
+  private String messageType;
 
   public String getId() {
     return id;
@@ -146,4 +149,13 @@ public class MemoryDocument {
   public void setRunId(String runId) {
     this.runId = runId;
   }
+
+  public String getMessageType() {
+    return messageType;
+  }
+
+  public void setMessageType(String memoryType) {
+    this.messageType = memoryType;
+  }
+
 }

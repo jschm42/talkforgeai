@@ -157,7 +157,7 @@ public class AssistantSpringService {
     return runIdMono;
   }
 
-  private static @NotNull List<Message> getFinalPromptMessageList(String message,
+  private static @NotNull List<Message> getFinalPromptMessageList(
       List<MessageDto> pastMessagesList, AssistantDto assistantDto,
       List<DocumentWithoutEmbeddings> memoryResultsList) {
     List<Message> promptMessageList = pastMessagesList.stream()
@@ -194,9 +194,6 @@ public class AssistantSpringService {
           result -> memoryMessage.append(result.content()).append("\n"));
       memoryMessage.append("\nUser message:\n");
     }
-
-    finalPromptMessageList.add(
-        new UserMessage(memoryMessage.append(message).toString()));
     return finalPromptMessageList;
   }
 
@@ -258,11 +255,11 @@ public class AssistantSpringService {
   }
 
   public Flux<ServerSentEvent<String>> streamRunConversation(String assistantId, String threadId,
-      String message) {
+      String userMessage) {
 
     final String runId = UniqueIdUtil.generateRunId();
 
-    Mono<Object> saveUserMessageMono = getSaveUserMessageMono(assistantId, threadId, message);
+    Mono<Object> saveUserMessageMono = getSaveUserMessageMono(assistantId, threadId, userMessage);
     Mono<AssistantDto> assistantEntityMono = getAssistantEntityMono(assistantId);
     Mono<List<MessageDto>> pastMessages = getPastMessagesMono(threadId);
     Mono<InitInfos> initInfosMono = getInitInfosMono(assistantEntityMono, pastMessages);
@@ -275,7 +272,7 @@ public class AssistantSpringService {
                 .flux()
                 .flatMap(initInfos -> {
                   List<DocumentWithoutEmbeddings> memorySearchResults = getMemorySearchResults(
-                      initInfos.assistantDto, message);
+                      initInfos.assistantDto, userMessage);
 
                   return Flux.just(
                       new PreparedInfos(initInfos.assistantDto(), initInfos.pastMessages(),
@@ -286,7 +283,7 @@ public class AssistantSpringService {
                   List<MessageDto> pastMessagesList = preparedInfos.pastMessages();
                   List<DocumentWithoutEmbeddings> memoryResultsList = preparedInfos.memoryResults();
 
-                  List<Message> finalPromptMessageList = getFinalPromptMessageList(message,
+                  List<Message> finalPromptMessageList = getFinalPromptMessageList(
                       pastMessagesList,
                       assistantDto, memoryResultsList);
 
@@ -303,19 +300,20 @@ public class AssistantSpringService {
 
                   Prompt prompt = new Prompt(finalPromptMessageList, promptOptions);
 
-                  return universalChatService.stream(assistantDto.system(), prompt);
+                  return universalChatService.stream(assistantDto.system(), finalPromptMessageList,
+                      userMessage, assistantId, promptOptions);
                 })
                 .doOnCancel(() -> {
-                  LOGGER.debug("doOnCancel. message={}", assistantMessageContent);
+                  LOGGER.debug("doOnCancel. userMessage={}", assistantMessageContent);
                 })
                 .mapNotNull(chatResponse -> mapChatResponse(chatResponse, assistantMessageContent))
                 .doOnSubscribe(subscription -> {
-                  LOGGER.debug("doOnSubscribe. message={}", assistantMessageContent);
+                  LOGGER.debug("doOnSubscribe. userMessage={}", assistantMessageContent);
 
                   activeStreams.put(runId, subscription);
                 })
                 .doOnComplete(() -> {
-                  LOGGER.trace("doOnComplete. message={}", assistantMessageContent);
+                  LOGGER.trace("doOnComplete. userMessage={}", assistantMessageContent);
 
                   Mono.fromRunnable(
                           () -> saveNewMessage(assistantId, threadId, MessageType.ASSISTANT,
@@ -524,7 +522,7 @@ public class AssistantSpringService {
     Prompt titlePrompt = new Prompt(new UserMessage(content), options);
 
     try {
-      ChatResponse titleResponse = universalChatService.call(LlmSystem.OPENAI, titlePrompt);
+      ChatResponse titleResponse = universalChatService.call(LlmSystem.OPENAI, content, options);
 
       String generatedTitle = titleResponse.getResult().getOutput().getContent();
 

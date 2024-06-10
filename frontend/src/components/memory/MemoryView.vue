@@ -60,6 +60,13 @@
                         ></v-text-field>
                       </td>
                       <td>
+                        <v-select v-model="searchMessageType"
+                                  :items="['', 'ASSISTANT', 'USER', 'SYSTEM']"
+                                  class="ma-2"
+                                  density="compact" hide-details
+                                  placeholder="Search Message Type..."></v-select>
+                      </td>
+                      <td>
                         <v-select v-model="searchSystem" :items="availableSystems" class="ma-2"
                                   density="compact" hide-details
                                   placeholder="Search System..."></v-select>
@@ -180,6 +187,7 @@ export default {
       headers: [
         {title: 'Content', key: 'content', align: 'start', sortable: true},
         {title: 'Assistant', key: 'assistantName', align: 'start', sortable: true},
+        {title: 'Type', key: 'messageType', align: 'start', sortable: true},
         {title: 'System', key: 'system', align: 'start', sortable: true},
         {title: 'Model', key: 'model', align: 'start', sortable: true},
       ],
@@ -199,6 +207,7 @@ export default {
     const searchAssistantName = ref('');
     const searchText = ref('');
     const searchSystem = ref('ALL');
+    const searchMessageType = ref('');
     let searchModifier = ref('');
     const newContentText = ref('');
     const selected = ref([]);
@@ -219,10 +228,14 @@ export default {
       searchModifier.value = String(Date.now());
     });
 
-    watch(searchSystem, async () => {
+    watch(searchMessageType, async () => {
       searchModifier.value = String(Date.now());
     });
 
+    watch(searchSystem, async () => {
+      searchModifier.value = String(Date.now());
+    });
+      
     const loadServerItems = async (pageable) => {
       console.log('Loading items', pageable);
       serverTable.value.loading = true;
@@ -232,6 +245,7 @@ export default {
             content: searchContent.value,
             assistantName: searchAssistantName.value,
             system: searchSystem.value === 'ALL' ? '' : searchSystem.value,
+            messageType: searchMessageType.value,
           });
       serverTable.value.totalItems = await memory.count();
       serverTable.value.loading = false;
@@ -328,6 +342,7 @@ export default {
       searchContent,
       searchAssistantName,
       searchSystem,
+      searchMessageType,
     };
   },
 };

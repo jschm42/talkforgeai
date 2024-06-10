@@ -14,23 +14,6 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.memory.dto;
 
-public enum MetadataKey {
-  SYSTEM("system"),
-  MODEL("model"),
-  CONVERSATION_ID("conversationId"),
-  ASSISTANT_NAME("assistantName"),
-  MESSAGE_TYPE("messageType"),
-  RUN_ID("runId");
-
-  private final String key;
-
-  MetadataKey(String key) {
-    this.key = key;
-  }
-
-  public String key() {
-    return key;
-  }
-}
+ALTER TABLE memory_document
+  ADD COLUMN message_type VARCHAR(20);

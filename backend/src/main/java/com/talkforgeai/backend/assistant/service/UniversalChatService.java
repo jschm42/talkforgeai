@@ -19,17 +19,16 @@ package com.talkforgeai.backend.assistant.service;
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
 import com.talkforgeai.backend.assistant.dto.LlmSystem;
 import com.talkforgeai.backend.assistant.exception.AssistentException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.anthropic.api.AnthropicApi;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.VectorStoreChatMemoryAdvisor;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.model.StreamingChatModel;
 import org.springframework.ai.chat.prompt.ChatOptions;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.mistralai.MistralAiChatModel;
 import org.springframework.ai.mistralai.MistralAiChatOptions;
 import org.springframework.ai.mistralai.api.MistralAiApi;
@@ -38,13 +37,19 @@ import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.api.OllamaOptions;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import reactor.core.publisher.Flux;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class UniversalChatService {
+
+  private final int DEFAULT_CHAT_MEMORY_RESPONSE_SIZE = 5;
 
   @Qualifier("openAiRestClient")
   private final RestClient openAiRestClient;
@@ -56,16 +61,21 @@ public class UniversalChatService {
   @Qualifier("ollamaAiRestClient")
   private final RestClient ollamaAiRestClient;
 
+  @Qualifier("dbVectorStore")
+  private final VectorStore dbVectorStore;
+
   public UniversalChatService(RestClient openAiRestClient,
       OpenAiChatModel openAiChatModel,
       MistralAiChatModel mistralAiChatModel, AnthropicChatModel anthropicChatModel,
-      OllamaChatModel ollamaChatModel, RestClient ollamaAiRestClient) {
+      OllamaChatModel ollamaChatModel, RestClient ollamaAiRestClient, VectorStore dbVectorStore) {
     this.openAiRestClient = openAiRestClient;
     this.openAiChatModel = openAiChatModel;
     this.mistralAiChatModel = mistralAiChatModel;
     this.anthropicChatModel = anthropicChatModel;
     this.ollamaChatModel = ollamaChatModel;
     this.ollamaAiRestClient = ollamaAiRestClient;
+
+    this.dbVectorStore = dbVectorStore;
   }
 
   public ChatOptions getPromptOptions(AssistantDto assistantDto,
@@ -126,38 +136,48 @@ public class UniversalChatService {
     return printedOptions.toString();
   }
 
-  ChatResponse call(LlmSystem system, Prompt prompt) {
-    return getChatClient(system).call(prompt);
+  ChatResponse call(LlmSystem system, String prompt, ChatOptions options) {
+    return getClient(system)
+        .prompt()
+        .options(options)
+        .user(prompt)
+        .call()
+        .chatResponse();
   }
 
-  Flux<ChatResponse> stream(LlmSystem system, Prompt prompt) {
-    return getStreamingChatClient(system).stream(prompt);
+  Flux<ChatResponse> stream(LlmSystem system, List<Message> messages, String userMessage,
+      String conversationId,
+      ChatOptions options) {
+
+    return getClient(system)
+        .prompt()
+        .advisors(getVectorStoreChatMemoryAdvisor(conversationId))
+        .options(options)
+        .messages(messages)
+        .user(userMessage)
+        .stream()
+        .chatResponse();
   }
 
-  StreamingChatModel getStreamingChatClient(LlmSystem system) {
-    return (StreamingChatModel) getClient(system);
+  private @NotNull VectorStoreChatMemoryAdvisor getVectorStoreChatMemoryAdvisor(
+      String converationId) {
+    return new VectorStoreChatMemoryAdvisor(
+        dbVectorStore,
+        converationId,
+        DEFAULT_CHAT_MEMORY_RESPONSE_SIZE
+    );
   }
 
-  ChatModel getChatClient(LlmSystem system) {
-    return (ChatModel) getClient(system);
-  }
+  private ChatClient getClient(LlmSystem system) {
+    ChatModel model = switch (system) {
+      case OPENAI -> openAiChatModel;
+      case MISTRAL -> mistralAiChatModel;
+      case OLLAMA -> ollamaChatModel;
+      case ANSTHROPIC -> anthropicChatModel;
+    };
 
-  private Object getClient(LlmSystem system) {
-    switch (system) {
-      case OPENAI -> {
-        return openAiChatModel;
-      }
-      case MISTRAL -> {
-        return mistralAiChatModel;
-      }
-      case OLLAMA -> {
-        return ollamaChatModel;
-      }
-      case ANSTHROPIC -> {
-        return anthropicChatModel;
-      }
-      default -> throw new IllegalStateException("Unexpected system: " + system);
-    }
+    return ChatClient.builder(model)
+        .build();
   }
 
   private MistralAiChatOptions getMistralOptions(AssistantDto assistantDto,
