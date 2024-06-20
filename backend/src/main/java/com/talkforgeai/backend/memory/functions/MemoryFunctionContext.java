@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.assistant.functions;
+package com.talkforgeai.backend.memory.functions;
 
-import org.springframework.context.annotation.Configuration;
+import com.talkforgeai.backend.assistant.dto.LlmSystem;
 
-@Configuration
-public class FunctionsConfiguration {
+public record MemoryFunctionContext(LlmSystem embedLlmSystem,
+                                    String embedModel, String assistantId, String assistantName,
+                                    String runId) {
 
-//  @Bean
-//  @Description("Store relevant information in the vector database for later retrieval.")
-//  public Function<Request, Response> contextStorageFunction(MemoryService memoryService) {
-//    return new ContextStorageFunction(memoryService);
-//  }
 }

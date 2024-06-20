@@ -37,6 +37,13 @@
     <module>service</module>
     <module>app</module>
   </modules>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
   <properties>
     <java.version>21</java.version>
     <maven.compiler.source>21</maven.compiler.source>
@@ -100,24 +107,6 @@
       <groupId>org.springframework.ai</groupId>
       <artifactId>spring-ai-stability-ai-spring-boot-starter</artifactId>
     </dependency>
-
-    <!--    <dependency>-->
-    <!--      <groupId>org.springframework.ai</groupId>-->
-    <!--      <artifactId>spring-ai-chroma-store-spring-boot-starter</artifactId>-->
-    <!--    </dependency>-->
-    <!--    <dependency>-->
-    <!--      <groupId>org.springframework.ai</groupId>-->
-    <!--      <artifactId>spring-ai-milvus-store-spring-boot-starter</artifactId>-->
-    <!--    </dependency>-->
-    <!--    <dependency>-->
-    <!--      <groupId>org.springframework.ai</groupId>-->
-    <!--      <artifactId>spring-ai-redis-spring-boot-starter</artifactId>-->
-    <!--    </dependency>-->
-    <!--    <dependency>-->
-    <!--      <groupId>org.springframework.ai</groupId>-->
-    <!--      <artifactId>spring-ai-neo4j-store-spring-boot-starter</artifactId>-->
-    <!--    </dependency>-->
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>

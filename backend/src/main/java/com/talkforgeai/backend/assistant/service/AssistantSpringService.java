@@ -34,15 +34,14 @@ import com.talkforgeai.backend.assistant.dto.ThreadTitleDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleGenerationRequestDto;
 import com.talkforgeai.backend.assistant.dto.ThreadTitleUpdateRequestDto;
 import com.talkforgeai.backend.assistant.exception.AssistentException;
-import com.talkforgeai.backend.assistant.functions.ContextStorageFunction;
-import com.talkforgeai.backend.assistant.functions.ContextStorageFunction.Request;
-import com.talkforgeai.backend.assistant.functions.ContextStorageFunction.Response;
-import com.talkforgeai.backend.assistant.functions.ContextTool;
-import com.talkforgeai.backend.assistant.functions.FunctionContext;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.assistant.repository.MessageRepository;
 import com.talkforgeai.backend.assistant.repository.ThreadRepository;
 import com.talkforgeai.backend.memory.dto.DocumentWithoutEmbeddings;
+import com.talkforgeai.backend.memory.functions.MemoryContextStorageFunction;
+import com.talkforgeai.backend.memory.functions.MemoryContextStorageFunction.Request;
+import com.talkforgeai.backend.memory.functions.MemoryContextStorageFunction.Response;
+import com.talkforgeai.backend.memory.functions.MemoryFunctionContext;
 import com.talkforgeai.backend.memory.service.MemoryService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
@@ -79,12 +78,14 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.ChatOptions;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.image.ImageResponse;
+import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.model.function.FunctionCallbackWrapper;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi.ChatModel;
 import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.filter.Filter.Expression;
+import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
@@ -272,7 +273,7 @@ public class AssistantSpringService {
                 .flux()
                 .flatMap(initInfos -> {
                   List<DocumentWithoutEmbeddings> memorySearchResults = getMemorySearchResults(
-                      initInfos.assistantDto, userMessage);
+                      initInfos.assistantDto.id(), initInfos.assistantDto.memory(), userMessage);
 
                   return Flux.just(
                       new PreparedInfos(initInfos.assistantDto(), initInfos.pastMessages(),
@@ -287,21 +288,24 @@ public class AssistantSpringService {
                       pastMessagesList,
                       assistantDto, memoryResultsList);
 
-                  FunctionCallbackWrapper<Request, Response> memoryFunctionCallback = getMemoryFunctionCallback(
-                      assistantId, runId, assistantDto);
+                  List<FunctionCallback> functionCallbacks = new ArrayList<>();
+                  FunctionCallbackWrapper<Request, Response> memoryFunctionCallback
+                      = getMemoryFunctionCallback(assistantId, assistantDto.name(), runId);
+
+                  if (assistantDto.memory() == MemoryType.AI_DECIDES) {
+                    functionCallbacks.add(memoryFunctionCallback);
+                  }
 
                   ChatOptions promptOptions = universalChatService.getPromptOptions(assistantDto,
-                      List.of(memoryFunctionCallback));
+                      functionCallbacks);
 
                   LOGGER.debug("Starting stream with prompt: {}", finalPromptMessageList);
                   LOGGER.debug("Prompt Options: {}",
                       universalChatService.printPromptOptions(assistantDto.system(),
                           promptOptions));
 
-                  Prompt prompt = new Prompt(finalPromptMessageList, promptOptions);
-
-                  return universalChatService.stream(assistantDto.system(), finalPromptMessageList,
-                      userMessage, assistantId, promptOptions);
+                  return universalChatService.stream(assistantDto,
+                      finalPromptMessageList, userMessage, promptOptions);
                 })
                 .doOnCancel(() -> {
                   LOGGER.debug("doOnCancel. userMessage={}", assistantMessageContent);
@@ -354,18 +358,18 @@ public class AssistantSpringService {
   }
 
   private FunctionCallbackWrapper<Request, Response> getMemoryFunctionCallback(
-      String assistantId, String runId, AssistantDto assistantDto) {
+      String assistantId, String assistantName, String runId) {
     return FunctionCallbackWrapper.builder(
-            new ContextStorageFunction(memoryService,
-                new FunctionContext(LlmSystem.OPENAI,
+            new MemoryContextStorageFunction(memoryService,
+                new MemoryFunctionContext(LlmSystem.OPENAI,
                     OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL,
                     assistantId,
-                    assistantDto.name(),
+                    assistantName,
                     runId
                 )))
         .withDescription(
             "Store relevant information in the vector database for later retrieval.")
-        .withName(ContextTool.MEMORY_STORE.getFunctionBeanName())
+        .withName(MemoryContextStorageFunction.NAME)
         .build();
   }
 
@@ -392,31 +396,32 @@ public class AssistantSpringService {
         .subscribeOn(Schedulers.boundedElastic());
   }
 
-  private @NotNull List<DocumentWithoutEmbeddings> getMemorySearchResults(AssistantDto assistantDto,
+  private @NotNull List<DocumentWithoutEmbeddings> getMemorySearchResults(String assistantId,
+      MemoryType memoryType,
       String message) {
 
-    if (assistantDto.memory() == MemoryType.NONE) {
+    if (memoryType == MemoryType.NONE) {
       return List.of();
     }
 
     LOGGER.info("Searching memory for message: {}", message);
+
+    FilterExpressionBuilder expressionBuilder = new FilterExpressionBuilder();
+    Expression assistantExpression = expressionBuilder.eq("assistantId", assistantId).build();
+
     List<DocumentWithoutEmbeddings> searchResults = memoryService.search(
-        SearchRequest.query(message).withSimilarityThreshold(0.75f));
+        SearchRequest.query(message)
+            .withFilterExpression(assistantExpression)
+            .withSimilarityThreshold(0.75f));
 
-    if (assistantDto.memory() == MemoryType.ASSISTANT) {
-      List<DocumentWithoutEmbeddings> filteredMemory = searchResults.stream()
-          .filter(m -> m.assistantId() != null && m.assistantId().equals(assistantDto.id()))
-          .toList();
+    List<DocumentWithoutEmbeddings> filteredMemory = searchResults.stream()
+        .filter(m -> m.assistantId() != null && m.assistantId().equals(assistantId))
+        .toList();
 
-      LOGGER.debug("Memory search results for assistant '{}': {}", assistantDto.id(),
-          filteredMemory);
+    LOGGER.debug("Memory search results for assistant '{}': {}", assistantId,
+        filteredMemory);
 
-      return filteredMemory;
-    }
-
-    LOGGER.debug("Memory search results: {}", searchResults);
-
-    return searchResults;
+    return filteredMemory;
   }
 
   private ServerSentEvent<String> createResponseSseEvent(ChatResponse chatResponse) {
@@ -518,8 +523,6 @@ public class AssistantSpringService {
         .withModel(ChatModel.GPT_3_5_TURBO.getValue())
         .withMaxTokens(256)
         .build();
-
-    Prompt titlePrompt = new Prompt(new UserMessage(content), options);
 
     try {
       ChatResponse titleResponse = universalChatService.call(LlmSystem.OPENAI, content, options);

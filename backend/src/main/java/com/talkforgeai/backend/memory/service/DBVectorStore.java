@@ -131,22 +131,26 @@ public class DBVectorStore implements ListableVectoreStore {
     LOGGER.info("Similarity search request: {}", request);
 
     String assistantId = null;
-
-    // TODO Handle expression
     if (request.getFilterExpression() != null) {
       ExpressionType type = request.getFilterExpression().type();
-      Key left = (Key) request.getFilterExpression().left();
-      Value right = (Value) request.getFilterExpression().right();
+      if (type == ExpressionType.EQ) {
+        Key left = (Key) request.getFilterExpression().left();
+        Value right = (Value) request.getFilterExpression().right();
 
-      assistantId = right.value().toString();
+        if (left.key().equals(SEARCH_ASSISTANT_ID)) {
+          assistantId = right.value().toString();
+        }
+      }
     }
 
     List<Double> userQueryEmbedding = getUserQueryEmbedding(request.getQuery());
 
     List<MemoryDocument> documents;
     if (assistantId == null) {
+      LOGGER.info("Searching for all documents");
       documents = memoryRepository.findAll();
     } else {
+      LOGGER.info("Searching for documents with assistantId = {}", assistantId);
       documents = memoryRepository.findAllByAssistantId(assistantId);
     }
 

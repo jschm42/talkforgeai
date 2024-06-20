@@ -17,13 +17,19 @@
 package com.talkforgeai.backend.assistant.service;
 
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
+import com.talkforgeai.backend.assistant.dto.AssistantDto.MemoryType;
 import com.talkforgeai.backend.assistant.dto.LlmSystem;
 import com.talkforgeai.backend.assistant.exception.AssistentException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.RequestResponseAdvisor;
 import org.springframework.ai.chat.client.advisor.VectorStoreChatMemoryAdvisor;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.model.ChatModel;
@@ -42,9 +48,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import reactor.core.publisher.Flux;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class UniversalChatService {
@@ -67,7 +70,8 @@ public class UniversalChatService {
   public UniversalChatService(RestClient openAiRestClient,
       OpenAiChatModel openAiChatModel,
       MistralAiChatModel mistralAiChatModel, AnthropicChatModel anthropicChatModel,
-      OllamaChatModel ollamaChatModel, RestClient ollamaAiRestClient, VectorStore dbVectorStore) {
+      OllamaChatModel ollamaChatModel,
+      RestClient ollamaAiRestClient, VectorStore dbVectorStore) {
     this.openAiRestClient = openAiRestClient;
     this.openAiChatModel = openAiChatModel;
     this.mistralAiChatModel = mistralAiChatModel;
@@ -145,13 +149,18 @@ public class UniversalChatService {
         .chatResponse();
   }
 
-  Flux<ChatResponse> stream(LlmSystem system, List<Message> messages, String userMessage,
-      String conversationId,
-      ChatOptions options) {
+  Flux<ChatResponse> stream(AssistantDto assistantDto, List<Message> messages,
+      String userMessage, ChatOptions options) {
 
-    return getClient(system)
+    List<RequestResponseAdvisor> requestResponseAdvisors = new ArrayList<>();
+
+    if (assistantDto.memory() == MemoryType.HISTORY) {
+      requestResponseAdvisors.add(getVectorStoreChatMemoryAdvisor(assistantDto.id()));
+    }
+
+    return getClient(assistantDto.system())
         .prompt()
-        .advisors(getVectorStoreChatMemoryAdvisor(conversationId))
+        .advisors(requestResponseAdvisors)
         .options(options)
         .messages(messages)
         .user(userMessage)

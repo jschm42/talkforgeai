@@ -39,8 +39,7 @@
                     :search="searchModifier"
                     item-value="id"
                     show-select
-                    @update:options="loadServerItems"
-                >
+                    @update:options="loadServerItems">
                   <template v-slot:tfoot>
                     <tr>
                       <td>
@@ -185,7 +184,7 @@ export default {
     const serverTable = ref({
       itemsPerPage: 10,
       headers: [
-        {title: 'Content', key: 'content', align: 'start', sortable: true},
+        {title: 'Content', key: 'content', align: 'start', sortable: true, width: '40%'},
         {title: 'Assistant', key: 'assistantName', align: 'start', sortable: true},
         {title: 'Type', key: 'messageType', align: 'start', sortable: true},
         {title: 'System', key: 'system', align: 'start', sortable: true},
@@ -235,18 +234,27 @@ export default {
     watch(searchSystem, async () => {
       searchModifier.value = String(Date.now());
     });
-      
+
     const loadServerItems = async (pageable) => {
       console.log('Loading items', pageable);
       serverTable.value.loading = true;
 
-      serverTable.value.serverItems = await memory.list(pageable.page, pageable.itemsPerPage,
+      const resultList = await memory.list(pageable.page, pageable.itemsPerPage,
           pageable.sortBy, {
             content: searchContent.value,
             assistantName: searchAssistantName.value,
             system: searchSystem.value === 'ALL' ? '' : searchSystem.value,
             messageType: searchMessageType.value,
           });
+
+      resultList.forEach((item) => {
+        // shorten the content if it is too long
+        if (item.content.length > 200) {
+          item.content = item.content.substring(0, 200) + '...';
+        }
+      });
+
+      serverTable.value.serverItems = resultList;
       serverTable.value.totalItems = await memory.count();
       serverTable.value.loading = false;
     };
@@ -354,4 +362,5 @@ export default {
   overflow-y: auto;
   height: 100vh; /* Adjust this value as needed */
 }
+
 </style>

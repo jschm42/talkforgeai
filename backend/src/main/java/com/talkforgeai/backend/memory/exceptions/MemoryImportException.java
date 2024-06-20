@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.assistant.functions;
+package com.talkforgeai.backend.memory.exceptions;
 
-import com.talkforgeai.backend.assistant.dto.LlmSystem;
+public class MemoryImportException extends RuntimeException {
 
-public record FunctionContext(LlmSystem embedLlmSystem,
-                              String embedModel, String assistantId, String assistantName,
-                              String runId) {
+  public MemoryImportException(String message) {
+    super(message);
+  }
+
+  public MemoryImportException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
 }
