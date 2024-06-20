@@ -22,8 +22,10 @@ import com.talkforgeai.backend.assistant.domain.AssistantEntity;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.memory.dto.MemoryImportDto;
 import com.talkforgeai.backend.memory.exceptions.MemoryException;
+import com.talkforgeai.backend.memory.exceptions.MemoryImportException;
 import com.talkforgeai.backend.storage.FileStorageService;
 import jakarta.transaction.Transactional;
+import java.awt.TrayIcon.MessageType;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,6 +69,8 @@ public class MemoryImportService {
                   new TypeReference<>() {
                   });
               memoryImportDtos.forEach(memoryImportDto -> {
+                validateImport(memoryImportDto);
+
                 try {
                   String assistantId = null;
                   if (memoryImportDto.assistantName() != null && !memoryImportDto.assistantName()
@@ -88,6 +92,17 @@ public class MemoryImportService {
           });
     } catch (IOException e) {
       LOGGER.error("Failed to list files in directory: {} ", importDirectory, e);
+    }
+  }
+
+  private void validateImport(MemoryImportDto memoryImportDto) {
+    try {
+      if (memoryImportDto.messageType() != null && !memoryImportDto.messageType()
+          .isBlank()) {
+        MessageType.valueOf(memoryImportDto.messageType());
+      }
+    } catch (IllegalArgumentException e) {
+      throw new MemoryImportException("Invalid message type: " + memoryImportDto.messageType(), e);
     }
   }
 }

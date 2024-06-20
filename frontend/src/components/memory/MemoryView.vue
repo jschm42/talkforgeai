@@ -39,8 +39,7 @@
                     :search="searchModifier"
                     item-value="id"
                     show-select
-                    @update:options="loadServerItems"
-                >
+                    @update:options="loadServerItems">
                   <template v-slot:tfoot>
                     <tr>
                       <td>
@@ -58,6 +57,13 @@
                             placeholder="Search Assistant..."
                             type="string"
                         ></v-text-field>
+                      </td>
+                      <td>
+                        <v-select v-model="searchMessageType"
+                                  :items="['', 'ASSISTANT', 'USER', 'SYSTEM']"
+                                  class="ma-2"
+                                  density="compact" hide-details
+                                  placeholder="Search Message Type..."></v-select>
                       </td>
                       <td>
                         <v-select v-model="searchSystem" :items="availableSystems" class="ma-2"
@@ -178,8 +184,9 @@ export default {
     const serverTable = ref({
       itemsPerPage: 10,
       headers: [
-        {title: 'Content', key: 'content', align: 'start', sortable: true},
+        {title: 'Content', key: 'content', align: 'start', sortable: true, width: '40%'},
         {title: 'Assistant', key: 'assistantName', align: 'start', sortable: true},
+        {title: 'Type', key: 'messageType', align: 'start', sortable: true},
         {title: 'System', key: 'system', align: 'start', sortable: true},
         {title: 'Model', key: 'model', align: 'start', sortable: true},
       ],
@@ -199,6 +206,7 @@ export default {
     const searchAssistantName = ref('');
     const searchText = ref('');
     const searchSystem = ref('ALL');
+    const searchMessageType = ref('');
     let searchModifier = ref('');
     const newContentText = ref('');
     const selected = ref([]);
@@ -219,6 +227,10 @@ export default {
       searchModifier.value = String(Date.now());
     });
 
+    watch(searchMessageType, async () => {
+      searchModifier.value = String(Date.now());
+    });
+
     watch(searchSystem, async () => {
       searchModifier.value = String(Date.now());
     });
@@ -227,12 +239,22 @@ export default {
       console.log('Loading items', pageable);
       serverTable.value.loading = true;
 
-      serverTable.value.serverItems = await memory.list(pageable.page, pageable.itemsPerPage,
+      const resultList = await memory.list(pageable.page, pageable.itemsPerPage,
           pageable.sortBy, {
             content: searchContent.value,
             assistantName: searchAssistantName.value,
             system: searchSystem.value === 'ALL' ? '' : searchSystem.value,
+            messageType: searchMessageType.value,
           });
+
+      resultList.forEach((item) => {
+        // shorten the content if it is too long
+        if (item.content.length > 200) {
+          item.content = item.content.substring(0, 200) + '...';
+        }
+      });
+
+      serverTable.value.serverItems = resultList;
       serverTable.value.totalItems = await memory.count();
       serverTable.value.loading = false;
     };
@@ -328,6 +350,7 @@ export default {
       searchContent,
       searchAssistantName,
       searchSystem,
+      searchMessageType,
     };
   },
 };
@@ -339,4 +362,5 @@ export default {
   overflow-y: auto;
   height: 100vh; /* Adjust this value as needed */
 }
+
 </style>

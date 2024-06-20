@@ -38,7 +38,7 @@ public record AssistantDto(
 
   public enum MemoryType {
     NONE,
-    ASSISTANT,
-    GLOBAL
+    AI_DECIDES,
+    HISTORY
   }
 }

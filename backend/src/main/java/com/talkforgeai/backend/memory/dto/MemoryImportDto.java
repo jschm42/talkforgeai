@@ -16,6 +16,6 @@
 
 package com.talkforgeai.backend.memory.dto;
 
-public record MemoryImportDto(String content, String assistantName) {
+public record MemoryImportDto(String content, String assistantName, String messageType) {
 
 }

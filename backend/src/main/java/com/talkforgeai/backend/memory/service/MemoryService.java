@@ -44,19 +44,21 @@ public class MemoryService {
   }
 
   public DocumentWithoutEmbeddings store(String content, String assistantId) {
-    return this.store(content, assistantId, "");
+    return this.store(content, assistantId, "", "");
   }
 
-  public DocumentWithoutEmbeddings store(String content, String assistantId, String runId) {
+  public DocumentWithoutEmbeddings store(String content, String assistantId, String runId,
+      String messageType) {
     Document document = new Document(content);
 
     document.getMetadata().put(MetadataKey.SYSTEM.key(), LlmSystem.OPENAI.name());
     document.getMetadata()
         .put(MetadataKey.MODEL.key(), OpenAiEmbeddingProperties.DEFAULT_EMBEDDING_MODEL);
     document.getMetadata().put(MetadataKey.RUN_ID.key(), runId);
+    document.getMetadata().put(MetadataKey.MESSAGE_TYPE.key(), messageType);
 
     if (assistantId != null && !assistantId.isBlank()) {
-      document.getMetadata().put(MetadataKey.ASSISTANT_ID.key(), assistantId);
+      document.getMetadata().put(MetadataKey.CONVERSATION_ID.key(), assistantId);
       var assistant = assistantRepository.findById(assistantId);
       assistant.ifPresent(
           a -> document.getMetadata().put(MetadataKey.ASSISTANT_NAME.key(), a.getName()));

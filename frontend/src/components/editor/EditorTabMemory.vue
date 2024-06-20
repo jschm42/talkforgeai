@@ -25,9 +25,12 @@ export default defineComponent({
   data() {
     return {
       memoryTypes: [
-        {key: 'NONE', description: 'No Memory'},
-        {key: 'ASSISTANT', description: 'Use only Assistant memory'},
-        {key: 'GLOBAL', description: 'Use global memory'},
+        {key: 'NONE', description: 'No information is stored'},
+        {
+          key: 'AI_DECIDES',
+          description: 'The AI independently decides which information is stored',
+        },
+        {key: 'HISTORY', description: 'The entire chat history is stored'},
       ],
     };
   },

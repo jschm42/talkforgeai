@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.assistant.functions;
 
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-public class FunctionsConfiguration {
-
-//  @Bean
-//  @Description("Store relevant information in the vector database for later retrieval.")
-//  public Function<Request, Response> contextStorageFunction(MemoryService memoryService) {
-//    return new ContextStorageFunction(memoryService);
-//  }
-}
+ALTER TABLE memory_document
+  ADD COLUMN message_type VARCHAR(20);

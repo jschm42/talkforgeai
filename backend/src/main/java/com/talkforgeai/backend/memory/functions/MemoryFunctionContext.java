@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.assistant.functions;
+package com.talkforgeai.backend.memory.functions;
 
-public enum ContextTool {
-  MEMORY_STORE("contextStorageFunction");
+import com.talkforgeai.backend.assistant.dto.LlmSystem;
 
-  private String functionBeanName;
+public record MemoryFunctionContext(LlmSystem embedLlmSystem,
+                                    String embedModel, String assistantId, String assistantName,
+                                    String runId) {
 
-  ContextTool(String functionBeanName) {
-    this.functionBeanName = functionBeanName;
-  }
-
-  public String getFunctionBeanName() {
-    return functionBeanName;
-  }
 }

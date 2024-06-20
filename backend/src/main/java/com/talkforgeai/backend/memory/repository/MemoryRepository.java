@@ -17,6 +17,7 @@
 package com.talkforgeai.backend.memory.repository;
 
 import com.talkforgeai.backend.memory.domain.MemoryDocument;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,10 @@ public interface MemoryRepository extends JpaRepository<MemoryDocument, String> 
 
   @NotNull
   Page<MemoryDocument> findAll(@NotNull Pageable pageable);
+
+  @NotNull
+  List<MemoryDocument> findAllByAssistantId(@NotNull String assistantId);
+
 
   @Query("SELECT COUNT(md) FROM MemoryDocument md WHERE md.content = :content AND md.assistant.id = :assistantId")
   int countByContentAndAssistantId(String content, String assistantId);

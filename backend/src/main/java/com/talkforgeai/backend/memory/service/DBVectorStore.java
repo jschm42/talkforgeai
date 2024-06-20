@@ -16,6 +16,7 @@
 
 package com.talkforgeai.backend.memory.service;
 
+import com.talkforgeai.backend.assistant.dto.LlmSystem;
 import com.talkforgeai.backend.assistant.repository.AssistantRepository;
 import com.talkforgeai.backend.memory.domain.MemoryDocument;
 import com.talkforgeai.backend.memory.dto.MemoryListRequestDto;
@@ -38,8 +39,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.SimpleVectorStore.EmbeddingMath;
+import org.springframework.ai.vectorstore.filter.Filter.ExpressionType;
+import org.springframework.ai.vectorstore.filter.Filter.Key;
+import org.springframework.ai.vectorstore.filter.Filter.Value;
 import org.springframework.data.domain.PageRequest;
 
 public class DBVectorStore implements ListableVectoreStore {
@@ -49,7 +54,7 @@ public class DBVectorStore implements ListableVectoreStore {
   public static final String SEARCH_ASSISTANT_NAME = "assistantName";
   public static final String SEARCH_SYSTEM = "system";
   public static final String SEARCH_CONTENT = "content";
-  public static final String SEARCH_CREATED_AT = "createdAt";
+  public static final String SEARCH_MESSAGE_TYPE = "messageType";
   private final EntityManager entityManager;
   private final MemoryRepository memoryRepository;
   private final AssistantRepository assistantRepository;
@@ -71,11 +76,11 @@ public class DBVectorStore implements ListableVectoreStore {
     List<MemoryDocument> memoryDocuments = documents.stream()
         .filter(document -> {
           int countDocs;
-          if (document.getMetadata().get(MetadataKey.ASSISTANT_ID.key()) == null) {
+          if (document.getMetadata().get(MetadataKey.CONVERSATION_ID.key()) == null) {
             countDocs = memoryRepository.countByContentAndEmptyAssistant(document.getContent());
           } else {
             countDocs = memoryRepository.countByContentAndAssistantId(document.getContent(),
-                (String) document.getMetadata().get(MetadataKey.ASSISTANT_ID.key()));
+                (String) document.getMetadata().get(MetadataKey.CONVERSATION_ID.key()));
           }
 
           if (countDocs > 0) {
@@ -92,16 +97,18 @@ public class DBVectorStore implements ListableVectoreStore {
           List<Double> embedding = this.embeddingModel.embed(document);
           documentEntity.setEmbeddings(
               embedding.stream().mapToDouble(Double::doubleValue).toArray());
-          // Convert List<Double> to byte[]
           documentEntity.setId(UniqueIdUtil.generateMemoryId());
           documentEntity.setContent(document.getContent());
           documentEntity.setCreatedAt(new Date());
-          documentEntity.setSystem((String) document.getMetadata().get(MetadataKey.SYSTEM.key()));
-          documentEntity.setModel((String) document.getMetadata().get(MetadataKey.MODEL.key()));
+
+          documentEntity.setSystem(LlmSystem.OPENAI.name());
+          documentEntity.setModel(OpenAiApi.DEFAULT_EMBEDDING_MODEL);
           documentEntity.setRunId((String) document.getMetadata().get(MetadataKey.RUN_ID.key()));
-          if (document.getMetadata().containsKey(MetadataKey.ASSISTANT_ID.key())) {
+          documentEntity.setMessageType(
+              (String) document.getMetadata().get(MetadataKey.MESSAGE_TYPE.key()));
+          if (document.getMetadata().containsKey(MetadataKey.CONVERSATION_ID.key())) {
             assistantRepository.findById(
-                    (String) document.getMetadata().get(MetadataKey.ASSISTANT_ID.key()))
+                    (String) document.getMetadata().get(MetadataKey.CONVERSATION_ID.key()))
                 .ifPresent(documentEntity::setAssistant);
           }
 
@@ -121,14 +128,32 @@ public class DBVectorStore implements ListableVectoreStore {
 
   @Override
   public List<Document> similaritySearch(SearchRequest request) {
+    LOGGER.info("Similarity search request: {}", request);
+
+    String assistantId = null;
     if (request.getFilterExpression() != null) {
-      throw new UnsupportedOperationException(
-          "The [" + this.getClass() + "] doesn't support metadata filtering!");
+      ExpressionType type = request.getFilterExpression().type();
+      if (type == ExpressionType.EQ) {
+        Key left = (Key) request.getFilterExpression().left();
+        Value right = (Value) request.getFilterExpression().right();
+
+        if (left.key().equals(SEARCH_ASSISTANT_ID)) {
+          assistantId = right.value().toString();
+        }
+      }
     }
 
     List<Double> userQueryEmbedding = getUserQueryEmbedding(request.getQuery());
 
-    List<MemoryDocument> documents = memoryRepository.findAll();
+    List<MemoryDocument> documents;
+    if (assistantId == null) {
+      LOGGER.info("Searching for all documents");
+      documents = memoryRepository.findAll();
+    } else {
+      LOGGER.info("Searching for documents with assistantId = {}", assistantId);
+      documents = memoryRepository.findAllByAssistantId(assistantId);
+    }
+
     // Convert documents to Map<String, MemoryDocument>
     Map<String, MemoryDocument> documentMap = documents.stream()
         .collect(Collectors.toMap(MemoryDocument::getId, document -> document));
@@ -156,14 +181,16 @@ public class DBVectorStore implements ListableVectoreStore {
           Map<String, Object> metadata = new HashMap<>();
           metadata.put(MetadataKey.SYSTEM.key(), memoryDocument.getSystem());
           metadata.put(MetadataKey.MODEL.key(), memoryDocument.getModel());
-          metadata.put(MetadataKey.ASSISTANT_ID.key(),
+          metadata.put(MetadataKey.CONVERSATION_ID.key(),
               memoryDocument.getAssistant() == null ? null : memoryDocument.getAssistant().getId());
           metadata.put(MetadataKey.ASSISTANT_NAME.key(),
               memoryDocument.getAssistant() == null ? null
                   : memoryDocument.getAssistant().getName());
+          metadata.put(MetadataKey.MESSAGE_TYPE.key(), memoryDocument.getMessageType());
 
           return new Document(s.key(), memoryDocument.getContent(), metadata);
         })
+        .peek(document -> LOGGER.info("Similarity search result: {}", document))
         .toList();
   }
 
@@ -201,6 +228,8 @@ public class DBVectorStore implements ListableVectoreStore {
           "a.name LIKE :assistantName");
       appendQueryCondition(query, searchMap, SEARCH_SYSTEM,
           "md.system = :system");
+      appendQueryCondition(query, searchMap, SEARCH_MESSAGE_TYPE,
+          "md.messageType = :messageType");
     }
 
     List<MemoryListOrderDto> sortBy = listRequest.sortBy();
@@ -233,6 +262,8 @@ public class DBVectorStore implements ListableVectoreStore {
       setQueryParameter(typedQuery, searchMap, SEARCH_ASSISTANT_NAME,
           "%" + searchMap.get(SEARCH_ASSISTANT_NAME) + "%");
       setQueryParameter(typedQuery, searchMap, SEARCH_SYSTEM, searchMap.get(SEARCH_SYSTEM));
+      setQueryParameter(typedQuery, searchMap, SEARCH_MESSAGE_TYPE,
+          searchMap.get(SEARCH_MESSAGE_TYPE));
     }
 
     return typedQuery.getResultList().stream()
@@ -251,10 +282,11 @@ public class DBVectorStore implements ListableVectoreStore {
 
     metadata.put(MetadataKey.SYSTEM.key(), memoryDocument.getSystem());
     metadata.put(MetadataKey.MODEL.key(), memoryDocument.getModel());
-    metadata.put(MetadataKey.ASSISTANT_ID.key(),
+    metadata.put(MetadataKey.CONVERSATION_ID.key(),
         memoryDocument.getAssistant() == null ? null : memoryDocument.getAssistant().getId());
     metadata.put(MetadataKey.ASSISTANT_NAME.key(),
         memoryDocument.getAssistant() == null ? null : memoryDocument.getAssistant().getName());
+    metadata.put(MetadataKey.MESSAGE_TYPE.key(), memoryDocument.getMessageType());
 
     return new Document(
         memoryDocument.getId(),

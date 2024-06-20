@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.talkforgeai.backend.assistant.functions;
+package com.talkforgeai.backend.memory.functions;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -27,26 +27,28 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ContextStorageFunction implements
-    Function<ContextStorageFunction.Request, ContextStorageFunction.Response> {
+public class MemoryContextStorageFunction implements
+    Function<MemoryContextStorageFunction.Request, MemoryContextStorageFunction.Response> {
 
-  public static final Logger LOGGER = LoggerFactory.getLogger(ContextStorageFunction.class);
+  public static final String NAME = "memoryContextStorageFunction";
+  public static final Logger LOGGER = LoggerFactory.getLogger(MemoryContextStorageFunction.class);
 
   private final MemoryService memoryService;
-  private final FunctionContext functionContext;
+  private final MemoryFunctionContext memoryFunctionContext;
 
-  public ContextStorageFunction(MemoryService memoryService, FunctionContext functionContext) {
+  public MemoryContextStorageFunction(MemoryService memoryService,
+      MemoryFunctionContext memoryFunctionContext) {
     this.memoryService = memoryService;
-    this.functionContext = functionContext;
+    this.memoryFunctionContext = memoryFunctionContext;
   }
 
   @Override
   public Response apply(Request request) {
     LOGGER.info("Storing information in memory: {}", request.contextInfo());
     MemoryStoreRequestDto requestDto = new MemoryStoreRequestDto(request.contextInfo(),
-        functionContext.assistantId());
+        memoryFunctionContext.assistantId());
     DocumentWithoutEmbeddings storedDocument = memoryService.store(requestDto.content(),
-        requestDto.assistantId(), functionContext.runId());
+        requestDto.assistantId());
     return new Response(
         storedDocument.id(),
         "I stored the following information in memory: " + request.contextInfo());

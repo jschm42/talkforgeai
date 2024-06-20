@@ -22,7 +22,7 @@ import org.springframework.ai.document.Document;
 
 public record DocumentWithoutEmbeddings(String id, String content, String assistantId,
                                         String assistantName,
-                                        String system, String model) {
+                                        String system, String model, String messageType) {
 
   private static String getMetadataValue(Map<String, Object> meta, MetadataKey key) {
     return (String) meta.getOrDefault(key.key(), null);
@@ -33,10 +33,11 @@ public record DocumentWithoutEmbeddings(String id, String content, String assist
     return new DocumentWithoutEmbeddings(
         document.getId(),
         document.getContent(),
-        getMetadataValue(meta, MetadataKey.ASSISTANT_ID),
+        getMetadataValue(meta, MetadataKey.CONVERSATION_ID),
         getMetadataValue(meta, MetadataKey.ASSISTANT_NAME),
         getMetadataValue(meta, MetadataKey.SYSTEM),
-        getMetadataValue(meta, MetadataKey.MODEL)
+        getMetadataValue(meta, MetadataKey.MODEL),
+        getMetadataValue(meta, MetadataKey.MESSAGE_TYPE)
     );
   }
 }
