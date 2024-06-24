@@ -143,6 +143,18 @@ Contributions are welcome! Review our contributing guidelines to get started.
 
 TalkforgeAI is released under the Apache License 2.0. See the LICENSE file for more details.
 
+## Dependencies and Licenses
+
+This project uses several open-source libraries as dependencies. The direct dependencies and their
+licenses are listed in the DEPENDENCIES file.
+
+Please note that these dependencies may have their own transitive dependencies with various
+licenses. Users of this project should be aware of these licenses when using the software.
+
+To view a full list of dependencies and their licenses, you can use the following Maven command:
+
+mvn license:aggregate-add-third-party
+
 ## Support
 
 For support and inquiries, please open an issue on the GitHub repository or contact the maintainers

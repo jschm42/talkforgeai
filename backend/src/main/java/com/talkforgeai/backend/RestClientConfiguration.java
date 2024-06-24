@@ -21,6 +21,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
@@ -44,11 +45,26 @@ public class RestClientConfiguration {
   @Value("${spring.ai.ollama.base-url}")
   private String ollamaBaseUrl;
 
+  @Value("${elevenlabs.api-key}")
+  private String elevenLabsApiKey;
+
+  @Value("${elevenlabs.api-url}")
+  private String elevenLabsBaseUrl;
+
+  @Bean(name = "elevenLabsRestClient")
+  public RestClient elevenLabsRestClient() {
+    return RestClient.builder()
+        .baseUrl(elevenLabsBaseUrl)
+        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + elevenLabsApiKey)
+        .build();
+  }
+
   @Bean(name = "openAiRestClient")
   public RestClient openAiRestClient() {
     return RestClient.builder()
         .baseUrl(openAiBaseUrl)
-        .defaultHeader("Content-Type", "application/json")
+        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + openAiApiKey)
         .build();
   }
@@ -57,7 +73,7 @@ public class RestClientConfiguration {
   public RestClient ollamaAiRestClient() {
     return RestClient.builder()
         .baseUrl(ollamaBaseUrl)
-        .defaultHeader("Content-Type", "application/json")
+        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .build();
   }
 

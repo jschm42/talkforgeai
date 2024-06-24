@@ -35,11 +35,6 @@
       <version>0.2.2-SNAPSHOT</version>
     </dependency>
 
-    <dependency>
-      <groupId>net.sourceforge.plantuml</groupId>
-      <artifactId>plantuml</artifactId>
-    </dependency>
-
   </dependencies>
 
 </project>

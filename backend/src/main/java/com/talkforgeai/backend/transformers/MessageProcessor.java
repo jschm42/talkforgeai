@@ -19,7 +19,6 @@ package com.talkforgeai.backend.transformers;
 import com.talkforgeai.backend.assistant.service.UniversalImageGenService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.dto.TransformerContext;
-import com.talkforgeai.service.plantuml.PlantUMLService;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -34,14 +33,12 @@ public class MessageProcessor {
   List<Transformer> transformers = new ArrayList<>();
 
   public MessageProcessor(FileStorageService fileStorageService,
-      UniversalImageGenService universalImageGenService,
-      PlantUMLService plantUMLService) {
+      UniversalImageGenService universalImageGenService) {
     this.fileStorageService = fileStorageService;
 
     transformers.add(new HtmlEncoderTransformer());
     transformers.add(new ImageDownloadTransformer(universalImageGenService));
     transformers.add(new LaTeXTransformer());
-    transformers.add(new PlantUMLTransformer(plantUMLService));
     transformers.add(new CodeBlockTransformer());
     transformers.add(new CodePhraseTransformer());
     transformers.add(new MarkdownHeaderTransformer());
