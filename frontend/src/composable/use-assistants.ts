@@ -299,8 +299,9 @@ export function useAssistants() {
     return axios.post(`/api/v1/threads/${threadId}/runs/${id}/cancel`);
   };
 
-  const regenerateRun = async (threadId: any, id: any) => {
-    return axios.post(`/api/v1/threads/${threadId}/runs/${id}/regenerate`);
+  const regenerateRun = async (threadId: any) => {
+    console.log('Regenerate run with thread id:', threadId);
+    return axios.post(`/api/v1/threads/${threadId}/regenerate`);
   };
 
   const getAssistantById = (assistantId: string) => {
@@ -491,13 +492,6 @@ export function useAssistants() {
     }
   };
 
-  const regenerateCurrentRun = async (chunkUpdateCallback: () => void) => {
-    await regenerateRun(chatStore.threadId, chatStore.runId);
-
-    chatStore.updateStatus('Thinking...', 'running');
-    // await runStreamAndHandleResults(chunkUpdateCallback);
-  };
-
   const submitUserMessage = async (content: string, chunkUpdateCallback: () => void) => {
     console.log('');
 
@@ -540,7 +534,6 @@ export function useAssistants() {
     getAssistantImageUrl,
     encodePrompt,
     cancelCurrentRun,
-    regenerateCurrentRun,
     submitUserMessage,
     runConversation,
     retrieveModels,

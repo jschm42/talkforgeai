@@ -78,12 +78,6 @@ export default {
     isUser() {
       return this.message.role === Role.USER;
     },
-    // isFunctionCall() {
-    //   return this.message.function_call;
-    // },
-    // isFunctionResponse() {
-    //   return this.message.name && this.message.content;
-    // },
     isSpeakable() {
       return true;
     },
@@ -102,7 +96,11 @@ export default {
   },
   methods: {
     async playAudio() {
-      await this.$refs.chatMessageAudioPlayerRef.playAudio();
+      try {
+        await this.$refs.chatMessageAudioPlayerRef.playAudio();
+      } catch (error) {
+        this.chatStore.handleError(error);
+      }
     },
     getContent() {
       if (this.chatStore.parsedMessages[this.message.id] !== undefined) {

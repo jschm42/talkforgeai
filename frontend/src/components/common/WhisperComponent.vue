@@ -34,10 +34,12 @@
 import axios from 'axios';
 import {onMounted, ref} from 'vue';
 import RecordRTC from 'recordrtc';
+import {useAppStore} from '@/store/app-store';
 
 export default {
   name: 'WhisperComponent',
   setup(props, {emit}) {
+    const appStore = useAppStore();
     const recordedBlobUrl = ref(null);
     let isRecording = ref(false);
     let mediaStream = null;
@@ -47,17 +49,23 @@ export default {
       console.log('Start recording');
       isRecording.value = true;
 
-      mediaStream = await navigator.mediaDevices.getUserMedia({audio: true});
-      recorder = new RecordRTC(mediaStream, {
-        type: 'audio',
-        mimeType: 'audio/webm',
-        sampleRate: 44100,
-        numberOfAudioChannels: 1,
-        desiredSampRate: 16000,
-        bitsPerSecond: 128000,
-      });
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({audio: true});
+        recorder = new RecordRTC(mediaStream, {
+          type: 'audio',
+          mimeType: 'audio/webm',
+          sampleRate: 44100,
+          numberOfAudioChannels: 1,
+          desiredSampRate: 16000,
+          bitsPerSecond: 128000,
+        });
 
-      await recorder.startRecording();
+        await recorder.startRecording();
+      } catch (error) {
+        console.error('Failed to start recording: ', error);
+        this.appStore.handleError(error);
+        isRecording.value = false;
+      }
     };
 
     const saveBlob = (blob) => {
@@ -77,21 +85,30 @@ export default {
         });
       } catch (e) {
         console.error('Failed to send audio file: ', e);
+        this.appStore.handleError(e);
       } finally {
         isRecording.value = false;
       }
     };
 
     const stopRecording = () => {
-      recorder.stopRecording(() => {
-        const blob = recorder.getBlob();
-        saveBlob(blob);
-      });
+      try {
+        recorder.stopRecording(() => {
+          const blob = recorder.getBlob();
+          saveBlob(blob);
+        });
+      } catch (error) {
+        this.appStore.handleError(error);
+      }
     };
 
     onMounted(() => {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        console.error('getUserMedia() not supported.');
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          console.error('getUserMedia() not supported.');
+        }
+      } catch (error) {
+        this.appStore.handleError(error);
       }
     });
 
@@ -100,6 +117,7 @@ export default {
       startRecording,
       stopRecording,
       isRecording,
+      appStore,
     };
   },
 };

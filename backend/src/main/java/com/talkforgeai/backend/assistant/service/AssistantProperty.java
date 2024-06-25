@@ -16,13 +16,13 @@
 
 package com.talkforgeai.backend.assistant.service;
 
-public enum AssistantProperties {
+public enum AssistantProperty {
   TTS_TYPE("tts_type", ""),
 
   SPEECHAPI_VOICE("speechAPI_voice", ""),
 
   ELEVENLABS_VOICEID("elevenlabs_voiceId", ""),
-  ELEVENLABS_MODELID("elevenlabs_modelId", "eleven_monolingual_v2"),
+  ELEVENLABS_MODELID("elevenlabs_modelId", "eleven_multilingual_v2"),
   ELEVENLABS_SIMILARITYBOOST("elevenlabs_similarityBoost", "0"),
   ELEVENLABS_STABILITY("elevenlabs_stability", "0"),
 
@@ -30,18 +30,27 @@ public enum AssistantProperties {
   MODEL_TOP_P("model_topP", "1.0"),
   MODEL_FREQUENCY_PENALTY("model_frequencyPenalty", "0"),
   MODEL_PRESENCE_PENALTY("model_presencePenalty", "0"),
+  MODEL_MAX_TOKENS("model_maxTokens", "4096"),
 
-  FEATURE_PLANTUML("feature_plantUMLGeneration", "false"),
   FEATURE_IMAGEGENERATION("feature_imageGeneration", "false"),
   FEATURE_AUTOSPEAKDEFAULT("feature_autoSpeakDefault", "false"),
   FEATURE_TITLEGENERATION("feature_titleGeneration", "true");
-  
+
   private final String key;
   private final String defaultValue;
 
-  AssistantProperties(String key, String defaultValue) {
+  AssistantProperty(String key, String defaultValue) {
     this.key = key;
     this.defaultValue = defaultValue;
+  }
+
+  public static AssistantProperty fromKey(String key) {
+    for (AssistantProperty property : AssistantProperty.values()) {
+      if (property.getKey().equals(key)) {
+        return property;
+      }
+    }
+    throw new IllegalArgumentException("Unknown key: " + key);
   }
 
   public String getDefaultValue() {

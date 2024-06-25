@@ -23,11 +23,13 @@ import {useAssistants} from '@/composable/use-assistants';
 import {useHtmlToText} from '@/composable/use-html-to-text';
 import {useTextToSpeech} from '@/composable/use-text-to-speech';
 import {ThreadMessage} from '@/store/to/thread';
+import {useAppStore} from '@/store/app-store';
 
 export default defineComponent({
   name: 'ChatMessageTextToSpeech',
   setup() {
     const chatStore = useChatStore(); // Call useMyStore() inside the setup function
+    const appStore = useAppStore();
     const assistants = useAssistants();
     const htmlToText = useHtmlToText();
     const textToSpeech = useTextToSpeech();
@@ -60,8 +62,12 @@ export default defineComponent({
     stopAudio() {
       console.log('Audio stopped');
 
-      if (this.ttsType === TTSType.SPEECHAPI) {
-        window.speechSynthesis.cancel();
+      try {
+        if (this.ttsType === TTSType.SPEECHAPI) {
+          window.speechSynthesis.cancel();
+        }
+      } catch (error) {
+        this.appStore.handleError(error);
       }
 
       this.audioState = AudioState.Stopped;
@@ -72,13 +78,17 @@ export default defineComponent({
         return;
       }
 
-      const plainText = this.htmlToText.removeHtml(this.message.content);
-      this.audioState = AudioState.Loading;
+      try {
+        const plainText = this.htmlToText.removeHtml(this.message.content);
+        this.audioState = AudioState.Loading;
 
-      if (this.ttsType === TTSType.SPEECHAPI) {
-        await this.speakSpeechApi(plainText);
-      } else {
-        await this.speakElevenlabs(plainText);
+        if (this.ttsType === TTSType.SPEECHAPI) {
+          await this.speakSpeechApi(plainText);
+        } else {
+          await this.speakElevenlabs(plainText);
+        }
+      } catch (error) {
+        this.appStore.handleError(error);
       }
     },
     async speakElevenlabs(plainText) {
@@ -96,16 +106,23 @@ export default defineComponent({
         await audio.play();
       } catch (error) {
         console.error('Error loading audio stream.', error);
+        this.appStore.handleError(error);
         this.audioState = AudioState.Stopped;
       }
     },
     async speakSpeechApi(plainText) {
       console.log(`Speaking using SpeechAPI: '${plainText}'`);
-      this.audioState = AudioState.Playing;
-      const assistant = this.assistants.getAssistantById(this.message.assistantId);
-      await this.textToSpeech.speakSpeechAPI(plainText, assistant);
-      console.log('Stopped...');
-      this.audioState = AudioState.Stopped;
+      try {
+        this.audioState = AudioState.Playing;
+        const assistant = this.assistants.getAssistantById(this.message.assistantId);
+        await this.textToSpeech.speakSpeechAPI(plainText, assistant);
+        console.log('Stopped...');
+        this.audioState = AudioState.Stopped;
+      } catch (error) {
+        console.error('Error speaking using SpeechAPI.', error);
+        this.appStore.handleError(error);
+        this.audioState = AudioState.Stopped;
+      }
     },
   },
 });

@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Jean Schmitz.
+  - Copyright (c) 2023-2024 Jean Schmitz.
   -
   - Licensed under the Apache License, Version 2.0 (the "License");
   - you may not use this file except in compliance with the License.
@@ -25,17 +25,23 @@
 
 <script>
 import {ref} from 'vue';
+import {useAppStore} from '@/store/app-store';
 
 export default {
   setup() {
     const audio = ref(null);
     const isPlaying = ref(false);
+    const appStore = useAppStore();
 
     const playAudio = () => {
-      audio.value = new Audio('http://localhost:8090/streamaudio'); // replace with your streaming endpoint
-      audio.value.play();
-      isPlaying.value = true;
-      audio.value.onended = () => isPlaying.value = false;
+      try {
+        audio.value = new Audio('http://localhost:8090/streamaudio'); // replace with your streaming endpoint
+        audio.value.play();
+        isPlaying.value = true;
+        audio.value.onended = () => isPlaying.value = false;
+      } catch (error) {
+        appStore.handleError(error);
+      }
     };
 
     const stopAudio = () => {
@@ -50,6 +56,7 @@ export default {
       playAudio,
       stopAudio,
       isPlaying,
+      appStore,
     };
   },
 };

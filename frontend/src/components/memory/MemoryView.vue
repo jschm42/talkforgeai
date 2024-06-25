@@ -171,12 +171,14 @@ import {onMounted, ref, watch} from 'vue';
 import {useMemory} from '@/composable/use-memory';
 import {useAssistants} from '@/composable/use-assistants';
 import QuestionModal from '@/components/common/QuestionModal.vue';
+import {useAppStore} from '@/store/app-store';
 
 export default {
   components: {QuestionModal},
   setup() {
     const memory = useMemory();
     const assistants = useAssistants();
+    const appStore = useAppStore();
 
     const tab = ref(null);
     const similarityTable = ref([]);
@@ -239,24 +241,30 @@ export default {
       console.log('Loading items', pageable);
       serverTable.value.loading = true;
 
-      const resultList = await memory.list(pageable.page, pageable.itemsPerPage,
-          pageable.sortBy, {
-            content: searchContent.value,
-            assistantName: searchAssistantName.value,
-            system: searchSystem.value === 'ALL' ? '' : searchSystem.value,
-            messageType: searchMessageType.value,
-          });
+      try {
+        const resultList = await memory.list(pageable.page, pageable.itemsPerPage,
+            pageable.sortBy, {
+              content: searchContent.value,
+              assistantName: searchAssistantName.value,
+              system: searchSystem.value === 'ALL' ? '' : searchSystem.value,
+              messageType: searchMessageType.value,
+            });
 
-      resultList.forEach((item) => {
-        // shorten the content if it is too long
-        if (item.content.length > 200) {
-          item.content = item.content.substring(0, 200) + '...';
-        }
-      });
+        resultList.forEach((item) => {
+          // shorten the content if it is too long
+          if (item.content.length > 200) {
+            item.content = item.content.substring(0, 200) + '...';
+          }
+        });
 
-      serverTable.value.serverItems = resultList;
-      serverTable.value.totalItems = await memory.count();
-      serverTable.value.loading = false;
+        serverTable.value.serverItems = resultList;
+        serverTable.value.totalItems = await memory.count();
+        serverTable.value.loading = false;
+      } catch (error) {
+        console.error('Error loading items', error);
+        this.appStore.handleError(error);
+        serverTable.value.loading = false;
+      }
     };
 
     const itemProps = (item) => {
@@ -273,13 +281,23 @@ export default {
     };
 
     const onAddNewContent = async () => {
-      await memory.store(newContentText.value, selectedAssistant.value.id);
-      await loadServerItems({page: 1, itemsPerPage: serverTable.value.itemsPerPage});
+      try {
+        await memory.store(newContentText.value, selectedAssistant.value.id);
+        await loadServerItems({page: 1, itemsPerPage: serverTable.value.itemsPerPage});
+      } catch (error) {
+        console.error('Error adding new content', error);
+        appStore.handleError(error);
+      }
     };
 
     const onSearchSimilarity = async () => {
-      let memoryResponses = await memory.search(searchText.value, 10, searchThreshold.value);
-      updateSimilarityTable(memoryResponses);
+      try {
+        let memoryResponses = await memory.search(searchText.value, 10, searchThreshold.value);
+        updateSimilarityTable(memoryResponses);
+      } catch (error) {
+        console.error('Error searching similarity', error);
+        appStore.handleError(error);
+      }
     };
 
     const onClearSimilarities = async () => {
@@ -288,26 +306,46 @@ export default {
 
     const onDeleteMemoryEntriesAnswer = async (answer) => {
       showDeleteItemsModal.value = false;
-      if (answer) {
-        await onDeleteSelected();
+      try {
+        if (answer) {
+          await onDeleteSelected();
+        }
+      } catch (error) {
+        console.error('Error deleting memory entries', error);
+        appStore.handleError(error);
       }
     };
 
     const onDeleteAllAnswer = async (answer) => {
       showDeleteAllModal.value = false;
-      if (answer) {
-        await onDeleteAll();
+      try {
+        if (answer) {
+          await onDeleteAll();
+        }
+      } catch (error) {
+        console.error('Error deleting all memory entries', error);
+        appStore.handleError(error);
       }
     };
 
     const onDeleteSelected = async () => {
-      await memory.remove(selectedAssistants.value);
-      await loadServerItems({page: 1, itemsPerPage: serverTable.value.itemsPerPage});
+      try {
+        await memory.remove(selectedAssistants.value);
+        await loadServerItems({page: 1, itemsPerPage: serverTable.value.itemsPerPage});
+      } catch (error) {
+        console.error('Error deleting selected memory entries', error);
+        appStore.handleError(error);
+      }
     };
 
     const onDeleteAll = async () => {
-      await memory.clear();
-      await loadServerItems({page: 1, itemsPerPage: serverTable.value.itemsPerPage});
+      try {
+        await memory.clear();
+        await loadServerItems({page: 1, itemsPerPage: serverTable.value.itemsPerPage});
+      } catch (error) {
+        console.error('Error deleting all memory entries', error);
+        appStore.handleError(error);
+      }
     };
 
     const updateSimilarityTable = (similarityResponses) => {
@@ -351,6 +389,7 @@ export default {
       searchAssistantName,
       searchSystem,
       searchMessageType,
+      appStore,
     };
   },
 };

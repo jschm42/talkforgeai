@@ -43,6 +43,7 @@
 import {useChatStore} from '@/store/chat-store';
 import {format} from 'date-fns';
 import {useAssistants} from '@/composable/use-assistants';
+import {useAppStore} from '@/store/app-store';
 
 export default {
   name: 'ThreadEntry',
@@ -57,6 +58,7 @@ export default {
   },
   setup() {
     const chatStore = useChatStore(); // Call useMyStore() inside the setup function
+    const appStore = useAppStore();
     const assistants = useAssistants();
     return {chatStore, assistants};
   },
@@ -100,13 +102,17 @@ export default {
       this.$emit('entrySelected', this.entry.id);
     },
     async onClickConfirm() {
-      if (this.chatStore.threadEditMode) {
-        this.oldTitle = this.title;
-        this.chatStore.threadEditMode = false;
-        await this.assistants.updateThreadTitle(this.chatStore.threadId, this.title);
-      } else if (this.chatStore.threadDeleteMode) {
-        this.chatStore.threadDeleteMode = false;
-        await this.assistants.deleteThread(this.chatStore.threadId);
+      try {
+        if (this.chatStore.threadEditMode) {
+          this.oldTitle = this.title;
+          this.chatStore.threadEditMode = false;
+          await this.assistants.updateThreadTitle(this.chatStore.threadId, this.title);
+        } else if (this.chatStore.threadDeleteMode) {
+          this.chatStore.threadDeleteMode = false;
+          await this.assistants.deleteThread(this.chatStore.threadId);
+        }
+      } catch (error) {
+        this.appStore.handleError(error);
       }
     },
     onClickCancel() {

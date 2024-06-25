@@ -132,8 +132,7 @@ export default defineComponent({
           <input id="rangePresencePenalty"
                  v-model="assistantForm.properties[assistantProperties.MODEL_PRESENCE_PENALTY]"
                  class="form-range"
-                 max="1.0" min="0.0"
-                 step="0.1" type="range">
+                 max="1000000" min="1" type="range">
         </div>
         <div class="col-2">
           <label>{{
@@ -142,6 +141,20 @@ export default defineComponent({
         </div>
       </div>
     </div>
+
+    <label class="form-label my-2" for="maxTokens">Max tokens</label>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-10 p-0">
+          <input id="typeNumber"
+                 v-model="assistantForm.properties[assistantProperties.MODEL_MAX_TOKENS]"
+                 class="form-control"
+                 type="number">
+        </div>
+      </div>
+    </div>
+
 
   </div>
 

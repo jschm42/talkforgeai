@@ -17,7 +17,7 @@
 package com.talkforgeai.backend.voice.service;
 
 import com.talkforgeai.backend.assistant.dto.AssistantDto;
-import com.talkforgeai.backend.assistant.service.AssistantProperties;
+import com.talkforgeai.backend.assistant.service.AssistantProperty;
 import com.talkforgeai.backend.assistant.service.AssistantSpringService;
 import com.talkforgeai.backend.voice.dto.TTSRequest;
 import com.talkforgeai.service.elevenlabs.ElevenLabsService;
@@ -50,8 +50,8 @@ public class TextToSpeechService {
 
     ElevenLabsRequest request = new ElevenLabsRequest(
         TTSRequest.text(),
-        assistantProperties.get(AssistantProperties.ELEVENLABS_VOICEID.getKey()),
-        assistantProperties.get(AssistantProperties.ELEVENLABS_MODELID.getKey()),
+        assistantProperties.get(AssistantProperty.ELEVENLABS_VOICEID.getKey()),
+        assistantProperties.get(AssistantProperty.ELEVENLABS_MODELID.getKey()),
         new ElevenLabsRequest.VoiceSettings()
     );
 

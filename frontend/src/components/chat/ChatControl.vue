@@ -22,11 +22,6 @@
                     label="Auto speak"></v-checkbox>
       </v-col>
       <v-col class="flex-grow-0 align-self-center">
-        <v-btn :hidden="isRegenerateRequestHidden" prepend-icon="mdi mdi-repeat"
-               @click="onRegenerateRun()">Regenerate
-        </v-btn>
-      </v-col>
-      <v-col class="flex-grow-0 align-self-center">
         <v-btn :hidden="isCancelRequestHidden" prepend-icon="mdi mdi-cancel" @click="onCancelRun()">
           Cancel
           request
@@ -75,16 +70,6 @@ export default {
       console.log('Chat Control - Cancel Run');
       try {
         this.assistants.cancelCurrentRun();
-      } catch (error) {
-        this.appStore.handleError(error);
-        this.chatStore.updateStatus('Error: ' + error, 'error');
-      }
-    },
-    async onRegenerateRun() {
-      console.log('Chat Control - Regenerate Run');
-      this.appStore.resetErrorState();
-      try {
-        await this.assistants.regenerateCurrentRun(() => this.$emit('chunkUpdateReceived'));
       } catch (error) {
         this.appStore.handleError(error);
         this.chatStore.updateStatus('Error: ' + error, 'error');

@@ -45,20 +45,6 @@ public class RestClientConfiguration {
   @Value("${spring.ai.ollama.base-url}")
   private String ollamaBaseUrl;
 
-  @Value("${elevenlabs.api-key}")
-  private String elevenLabsApiKey;
-
-  @Value("${elevenlabs.api-url}")
-  private String elevenLabsBaseUrl;
-
-  @Bean(name = "elevenLabsRestClient")
-  public RestClient elevenLabsRestClient() {
-    return RestClient.builder()
-        .baseUrl(elevenLabsBaseUrl)
-        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + elevenLabsApiKey)
-        .build();
-  }
 
   @Bean(name = "openAiRestClient")
   public RestClient openAiRestClient() {

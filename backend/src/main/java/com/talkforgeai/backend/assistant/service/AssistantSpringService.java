@@ -42,6 +42,7 @@ import com.talkforgeai.backend.memory.functions.MemoryContextStorageFunction;
 import com.talkforgeai.backend.memory.functions.MemoryContextStorageFunction.Request;
 import com.talkforgeai.backend.memory.functions.MemoryContextStorageFunction.Response;
 import com.talkforgeai.backend.memory.functions.MemoryFunctionContext;
+import com.talkforgeai.backend.memory.service.DBVectorStore;
 import com.talkforgeai.backend.memory.service.MemoryService;
 import com.talkforgeai.backend.storage.FileStorageService;
 import com.talkforgeai.backend.transformers.MessageProcessor;
@@ -103,8 +104,18 @@ import reactor.core.scheduler.Schedulers;
 public class AssistantSpringService {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(AssistantSpringService.class);
-  public static final String SYSTEM_MESSAGE_PLANTUML = "You can generate PlantUML diagrams. PlantUML code that you generate will be transformed to a downloadable image.";
   public static final String SYSTEM_MESSAGE_IMAGE_GEN = "You can generate an image by using the following syntax: !image_gen[<image prompt>]";
+  private static final String SYSTEM_MESSAGE_MEMORY = """
+
+      Use the long term conversation memory from the LONG_TERM_MEMORY section to provide accurate answers.
+
+      ---------------------
+      LONG_TERM_MEMORY:
+      %s
+      ---------------------
+
+      """;
+
 
   private final UniversalChatService universalChatService;
   private final UniversalImageGenService universalImageGenService;
@@ -144,18 +155,16 @@ public class AssistantSpringService {
 
   private static @NotNull Mono<InitInfos> getInitInfosMono(Mono<AssistantDto> assistantEntityMono,
       Mono<List<MessageDto>> pastMessages) {
-    Mono<InitInfos> initInfosMono = Mono.zip(
+    return Mono.zip(
         Arrays.asList(assistantEntityMono, pastMessages),
         args -> new InitInfos((AssistantDto) args[0], (List<MessageDto>) args[1]));
-    return initInfosMono;
   }
 
   private static @NotNull Flux<ServerSentEvent<String>> getRunIdEventFlux(String runId) {
-    Flux<ServerSentEvent<String>> runIdMono = Flux.just(ServerSentEvent.<String>builder()
+    return Flux.just(ServerSentEvent.<String>builder()
         .event("run.started")
         .data(runId)
         .build());
-    return runIdMono;
   }
 
   private static @NotNull List<Message> getFinalPromptMessageList(
@@ -174,27 +183,30 @@ public class AssistantSpringService {
 
     List<Message> finalPromptMessageList = new ArrayList<>(promptMessageList);
 
-    if (assistantDto.properties()
-        .get(AssistantProperties.FEATURE_IMAGEGENERATION.getKey()).equals(
-            "true")) {
-      finalPromptMessageList.addFirst(new SystemMessage(SYSTEM_MESSAGE_IMAGE_GEN));
+    // Remove the last message if it was from the user
+    if (!finalPromptMessageList.isEmpty()
+        && finalPromptMessageList.getLast() instanceof UserMessage) {
+      finalPromptMessageList.removeLast();
     }
 
     if (assistantDto.properties()
-        .get(AssistantProperties.FEATURE_PLANTUML.getKey()).equals(
-            "true")) {
-      finalPromptMessageList.addFirst(new SystemMessage(SYSTEM_MESSAGE_PLANTUML));
+        .get(AssistantProperty.FEATURE_IMAGEGENERATION.getKey()).equals("true")) {
+      finalPromptMessageList.addFirst(new SystemMessage(SYSTEM_MESSAGE_IMAGE_GEN));
     }
 
     finalPromptMessageList.addFirst(new SystemMessage(assistantDto.instructions()));
 
-    StringBuilder memoryMessage = new StringBuilder();
-    if (!memoryResultsList.isEmpty()) {
+    if (!memoryResultsList.isEmpty() && assistantDto.memory() == MemoryType.AI_DECIDES) {
+      StringBuilder memoryMessage = new StringBuilder();
       memoryMessage.append("Use the following information from memory:\n");
       memoryResultsList.forEach(
           result -> memoryMessage.append(result.content()).append("\n"));
       memoryMessage.append("\nUser message:\n");
+
+      String memorySystemMessage = SYSTEM_MESSAGE_MEMORY.formatted(memoryMessage);
+      finalPromptMessageList.addFirst(new SystemMessage(memorySystemMessage));
     }
+
     return finalPromptMessageList;
   }
 
@@ -262,8 +274,8 @@ public class AssistantSpringService {
 
     Mono<Object> saveUserMessageMono = getSaveUserMessageMono(assistantId, threadId, userMessage);
     Mono<AssistantDto> assistantEntityMono = getAssistantEntityMono(assistantId);
-    Mono<List<MessageDto>> pastMessages = getPastMessagesMono(threadId);
-    Mono<InitInfos> initInfosMono = getInitInfosMono(assistantEntityMono, pastMessages);
+    Mono<List<MessageDto>> pastMessagesMono = getPastMessagesMono(threadId);
+    Mono<InitInfos> initInfosMono = getInitInfosMono(assistantEntityMono, pastMessagesMono);
 
     StringBuilder assistantMessageContent = new StringBuilder();
 
@@ -272,12 +284,18 @@ public class AssistantSpringService {
                 .then(initInfosMono)
                 .flux()
                 .flatMap(initInfos -> {
-                  List<DocumentWithoutEmbeddings> memorySearchResults = getMemorySearchResults(
-                      initInfos.assistantDto.id(), initInfos.assistantDto.memory(), userMessage);
+                  List<DocumentWithoutEmbeddings> memorySearchResults = new ArrayList<>();
+
+                  if (MemoryType.AI_DECIDES == initInfos.assistantDto.memory()) {
+                    LOGGER.info("Searching memory for assistant '{}'", assistantId);
+                    memorySearchResults = getMemorySearchResults(
+                        initInfos.assistantDto.id(), initInfos.assistantDto.memory(), userMessage);
+                  }
 
                   return Flux.just(
                       new PreparedInfos(initInfos.assistantDto(), initInfos.pastMessages(),
-                          memorySearchResults));
+                          memorySearchResults)
+                  );
                 })
                 .flatMap(preparedInfos -> {
                   AssistantDto assistantDto = preparedInfos.assistantDto();
@@ -340,6 +358,14 @@ public class AssistantSpringService {
 
   private @NotNull ServerSentEvent<String> mapChatResponse(@NotNull ChatResponse chatResponse,
       StringBuilder assistantMessageContent) {
+
+    if (chatResponse.getResult() == null || chatResponse.getResult().getOutput() == null) {
+      LOGGER.warn("Empty ChatResponse received: {}", chatResponse.getResult());
+      return ServerSentEvent.<String>builder()
+          .event("thread.message.delta")
+          .data("")
+          .build();
+    }
 
     String content = chatResponse.getResult().getOutput().getContent();
     LOGGER.trace("ChatResponse received: {}", chatResponse.getResult());
@@ -407,7 +433,8 @@ public class AssistantSpringService {
     LOGGER.info("Searching memory for message: {}", message);
 
     FilterExpressionBuilder expressionBuilder = new FilterExpressionBuilder();
-    Expression assistantExpression = expressionBuilder.eq("assistantId", assistantId).build();
+    Expression assistantExpression = expressionBuilder.eq(DBVectorStore.SEARCH_CONVERSATION_ID,
+        assistantId).build();
 
     List<DocumentWithoutEmbeddings> searchResults = memoryService.search(
         SearchRequest.query(message)
@@ -699,6 +726,10 @@ public class AssistantSpringService {
 
   public List<String> retrieveModels(LlmSystem system) {
     return universalChatService.getModels(system);
+  }
+
+  public void regenerateThread(String threadId) {
+
   }
 
   record InitInfos(AssistantDto assistantDto, List<MessageDto> pastMessages) {

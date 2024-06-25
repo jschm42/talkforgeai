@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.anthropic.api.AnthropicApi;
@@ -51,6 +53,8 @@ import reactor.core.publisher.Flux;
 
 @Service
 public class UniversalChatService {
+
+  public static final Logger LOGGER = LoggerFactory.getLogger(UniversalChatService.class);
 
   private final int DEFAULT_CHAT_MEMORY_RESPONSE_SIZE = 5;
 
@@ -149,8 +153,8 @@ public class UniversalChatService {
         .chatResponse();
   }
 
-  Flux<ChatResponse> stream(AssistantDto assistantDto, List<Message> messages,
-      String userMessage, ChatOptions options) {
+  Flux<ChatResponse> stream(AssistantDto assistantDto, List<Message> messages, String userPrompt,
+      ChatOptions options) {
 
     List<RequestResponseAdvisor> requestResponseAdvisors = new ArrayList<>();
 
@@ -163,7 +167,7 @@ public class UniversalChatService {
         .advisors(requestResponseAdvisors)
         .options(options)
         .messages(messages)
-        .user(userMessage)
+        .user(userPrompt)
         .stream()
         .chatResponse();
   }
@@ -194,10 +198,11 @@ public class UniversalChatService {
     return MistralAiChatOptions.builder()
         .withModel(assistantDto.model())
         .withTopP(
-            Float.valueOf(assistantDto.properties().get(AssistantProperties.MODEL_TOP_P.getKey())))
+            getFloatValueOrDefault(AssistantProperty.MODEL_TOP_P.getKey(),
+                assistantDto.properties()))
         .withTemperature(
-            Float.valueOf(
-                assistantDto.properties().get(AssistantProperties.MODEL_TEMPERATURE.getKey())))
+            getFloatValueOrDefault(AssistantProperty.MODEL_TEMPERATURE.getKey(),
+                assistantDto.properties()))
         .withFunctionCallbacks(functionCallbacks)
         .build();
   }
@@ -208,13 +213,16 @@ public class UniversalChatService {
 
     return OpenAiChatOptions.builder()
         .withModel(assistantDto.model())
-        .withTopP(Float.valueOf(properties.get(AssistantProperties.MODEL_TOP_P.getKey())))
+        .withMaxTokens(
+            getIntegerValueOrDefault(AssistantProperty.MODEL_MAX_TOKENS.getKey(), properties))
+        .withTopP(getFloatValueOrDefault(AssistantProperty.MODEL_TOP_P.getKey(), properties))
         .withFrequencyPenalty(
-            Float.valueOf(properties.get(AssistantProperties.MODEL_FREQUENCY_PENALTY.getKey())))
+            getFloatValueOrDefault(AssistantProperty.MODEL_FREQUENCY_PENALTY.getKey(),
+                properties))
         .withPresencePenalty(
-            Float.valueOf(properties.get(AssistantProperties.MODEL_PRESENCE_PENALTY.getKey())))
+            getFloatValueOrDefault(AssistantProperty.MODEL_PRESENCE_PENALTY.getKey(), properties))
         .withTemperature(
-            Float.valueOf(properties.get(AssistantProperties.MODEL_TEMPERATURE.getKey())))
+            getFloatValueOrDefault(AssistantProperty.MODEL_TEMPERATURE.getKey(), properties))
         .withFunctionCallbacks(functionCallbacks)
         .build();
   }
@@ -225,11 +233,12 @@ public class UniversalChatService {
     return OllamaOptions.create()
         .withModel(assistantDto.model())
         .withFrequencyPenalty(
-            Float.valueOf(properties.get(AssistantProperties.MODEL_FREQUENCY_PENALTY.getKey())))
+            getFloatValueOrDefault(AssistantProperty.MODEL_FREQUENCY_PENALTY.getKey(),
+                properties))
         .withPresencePenalty(
-            Float.valueOf(properties.get(AssistantProperties.MODEL_PRESENCE_PENALTY.getKey())))
+            getFloatValueOrDefault(AssistantProperty.MODEL_PRESENCE_PENALTY.getKey(), properties))
         .withTemperature(
-            Float.valueOf(properties.get(AssistantProperties.MODEL_TEMPERATURE.getKey())));
+            getFloatValueOrDefault(AssistantProperty.MODEL_TEMPERATURE.getKey(), properties));
   }
 
   private ChatOptions getAnthropicOptions(AssistantDto assistantDto) {
@@ -237,9 +246,12 @@ public class UniversalChatService {
 
     return AnthropicChatOptions.builder()
         .withModel(assistantDto.model())
+        .withMaxTokens(
+            getIntegerValueOrDefault(AssistantProperty.MODEL_MAX_TOKENS.getKey(), properties))
         .withTemperature(
-            Float.valueOf(properties.get(AssistantProperties.MODEL_TEMPERATURE.getKey())))
-        .withTopP(Float.valueOf(properties.get(AssistantProperties.MODEL_TOP_P.getKey())))
+            getFloatValueOrDefault(AssistantProperty.MODEL_TEMPERATURE.getKey(),
+                properties))
+        .withTopP(Float.valueOf(properties.get(AssistantProperty.MODEL_TOP_P.getKey())))
         .build();
   }
 
@@ -278,11 +290,27 @@ public class UniversalChatService {
       case ANSTHROPIC -> {
         return Arrays.stream(AnthropicApi.ChatModel.values()).map(AnthropicApi.ChatModel::getValue)
             .toList();
+
+        //claude-3-5-sonnet-20240620
       }
       default -> throw new IllegalStateException("Unexpected system: " + llmSystem);
     }
   }
 
+  private Integer getIntegerValueOrDefault(String key, Map<String, String> properties) {
+    String value = properties.get(key);
+    int defaultValue = Integer.parseInt(AssistantProperty.fromKey(key).getDefaultValue());
+    if (value == null) {
+      return defaultValue;
+    }
+    return Integer.parseInt(value);
+  }
+
+  private Float getFloatValueOrDefault(String key, Map<String, String> properties) {
+    String value = properties.get(key);
+    float defaultValue = Float.parseFloat(AssistantProperty.fromKey(key).getDefaultValue());
+    return value == null ? defaultValue : Float.parseFloat(value);
+  }
 
   record OpenAiModelResponse(String object, List<OpenAiModelDetail> data) {
 

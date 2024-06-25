@@ -57,21 +57,29 @@ export default {
       console.log('Submit Result Received');
 
       if (this.chatStore.isAutoSpeak) {
-        const lastChatMessage = this.$refs.chatMessageRef.slice(-1)[0];
-        console.log('Auto speaking last Chat-Message:');
-        await lastChatMessage.playAudio();
+        try {
+          const lastChatMessage = this.$refs.chatMessageRef.slice(-1)[0];
+          console.log('Auto speaking last Chat-Message:');
+          await lastChatMessage.playAudio();
+        } catch (error) {
+          this.appStore.handleError(error);
+        }
       }
     },
     populateVoices() {
-      const voices = speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        console.log('Voices already loaded');
-        this.speechApiVoices = voices;
-      } else {
-        console.log('Voices not loaded, waiting for onvoiceschanged');
-        speechSynthesis.onvoiceschanged = () => {
-          console.log('Voices loaded.');
-        };
+      try {
+        const voices = speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          console.log('Voices already loaded');
+          this.speechApiVoices = voices;
+        } else {
+          console.log('Voices not loaded, waiting for onvoiceschanged');
+          speechSynthesis.onvoiceschanged = () => {
+            console.log('Voices loaded.');
+          };
+        }
+      } catch (error) {
+        this.appStore.handleError(error);
       }
     },
     chunkUpdateReceived() {

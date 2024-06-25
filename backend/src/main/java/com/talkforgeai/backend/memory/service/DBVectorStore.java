@@ -50,6 +50,7 @@ import org.springframework.data.domain.PageRequest;
 public class DBVectorStore implements ListableVectoreStore {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(DBVectorStore.class);
+  public static final String SEARCH_CONVERSATION_ID = "conversationId";
   public static final String SEARCH_ASSISTANT_ID = "assistantId";
   public static final String SEARCH_ASSISTANT_NAME = "assistantName";
   public static final String SEARCH_SYSTEM = "system";
@@ -137,7 +138,7 @@ public class DBVectorStore implements ListableVectoreStore {
         Key left = (Key) request.getFilterExpression().left();
         Value right = (Value) request.getFilterExpression().right();
 
-        if (left.key().equals(SEARCH_ASSISTANT_ID)) {
+        if (left.key().contains(SEARCH_CONVERSATION_ID)) {
           assistantId = right.value().toString();
         }
       }

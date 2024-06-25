@@ -124,7 +124,11 @@ export default defineComponent({
   },
   methods: {
     onNewThread() {
-      this.assistants.newThread();
+      try {
+        this.assistants.newThread();
+      } catch (error) {
+        this.appStore.handleError(error);
+      }
     },
     onClickBack() {
       this.$router.push('/');
@@ -146,9 +150,13 @@ export default defineComponent({
     },
   },
   mounted() {
-    this.chatStore.clearThreadsList();
-    this.chatStore.newThread();
-    this.fetchData();
+    try {
+      this.chatStore.clearThreadsList();
+      this.chatStore.newThread();
+      this.fetchData();
+    } catch (error) {
+      this.appStore.handleError(error);
+    }
   },
 });
 </script>

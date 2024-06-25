@@ -73,7 +73,7 @@ public class AssistantMapper {
       Map<String, AssistantPropertyValue> properties) {
     Map<String, String> mappedProperties = new HashMap<>();
 
-    Arrays.stream(AssistantProperties.values()).forEach(property -> {
+    Arrays.stream(AssistantProperty.values()).forEach(property -> {
       AssistantPropertyValue propertyValue = properties.get(property.getKey());
       if (propertyValue != null) {
         mappedProperties.put(
@@ -89,8 +89,12 @@ public class AssistantMapper {
   public Map<String, AssistantPropertyValue> mapProperties(Map<String, String> properties) {
     Map<String, AssistantPropertyValue> mappedProperties = new HashMap<>();
 
-    Arrays.stream(AssistantProperties.values()).forEach(property -> {
+    Arrays.stream(AssistantProperty.values()).forEach(property -> {
       String propertyValue = properties.get(property.getKey());
+      if (propertyValue != null && propertyValue.isEmpty()) {
+        propertyValue = null;
+      }
+
       AssistantPropertyValue assistantPropertyValue = new AssistantPropertyValue();
       assistantPropertyValue.setPropertyValue(propertyValue);
       mappedProperties.put(property.getKey(), assistantPropertyValue);

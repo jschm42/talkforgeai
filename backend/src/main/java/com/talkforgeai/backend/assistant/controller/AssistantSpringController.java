@@ -63,6 +63,7 @@ public class AssistantSpringController {
 
   private final AssistantSpringService assistantService;
 
+
   private final FileStorageService fileStorageService;
 
   public AssistantSpringController(AssistantSpringService assistantService,
@@ -176,6 +177,11 @@ public class AssistantSpringController {
     } catch (IOException ioException) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+  }
+
+  @PostMapping("/threads/{threadId}/regenerate")
+  public void regenerateThread(@PathVariable("threadId") String threadId) {
+    assistantService.regenerateThread(threadId);
   }
 
   @DeleteMapping("/threads/{threadId}")
