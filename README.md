@@ -29,9 +29,12 @@ production use.
   build-in MS Speech API.
 - 🖼️ Generate a profile picture for your Assistant directly inside the app.
 - 🎭 Image generation through DALL-E 3, compatible with various GPT models.
-- 📊 Advanced diagram creation with PlantUML and graphical enhancement of LaTeX code.
 - 💻 Code highlighting for generated source code.
 - 📦 Docker container support for simplified deployment.
+- 🧠 Memory Feature with Vector Databases: TalkforgeAI supports persistent memory capabilities
+  for storing essential information. This allows your Assistants to remember past interactions and
+  provide more personalized responses. Currently only local storage is supported, other databases
+  are in development.
 
 ## Upcoming Features
 
@@ -42,6 +45,7 @@ production use.
 - Expanded task functions like email automation and calendar queries.
 - Integration with additional AI providers and services.
 - Enhanced image generation capabilities with OpenAI and StablilityAI .
+- Advanced diagram creation with and graphical enhancement of LaTeX code.
 
 ## Installation
 
@@ -79,10 +83,12 @@ Available properties:
 | `talkforgeai.datadir`                       | `${user.home}/.talkforgeai`                         | The directory where TalkforgeAI data will be stored. |
 | `spring.servlet.multipart.max-file-size`    | `5MB`                                               | The maximum file size for multipart file uploads.    |
 | `spring.servlet.multipart.max-request-size` | `5MB`                                               | The maximum request size for multipart file uploads. |
+| `spring.ai.openai.api-key`                  | -                                                   | The API key for OpenAI.                              |
 | `spring.ai.mistralai.api-key`               | -                                                   | The API key for Mistral AI.                          |
 | `spring.ai.ollama.base-url`                 | `http://localhost:11434`                            | The base URL for Ollama AI.                          |
 | `spring.ai.anthropic.api-key`               | -                                                   | The API key for Anthropic AI.                        |
 | `spring.ai.anthropic.version`               | `2023-06-01`                                        | The version of Anthropic AI.                         |
+| `spring.ai.stabilityai.api-key`             | -                                                   | The API key for StabilityAI.                         |
 | `elevenlabs.api-key`                        | -                                                   | The API key for Elevenlabs.                          |
 | `elevenlabs.api-url`                        | `https://api.elevenlabs.io`                         | The base URL for Elevenlabs API.                     |
 | `spring.datasource.url`                     | `jdbc:sqlite:${talkforgeai.datadir}/talkforgeai.db` | The URL for the SQLite database.                     |
@@ -92,24 +98,35 @@ Available properties:
 
 ### Using Docker
 
-Deploy using Docker with commands customized for your local settings and environment variables
-managed via a `.env` file:
+You can build and run the Docker container locally using the Dockerfile provided in the project.
+Here are the steps:
 
-1. **Create an `.env` file** on your system where you'll specify all necessary environment variables
+1. **Build the Docker image**. Navigate to the project root directory where the Dockerfile is
+   located and run the following command:
+
+    ```bash
+    docker build -t talkforgeai:latest .
+    ```
+
+   This command builds a Docker image using the Dockerfile in the current directory and tags the
+   image as `talkforgeai:latest`.
+
+2. **Create an `.env` file** on your system where you'll specify all necessary environment variables
    for the Docker container. Example content for your `.env` file:
 
     ```plaintext
     SPRING_AI_OPENAI_API_KEY=[your OpenAI API Key]
     SPRING_AI_MISTRALAI_API_KEY=[your Mistral AI API Key]
     SPRING_AI_ANTHROPIC_API_KEY=[your Anthropic API Key]
+    SPRING_AI_STABILITYAI_API_KEY=[your StabilityAI API Key]
     SPRING_AI_OLLAMA_BASE_URL=http://localhost:11434
     ELEVENLABS_API_KEY=[your ElevenLabs API Key]
     ```
 
-2. **Run the Docker container** using the `.env` file to provide the environment variables:
+3. **Run the Docker container** using the `.env` file to provide the environment variables:
 
     ```bash
-    docker run -d -p [your local port]:8090 --env-file /path/to/your/.env file talkforgeai/talkforgeai:latest
+    docker run -d -p [your local port]:8090 --env-file /path/to/your/.env file talkforgeai:latest
     ```
 
    Replace `/path/to/your/.env` with the actual path to your `.env` file and `[your local port]`
@@ -119,7 +136,7 @@ managed via a `.env` file:
    your container on local port 8090, the command would be:
 
     ```bash
-    docker run -d -p 8090:8090 --env-file /home/user/talkforgeai/.env talkforgeai/talkforgeai:latest
+    docker run -d -p 8090:8090 --env-file /home/user/talkforgeai/.env talkforgeai:latest
     ```
 
 This approach allows you to manage environment variables centrally within the `.env` file,
