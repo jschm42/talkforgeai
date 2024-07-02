@@ -46,6 +46,12 @@
             <v-icon icon="mdi-memory"></v-icon>
           </template>
         </v-list-item>
+        <v-list-item color="primary" title="Image Generator" variant="elevated"
+                     @click.prevent="onOpenImageGenEditor">
+          <template v-slot:prepend>
+            <v-icon icon="mdi-memory"></v-icon>
+          </template>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
@@ -116,6 +122,10 @@ export default {
       router.push({name: 'memory-editor'});
     };
 
+    const onOpenImageGenEditor = () => {
+      router.push({name: 'imagegen-editor'});
+    };
+
     onMounted(async () => {
       try {
         chatStore.assistantList = await assistants.retrieveAssistants();
@@ -128,6 +138,7 @@ export default {
       onListAssistants,
       onCreateNewAssistant,
       onOpenMemoryEditor,
+      onOpenImageGenEditor,
     };
   },
 };

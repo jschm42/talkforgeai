@@ -19,6 +19,7 @@ import ChatView from '@/components/chat/ChatView.vue';
 import EditorView from '@/components/editor/EditorView.vue';
 import MemoryView from '@/components/memory/MemoryView.vue';
 import ChoiceView from '@/components/choice/ChoiceView.vue';
+import ImageGenView from '@/components/imagegen/ImageGenView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -60,7 +61,14 @@ const routes: Array<RouteRecordRaw> = [
     },
     props: true,
   },
-
+  {
+    path: '/imagegen/editor',
+    name: 'imagegen-editor',
+    components: {
+      mainView: ImageGenView,
+    },
+    props: true,
+  },
 ];
 
 const router = createRouter({

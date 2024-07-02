@@ -79,6 +79,7 @@ public class UniversalImageGenService {
             .withN(universalImageOptions.n())
             .withHeight(universalImageOptions.height())
             .withWidth(universalImageOptions.width())
+            .withResponseFormat("application/json")
             .build();
       }
       case STABILITY -> {
@@ -88,6 +89,7 @@ public class UniversalImageGenService {
             .withN(universalImageOptions.n())
             .withHeight(universalImageOptions.height())
             .withWidth(universalImageOptions.width())
+            .withResponseFormat("application/json")
             .build();
       }
       default -> throw new AssistentException("Image generation system not supported: " + system);
